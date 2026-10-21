@@ -1,4 +1,4 @@
-# DESIGN-3D — Hollow Dawn 3D remake (MC 11095, T-P2-2; cycle-2 rework of the DA FIX)
+# DESIGN-3D — Hollow Dawn 3D remake (MC 11095, T-P2-2; cycle 3 — final DA-gate rework)
 
 File-level design for the 3D port of v1 `vampire_survivor` (Hollow Dawn). Owner ruling (verbatim):
 *"a 3d remake. Same type of viduals, top down, but with chatacter animations, movements. 3090 only
@@ -11,13 +11,18 @@ byte-identical to the commit cycle 1 pinned (`git diff --name-only aae77d6..562e
 LEDGER/README/ARCHITECTURE; VERIFIED this session); EXCEPT `docs/ARCHITECTURE.md`, whose cited
 content exists only since its rewrite **`5dc7679`** (57-line file at `aae77d6` — cycle-1 pin was
 false for its 4 cites; the 217-line rewrite is the cited content, identical at `562e0a1`).
-DA cycle-1 findings fixed here: P1 (§c rewrite, Route A), P2-1..P2-5, P3 set, P4 nits.
+DA cycle-1 findings fixed in cycle 2; cycle-3 (final) applies `DA-verdict-c2.md`: §c acceptance
+rebuilt (P1-A width lever + P1-B trigger + freq cap), Godot API names VERIFIED on the pinned 4.7.2
+binary (P3-B), budget + boss halo, ember/iframes wording. Route A SURVIVES — not re-litigated.
 
 ## (a) SCENE — top-down Node3D world
 - **Camera:** one `Camera3D` on a rig node that follows the player. **Projection = Orthographic**
   (perspective rejected: v1 entities are size-pinned regardless of distance, `render.gd:10`).
-  `orthographic_size = 30.0 m` vertical at the 720 px viewport (`project.godot:14-15`) ⇒ lateral ground
-  scale **S = 720/30 = 24 px/m**; horizontal span 30·(1280/720) = **53.3 m**.
+  **VERIFIED member names on the pinned binary `Godot_v4.7.2-stable` (`--doctool` + ClassDB probe,
+  this session): `projection = Camera3D.PROJECTION_ORTHOGONAL`, `size = 30.0`, `near`, `far` — the
+  name `orthographic_size` does NOT exist and is withdrawn.** `size = 30.0 m` vertical at the 720 px
+  viewport (`project.godot:14-15`) ⇒ lateral ground scale **S = 720/30 = 24 px/m**; horizontal span
+  30·(1280/720) = **53.3 m**.
 - **Pitch:** camera pitched **20° off straight-down** (70° below horizontal). Honest anisotropy note
   (P2-2): with an ortho tilt, ground distances along camera-forward shrink by cos 20° = **0.94**
   (≤ 6 %, accepted); a 0° rig is isotropic but makes ALL vertical motion invisible. Visible ground
@@ -44,11 +49,12 @@ DA cycle-1 findings fixed here: P1 (§c rewrite, Route A), P2-1..P2-5, P3 set, P
 gl_compatibility WASM, threads OFF (`project.godot:19`, `export_presets.cfg:23`). Budget is **per
 class, never per enemy**: draw count is horde-size-independent.
 - **Instancing (`godot/scripts/horde_viz.gd`):** one `MultiMeshInstance3D` per enemy class (8) +
-  player + boss + gem + coin + dawnlight. **Per-instance transforms are rewritten every frame** —
-  position, yaw-sway, lean, squash, scale, color (this one mechanism IS the horde animation, §c).
-  Per-instance tint (v1 `tint_of`, `render.gd:41-42`; P3-2) = `use_colors` +
-  `shaders/instance_tint.gdshader` multiplying `ALBEDO` by `INSTANCE_COLOR` — v1's tint ported, still
-  one material per class over the 2048² shared atlas.
+  player + boss + gem + coin + dawnlight; `MultiMesh.transform_array` rewritten every frame —
+  position, yaw-sway, lean, squash, scale (this one mechanism IS the horde animation, §c; member
+  VERIFIED on the pinned binary). Per-type tint (v1 `tint_of`, `render.gd:41-42`) = **one
+  `StandardMaterial3D` per class with `albedo_color = tint_of(type)`** (both VERIFIED by ClassDB
+  probe — cycle-2's `INSTANCE_COLOR` claim withdrawn; the v1 modulate mechanism maps 1:1 since every
+  class is exactly one type; atlas stays one 2048² texture).
 - **Tri budgets** (TRELLIS.2 `to_glb(decimation_target=…)`): swarmers (wraith/hound/crawler/cultist/
   scarab) ≤ 1500; brute/ghoul/wight ≤ 4000; player ≤ 8000 (skinned); boss ≤ 15000 (skinned).
 - **Shadows:** none real-time (WASM cost; the 5.4 m boss included). **Blob shadow = ONE MultiMesh**
@@ -63,9 +69,10 @@ class, never per enemy**: draw count is horde-size-independent.
   draw. Boss bar + name (`render.gd:194-207`) and the HUD (`hud.gd`, `layer = 5`) live on a 2D
   `CanvasLayer` — outside the 3D draw budget.
 - **Numeric budget (replaces cycle-1's "≤ 45 exact", which left zero headroom):** ground 1 + enemy MM
-  8 + halo MM 8 + blobs 1 + hp-bars 1 + gems 1 + coins 1 + dawnlight 1 + dawn-glow 1 + player 1 +
-  boss 1 = 25, + FX ≤ 7 (§i batched) ⇒ **planned worst case 32, hard cap 60 (≈ 2× headroom)**.
-  **"300+" is a design-time margin, not
+  8 + enemy-halo MM 8 + **boss-halo MM 1 (cycle-3 P4: BOSS_GLOW_RADII `render.gd:51` is its own
+  radii ⇒ its own instance set)** + blobs 1 + hp-bars 1 + gems 1 + coins 1 + dawnlight 1 + dawn-glow
+  1 + player 1 + boss 1 = 26, + FX ≤ 7 (§i batched) ⇒ **planned worst case 33, hard cap 60 (≈ 2×
+  headroom)**. **"300+" is a design-time margin, not
   a v1 fact** (no v1 doc measures peak alive; the spawn math — rate cap `min(12, …)/s` from
   t ≈ 508 s, `world.gd:88` — implies ≈ 1800 spawns in the last band alone; budget assumes ≤ 400
   concurrent).
@@ -92,26 +99,43 @@ routes while rendering them as neither — that split is gone.
   `AnimationTree` + retarget tracks; **local motion sources (research doc (b)):** MDM
   `GuyTevet/motion-diffusion-model` (`:80`), T2M-GPT `Mael-zys/T2M-GPT` (`:82`), MLD arXiv 2212.04048
   (`:83`). 2 skinned draws total.
-- **Gait (all 8 enemy classes, `horde_viz.gd`):** yaw-sway **±6°** about vertical at gait frequency
-  `spd_m_per_s / 1.2 m stride` (v1 speeds ÷ S: wraith 55→2.29, hound 95→3.96, crawler 35→1.46,
-  cultist 60→2.50, brute 32→1.33, scarab 105→4.38, ghoul 60→2.50, wight 52→2.17 m/s; player
-  BASE_SPEED 140→5.83, `game_state.gd:5`), stride pulse **±0.09 m** along velocity, lean toward
-  velocity, secondary vertical bob ±0.15 m (reads ±1.2 px at the 20° pitch — kept, NOT the contract).
-  **Attack = transform signature:** forward lunge 0.24 m + velocity-axis squash 0.85↔1.15 over 0.2 s.
-- **pale-wight (P3-3 closed):** transform **drift-float** (slow yaw wander + 0.1 m sink/breathe) — it
-  is a legless mist form ("wispy dissolving lower body", `MANIFEST.md:102`); cycle-1's biped-mocap
-  showcase choice withdrawn. Class labels fixed: **moor-brute** is the hunched one, **rime-ghoul** a
-  tall humanoid (`MANIFEST.md:99,101`) — which strengthens dropping its "hunched" mislabel, not the
-  rig (Route A needs no rig).
+- **Mechanism per class (`horde_viz.gd`, instance transforms):**
+  | classes | mechanism | parameters |
+  |---|---|---|
+  | wraith, crawler, cultist, moor-brute, rime-ghoul | **gait** | **scissor**: width↔depth scale alternation **1.00↔1.12** (scale channels of the instance transform) at freq `f = min(spd_m_per_s / 1.2 m stride, 2.2 Hz)` → wraith 1.91, crawler 1.22, cultist 2.08, brute 1.11, ghoul 2.08 Hz (speeds ÷ S from `world.gd:14-23`, `game_state.gd:5`); + yaw-sway ±15° (look) |
+  | hound, dune-scarab | **gait, taper-capped (P2-A)** — raw 3.30 / 3.65 Hz is jitter at a 34 px read | same scissor; **yaw ±12°, f capped at 2.2 Hz** |
+  | pale-wight | **drift-float — REPLACES gait** (legless mist form, `MANIFEST.md:102`; P3-A resolved, not ambiguous) | scale-breathe **0.93↔1.15** over ≈ 3 s + slow yaw wander + ±0.1 m sink (wander/sink NOT gated) |
+  Common: stride pulse **±0.09 m** along velocity; constant **8° forward lean** (not gated); vertical
+  bob ±0.15 m (±1.2 px at the 20° pitch — decoration only, NOT the contract).
+- **WALK acceptance — a measurement a frozen sliding mesh CANNOT fake (P1-A, rebuilt):** dump
+  per-instance transforms + the projected **bbox WIDTH** series per class strip (strip recorder owns
+  capture; dump-driven); gate = **width peak-to-peak ≥ 2 px with instance translation normalized
+  out**. Lever named: the mesh's **lateral extent w** (art floor: w ≥ 0.5 m every class); the
+  scissor scales it 1.00↔1.12 ⇒ **p2p = 2·0.12·w·24 px = 2.88 px at the floor, 8.35 px at w = 1.45**
+  (margin ≥ 1.4×; shape-independent). Wight: its breathe is the same scale lever: p2p = 0.22·w·24 =
+  **2.64 px at w ≥ 0.5**. **A frozen sliding instance has constant scale → constant width → 0 px →
+  FAILS** — the gate goes RED against its own failure mode (the DA's crawler-slides-at-8.8 px false
+  pass is structurally excluded). Honest geometry note: yaw-sway was tested as the lever and
+  **REJECTED with numbers** — width(θ) = w·cosθ + d·sinθ, and the cos shrink cancels the sin gain,
+  p2p ∈ **0.37…5.10 px** across plausible shape ratios → not relied on (yaw stays as look; the
+  earlier "3.6 px from 1.45 m" used HEIGHT as the lever — withdrawn twice-wrong, as refuted).
+  Acceptance gains a dump row: **every gait instance freq ≤ 2.2 Hz**.
+- **ATTACK acceptance — trigger declared (P1-B):** the verbatim sim has **no enemy attack event**
+  (chase `world.gd:99-103`; player contact touches only the player's `iframes`, `main.gd:125-127`).
+  **Trigger = rising edge of `e.hit_cd`**: initialised 0.0 at spawn (`world.gd:79`), set to 0.3 by
+  ticked sources via `_hit(ticked=true)` — ward (`weapons.gd:147`) and halo (`:188`) are the tickers
+  (`:92-95`) — decayed at `world.gd:104-105`. Each edge plays **one engagement lunge: 0.24 m forward
+  + velocity-axis squash 0.85↔1.15 over 0.2 s** (bite read); gate = instance-position dump shows
+  **≥ 5 px forward excursion outside the walk envelope** (0.24·24 = 5.76 px) **+ footprint scale
+  delta ≥ 15 %**; the boss rides the same trigger with its own clip. Non-vacuous: ward r 80 px and
+  halo r ≥ 52 px both exceed the 33 px contact ring (`main.gd:122,125`), so engaged enemies tick
+  regularly. Visual-only — no sim change; the lunge never alters damage, cooldowns or the sim.
 - **No buy-and-unused rigs (P2-3 closed):** UniRig runs for **player + boss only**; brute/ghoul/
   scarab/wight ship as decimated static TRELLIS meshes animated by transforms — no GPU window or
   manual-bone-fix spent on rigs nothing consumes.
-- **Acceptance — every test satisfiable by the mechanism it tests (captured PNGs + numeric
-  frame-diffs):** rest = silhouette bbox delta ≤ 1 px; **walk** = bbox delta ≥ 2 px (predicted: sway
-  1.45·sin 6°·24 = **3.6 px**; pulse 0.09·24 = **2.2 px**); **attack** = lunge ≥ 5 px translation
-  (predicted 0.24·24 = **5.8 px**) + footprint scale delta ≥ 15 % — a transform signature, and no
-  "distinct pose" is asserted for a pose-less class. Player + boss additionally: rest/walk/attack
-  pose delta ≥ 2 px (they have poses).
+- **Skinned classes (player, boss) — pose contract stays:** rest/walk/attack captured clips with
+  frame-diff ≥ 2 px between each pair (they have poses; the transform tests above do not apply to
+  them, and the width test additionally guards the rest case: rest sway = 0 → bbox stable).
 
 ## (d) NUMBERS PORT MAP — v1 suite runs unchanged
 **Mechanism:** v1's `test_game_numbers.py` reads `.gd` **source text** by file name
@@ -143,8 +167,8 @@ consolidated `game_data.gd` is **rejected** (§h). Band/signature pins v1 never 
 | HP bar only when damaged (`render.gd:185-191`) | `horde_viz.gd` bar MM, `scale.x = hp/max` | `test_biome_numbers.py` |
 | boss bar + "THE HOLLOW WARDEN" (`render.gd:194-207`) | `hud_3d.gd` CanvasLayer | screenshot |
 | Dawnlight cross + glow (`render.gd:18,174-182,252-254`) | dawnlight MM + halo MM | screenshot |
-| iframes alpha-flash + player→player-alt at L5 (`render.gd:134-138`) | `hero_pawn.gd` alpha tween + GLB swap | screenshot |
-| tint_of per-type (`render.gd:22-42`) | instance color + `instance_tint.gdshader` | `::test_five_enemy_tints_present` + screenshot |
+| iframes: v1 is a CONSTANT alpha 0.55 while iframes > 0 (`render.gd:134-138`, modulate at `:137` — cycle-3 says what it is, no "pulse" fiction); player→player-alt at L5 | `hero_pawn.gd` material alpha 0.55 during iframes + L5 GLB swap | screenshot |
+| tint_of per-type (`render.gd:22-42`) | per-class `StandardMaterial3D.albedo_color` (VERIFIED member) | `::test_five_enemy_tints_present` + screenshot |
 
 ## (e) SERVER / LEADERBOARD — reuse v1 verbatim
 v1's server is **stdlib-only Python, language-agnostic** (`ARCHITECTURE.md:168` @ `5dc7679`;
@@ -164,11 +188,10 @@ godot/Main.tscn                 Node3D root, scripts/main.gd (ported; renderer w
 godot/scripts/camera_rig.gd     NEW — ortho Camera3D rig, pitch/height/follow (§a)
 godot/scripts/ground.gd         NEW — biome band quad + band-swap logic (§a)
 godot/shaders/ground.gdshader   NEW — world-locked tiling (§a)
-godot/shaders/instance_tint.gdshader NEW — INSTANCE_COLOR × ALBEDO (§b tint port)
-godot/scripts/horde_viz.gd      NEW — per-class MultiMeshes + per-frame transform write (gait §c)
-                                + blob-shadow MM + HP-bar MM + instance-color plumbing (§b)
-godot/scripts/hero_pawn.gd      NEW — skinned player + boss (AnimationTree, retarget, iframes flash,
-                                L5 GLB swap; §c/§d)
+godot/scripts/horde_viz.gd      NEW — per-class MultiMeshes + per-frame transform_array write (gait
+                                §c) + blob-shadow MM + HP-bar MM + per-class material factory (§b)
+godot/scripts/hero_pawn.gd      NEW — skinned player + boss (AnimationTree, retarget, iframes
+                                alpha 0.55, L5 GLB swap; §c/§d)
 godot/scripts/viz_fx.gd         NEW — halo MM passes + weapon-FX emitters (§i/§b)
 godot/scripts/hud_3d.gd         NEW — hud.gd ported to a CanvasLayer over 3D + boss bar (§d)
 godot/scripts/render.gd         DECIDED — KEEP AS DATA MODULE ONLY: `class_name GameRenderer` +
