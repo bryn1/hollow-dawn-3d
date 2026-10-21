@@ -1,0 +1,8 @@
+data/
+.tmp/
+*.db
+*.db-wal
+*.db-shm
+__pycache__/
+*.import
+godot/.godot/
