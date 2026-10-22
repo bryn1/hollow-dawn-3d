@@ -1,0 +1,165 @@
+# World entities + edge-spawn scaling + drops (plan §5 numbers).
+class_name GameWorld
+extends RefCounted
+
+const BOSS_AT := 540.0 # "The Hollow Warden" spawns at 9:00
+const HEAL_DROP_CHANCE := 0.015 # Dawnlight drop roll on a normal enemy death
+const HEAL_AMOUNT := 8.0 # hp restored, clamped to max_hp
+
+# Stats + sprite per enemy id (plan §5 classics pinned by the acceptance
+# suite; biome signature creatures MC 11082 — sprites mirrored from
+# static/assets/enemies/ under res://assets/enemies/). Which ids spawn when:
+# BIOMES.enemies in render.gd (band roster) + the GATES rotation below.
+const ENEMY_TYPES := {
+	"wraith": {"hp": 8.0, "spd": 55.0, "dmg": 2.0, "xp": 1.0, "sprite": "enemy-wraith"},
+	"hound": {"hp": 6.0, "spd": 95.0, "dmg": 3.0, "xp": 1.0, "sprite": "enemy-hound"},
+	"crawler": {"hp": 30.0, "spd": 35.0, "dmg": 5.0, "xp": 3.0, "sprite": "enemy-crawler"},
+	"cultist": {"hp": 18.0, "spd": 60.0, "dmg": 6.0, "xp": 4.0, "sprite": "enemy-cultist"},
+	# Band signatures: moor-brute slow+tanky, dune-scarab fast+weak swarmer,
+	# rime-ghoul mid, pale-wight hardest (highest hp + damage).
+	"moor-brute": {"hp": 26.0, "spd": 32.0, "dmg": 4.0, "xp": 2.0, "sprite": "enemies/moor-brute"},
+	"dune-scarab": {"hp": 5.0, "spd": 105.0, "dmg": 2.0, "xp": 1.0, "sprite": "enemies/dune-scarab"},
+	"rime-ghoul": {"hp": 18.0, "spd": 60.0, "dmg": 5.0, "xp": 3.0, "sprite": "enemies/rime-ghoul"},
+	"pale-wight": {"hp": 45.0, "spd": 52.0, "dmg": 9.0, "xp": 4.0, "sprite": "enemies/pale-wight"},
+	"warden": {"hp": 3000.0, "spd": 45.0, "dmg": 12.0, "xp": 0.0, "sprite": "boss-warden", "boss": true},
+}
+
+# Minute gates at which a swarm type joins the rotation.
+const GATES := [[0.0, "wraith"], [2.0, "hound"], [4.0, "crawler"], [6.0, "cultist"]]
+
+var enemies: Array = []
+var gems: Array = []
+var coins: Array = []
+var heals: Array = [] # Dawnlight pickups; +HEAL_AMOUNT hp, clamped to max_hp
+var spawn_acc := 0.0
+var boss_spawned := false
+
+
+func reset() -> void:
+	enemies.clear()
+	gems.clear()
+	coins.clear()
+	heals.clear()
+	spawn_acc = 0.0
+	boss_spawned = false
+
+
+# Enemy set open at time t (MC 11082): the biome band's own roster
+# (BIOMES.enemies via the one biome_at() helper — wraith in every band + the
+# band's signature creature) plus the classic gate rotation (GATES, minutes).
+# One merged set; the single spawn loop in update_spawns draws from it.
+func _types_open(t: float) -> Array:
+	var open: Array = GameRenderer.biome_at(t).enemies.duplicate()
+	for gate in GATES:
+		if t >= gate[0] * 60.0 and not open.has(gate[1]):
+			open.append(gate[1])
+	return open
+
+
+func _spawn_ring(view: Vector2) -> float:
+	return view.length() / 2.0 + 40.0
+
+
+func _spawn_enemy(type_key: String, game: GameState, view: Vector2) -> void:
+	var def: Dictionary = ENEMY_TYPES[type_key]
+	var angle := randf() * TAU
+	var r := _spawn_ring(view)
+	var hp := roundf(def.hp * (1.0 + 0.22 * (game.time / 60.0)))
+	enemies.append({
+		"type": type_key,
+		"x": game.player.x + cos(angle) * r,
+		"y": game.player.y + sin(angle) * r,
+		"hp": hp,
+		"max_hp": hp,
+		"spd": def.spd,
+		"dmg": def.dmg,
+		"xp": def.xp,
+		"boss": def.get("boss", false),
+		"sprite": def.sprite,
+		"hit_cd": 0.0, # per-enemy cooldown for lingering damage sources
+	})
+
+
+func update_spawns(dt: float, game: GameState, view: Vector2) -> void:
+	if not boss_spawned and game.time >= BOSS_AT:
+		boss_spawned = true
+		_spawn_enemy("warden", game, view)
+	var minute := game.time / 60.0
+	spawn_acc += minf(12.0, 1.0 + 1.3 * minute) * dt
+	var open := _types_open(game.time)
+	while spawn_acc >= 1.0:
+		spawn_acc -= 1.0
+		_spawn_enemy(open[randi() % open.size()], game, view)
+
+
+# Swarmers home in on the survivor; gems magnet within Grip-scaled radius.
+func update_entities(dt: float, game: GameState) -> void:
+	var p: Dictionary = game.player
+	for e in enemies:
+		var dx: float = p.x - e.x
+		var dy: float = p.y - e.y
+		var d := maxf(sqrt(dx * dx + dy * dy), 1.0)
+		e.x += dx / d * e.spd * dt
+		e.y += dy / d * e.spd * dt
+		if e.hit_cd > 0.0:
+			e.hit_cd -= dt
+	var magnet: float = 60.0 * (1.0 + 0.25 * game.passives.grip)
+	_magnetize(gems, p, magnet, dt)
+	_magnetize(heals, p, magnet, dt)
+	if p.iframes > 0.0:
+		p.iframes -= dt
+
+
+# Grip-scaled pull shared by every magnetised pickup kind (gems + Dawnlight).
+func _magnetize(items: Array, p: Dictionary, magnet: float, dt: float) -> void:
+	for g in items:
+		var gx: float = p.x - g.x
+		var gy: float = p.y - g.y
+		var gd := maxf(sqrt(gx * gx + gy * gy), 1.0)
+		if gd < magnet:
+			g.x += gx / gd * 220.0 * dt
+			g.y += gy / gd * 220.0 * dt
+
+
+# Death payout: ~70% gem, 6% coin (1-3g); the Warden adds +50 gold.
+# Dawnlight heal: 1.5% roll on any death, guaranteed once from a boss.
+func kill_enemy(game: GameState, enemy: Dictionary) -> void:
+	var i := enemies.find(enemy)
+	if i >= 0:
+		enemies.remove_at(i)
+	game.kills += 1
+	if enemy.boss:
+		game.gold += 50
+	if enemy.xp > 0.0 and randf() < 0.7:
+		gems.append({"x": enemy.x, "y": enemy.y, "xp": enemy.xp})
+	if randf() < 0.06:
+		coins.append({"x": enemy.x, "y": enemy.y, "gold": 1 + randi() % 3})
+	if enemy.boss or randf() < HEAL_DROP_CHANCE:
+		heals.append({"x": enemy.x, "y": enemy.y})
+
+
+# Consume pickups inside touch range; returns gold picked up this step.
+func collect_pickups(game: GameState) -> int:
+	var gold := 0
+	for i in range(gems.size() - 1, -1, -1):
+		var g: Dictionary = gems[i]
+		if _dist(g, game.player) < 16.0:
+			gems.remove_at(i)
+			game.add_xp(g.xp)
+	for i in range(coins.size() - 1, -1, -1):
+		var c: Dictionary = coins[i]
+		if _dist(c, game.player) < 16.0:
+			coins.remove_at(i)
+			gold += c.gold
+	for i in range(heals.size() - 1, -1, -1):
+		var h: Dictionary = heals[i]
+		if _dist(h, game.player) < 16.0:
+			heals.remove_at(i) # consumed even at full hp — never a wasted item
+			game.hp = minf(game.max_hp, game.hp + HEAL_AMOUNT)
+	return gold
+
+
+static func _dist(a: Dictionary, b: Dictionary) -> float:
+	var dx: float = a.x - b.x
+	var dy: float = a.y - b.y
+	return sqrt(dx * dx + dy * dy)
