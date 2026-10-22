@@ -1,0 +1,13 @@
+rig,clip,pair,kind,diff_px
+player-rigged,walk,0,motion,255
+player-rigged,walk,1,motion,251
+player-rigged,walk,2,frozen,0
+player-rigged,attack,0,motion,168
+player-rigged,attack,1,motion,178
+player-rigged,attack,2,frozen,0
+boss-warden-rigged,walk,0,motion,208
+boss-warden-rigged,walk,1,motion,193
+boss-warden-rigged,walk,2,frozen,0
+boss-warden-rigged,attack,0,motion,206
+boss-warden-rigged,attack,1,motion,203
+boss-warden-rigged,attack,2,frozen,0

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """MC 11108 (T-S1b) — GLB animation validator, stdlib only.
+MC 11138 (T-S2r) — added 'rigged' mode for the skinned player/boss GLBs.
 
 Checks against a GLB file:
   * skins >= 1, mesh has JOINTS_0/WEIGHTS_0 (real skin, not static mesh)
@@ -7,10 +8,13 @@ Checks against a GLB file:
   * every channel targets a node; print bone names targeted (rotation path)
   * every sampler input accessor is strictly monotonic increasing
   * rotation outputs are unit-ish quaternions
-  * motion sanity: Hips translation path p2p range, walk/run must exceed
-    1.5 m of horizontal travel (proves real baked motion, not constant keys)
+  * expect mode (animproof GLB): motion sanity: Hips translation p2p,
+    walk/run > 1.5 m horizontal travel + CMU-named rotation channels
+  * rigged mode (player/boss GLBs, bone_N skeletons): skip the CMU-name
+    expectations; every animation must rotate >= 8 distinct nodes (a pose
+    clip, not a one-bone twitch)
 
-Usage: 04-validate-glb.py <glb> [expect_walk_run]   -> exit 0 = PASS
+Usage: 04-validate-glb.py <glb> [expect|rigged]   -> exit 0 = PASS
 """
 import json
 import math
@@ -46,7 +50,8 @@ def accessor(gj, blob, idx):
 
 def main():
     path = sys.argv[1]
-    strict = len(sys.argv) > 2
+    mode = sys.argv[2] if len(sys.argv) > 2 else ""
+    strict = mode == "expect"
     gj, blob = load_glb(path)
     nodes = gj.get("nodes", [])
     fails = []
@@ -72,10 +77,15 @@ def main():
         name = a.get("name")
         if not name:
             fails.append("animation without name")
+        rot_this = set()
         for ch in a.get("channels", []):
             node = nodes[ch["target"]["node"]]
             if ch["target"]["path"] == "rotation" and node.get("name"):
                 rot_bones.add(node["name"])
+                rot_this.add(node["name"])
+        if mode == "rigged" and len(rot_this) < 8:
+            fails.append(f"animation '{name}' rotates only "
+                         f"{len(rot_this)} nodes (< 8): not a pose clip")
         for sidx, s in enumerate(a.get("samplers", [])):
             times = [v[0] if isinstance(v, list) else v for v in accessor(gj, blob, s["input"])]
             if any(b <= x for x, b in zip(times, times[1:])):
@@ -104,9 +114,10 @@ def main():
         for k in ("walk", "run"):
             if hips_horiz.get(k, 0.0) < 1.5:
                 fails.append(f"motion sanity: '{k}' travel {hips_horiz.get(k)} < 1.5 m")
-    for want in ("Hips", "LeftArm", "RightLeg", "Head"):
-        if want not in rot_bones:
-            fails.append(f"expected rotation channel on {want}")
+    if mode != "rigged":  # CMU-name expectations bind the animproof GLB only
+        for want in ("Hips", "LeftArm", "RightLeg", "Head"):
+            if want not in rot_bones:
+                fails.append(f"expected rotation channel on {want}")
 
     if fails:
         print("GLB_VALID=FAIL")
