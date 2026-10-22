@@ -6,6 +6,9 @@ repo main @ `75fbf01`, stack install MC 11096 @ `1962206`, tools MC 11118); rig:
 **UniRig** (`VAST-AI-Research/UniRig` @ `6793c66`). fp16 `pipeline_type=1024`, matte =
 in-pipeline BiRefNet (MIT substitution, MC 11096). Inputs are v1 sprites
 (`/home/claudecode/Games/vampire_survivor/static/assets`, READ-ONLY source @ `562e0a1`).
+The `player` row (MC 11132) is the exception: its input is the re-mastered sprite
+`assets/art-src/player-remaster.png` — the v1 sprite went to the re-master pass; its
+three failed seeds keep their row and reasons below.
 DIMS = raw world-space bbox (meters, TRELLIS unit scale); game scale (1.67/1.42/5.33 m
 targets, DESIGN-3D §a) is applied at import by S3+, not here. TRIS from headless bpy
 `calc_loop_triangles` dump (tools/vm100/dump_render.py). Batch run 2026-10-22 (UTC),
@@ -24,7 +27,9 @@ MC 11118; capture `.tmp/art-batch-s1a.txt`.
 | player-alt | static/assets/player-alt.png | be5e635b7abf3297 | TRELLIS.2-4B | 18 | 7647 / 8000 | 0.507,0.484,0.999 | 7 576 224 | concepts/player-alt-render.png |
 | boss-warden | static/assets/boss-warden.png | 3972428804ba0991 | TRELLIS.2-4B | 29 | 14849 / 15000 | 0.934,0.738,0.985 | 8 636 736 | concepts/boss-warden-render.png |
 | boss-warden-rigged | (rig of boss-warden.glb) | — | UniRig skeleton→skin→merge | — | 14929 / 15000 (post-merge dump) | rig-space bbox larger than mesh (armature nodes) | 8 844 320 | — (visual validator PASS, textures survive) |
-| player | static/assets/player.png | 08181cf0f0df2ad4 | TRELLIS.2-4B | **SKIPPED** — 3 distinct-seed quality failures | seed17 7668 flat card (y-extent 0.002 m); seed30 7652 solid box (fill 0.80); seed40 7906 flat card (y-extent 0.014 m) | see evidence renders | not committed | .tmp/player-seed{17,30,40}-*-render.png |
+| player (v1 sprite) | static/assets/player.png | 08181cf0f0df2ad4 | TRELLIS.2-4B | **SKIPPED** — 3 distinct-seed quality failures | seed17 7668 flat card (y-extent 0.002 m); seed30 7652 solid box (fill 0.80); seed40 7906 flat card (y-extent 0.014 m) | see evidence renders | not committed | .tmp/player-seed{17,30,40}-*-render.png |
+| player | assets/art-src/player-remaster.png | 90273440dea128e9 | TRELLIS.2-4B | 42 | 7919 / 8000 | 0.500,0.469,0.997 | 7 957 140 | concepts/player-render.png |
+| player-rigged | (rig of player.glb, seed-42 mesh) | — | UniRig skeleton→skin→merge | — | 7999 / 8000 (post-merge dump) | rig-space bbox 1.902,2.000,2.000 (armature nodes; larger than mesh) | 8 112 600 | — (visual validator PASS, textures survive) |
 
 ## Honest notes
 - **Bone naming (warden rig):** UniRig's articulation-xl assigns a **46-bone
@@ -42,6 +47,15 @@ MC 11118; capture `.tmp/art-batch-s1a.txt`.
   seed). Sprite goes to a re-master pass (orchestrator-side); do NOT re-roll the
   current sprite. The intermediate 4-joint player rig (from the seed-30 slab) is NOT
   committed per the same ruling (degenerate; repo assets must not invite wiring it in).
+- **player (remaster, MC 11132):** ACCEPTED on the FIRST seed (42) once the sprite was
+  re-mastered — the volumetric rim-lit 1024×1536 input produced a real full-body mesh
+  (extent 0.500×0.469×0.997 m where the flat sprite collapsed to 0.002–0.014 m cards);
+  extent+fill gates green, no seed wasted on 43/44. Rig `player-rigged.glb` = UniRig
+  **34-joint generic `bone_0…bone_33` skeleton** (names NOT semantic, same state as the
+  warden note above): RIG_VALID=PASS (skins=1, 34 rotatable joints), textures survive the
+  merge (VISUAL re-validate PASS), post-merge tri dump 7999/8000 PASS. One bounded GPU
+  window (OPEN 15:37:25 / CLOSED 15:37:25+7min13s rc=0, drain_barrier PASS before load);
+  capture `.tmp/player-s1p.txt`.
 - `player-alt` is its own TRELLIS mesh (DOD-ACCEPTANCE §c lists it as same-rig
   retexture; as an unrigged static GLB the honest read is a separately generated
   variant — S5/S3 decide material-swap vs this mesh at integration).
