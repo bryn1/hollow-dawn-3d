@@ -1,0 +1,19 @@
+# tools/VERSIONS.txt — pinned versions + provenance for the build/export pipeline.
+# Append one section per card that changes toolchain versions. Verify with the
+# named check before trusting a line. (MC 11128 T-S7, 2026-10-22)
+
+# --- S7 export pipeline (MC 11128) ---
+godot_engine=4.7.2.stable (official, --version = 4.7.2.stable.official.ed1daf0bf)
+engine_binary=/home/claudecode/Games/.tools/godot/Godot_v4.7.2-stable_linux.x86_64
+engine_binary_sha256=8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e
+#   verified this session: unzip of Godot_v4.7.2-stable_linux.x86_64.zip
+#   (sha256 cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+#   == the .digest published by github release tag 4.7.2-stable) yields exactly
+#   the binary above.
+export_templates_tpz=Godot_v4.7.2-stable_export_templates.tpz
+export_templates_tpz_sha256=f298490b8d44d934be425a5a65a51bf15f422428b229a06a6e11d9ffea248011
+#   == the .digest published by github release tag 4.7.2-stable. Installed to
+#   ~/.local/share/godot/export_templates/4.7.2.stable/ ; `diff -r` of the
+#   extracted tpz vs the installed dir is clean (35 files, 2026-10-22).
+# Rollback: rm -rf ~/.local/share/godot/export_templates/4.7.2.stable/
+#   (export-only; the repo and engine binary are unaffected by that removal).
