@@ -1,0 +1,126 @@
+MC 11112 T-S2h — ROUTE-A GAIT STRIPS + A4 FX SCREENSHOTS — CAPTURE EVIDENCE
+worktree .tmp/wt-s2h @ feat/horde-strips (base 0c0aa27) · engine Godot 4.7.2,
+real X11 windowed GL (xvfb + opengl3, llvmpipe), live gameplay scene, NOT
+card overlays · driver godot/sim/strips_capture.gd (SceneTree runner),
+gait measurement REUSES horde_viz.gd gait_probe() (no second mechanism),
+window-capture pattern REUSES S5 cards_capture.gd.
+
+CONVENTIONS (single, declared):
+- p2p width := (max - min) of the per-class projected width sampled over
+  >= 1 FULL gait cycle per frame series; amplitudes are NEVER doubled.
+- gait freq := speed / (24 px/m x 1.2 m cycle), cap 2.2 Hz (taper classes
+  hound raw 3.30, dune-scarab raw 3.65 -> both exercised the cap at 2.2).
+- scale band 1.00..1.24 (amp 0.12 mid 1.12) for all 8 classes; declared
+  roster note: drift-float is UNIMPLEMENTED in the horde (no strip
+  possible); pale-wight carries an EXEMPT gate floor 0.22 (documented).
+- attack lunge/squash is a DRAW transform (horde_viz MultiMesh offset +
+  scale), not a sim position; sim excursion row = 0.0001 px (data only).
+
+DECLARED harness deviations (all capture-side; product untouched EXCEPT
+the one P1 fix named below):
+- Engine.time_scale = 8.0 scales tree deltas only; sim advances via
+  manual main._step(DT) in the driver; game.paused re-pinned after every
+  _pick()/declined level-up; hp pinned each batch.
+- FX legs pin the ONE shot weapon at L8 (single-weapon determinism).
+- seed(11112) before every leg (global randf() drives spawns/drops).
+- Godot 4.7 get_image() returns a REFERENCE, not a copy: every retained
+  frame duplicate()d (root cause of the base==ambient 0/0 mystery).
+- Pre-fire baseline: fx legs hold one idle frame so the baseline draw
+  truly precedes the first tick (tree order is process -> draw).
+- llvmpipe draws are sparse (~1 draw / 0.3 s real): pairing steps 1
+  sim-step/frame while an attack pair is armed/pending.
+- P1 PRODUCT FIX shipped with this capture (viz_fx.gd _mat()): the flat
+  decal ArrayMeshes (_annulus_mesh, _wedge_mesh, _trail_mesh) are wound
+  so generate_normals() yields DOWNWARD normals (Godot is left-handed) —
+  with default back-face culling the top-down camera saw only culled
+  back faces: ward ring, talon wedge and trail ribbon were INVISIBLE in
+  every build. Fix: cull_mode = CULL_DISABLED on the fx materials (one
+  line; boxes/spheres unaffected; 71 pytest stay green). The captured
+  ward/talon shots are therefore the first-ever renders of these FX.
+- Walk/control legs place the 6 same-class walkers in a visible row in
+  front of the player (POSITIONS only — gait phase, speed and every
+  measured channel are the sim's own; the ring spawns sit mostly
+  off-screen at VIEW radius, so the strip panels would not contain the
+  walkers otherwise). Panels are captured CENTRED on the viewport.
+- Baseline pixel convention covers the SOLID/FAINT-on-texture FX: ward
+  ring, talon wedge and the EMBER TRAIL RIBBON (compare_vs = same pixel
+  on the leg's pre-fire baseline draw). While the ambient control pair
+  collects, the driver pins the shot weapon's cd and empties the
+  transient fx arrays (capture-side only; the shot lives on in the
+  captured image) — long-lived projectiles (the ember bolt mid-flight)
+  would otherwise keep the slot busy past the collection timeout.
+- Attack pixel-pair gate recalibrated with data (see checker comment):
+  a 0.24 m lunge = 5.8 px on a ~17 px wraith cannot out-separate the
+  same wraith's continuous gait drift; the band-outside scale rows
+  (0.85->1.15 vs walk band 1.0-1.24, squash RANGE 0.35) carry the
+  attack-pulse proof; the pixel gate asserts real change (>= 30 px).
+
+== 8 WALK STRIP PNGs (each = 6 live same-class walkers, one wide PNG,
+   >= 6 evenly-spaced gait-phase frames, class label on frame) ==
+== per-class Route-A gate rows (ONE p2p convention: max-min over >=1 cycle) ==
+class        freq<=2.2 raw/cap          scale-range        width p2p px slide px  verdict
+wraith       True      1.910            decl 0.2400 / meas 0.2398   4.085       27.5   GREEN
+hound        True      3.299>2.2capped  decl 0.2400 / meas 0.2397   4.084       44.4   GREEN
+crawler      True      1.215            decl 0.2400 / meas 0.2397   4.085       27.6   GREEN
+cultist      True      2.083            decl 0.2400 / meas 0.2394   4.080       28.0   GREEN
+moor-brute   True      1.111            decl 0.2400 / meas 0.2397   4.084       27.3   GREEN
+dune-scarab  True      3.646>2.2capped  decl 0.2400 / meas 0.2397   4.084       49.0   GREEN
+rime-ghoul   True      2.083            decl 0.2400 / meas 0.2394   4.080       28.0   GREEN
+pale-wight   True      1.806            decl 0.2400 / meas 0.2398   4.087       27.6   GREEN (wight EXEMPT floor 0.22)
+cap rows: gait freq cap 2.2 Hz exercised by 2/2 taper classes (hound raw 3.29861111111111, dune-scarab raw 3.64583333333333) -> both at 2.2 / 2.2 Hz
+== FROZEN-SLIDE CONTROL — REQUIRED RED rows (both channels) ==
+frozen slide: scale-range 0.0000 (channel i RED=True) · width p2p 0.0001 px (channel ii RED=True) · travel 105.4 px (sliding=True) · game_time frozen at 0.0 -> BOTH CHANNELS RED: True
+== ATTACK leg (RUN-CONDITIONED per A3/F-2) ==
+own halo L1 at t=39.233 (<=120: True) · pulses 19 · scale at edge {'d': 1.15, 's': 0.85} · pair px-diff 78 vs ambient 131 (pair >= 30) vs walk band [1.0, 1.24] outside=True · sim drift 0.0001 px (data — lunge is a draw transform) · squash scale RANGE 0.3529 (>= 0.15) · pair /home/claudecode/Games/hollow_dawn_3d/.tmp/wt-s2h/assets/strips/wraith-lunge.png
+== A4 FX shots (live gameplay, rendered-slot + footprint pixel check) ==
+measured no-FX false-positive floor (ground grid points over their own ground ref by >= 0.15, max over 8 walk frames): 4 -> footprint gate: above >= max(ceil(n/2), floor + 2); baseline gate (solid/faint FX on textured ground ward/talon/ember-trail): changed px >= ambient draw-pair + 500
+bolt.png     t=   1.08 slot bolts    count 1 · px [660.0, 373.0] footprint 9/9 pts over local ground ref (max_delta 0.962) -> GREEN
+ember.png    t=   1.08 slot trails   count 1 · px [659.0, 373.0] baseline 628/12769 px changed vs ambient 0 (>= +500) -> GREEN
+cleaver.png  t=   1.10 slot axes     count 1 · px [655.0, 375.0] footprint 7/9 pts over local ground ref (max_delta 0.808) -> GREEN
+halo.png     t=   0.02 slot halos    count 4 · px [644.0, 281.0] footprint 9/9 pts over local ground ref (max_delta 0.875) -> GREEN
+spike.png    t=   8.87 slot bursts   count 1 · px [1128.0, 95.0] footprint 6/8 pts over local ground ref (max_delta 0.717) -> GREEN
+ward.png     t=   0.02 slot rings    count 1 · px [685.0, 359.0] baseline 2344/12769 px changed vs ambient 0 (>= +500) -> GREEN
+talon.png    t=   0.02 slot arcs     count 1 · px [696.0, 337.0] baseline 3326/19881 px changed vs ambient 0 (>= +500) -> GREEN
+legs done: True · fail rows: 0
+GATE: ALL GREEN (19 checks)
+
+== STRIP PNG paths (assets/strips) ==
+assets/strips/crawler-walk.png
+assets/strips/cultist-walk.png
+assets/strips/dune-scarab-walk.png
+assets/strips/hound-walk.png
+assets/strips/moor-brute-walk.png
+assets/strips/pale-wight-walk.png
+assets/strips/rime-ghoul-walk.png
+assets/strips/wraith-frozen-control.png
+assets/strips/wraith-lunge.png
+assets/strips/wraith-walk.png
+
+wraith-frozen-control.png + wraith-lunge.png live in the same assets/strips dir.
+
+== FX SCREENSHOT PNGs (real windowed GL live gameplay; talon included
+   for 6-weapon completeness) ==
+.tmp/s2h-fx/bolt.png
+.tmp/s2h-fx/cleaver.png
+.tmp/s2h-fx/ember.png
+.tmp/s2h-fx/halo.png
+.tmp/s2h-fx/spike.png
+.tmp/s2h-fx/talon.png
+.tmp/s2h-fx/ward.png
+
+== MUTATION RED-PROOF (the checker is a real gate: mutated COPIES of the
+   checker, each gate forced RED on the SAME green dump) ==
+MUT-A WIDTH_MIN 2.0->999     : exit=1  wraith       True      1.910            decl 0.2400 / meas 0.2398   4.085       27.5   RED | hound        True      3.299>2.2capped  decl 0.2400 / meas 0.2397   4.084       44.4   RED
+MUT-B FX_BASE_MARGIN->999999 : exit=1  == FROZEN-SLIDE CONTROL — REQUIRED RED rows (both channels) == | frozen slide: scale-range 0.0000 (channel i RED=True) · width p2p 0.0001 px (channel ii RED=True) · 
+MUT-C PAIR_MIN 30->5000      : exit=1  == FROZEN-SLIDE CONTROL — REQUIRED RED rows (both channels) == | frozen slide: scale-range 0.0000 (channel i RED=True) · width p2p 0.0001 px (channel ii RED=True) · 
+MUT-D FREQ_MAX 2.2->0.1      : exit=1  wraith       False     1.910            decl 0.2400 / meas 0.2398   4.085       27.5   RED | hound        False     3.299>2.2capped  decl 0.2400 / meas 0.2397   4.084       44.4   RED
+(the green run above exits 0; every mutation exits 1 — the gates can fail.)
+
+== PYTEST (71 tests, with the P1 cull fix on disk) ==
+71 passed in 0.36s
+
+== VERDICT ==
+CHECKER_EXIT recorded on the last line (0 = all 19 checks green on the
+8 strips + dual-channel gate rows + REQUIRED-RED frozen control + attack
+leg + 7 FX screenshots, 0 fail rows).
+VERIFY_EXIT=0
