@@ -49,8 +49,11 @@ func feed(cam: Camera3D, viz: Node, key: String, e: Dictionary) -> void:
 	s_min = minf(s_min, s)
 	s_max = maxf(s_max, s)
 	# Mesh half-width along world X at the instance's live scale (the scissor
-	# scales the transform's X channel — horde_viz.gd:115-118).
-	var r: float = viz._mms[key].multimesh.mesh.radius * s
+	# scales the transform's X channel — horde_viz.gd:115-118). T-S2p
+	# re-shoot repair: since MC 11133 the class mesh is the height-normalised
+	# GLB ArrayMesh, so the half-width is MEASURED off its aabb — the old
+	# CapsuleMesh.radius property died with the placeholder era.
+	var r: float = viz._mms[key].multimesh.mesh.get_aabb().size.x * 0.5 * s
 	var h: float = viz._heights[key]
 	var ox: float = e.x / CameraRig.PX_PER_M
 	var oz: float = e.y / CameraRig.PX_PER_M
