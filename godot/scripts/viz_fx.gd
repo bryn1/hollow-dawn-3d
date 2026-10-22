@@ -226,6 +226,13 @@ func _mat(col: Color, additive: bool, alpha := 1.0) -> StandardMaterial3D:
 	mat.albedo_color = Color(col.r, col.g, col.b, alpha)
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	# P1 FIX (S2h gate, 2026-10-22): the flat decal meshes (_annulus_mesh,
+	# _wedge_mesh, _trail_mesh) are wound so generate_normals() yields
+	# DOWNWARD normals (Godot is left-handed); with the default back-face
+	# cull the top-down camera saw only culled back faces — the ward ring,
+	# talon wedge and trail ribbon were invisible in every build. Disable
+	# culling on these tiny unshaded quads (boxes/spheres are unaffected).
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	if additive:
 		mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	return mat
