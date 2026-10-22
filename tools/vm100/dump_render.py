@@ -38,12 +38,15 @@ cam_data.lens = 50
 d = center - cam.location
 cam.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
 
-sun = bpy.data.lights.new("sun", "SUN"); sun.energy = 4.0
+sun = bpy.data.lights.new("sun", "SUN"); sun.energy = 6.0
 sun_o = bpy.data.objects.new("sun", sun); bpy.context.collection.objects.link(sun_o)
 sun_o.rotation_euler = Vector((0.8, -0.3, 0.5)).to_track_quat("Z", "Y").to_euler()
+sun2 = bpy.data.lights.new("sun2", "SUN"); sun2.energy = 3.0
+sun2_o = bpy.data.objects.new("sun2", sun2); bpy.context.collection.objects.link(sun2_o)
+sun2_o.rotation_euler = Vector((1.1, 0.4, -2.4)).to_track_quat("Z", "Y").to_euler()
 world = bpy.data.worlds.new("w"); bpy.context.scene.world = world
 world.use_nodes = True
-world.node_tree.nodes["Background"].inputs[0].default_value = (0.02, 0.02, 0.03, 1.0)
+world.node_tree.nodes["Background"].inputs[0].default_value = (0.05, 0.05, 0.07, 1.0)
 
 sc = bpy.context.scene
 sc.render.engine = "CYCLES"; sc.cycles.device = "CPU"
@@ -55,4 +58,7 @@ ok = tris <= budget and os.path.getsize(png_out) > 0
 print(f"TRIS={tris} BUDGET={budget} " + ("PASS" if tris <= budget else "FAIL") +
       f" DIMS_M={dims[0]:.3f},{dims[1]:.3f},{dims[2]:.3f} BYTES={os.path.getsize(glb)}"
       f" PNG={png_out} PNG_BYTES={os.path.getsize(png_out)}")
-sys.exit(0 if ok else 1)
+sys.stdout.flush()
+# pip-bpy segfaults in atexit teardown AFTER our exit value is set (observed rc=139
+# with correct output+PNG); os._exit ends before teardown so the gate RC means the gate.
+os._exit(0 if ok else 1)
