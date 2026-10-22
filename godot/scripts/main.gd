@@ -16,6 +16,7 @@ var bridge: Node
 var _rig: Node3D
 var _ground: MeshInstance3D
 var _viz: Node3D
+var _fxv: Node3D
 var _pawn: Node3D
 var _hud: CanvasLayer
 var _screens: CanvasLayer
@@ -47,6 +48,11 @@ func _ready() -> void:
 	_pawn = preload("res://scripts/hero_pawn.gd").new()
 	_pawn.game = game
 	add_child(_pawn)
+	# S4 weapon-FX layer (§i): reads the WeaponSystem transient arrays only.
+	_fxv = preload("res://scripts/viz_fx.gd").new()
+	_fxv.game = game
+	_fxv.sim = fx
+	add_child(_fxv)
 
 	_hud = preload("res://scripts/hud_3d.gd").new()
 	_hud.game = game
