@@ -35,8 +35,9 @@ const MODEL_H_BOSS := 5.33
 
 # T-S2i class -> batch glb (provenance: PERMANENCE.md; the game-use copies
 # ride the project tree at res://assets/glb/ per DESIGN-3D §f). player-alt
-# is NOT wired here — the player stays placeholder until player.glb
-# (MC 11132); its isolated future swap is hero_pawn.gd::_player_mesh().
+# is NOT wired here — the player rides its OWN committed GLB (player.glb,
+# MC 11132) through the same ClassMesh loader, isolated in
+# hero_pawn.gd::_player_mesh() (swap landed T-S2p, MC 11135).
 const GLB_FILES := {
 	"wraith": "enemy-wraith.glb",
 	"hound": "enemy-hound.glb",
