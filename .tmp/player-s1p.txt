@@ -1,0 +1,101 @@
+# CAPTURE MC 11132 — T-S1p player model + rig from the REMASTER sprite (vm100 3090)
+Date: 2026-10-22 (UTC). Seat: code (11132). Host: vm100 (RTX 3090, shared with fleet
+verifier llama-swap/knut). Exec: ssh a3090@192.168.5.230; GPU discipline per
+GPU_WINDOW_RUNBOOK.md (read first) + /usr/local/sbin/gpu-window via the committed
+tools/vm100/with-window.sh (touch loop, trap-close every exit path, backstop+reaper).
+THE RECIPE REUSED, never re-authored: matte = in-pipeline BiRefNet (MIT substitution,
+MC 11096) + batch_trellis.py (fp16 pipeline_type=1024, decimation to per-row budget) +
+player_attempts.py quality gates (extent+fill, drain_barrier) + dump_render.py bpy tri
+gate + concept render + run-unirig-inner.sh with artifact assertions + validate_glb.py.
+Staged scripts on vm100 (/opt/imagegen/tmp/mc11118/) verified md5-IDENTICAL to the
+committed repo files before the window. Only NEW file = .tmp/run-player-s1p.sh driver
+glue (per-seed MC 11131 env-failure classification; commits player_attempts.py and
+run-unirig-inner.sh verbatim).
+INPUT: assets/art-src/player-remaster.png (1024x1536 RGBA)
+  sha256 90273440dea128e9f7c44d1a24328c49e6c8645095e758fef1205b9db613b3d6 (local ==
+  staged copy on vm100).
+Base: master @ 0a27efc (the remaster commit; >= required). git pull: already up to date.
+
+## Baseline (before the window)
+gpu-window CLOSED | llama-swap.service active | knut-loop.timer active
+df /: used 324G free 428G (44%) | nvidia-smi 23136/24576 MiB (verifier resident)
+
+## ONE window, single run — gate lines (full transcript .tmp/player-s1p-run.log)
+BARRIER-PASS: llama-swap inactive, gpu_used=260MiB held 40s      (before pipeline load)
+load_s=156.6 | ROW player-s42 OK seed=42 tris=7919/8000 bytes=7957140 secs=84
+QUALITY player-s42: ext=0.500,0.997,0.469 fill=non-watertight ext_gate=PASS fill_gate=PASS
+ATTEMPT seed=42 -> ACCEPT | ACCEPTED-SEED=42
+  -> FIRST SEED ACCEPTED: NO seed rejected (seeds 43/44 never burned), zero attempts
+     failed, so the MC 11131 retry-once policy was never needed. PEAK_VRAM_MIB=5366.
+Tri vs 8000 budget (bpy dump, CPU, OUTSIDE window):
+  player.glb (accepted mesh):   TRIS=7919 BUDGET=8000 PASS DIMS_M=0.500,0.469,0.997 BYTES=7957140
+  player-rigged.glb (post-merge): TRIS=7999 BUDGET=8000 PASS DIMS_M=1.902,2.000,2.000 BYTES=8112600
+     (rig-space bbox inflated by armature nodes — same state as boss-warden-rigged row)
+RIG (UniRig skeleton->skin->merge, artifact assertions on FILES not RC):
+  stages rc=0: skeleton 48s, skin 43s, merge 7s; UNIRIG_RC=0
+  RIG_VALID=PASS  (skins=1, joints=34, nodes_with_rotation=34; joint names GENERIC
+  bone_0..bone_33 — semantics NOT assigned, stated honestly, same as warden 46-bone note;
+  animations=0)
+Textures survive merge: VISUAL_VALID=PASS on player.glb AND player-rigged.glb
+  (trimesh_load=OK, textured_geometries=1/1, images=2, images_embedded=True)
+Concept render: assets/concepts/player-render.png (dump_render.py Cycles CPU, two-sun
+  rig — same tool as the 10 batch renders); accepted-attempt evidence render committed
+  at .tmp/player-s42-render.png. Visual eyeball (read_image this session): volumetric
+  hooded robed figure holding a lantern — a real 3D body, not a card/slab.
+Deliverables (sha256, local == vm100 originals):
+  assets/glb/player.glb        c0eb98ae499151a40dcb270f25782d7f83445cd24f6021d77f873835666020b2
+  assets/glb/player-rigged.glb aa4b877a22e913852db83371fc49c71d938f66d20ebc1166e5e4180faa75f79a
+
+## GPU-window ledger
+15:37:25 OPEN 75min (backstop+reaper armed; llama-swap stopped 15:37:26, gpu_used 1MiB;
+                 imagegen healthy 15s later)
+15:38:2x barrier PASS (40 s held quiet) -> load 15:38:21 -> seed 42 ACCEPT 15:42:2x
+15:42:35-15:44:38 UniRig chain -> UNIRIG-CHAIN-DONE
+15:44:38 CLOSED rc=0 after: window CLOSED | llama-swap.service active | gpu_used 23136 MiB
+NO hold left open; none forced by backstop/reaper.
+
+## MC 11131 FLEET DEFECT RECURRED INSIDE THE WINDOW (journal excerpt, honest)
+Oct 22 15:37:25 systemd: Stopping llama-swap ... (gpu-window open, designed path)
+Oct 22 15:37:26 systemd: Stopped llama-swap ...
+Oct 22 15:40:11 systemd: Started llama-swap ...        <-- CONSUMER START, window OPEN
+Oct 22 15:40:11 llama-swap: matrix: model=qwen3.8-27b starting (no models running)
+Oct 22 15:41:06 llama-swap: [WARN] starting qwen3.8-27b failed: upstream command exited
+                      prematurely                        <-- THEIR 27B load died against
+                                                           our job (TRELLIS held GPU)
+Oct 22 15:44:15 llama-swap: matrix: model=qwen3.8-27b starting (no models running)
+                      (loaded after our job released the GPU)
+Reading applied per brief: env-failure classification covers FAILED attempts; ZERO of
+our attempts failed (their loader died, our gen+rig completed; PEAK 5.4 GiB left room),
+so no seed was treated as environment-failed, no retry was taken, seeds 43/44 untouched.
+drain_barrier is pre-load only (per MC 11118 capture) — it correctly passed at 15:38;
+the consumer-start at 15:40 is the still-unfixed MC 11131 side, not a barrier failure.
+
+## Verifier post-close (rule: only a real completion proves the GPU alive)
+llama-swap.service active; :8090 /v1/models qwen3.8-27b status=loaded;
+POST /v1/chat/completions model=qwen3.8-27b max_tokens=4 -> HTTP 200 in 0.52s,
+content "ok" (192.168.5.230:8090, this session).
+
+## df / after
+used 324G free 428G (44%) — unchanged at GB granularity (outputs ~20 MB on vm100).
+Installs/downloads: NONE (MC 11096 stack present). No windowless GPU use.
+
+## Rollback statement (full removal, restores pre-task state)
+vm100: rm -rf /opt/imagegen/tmp/mc11132 /opt/imagegen/output/mc11132
+       rm -f /opt/imagegen/output/mc11118/player-s42* (glb + render + skeleton dir)
+repo:  git revert fda4be91 (build: glb x2, concept render, PERMANENCE rows, LEDGER line)
+       + revert this capture commit (.tmp/player-s1p.txt, run-player-s1p.sh,
+       player-s42-render.png). Nothing else touched.
+
+## Deviations ledger (stated readings)
+- Brief step 2 names only the concept render + tri dump; the accepted MESH is committed
+  as assets/glb/player.glb too, matching the boss-warden precedent (mesh + rig both in
+  assets/glb/), so the rig provenance row resolves to a repo file.
+- PERMANENCE: the three old failures sat in ONE SKIPPED row (each with its reason); that
+  row is KEPT verbatim (relabelled "player (v1 sprite)") and the new remaster row added —
+  "old three failures keep their rows + reasons" satisfied without inventing rows.
+- run-player-s1p.sh (driver glue) committed under .tmp/ as evidence of exactly what ran
+  in the window; it is NOT a new mechanism — it shells the committed tools unchanged.
+- QUALITY line ext order (0.500,0.997,0.469 trimesh z-up) vs PERMANENCE dims
+  (0.500,0.469,0.997 bpy z-up like every other row): same bbox, axis convention.
+
+VERIFY_EXIT=0
