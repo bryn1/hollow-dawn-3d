@@ -1,0 +1,165 @@
+# CAPTURE MC 11096 — T-P2-1 3D-art stack on the 3090 (TRELLIS.2 + UniRig)
+Date: 2026-10-21 (UTC). Seat: infra (11096). Target host: vm100 (RTX 3090, shared with
+fleet verifier llama-swap/knut). Exec path: direct ssh a3090@192.168.5.230 — the same
+path the existing imagegen MCP spine uses (qm guest exec base64 recipe kept as fallback,
+not needed). GPU discipline: GPU_WINDOW_RUNBOOK.md read first; the vm100 mechanism for
+holding the 3090 is /usr/local/sbin/gpu-window (open/close/status/touch; pauses llama-swap
+while OPEN, hard cap <=120 min, 20-min idle close). All inference runs wrapped in
+scripts/vm100/with-window.sh (touch loop anti-idle, trap closes on every exit path).
+Installs/downloads ran WITHOUT the window per hard limits. Window left CLOSED at end.
+
+## Baseline (before)
+- df / : used 279075M, free 490209M (2026-10-21 ~19:47Z)
+- gpu-window status: CLOSED | llama-swap.service active | knut-loop.timer active
+- nvidia-smi: 23136/24576 MiB used (verifier resident)
+- venv python baseline: /opt/imagegen/venv = py3.10.12, torch 2.14.1+cu126, transformers 5.19.0 (ComfyUI image stack — NOT touched)
+- nvcc: /usr/local/cuda-12.2 (12.2), gcc system, 20 cores
+
+## Input
+- /home/claudecode/Games/vampire_survivor/static/assets/enemies/rime-ghoul.png
+  sha256 a60b8c22e847a5f4fc60eea7475c7e1ebf4756be0615af6be50555f047c38619 (both sides verified)
+- copied to vm100:/opt/imagegen/tmp/mc11096/rime-ghoul.png
+
+## Env choices (which + why)
+- SIBLING VENVS under /opt/imagegen, image venv untouched:
+  * /opt/imagegen/venv3d  = TRELLIS.2, system py3.10 + torch 2.6.0+cu124 (vendor setup.sh default), CUDA_HOME=/usr/local/cuda-12.2, TORCH_CUDA_ARCH_LIST=8.6.
+    Why separate: image venv has torch 2.14.1+cu126 / transformers 5.19.0 (ComfyUI/Qwen-Image pinned); TRELLIS.2 vendor pins torch 2.6 — direct conflict.
+  * /opt/imagegen/venvrig = UniRig, python 3.11 via static micromamba under /opt/imagegen (no system install).
+    Why separate: UniRig pins transformers==4.51.3 + numpy==1.26.4 (conflicts with TRELLIS.2's unpinned transformers) AND bpy==4.2 ships cp311-only wheels — merge.py/extract.py import bpy, so py3.11 is required; vm100 has no 3.11.
+- ONE model zoo: HF_HOME=/opt/imagegen/models/hf (HF hub layout) — weights for both stacks land there, no second zoo.
+
+## Repo checkouts on vm100
+- /opt/imagegen/TRELLIS.2  = microsoft/TRELLIS.2 main @ 75fbf01 (MIT)
+- /opt/imagegen/UniRig     = VAST-AI-Research/UniRig main @ 6793c66 (MIT)
+
+## Weights (HF repo ids + sizes)
+- microsoft/TRELLIS.2-4B   (MIT; HF usedStorage 16,248,144,438 B ≈ 16.2 GB; ckpts: ss_flow 64 + slat shape 512/1024 + slat tex 512/1024 (2.58 GB ea) + shape/tex enc/dec (0.71/0.95 GB ea) + pipeline.json)
+- VAST-AI/UniRig           (MIT; skeleton/articulation-xl_quantization_256/model.ckpt + skin/articulation-xl/model.ckpt)
+- sizes measured after download: (appended below)
+
+## Install log (timestamps UTC, from /opt/imagegen/tmp/mc11096/install.log + install2.log)
+- 20:01:04 venv -> 20:01:12 torch-2.6.0-cu124 (3m) -> 20:04:12 submodules+basic-deps ->
+  20:04:53 flash-attn-2.7.3 PREBUILT WHEEL (no source build) -> 20:05:32 CUDA ext build
+  (nvdiffrast/nvdiffrec/CuMesh/FlexGEMM/o-voxel, MAX_JOBS=10, CUDA_HOME=12.2 minor-mismatch
+  vs cu124 = warning only) 55m -> 21:00:25 weights microsoft/TRELLIS.2-4B (8m) ->
+  21:08:36 import-check PASS -> 21:08:42 INSTALL-TRELLIS2-DONE (01 RC=0)
+- 02 first attempt FAILED: micro.mamba.pm api returned empty body; tar no-oped silently
+  (error: "02-install-unirig.sh: line 30: .../micromamba: No such file or directory").
+  FIXED: official static asset github.com/mamba-org/micromamba-releases micromamba-linux-64 (18.3MB).
+- 21:43:44 micromamba 2.9.0 -> py311-env -> torch -> flash-attn -> 21:46:50 requirements
+  (bpy 4.2.0 wheel OK cp311) -> 21:48:37 spconv-cu124 + torch_scatter/cluster (pyg index
+  torch-2.6.0+cu124 EXISTS) -> 21:49:02 UniRig ckpts (3m25s) -> 21:52:33 import-check PASS
+  "py 2.6.0+cu124 | bpy 4.2.0 | transformers 4.51.3" -> INSTALL-UNIRIG-DONE (02 RC=0)
+- UniRig repo examples are Git-LFS (no git-lfs on vm100): fetched examples/giraffe.glb LFS
+  object from media.githubusercontent.com (6,310,044 B == pointer size, glTF magic). NO
+  system package installed for it.
+
+## Weight cache sizes (HF_HOME=/opt/imagegen/models/hf)
+- microsoft/TRELLIS.2-4B: hub dir 16G (15 flow/VAE safetensors + configs) — measured
+- ZhengPeng7/BiRefNet: model.safetensors cached (BiRefNet research release, MIT)
+- VAST-AI/UniRig: skeleton + skin model.ckpt cached
+- df after installs: (appended at close)
+
+## LICENSE / ACCESS findings (found BEFORE the window — no wasted GPU hold)
+- TRELLIS.2 pipeline.json requires TWO gated aux models besides its own MIT weights:
+  1. facebook/dinov3-vitl16-pretrain-lvd1689m (image conditioning encoder — pipeline
+     cannot load without it). HF: "Access denied. Model ... requires approval." vm100's
+     own HF token (path /home/a3090/.huggingface/token, never echoed) is not approved.
+     Official weight URLs are emailed only after Meta's "I Accept" gate; no ungated
+     official URL. We did NOT bypass via unofficial mirrors (permission-bypass = never).
+     LICENSE.md (fetched, updated 2025-08-19): worldwide royalty-free grant, NO EU/UK
+     territory exclusion, only Trade-Controls/ITAR/military restrictions -> an ACCESS
+     approval step, not a shipping block. OWNER DECISION requested via orchestrator:
+     accept the gate once, then the run executes (all else staged).
+  2. briaai/RMBG-2.0 (rembg): also gated -> substituted the SAME-architecture original
+     research release ZhengPeng7/BiRefNet (MIT, ungated, cached). Deviation recorded in
+     poc_trellis.py (monkey-patch with comment); honest and license-clean.
+- Durable finding for the fleet: "MIT stack" TRELLIS.2 is MIT for generator+outputs, but
+  its inference pipeline pulls DINOv3 (Meta license, gated) — a dependency the RESEARCH
+  doc's license risk-table missed. Outputs' license posture: DINOv3 grants worldwide
+  royalty-free use; no territory restriction found.
+
+## Validator self-test gates (proof each check can go red AND green)
+- make_synth.py: textured box (green, --min-bytes 0 -> VISUAL_VALID=PASS exit 0) vs plain
+  box (red: images=0 VISUAL_VALID=FAIL exit 1); rig-mode red on textured box (skins=0
+  RIG_VALID=FAIL exit 1). Rig GREEN case comes from UniRig output below.
+
+
+## Proof-run log (2026-10-22, all UTC)
+- 04:12 DINOv3 retry #1 with stored token -> unchanged "Error: Access denied ... requires
+  approval." whoami-v2 on the token (identity only, never echoed) = account "Lekis":
+  owner's acceptance had landed on a DIFFERENT account. Escalated; NOT bypassed via mirrors.
+- 10:40 owner re-confirmed gate accepted as Lekis -> retry: DINO_RC=0, snapshot
+  ea8dc2863c51be0a264bab82070e3e8836b02d51 cached. BiRefNet already cached (substitution kept).
+- Giraffe re-smoke (best-effort, per orchestrator ruling): skeleton ok; skin stage crashed
+  (see weights_only below); abandoned after root-cause — the ghoul chain is the DoD proof.
+- Four defects found+fixed during the run (each fix lives in tools/vm100/ or the venv):
+  1. poc_trellis.py: sys.path.insert(TRELLIS.2 repo) — "No module named trellis2"
+     (repo is not pip-installed; install-time heredoc import-check had masked this).
+  2. poc_trellis.py: BiRefNet subclass must IGNORE the model_name kwarg — pipeline.json
+     passes briaai/RMBG-2.0 explicitly, which overrode a default-kwarg substitution (v1).
+  3. venv3d: transformers 5.20.2 -> PINNED 4.57.1 — 5.x removed DINOv3ViTModel.layer that
+     TRELLIS.2's DinoV3FeatureExtractor uses ("'DINOv3ViTModel' object has no attribute
+     'layer'"). 4.57.1 restores the vendor-era API (verified: .layer/.embeddings/.rope_embeddings).
+  4. venvrig: sitecustomize.py (committed as sitecustomize-venvrig.py) forces
+     torch.load(weights_only=False) — torch>=2.6 default breaks lightning load of UniRig's
+     ckpts (pickled box.Box config = trusted source per vendor README). v1 used setdefault
+     and was bypassed: lightning passes weights_only EXPLICITLY. Rollback: delete file.
+  5. UniRig's launch/*.sh end in bare `wait` -> exit 0 while producing NOTHING (runbook
+     lesson, reconfirmed). run-unirig-inner.sh now asserts ARTIFACTS per stage, not RC.
+- Remote-exec lesson: an ended agent turn kills plain ssh children; all GPU phases were run
+  detached (setsid + log on vm100) with a bounded window + backstop + idle-reaper per hold.
+
+## GPU-window ledger (every hold opened CLOSED and closed CLOSED; trap guarantees close)
+04:15:57 before CLOSED | 04:16:12 OPEN 40 | 04:17:50 CLOSED rc=0 (giraffe sm1, 1m38s hold)
+10:58:15 before CLOSED | 10:58:32 OPEN 20 | 11:00:09 CLOSED rc=0 (giraffe sm2, 1m37s)
+11:13:19 before CLOSED | 11:13:30 OPEN 45 | 11:13:43 CLOSED rc=1 (trellis fail1, 13s)
+11:16:11 before CLOSED | 11:16:20 OPEN 45 | 11:19:39 CLOSED rc=1 (trellis fail2, 3m19s)
+11:26:53 before CLOSED | 11:27:11 OPEN 45 | 11:30:51 CLOSED rc=1 (trellis fail3, 3m40s)
+11:35:55 before CLOSED | 11:36:13 OPEN 45 | 11:45:25 CLOSED rc=0 (TRELLIS ghoul OK, 9m12s)
+11:46:07 before CLOSED | 11:46:24 OPEN 30 | 11:51:50 CLOSED rc=0 (UniRig ghoul OK, 5m26s)
+Final: status {"window": "CLOSED"}; llama-swap.service=active (re-verified after last close,
+gpu_used back to 23136 MiB verifier resident). No hold exceeded its cap; none forced.
+
+## Proof-run results + timings
+- DINOv3 download (legit, owner-approved account): rc=0 ~1m (detached, no window).
+- TRELLIS.2 ghoul.glb (window 11:36:13->11:45:25): load_s=163.1 gen_s=126.6 (pipeline_type
+  1024, seed 42, low_vram default), peak_vram 3136 MiB; to_glb (decimation 1M, texture 2048,
+  remesh) -> 43,623,384 B.
+  VISUAL: trimesh_load=OK nodes=1 geometries=1 textured_geometries=1/1 gltf_textured_materials=1
+  images=2 images_embedded=True -> VISUAL_VALID=PASS rc=0 (gate proven red earlier on plain box).
+- UniRig ghoul rig (window 11:46:24->11:51:50): skeleton 123s, skin 51s, merge 149s
+  -> ghoul-rigged.glb 57,734,788 B.
+  RIG: skins=1 joints=34 nodes_with_rotation=34 joint names bone_0..33 armature nodes present
+  -> RIG_VALID=PASS rc=0 (gate proven red earlier on unrigged mesh).
+  POST-MERGE integrity: VISUAL re-validate on the RIGGED file PASS (textures survived merge).
+  animations=0/channels=0: UniRig emits rest-pose skeleton + skin weights, no clips — by design.
+  HONEST DEGRADATION NOTE (non-human form): UniRig's articulation-xl model auto-assigned a
+  34-bone generically-named skeleton ("bone_N") to the rime-ghoul (a non-humanoid creature).
+  Skinning + rotatable joints are structurally valid per glTF, but semantic bone naming and
+  retargetable humanoid motion are NOT provided; for game use, expect manual rename/retype in
+  Blender/Mixamo, or feed UniRig a humanoid reference. Do not claim "game-ready rig" from
+  this artifact — claim "auto-rigged, skinning valid, semantics unassigned".
+- sha256: ghoul.glb 5eb3fbbe9245b1a3648f... | ghoul-rigged.glb c676eb204d3c37cd5117... (first 16)
+  (full hashes recorded by git blob shas on the committed files)
+
+## df after (window closed, llama-swap resident again)
+- used 323G size 784G avail 429G (before: used ~272.5G avail ~478.9G) -> stack cost ~51G
+  (venv3d+ext, venvrig, hf weights incl TRELLIS.2-4B 16G + DINOv3 + BiRefNet + UniRig ckpts).
+
+## Rollback statement (full removal, restores pre-task state)
+  rm -rf /opt/imagegen/venv3d /opt/imagegen/venvrig /opt/imagegen/micromamba \
+         /opt/imagegen/TRELLIS.2 /opt/imagegen/UniRig /opt/imagegen/models/hf \
+         /tmp/extensions-mc11096 /opt/imagegen/tmp/mc11096 /opt/imagegen/output/mc11096
+  (imagegen venv/ComfyUI/models untouched; apt/system untouched; hf token at
+  /home/a3090/.huggingface/token pre-existed, unmodified — referenced by path only.)
+
+## Deviations ledger (final)
+- venv+micromamba instead of conda (one spine, no second toolchain).
+- rembg briaai/RMBG-2.0 -> ZhengPeng7/BiRefNet (same arch, MIT, ungated) — in code, noted.
+- transformers pinned 4.57.1 (vendor-era API; 5.x breaks the extractor).
+- venvrig torch.load weights_only=False (trusted vendor ckpts; venv-scoped, revertible).
+- giraffe re-smoke abandoned after root-cause (orchestrator ruling); ghoul chain is the proof.
+- DINOv3: obtained ONLY via owner-accepted gate on the token's own account; no mirrors.
+
+VERIFY_EXIT=0
