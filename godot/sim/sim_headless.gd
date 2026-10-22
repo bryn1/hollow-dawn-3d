@@ -9,6 +9,13 @@
 # (A8 row), a gait probe, the gameover row, and the WIN row at t >= 600 with
 # the score cross-checked against the formula. Stubbed: only the screens
 # layer (its cards build Control trees this stage does not carry).
+# T-S4 adds the combat rows (MC 11102): per-sample FX-cap rows for t < 300
+# (RENDERED live counts vs the §i formulas — per-sample rows, not averages),
+# the scene draw-count row (planned 33 / hard 60, §b), XP/gold progression
+# rows, the RUN-CONDITIONED pick rows (own ward or halo by t <= 120 with the
+# owning level recorded, A3/D§c F-2), the §c attack pulse counter, and the
+# single-weapon kill-attribution legs (SimCombat) proving >= 1 kill per
+# weapon class. The journey itself is UNTOUCHED — same seed, same rows.
 extends SceneTree
 
 const DT := 1.0 / 60.0
@@ -16,6 +23,11 @@ const TOTAL_STEPS := 37200 # 620 sim-seconds; WIN fires at step 36000
 const POLICY_EVERY := 3 # input policy every 0.05 s — 0.5 s quantised
 	# reversals are how a 140 px/s survivor gets eaten by a 105 px/s scarab
 const POS_EVERY := 600 # 10 s position/stat samples
+const FX_EVERY := 30 # 0.5 s FX-cap sample rows while t < FX_WINDOW
+const PROG_EVERY := 1800 # 30 s XP/gold progression rows while t < FX_WINDOW
+const FX_WINDOW := 300.0 # brief: the dump window proving the caps is t < 300
+const DRAWS_PLANNED := 33 # §b planned worst case
+const DRAWS_HARD := 60 # §b hard cap
 const BAND_STEPS := {
 	8994: 149.9, 9006: 150.1, 17994: 299.9, 18006: 300.1,
 	26994: 449.9, 27006: 450.1,
@@ -25,6 +37,7 @@ const CLASS_COUNT := 9 # non-boss 8 + warden (first_spawn watch closes early)
 
 var _main: Node
 var _pol := SimPolicy.new()
+var _combat := SimCombat.new()
 var _band := ""
 var _open_seen := {}
 var _spawn_seen := {}
@@ -35,6 +48,10 @@ var _ended := false
 var _started := false
 var _frames := 0
 var _out: FileAccess
+var _fx_bad := 0 # §i cap violations across every t<300 sample (must stay 0)
+var _fx_samples := 0
+var _hard_fail := false # S4 gate rows (draws/fx caps/legs) — forces rc != 0
+var _rc := {} # RUN-CONDITIONED state (own/level/t once, check at t>120)
 
 
 # SceneTree-script quit contract: returning true from _process ends the run
@@ -75,6 +92,7 @@ func _run_sim() -> void:
 	var game = _main.game
 	game.paused = true # the tree's own tick idles; _step is driven manually
 	_dump_camera()
+	_dump_draws()
 	_emit({"ev": "start", "t": 0.0, "phase": game.phase, "band": 0,
 		"name": GameRenderer.biome_at(0.0).name})
 	_observe(0)
@@ -98,7 +116,11 @@ func _run_sim() -> void:
 	if not _done and not _ended:
 		_emit({"ev": "timeout", "t": _main.game.time})
 		_fail = true
+	_emit({"ev": "fx_caps", "samples": _fx_samples, "violations": _fx_bad})
 	_run_win_gate()
+	_run_attribution()
+	if _fx_bad > 0 or _hard_fail:
+		_done = false
 
 
 # WIN-gate leg: no scripted driver survives the 12/s endgame wall, and v1
@@ -127,6 +149,38 @@ func _run_win_gate() -> void:
 	if not _done:
 		_emit({"ev": "win_gate_missed", "t": run2.game.time})
 		_fail = true
+
+
+# Per-weapon kill attribution (brief item 5): one seeded single-weapon leg
+# per class; the row names kills + the leg's own t (all legs end < 300 s).
+func _run_attribution() -> void:
+	var all_ok := true
+	var i := 0
+	for spec in SimCombat.SPECS:
+		seed(41102 + i)
+		i += 1
+		var row: Dictionary = _combat.run_leg(root, spec[0], spec[1])
+		row["ok"] = row.kills >= 1
+		if row.kills < 1:
+			all_ok = false
+		_emit(row)
+	_emit({"ev": "all_weapons_killed", "ok": all_ok, "legs": SimCombat.SPECS.size()})
+	if not all_ok:
+		_hard_fail = true
+
+
+# §b scene draw tally: ground 1 + horde node (class MMs + bar + blob) +
+# pawn 1 + FX worst case (§i 7). The renderer issues FEWER calls when a
+# class is empty — fx_live rides the FX rows.
+func _dump_draws() -> void:
+	var horde: int = _main._viz.draw_count()
+	var fxw: int = _main._fxv.draw_count()
+	var total := 1 + horde + 1 + fxw
+	_emit({"ev": "draws", "ground": 1, "horde": horde, "pawn": 1,
+		"fx_worst": fxw, "total": total, "planned": DRAWS_PLANNED,
+		"hard_cap": DRAWS_HARD, "ok": total <= DRAWS_HARD})
+	if total > DRAWS_HARD:
+		_hard_fail = true
 
 
 var _last_combo := ""
@@ -203,6 +257,7 @@ func _observe(n: int) -> void:
 		_emit({"ev": "pos", "t": roundi(t * 100.0) / 100.0,
 			"x": roundi(p.x * 10.0) / 10.0, "y": roundi(p.y * 10.0) / 10.0,
 			"hp": roundi(game.hp * 10.0) / 10.0, "lvl": game.level,
+			"xp": roundi(game.xp * 10.0) / 10.0,
 			"wpns": _build_line(game),
 			"kills": game.kills, "gold": game.gold,
 			"enemies": _main.world.enemies.size()})
@@ -212,6 +267,59 @@ func _observe(n: int) -> void:
 			if e.boss:
 				_emit({"ev": "boss", "t": roundi(t * 1000.0) / 1000.0,
 					"hp": e.hp, "spd": e.spd, "dmg": e.dmg})
+	_observe_combat(n)
+
+
+# T-S4 combat rows (all inside the t < 300 dump window unless named): the
+# per-sample FX-cap rows, XP/gold progression, and the RUN-CONDITIONED
+# pick rows (own ward or halo by t <= 120 with the owning level recorded).
+func _observe_combat(n: int) -> void:
+	var game = _main.game
+	var t: float = game.time
+	if t < FX_WINDOW and n % FX_EVERY == 0:
+		# force one visible-layer write, then compare the RENDERED live
+		# counts against the §i caps — every sample, per-sample rows.
+		_main._viz.refresh()
+		_main._fxv.refresh()
+		var c: Dictionary = _main._fxv.fx_counts()
+		var v := SimCombat.cap_violations(game, c)
+		_fx_samples += 1
+		_emit({"ev": "fx", "t": roundi(t * 1000.0) / 1000.0, "c": c,
+			"caps": SimCombat.caps(game), "halo_cap": SimCombat.HALO_MAX,
+			"shards_cap": SimCombat.SHARDS_MAX,
+			"pulses": _main._viz.attack_pulses,
+			"live_draws": _main._fxv.live_draws(), "violations": v.size()})
+		if not v.is_empty():
+			_fx_bad += v.size()
+			_emit({"ev": "fx_violation", "t": roundi(t * 1000.0) / 1000.0,
+				"detail": v})
+	if t < FX_WINDOW and n % PROG_EVERY == 0:
+		_emit({"ev": "progress", "t": roundi(t * 100.0) / 100.0,
+			"xp": roundi(game.xp * 10.0) / 10.0,
+			"xp_next": GameState.xp_need(game.level), "lvl": game.level,
+			"gold": game.gold, "kills": game.kills,
+			"hp": roundi(game.hp * 10.0) / 10.0,
+			"wpns": _build_line(game)})
+	if not _rc.has("own") and t <= 120.0:
+		# RUN-CONDITIONED precondition (A3/D§c F-2): scripted picks must
+		# own Ward or Halo by t <= 120 — record the OWNING LEVEL here.
+		for w in game.weapons:
+			if w.id == "ward" or w.id == "halo":
+				_rc = {"own": w.id, "level": w.level,
+					"t": roundi(t * 1000.0) / 1000.0}
+				_emit({"ev": "run_conditioned", "own": w.id, "level": w.level,
+					"t": _rc.t, "pulses": _main._viz.attack_pulses})
+				break
+	if not _rc.has("check") and t > 120.0:
+		_rc["check"] = true
+		var lvl := 0
+		for w in game.weapons:
+			if w.id == _rc.get("own", ""):
+				lvl = w.level
+		_emit({"ev": "run_conditioned_check", "t": roundi(t * 1000.0) / 1000.0,
+			"own": _rc.get("own", ""), "level": lvl, "t_owned": _rc.get("t", -1.0),
+			"edges_to_120": _main._viz.attack_pulses,
+			"ok": _rc.has("own") and float(_rc.get("t", 1e9)) <= 120.0})
 
 
 func _build_line(game) -> String:
