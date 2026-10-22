@@ -6,7 +6,7 @@
 set -uo pipefail
 SPINE=/opt/imagegen
 IN="$1"; OUTGLB="$2"; STEM="$3"
-OUT=$SPINE/output/mc11096
+OUT=${UNIRIG_OUT:-$SPINE/output/mc11096}   # MC 11118: env-overrideable out dir
 SK="$OUT/${STEM}_skeleton.fbx"; SKIN="$OUT/${STEM}_skin.fbx"
 cd "$SPINE/UniRig" || exit 1
 export HF_HOME=$SPINE/models/hf PATH="$SPINE/venvrig/bin:$PATH"

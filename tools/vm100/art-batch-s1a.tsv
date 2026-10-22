@@ -1,0 +1,15 @@
+# MC 11118 T-S1a batch spec — name<TAB>input.png (v1 static/assets, READ-ONLY source)<TAB>tri_budget<TAB>base_seed
+# Budgets = DOD-ACCEPTANCE.md §c rows; seeds recorded per row (brief). 3-seed fail policy per row.
+# batch-a (window 1): swarm tier + ghoul
+enemy-wraith	static/assets/enemy-wraith.png	1500	21
+enemy-hound	static/assets/enemy-hound.png	1500	22
+enemy-crawler	static/assets/enemy-crawler.png	1500	23
+enemy-cultist	static/assets/enemy-cultist.png	1500	24
+dune-scarab	static/assets/enemies/dune-scarab.png	1500	26
+rime-ghoul	static/assets/enemies/rime-ghoul.png	4000	27
+# batch-b (window 2): brute/wight tier + players + boss
+moor-brute	static/assets/enemies/moor-brute.png	4000	25
+pale-wight	static/assets/enemies/pale-wight.png	4000	28
+player	static/assets/player.png	8000	17
+player-alt	static/assets/player-alt.png	8000	18
+boss-warden	static/assets/boss-warden.png	15000	29
