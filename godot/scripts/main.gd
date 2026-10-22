@@ -38,6 +38,26 @@ func _ready() -> void:
 	_rig = preload("res://scripts/camera_rig.gd").new()
 	_rig.game = game
 	add_child(_rig)
+	# §b lighting row, LANDED WITH THE ART (T-S2i finding: the scene carried
+	# zero lights before this card — shaded horde meshes read pitch black;
+	# only unshaded quads drew). One moon DirectionalLight3D, no real-time
+	# shadow pass (WASM cost, §b), + WorldEnvironment ambient — v1's flat
+	# dark look. Adds ZERO draws (shadow off).
+	var moon := DirectionalLight3D.new()
+	moon.light_color = GameRenderer.MOON
+	moon.light_energy = 1.3 # §b pins the mechanism, not the level; tuned so
+	# baked-diffuse GLB horde meshes read on the dark tiles (v1 kept the same
+	# readability with sprites over the same dark ground).
+	moon.shadow_enabled = false
+	moon.rotation_degrees = Vector3(-55.0, -30.0, 0.0)
+	add_child(moon)
+	var env := Environment.new()
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = GameRenderer.MOON
+	env.ambient_light_energy = 0.5
+	var we := WorldEnvironment.new()
+	we.environment = env
+	add_child(we)
 	_ground = preload("res://scripts/ground.gd").new()
 	_ground.game = game
 	add_child(_ground)

@@ -15,10 +15,12 @@ brief left them open:
   world.gd:137) and world.gd is byte-identical here. The tests below pin the
   unconditional rule AND the absence of any taken-guard, so inventing one
   later goes red.
-* tri budget: the boss placeholder is the same CapsuleMesh the whole horde
-  uses (no GLB yet); the <= 15000-tri gate (DOD-ACCEPTANCE c row boss-warden)
-  belongs to the S1/S2 art chain and is proven by the bpy dump, not here —
-  this file pins the 5.33 m build size that placeholder already honours.
+* tri budget (restated by T-S2i/MC 11133): the boss mesh is its batch glb
+  (boss-warden, 14849/15000 tris per the PERMANENCE bpy dump — the <= 15000
+  gate lives in the S1a art chain, proven there, not here). The former
+  CapsuleMesh-placeholder wording was stale after the art swap; the live
+  5.33 m height is now gated by the committed probe dump
+  (test_art_integration.py), alongside the 5.33 m build-size const here.
 """
 
 import os
@@ -168,18 +170,24 @@ def test_boss_build_size_5_33_m():
 
 def test_boss_rides_the_one_gait_mechanism_placeholder_note():
     # D§c/§b: the Warden is ONE per-class MultiMesh instance of the horde
-    # mechanism — same CapsuleMesh placeholder as every class, own freq off
-    # its own spd, same e.hit_cd lunge edge. A second boss gait (or a boss
-    # branch in the gait math) is the defect this row forbids.
+    # mechanism — same mesh path as every class, own freq off its own spd,
+    # same e.hit_cd lunge edge. A second boss gait (or a boss branch in the
+    # gait math) is the defect this row forbids. T-S2i (MC 11133) retired
+    # the two placeholder-era claims below: the S3 CapsuleMesh became the
+    # per-class GLB swap (ClassMesh), boss included — the SAME-ness the row
+    # pins is untouched, so it now pins THAT instead.
     ready = block(VIZ, "func _ready", "func _process")
     assert re.search(r"MODEL_H_BOSS if def\.get\(\"boss\", false\) else MODEL_H_ENEMY", ready)
     assert re.search(r"_freqs\[key\] = minf\(def\.spd / CameraRig\.PX_PER_M / GAIT_STRIDE_M, GAIT_FREQ_MAX\)", ready), \
         "the boss freq must come from the same spd formula as the horde"
-    assert "CapsuleMesh" in block(VIZ, "func _make_class", "func _make_bar"), \
-        "placeholder capsule is shared by every class, boss included"
+    assert "ClassMesh.mesh_for" in block(VIZ, "func _make_class", "func _make_bar"), \
+        "the GLB swap is shared by every class, boss included"
+    assert "CapsuleMesh" not in VIZ, "placeholder era retired by MC 11133"
     assert VIZ.count("e.boss") == 2, \
         "the boss may appear in the horde viz ONLY as (1) the bar exclusion and " \
         "(2) the lunge-edge attribution — never as a gait branch"
-    # tri-budget placeholder note: no GLB, so no tri claim here; the <= 15000
-    # gate is the S1/S2 bpy dump (DOD-ACCEPTANCE c, boss-warden row).
-    assert "assets/glb" not in VIZ, "no GLB path yet: this stage is placeholder by design"
+    # tri-budget note restated by T-S2i: the boss mesh is its batch glb
+    # (14849/15000 tris, PERMANENCE bpy dump); the live 5.33 m height gate
+    # is the committed probe dump (test_art_integration.py).
+    assert "GLB_FILES" in VIZ and "\"warden\": \"boss-warden.glb\"" in VIZ, \
+        "the warden class must ride the boss-warden glb"

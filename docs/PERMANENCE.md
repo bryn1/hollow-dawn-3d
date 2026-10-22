@@ -48,3 +48,11 @@ MC 11118; capture `.tmp/art-batch-s1a.txt`.
 - All seeds recorded per row in `tools/vm100/art-batch-s1a.tsv`; tri gate =
   `to_glb(decimation_target=budget)` then bpy re-count (gate can go red: it did, on
   planted-bad runs MC 11096; the player row is a real observed gate-red case).
+
+## Integration move (T-S2i, MC 11133)
+
+The nine game-use glbs (8 swarm classes + boss-warden) MOVED to
+`godot/assets/glb/` at art-integration import (DESIGN-3D §f project-tree
+row; provenance rows above are unchanged). `player-alt.glb` and
+`boss-warden-rigged.glb` stay in `assets/glb/` — neither is wired: the
+rigged variant waits for the mocap card, player-alt for MC 11132.

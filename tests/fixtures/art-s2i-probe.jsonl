@@ -1,0 +1,11 @@
+{"class":"wraith","ev":"height","glb":"enemy-wraith.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"hound","ev":"height","glb":"enemy-hound.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"crawler","ev":"height","glb":"enemy-crawler.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"cultist","ev":"height","glb":"enemy-cultist.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"moor-brute","ev":"height","glb":"moor-brute.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"dune-scarab","ev":"height","glb":"dune-scarab.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"rime-ghoul","ev":"height","glb":"rime-ghoul.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"pale-wight","ev":"height","glb":"pale-wight.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"warden","ev":"height","glb":"boss-warden.glb","measured_m":5.33,"mesh":"ArrayMesh","rel_err":0.0,"target_m":5.33}
+{"alive":400,"ev":"draws","fx_worst":7,"ground":1,"hard_cap":60,"horde":11,"ok":true,"pawn":1,"planned":33,"total":20}
+{"ev":"player_placeholder","marker":"PLAYER_GLB_PLACEHOLDER-MC11132-pending","mesh_class":"CapsuleMesh"}
