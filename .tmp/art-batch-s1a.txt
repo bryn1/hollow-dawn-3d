@@ -1,0 +1,103 @@
+# CAPTURE MC 11118 — T-S1a full 3D art batch (11 GLB rows) on the vm100 3090
+Date: 2026-10-22 (UTC). Seat: code (11118). Host: vm100 (RTX 3090, shared with fleet
+verifier llama-swap/knut). Exec: ssh a3090@192.168.5.230; GPU discipline per
+GPU_WINDOW_RUNBOOK.md (read first) + /usr/local/sbin/gpu-window holds via
+tools/vm100/with-window.sh (touch loop, trap-close every exit path, backstop+reaper).
+Recipe REUSED from MC 11096 (tools/vm100/poc_trellis.py chain), never re-authored:
+batch_trellis.py = poc_trellis.py recipe with ONE loaded session per window generating
+multiple rows, decimation_target = per-row tri budget, 3-distinct-seed fail policy.
+Inputs: v1 static/assets sprites (READ-ONLY, sha256 recorded in docs/PERMANENCE.md).
+Spec: tools/vm100/art-batch-s1a.tsv. Matte = in-pipeline BiRefNet (MIT substitution).
+
+## Baseline (before first window)
+- gpu-window CLOSED | llama-swap.service active | knut-loop.timer active
+- df /: used 330585M free 438700M  | nvidia-smi 23136/24576 MiB (verifier resident)
+
+## Per-asset results (bpy tri dump | validate_glb visual | seed)
+asset            tris/budget   dump  VISUAL   seed  glb-sha16
+enemy-wraith     1479/1500     PASS  PASS     21    7efabc0668722a44
+enemy-hound      1480/1500     PASS  PASS     22    7f8be415c3ca179f
+enemy-crawler    1429/1500     PASS  PASS     23    06aebc875263697d
+enemy-cultist    1493/1500     PASS  PASS     24    2354f9e095217300
+dune-scarab      1436/1500     PASS  PASS     26    0d716b7204d5e812
+rime-ghoul       3926/4000     PASS  PASS     27    706c553b51483867
+moor-brute       3903/4000     PASS  PASS     25    423db84011396c7b
+pale-wight       3723/4000     PASS  PASS     28    71797e6c7617b7e8
+player           —             SKIPPED (quality, 3 seeds: 17/30/40 — see below)
+player-alt       7647/8000     PASS  PASS     18    f2d12f4ecb1a20d1
+boss-warden      14849/15000   PASS  PASS     29    1c6ed175438faebb
+boss-warden-rig  —              RIG: skins=1 joints=46 rotatable=46 RIG_VALID=PASS
+                                  post-merge VISUAL_VALID=PASS (textures survive)
+                                  post-merge tri dump 14929/15000 PASS
+Concept renders (bpy Cycles CPU, outside windows): assets/concepts/*.png — 10 committed.
+Timings: load_s=165.9 once per window; gen+export 35-201 s/asset @1024 fp16.
+Peak VRAM: batch A 3.1G (per-PoC), batch B PEAK_VRAM_MIB=9554.
+Tri budget FAIL cases: none (decimation_target landed under budget first try on all
+generated rows; the decim-retry ladder never fired).
+
+## player row — SKIPPED (honest detail + orchestrator ruling)
+- seed 17 (batch B, tri PASS 7668/8000): visual/quality FAIL — flat card,
+  y-extent 0.002 m. Evidence: .tmp/player-seed17-flat-render.png
+- seed 30 (window 3 regen, tri PASS 7652/8000): quality FAIL — solid box,
+  fill 0.80 of bbox. Evidence: .tmp/player-seed30-slab-render.png (+slab glb in .tmp)
+- seed 40 attempt-1 (window 4): CUDA OOM — FLEET INTERFERENCE: VM300 seat ran
+  `systemctl restart llama-swap` INSIDE the open window (vm100 journal 14:30:11Z,
+  sudo line visible to root); 27B verifier reloaded (PID 253724, 22.57 GiB) mid-job.
+  NOT counted as a seed attempt (no mesh produced).
+- seed 40 attempt-2 (window 5, behind drain_barrier: llama-swap inactive + <1000 MiB
+  held 40 s BEFORE gen): real attempt, tri PASS 7906/8000, quality FAIL — flat card,
+  y-extent 0.014 m. Evidence: .tmp/player-seed40-flat-render.png
+- 3 distinct-seed quality failures -> SKIPPED per brief policy AND orchestrator
+  binding ruling 14:37Z (stop, sprite goes to re-master, no further seeds).
+- Intermediate 4-joint player rig from the seed-30 slab NOT committed (ruling:
+  degenerate rig must not be a repo asset). Warden rig (46 joints) committed.
+- Fleet lesson: gpu-window's open-stop of llama-swap does not prevent another seat
+  from starting it mid-window; a consumer-side restart bypasses the flag. The
+  drain_barrier in tools/vm100/player_attempts.py is the consumer-side mitigation
+  (verifies quiet BEFORE spending a load; never mid-window protection).
+
+## GPU-window ledger (every hold; close-state per gpu-window events.log)
+12:51:44 OPEN 60 | 12:52:17 CLOSED rc=1 (spec-path bug fail-fast, 33 s)
+12:55:34 OPEN 60 | 13:04:42 CLOSED rc=0 (batch A 6/6; close: llama-swap serves
+       qwen3.8-27b, 1-token completion OK, gpu_used 23136MiB)
+13:05:37 OPEN 45 | 13:16:48 CLOSED rc=0 (batch B 5/5 gen; close: llama-swap serves,
+       completion OK, 23136MiB)
+13:19:53 OPEN 45 | 13:20:48 CLOSED rc=1 (UniRig skeleton CUDA-OOM: verifier not yet
+       drained when stage started ~38 s after open — runbook "sample after settles";
+       close: llama-swap serves, completion OK)
+13:32:52 OPEN 45 | 13:40:32 CLOSED rc=0 (settle-guarded: player regen s30 + warden rig
+       PASS + player rig PASS-thin[rejected]; close: llama-swap serves, completion OK)
+14:28:33 OPEN 45 | 14:37:32 CLOSED rc=0 (window 4 attempts all OOM —
+       fleet interference; close: llama-swap serves, completion OK)
+14:45:39 OPEN 40 | 14:50:31 CLOSED rc=0 (window 5 barriered seed-40: REJECT, row
+       SKIPPED; close: llama-swap serves, completion OK)
+NO hold left open; none forced by backstop/reaper. Final state: window CLOSED,
+llama-swap.service active, knut-loop.timer active (verifier serves).
+Installs/downloads: none needed (MC 11096 stack present); no windowless GPU use.
+
+## df / after (all windows closed, verifier resident)
+used 331263M free 438022M (before: used 330585M free 438700M) — batch cost ~0.7 G on
+vm100 (outputs/mc11118 11 glb + renders; no new stack weight).
+
+## Rollback statement (full removal, restores pre-task state)
+vm100:  rm -rf /opt/imagegen/tmp/mc11118 /opt/imagegen/output/mc11118
+repo:   git revert the MC 11118 commits (assets/glb/, assets/concepts/,
+        docs/PERMANENCE.md, tools/vm100/{batch_trellis.py,run-batch-inner.sh,
+        dump_render.py,player_attempts.py,art-batch-s1a.tsv}, LEDGER line)
+Nothing else was created on vm100; imagegen/ComfyUI models and the MC 11096 stack
+(venv3d/venvrig/TRELLIS.2/UniRig/models/hf) untouched; hf token referenced by path only.
+
+## Deviations ledger
+- Batch runner parameterizes the PoC single-shot (one session, many rows, per-row seed
+  + budget) — recipe content reused verbatim, incl. BiRefNet substitution.
+- Quality gates (extent + fill) added BECAUSE tri budget demonstrably passed two
+  degenerate meshes; the brief's validators do not cover shape. Proven red on the
+  player row itself (real gate-red case), green on the 10 accepted rows.
+- Concept renders initially committed under one-sun lighting, superseded by two-sun
+  set in the same card (committed tool == committed renders).
+- DOD-ACCEPTANCE §c says GLBs land godot/assets/glb/; THIS card's brief says
+  assets/glb/ — brief followed; integration (S3+) may move/copy. Stated reading.
+- player-alt generated as its own mesh (row says same-rig retexture; honest note in
+  PERMANENCE).
+
+VERIFY_EXIT=0
