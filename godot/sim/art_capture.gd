@@ -21,7 +21,14 @@ const CAST := [
 		"dune-scarab", "hound", "wraith", "dune-scarab", "wraith",
 		"cultist", "dune-scarab"],
 ]
-const SETTLE := 60 # frames between cast and save: gait running, spread kept
+const SETTLE := 8 # frames between cast and save (T-S2p: llvmpipe draws at
+# ~3 fps, so the old 60-frame settle ran ~20 s of chase and the whole cast
+# stood ON the hero at save time)
+const FROZE := true # chase frozen for the cast (spd zeroed at placement):
+# a POSITIONS/POSE-only capture deviation of the same declared kind as the
+# strips frozen control — models, materials, gait animation, FX, lighting
+# and the world's own roaming spawns stay fully live; the acceptance shot
+# shows the hero unburied inside a live-animated GLB ring.
 
 var _main: Node
 var _stage := 0
@@ -35,6 +42,11 @@ func _out_dir() -> String:
 
 func _initialize() -> void:
 	print("CAPTURE_START")
+	# T-S2p: per-run cast seed (S2h per-leg seed convention, MC 11112) — the
+	# acceptance material must be reproducible from a clean run, not the luck
+	# of an unseeded randf() draw; HD3D_SEED overrides the accepted frame.
+	var s := OS.get_environment("HD3D_SEED")
+	seed(s.to_int() if s != "" else 11135)
 	assert(DirAccess.make_dir_recursive_absolute(_out_dir()) == OK)
 	_main = load("res://Main.tscn").instantiate()
 	root.add_child(_main)
@@ -60,7 +72,11 @@ func _on_frame() -> void:
 			_save(0)
 			_cast(1)
 			_main.world._spawn_enemy("warden", _main.game, GameRenderer.VIEW)
-			_reposition(_main.world.enemies.back(), 190.0)
+			# boss-frame anchor at 190 px (S2i composition), same FROZE rule
+			var w: Dictionary = _main.world.enemies.back()
+			_reposition(w, 190.0)
+			if FROZE:
+				w.spd = 0.0
 			_advance(3)
 		3:  # save the dunes + boss shot and leave
 			_save(1)
@@ -82,13 +98,16 @@ func _cast(shot: int) -> void:
 		_main.world._spawn_enemy(key, _main.game, GameRenderer.VIEW)
 		var e: Dictionary = _main.world.enemies.back()
 		_reposition(e, randf_range(130.0, 220.0))
+		if FROZE:
+			e.spd = 0.0
 	_wait = SETTLE
 
 
-# Place one enemy at radius r_px on a random bearing around the player
-# (px — the sim's unit); the viz converts through CameraRig.PX_PER_M.
-func _reposition(e: Dictionary, r_px: float) -> void:
-	var a := randf() * TAU
+# Place one enemy at radius r_px on a bearing around the player (px — the
+# sim's unit; random unless declared); the viz converts through
+# CameraRig.PX_PER_M.
+func _reposition(e: Dictionary, r_px: float, bearing := -1.0) -> void:
+	var a: float = bearing if bearing >= 0.0 else randf() * TAU
 	e.x = _main.game.player.x + cos(a) * r_px
 	e.y = _main.game.player.y + sin(a) * r_px
 
