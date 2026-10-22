@@ -6,3 +6,8 @@ data/
 __pycache__/
 *.import
 godot/.godot/
+
+# glb import pass extracts each .glb's embedded textures as *_0.png/*_1.png
+# sidecars; generated artifacts — the pinned editor re-extracts them on
+# `godot --headless --import`, so they never enter the tree (MC 11133).
+godot/assets/glb/*_[0-9].png

@@ -16,15 +16,38 @@
 # (spd 45 px/s -> 1.5625 Hz), the same hit_cd lunge edge (boss_pulses names
 # them); the only boss-specific code is the HP readout living on the HUD
 # (hud_3d.gd), exactly as in v1 (render.gd:185-186 excludes it from the bar).
+# T-S2i (MC 11133): every class MultiMesh now renders its batch GLB's
+# height-normalised ArrayMesh (ClassMesh §a scale; the boss rides the same
+# per-class swap at 5.33 m, rest pose — mocap is a later card) in place of
+# the S3 capsule. ONE import per class at load, ONE draw per class (glb
+# probe: 1 mesh / 1 surface / 1 material); the per-instance transform +
+# gait mechanism above is UNCHANGED. The §b tint stays — albedo_color is
+# the StandardMaterial3D multiplier over the GLB's own texture.
 class_name HordeViz
 extends Node3D
 
 # §a build sizes: size_px / S off the v1 SIZES table (render.gd:10 stays the
 # px truth) — player 40 px -> 1.67 m, non-boss 34 px -> 1.42 m, boss 128 ->
-# 5.33 m. The GLB stage models to these; the placeholder capsules use them.
+# 5.33 m. The raw batch GLBs are scaled to these at import (ClassMesh).
 const MODEL_H_PLAYER := 1.67
 const MODEL_H_ENEMY := 1.42
 const MODEL_H_BOSS := 5.33
+
+# T-S2i class -> batch glb (provenance: PERMANENCE.md; the game-use copies
+# ride the project tree at res://assets/glb/ per DESIGN-3D §f). player-alt
+# is NOT wired here — the player stays placeholder until player.glb
+# (MC 11132); its isolated future swap is hero_pawn.gd::_player_mesh().
+const GLB_FILES := {
+	"wraith": "enemy-wraith.glb",
+	"hound": "enemy-hound.glb",
+	"crawler": "enemy-crawler.glb",
+	"cultist": "enemy-cultist.glb",
+	"moor-brute": "moor-brute.glb",
+	"dune-scarab": "dune-scarab.glb",
+	"rime-ghoul": "rime-ghoul.glb",
+	"pale-wight": "pale-wight.glb",
+	"warden": "boss-warden.glb",
+}
 
 # §c gait constants (dump acceptance rows: freq <= 2.2 Hz, scale range <= 0.24).
 const GAIT_STRIDE_M := 1.2
@@ -200,15 +223,16 @@ func gait_probe() -> Dictionary:
 
 
 func _make_class(key: String, h: float, tint: Color) -> MultiMeshInstance3D:
-	var mesh := CapsuleMesh.new()
-	mesh.radius = h * 0.25
-	mesh.height = h
+	var mesh := ClassMesh.mesh_for(GLB_FILES[key], h) # T-S2i §a swap
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = mesh # VERIFIED on the pinned 4.7.2 binary: mesh lives on MultiMesh
 	var mmim := MultiMeshInstance3D.new()
 	mmim.multimesh = mm
-	var mat := StandardMaterial3D.new()
+	# §b per-class tint kept — duplicated surface material so the GLB's own
+	# texture survives and albedo_color acts as the v1 tint_of multiplier.
+	var mat: StandardMaterial3D = (mesh.surface_get_material(0)
+		as StandardMaterial3D).duplicate()
 	mat.albedo_color = tint
 	mmim.material_override = mat
 	add_child(mmim)
