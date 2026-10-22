@@ -5,8 +5,9 @@
 # channels x/z only, vertical stays 1.0, so mesh aabb = live instance
 # height); (2) the §b draw tally at a 400-enemy sim — 400 alive through the
 # real _spawn_enemy funnel, refresh() forced, tally ground + horde MMs +
-# pawn + FX worst case (planned 33 / hard cap 60); (3) the player
-# placeholder marker row (hero_pawn stays capsule until MC 11132). One JSON
+# pawn + FX worst case (planned 33 / hard cap 60); (3) the player's own
+# live-height row (T-S2p, MC 11135: the GLB pawn mesh — the same
+# measured-aabb reading as the class rows). One JSON
 # line per row; the committed copy lives at
 # tests/fixtures/art-s2i-probe.json for test_art_integration.py.
 extends SceneTree
@@ -99,7 +100,13 @@ func _dump_400() -> void:
 
 
 func _dump_player() -> void:
+	# T-S2p: the player row joins the MEASURED height table — the aabb of
+	# the very ArrayMesh the pawn renders (hero_pawn._player_mesh() seam).
 	var pawn: MeshInstance3D = _main._pawn
-	_rows.append({"ev": "player_placeholder",
-		"mesh_class": pawn.mesh.get_class(),
-		"marker": String(pawn.get_script().PLAYER_MESH_MARKER)})
+	var mesh: Mesh = pawn.mesh
+	var measured: float = mesh.get_aabb().size.y
+	_rows.append({"ev": "height", "class": "player", "glb": "player.glb",
+		"mesh": mesh.get_class(), "target_m": HordeViz.MODEL_H_PLAYER,
+		"measured_m": snappedf(measured, 0.0001),
+		"rel_err": snappedf(absf(measured - HordeViz.MODEL_H_PLAYER)
+			/ HordeViz.MODEL_H_PLAYER, 0.0001)})

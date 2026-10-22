@@ -11,13 +11,13 @@ Readings stated where the brief left them open:
   boss-warden-rigged.glb is deliberately NOT wired (mocap is a later card)
   and player-alt is NOT the player (MC 11132 owns player.glb).
 * Height table: the fixture rows are MEASURED live heights — the aabb of
-  the very ArrayMesh each class MultiMesh renders (vertical scale channel
-  is 1.0 in the gait, §c) — each within 10 % of the §a row (1.42 enemy,
-  5.33 boss).
-* Player placeholder: hero_pawn keeps the §a capsule and the future GLB
-  swap lives in the ONE function _player_mesh(); the marker constant below
-  pins that state (red when someone wires a real player mesh without
-  retiring the marker).
+  the very ArrayMesh each unit renders (vertical scale channel is 1.0 in
+  the gait, §c) — each within 10 % of the §a row (1.42 enemy, 5.33 boss,
+  1.67 player).
+* Player GLB (T-S2p, MC 11135): the placeholder era is RETIRED — the pawn
+  renders player.glb through the ONE function _player_mesh(); the swap is
+  pinned structurally there and by the player's own live-height table row
+  (red when the live mesh off-specs the §a row by more than 10 %).
 * Draw budget: the fixture's draws row (400 alive) must total <= 60 hard
   cap with the §b planned-33 note kept.
 """
@@ -36,13 +36,13 @@ FIXTURE = os.path.join(REPO, "tests", "fixtures", "art-s2i-probe.jsonl")
 # §a rows: non-boss 34 px / S, boss 128 px / S (render.gd:10 stays px truth)
 SPEC_H_ENEMY = 1.42
 SPEC_H_BOSS = 5.33
+SPEC_H_PLAYER = 1.67  # §a row: v1 player 40 px / S (live row since T-S2p)
 HEIGHT_TOL = 0.10  # brief §4: within 10 %
 DRAWS_HARD = 60  # §b hard cap
 DRAWS_PLANNED = 33  # §b planned worst case (note kept, not a gate)
 ALIVE_TARGET = 400  # brief §5: dump at a 400-enemy sim
 CLASS_KEYS = ["wraith", "hound", "crawler", "cultist", "moor-brute",
               "dune-scarab", "rime-ghoul", "pale-wight"]  # 8 swarm + warden
-PLAYER_MARKER = "PLAYER_GLB_PLACEHOLDER-MC11132-pending"
 
 
 def read(name):
@@ -91,29 +91,46 @@ def test_glb_per_class_exists_and_wired():
 def test_height_table_within_spec():
     rows = [r for r in fixture_rows() if r["ev"] == "height"]
     by_class = {r["class"]: r for r in rows}
-    assert sorted(by_class) == sorted(CLASS_KEYS + ["warden"])
+    assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player"])
     for key, row in by_class.items():
-        spec = SPEC_H_BOSS if key == "warden" else SPEC_H_ENEMY
+        spec = {"warden": SPEC_H_BOSS,
+                "player": SPEC_H_PLAYER}.get(key, SPEC_H_ENEMY)
         assert row["mesh"] == "ArrayMesh", (
-            "%s: horde class must render an imported ArrayMesh" % key)
+            "%s: live unit must render an imported ArrayMesh" % key)
         assert abs(row["measured_m"] - spec) / spec <= HEIGHT_TOL, (
             "%s: live height %.3f m off the §a row %.2f m by more than %d%%"
             % (key, row["measured_m"], spec, HEIGHT_TOL * 100))
 
 
-# ---- 3. player stays placeholder behind ONE seam ----------------------------
+# ---- 3. player GLB swapped at the ONE seam; live height pinned -------------
 
-def test_player_placeholder_marker_and_single_swap():
-    assert PLAYER_MARKER in HERO, (
-        "player placeholder marker missing — if player.glb (MC 11132) has "
-        "landed, retire the marker in hero_pawn.gd and this test together")
+def test_player_glb_swap_and_live_height():
+    # T-S2p retired the placeholder-marker test WITH this swap: the pawn
+    # renders player.glb through the ONE seam, and the fixture's player
+    # row — MEASURED off the live pawn mesh — carries the height gate.
     seam = re.search(r"func _player_mesh\(\).*?\n(?=func |\Z)", HERO, re.S)
     assert seam, "the ONE swap function _player_mesh() is missing"
-    assert "CapsuleMesh.new()" in seam.group(0), (
-        "_player_mesh() no longer returns the placeholder while the marker "
-        "is live — swap AND marker must land in the same change")
-    assert "ClassMesh" not in HERO, (
-        "player GLB wired into hero_pawn before MC 11132 — placeholder rule")
+    assert 'ClassMesh.mesh_for("player.glb", HordeViz.MODEL_H_PLAYER)' \
+        in seam.group(0), (
+        "_player_mesh() must return the height-normalised player GLB "
+        "through ClassMesh — the ONE seam, no second loader")
+    assert "CapsuleMesh" not in HERO, (
+        "capsule placeholder still in hero_pawn — placeholder era retired "
+        "by MC 11135")
+    assert "PLAYER_GLB_PLACEHOLDER" not in HERO, (
+        "placeholder marker still live in hero_pawn — retired with the swap")
+    assert os.path.isfile(os.path.join(GLB_DIR, "player.glb")), (
+        "no committed player glb at godot/assets/glb/player.glb")
+    row = {r["class"]: r for r in fixture_rows() if r["ev"] == "height"}\
+        .get("player")
+    assert row is not None, "player live-height row missing from the dump"
+    assert row["mesh"] == "ArrayMesh", (
+        "player must render the ClassMesh-imported ArrayMesh, not a "
+        "placeholder")
+    assert abs(row["measured_m"] - SPEC_H_PLAYER) / SPEC_H_PLAYER \
+        <= HEIGHT_TOL, (
+        "player: live height %.3f m off the §a row %.2f m by more than %d%%"
+        % (row["measured_m"], SPEC_H_PLAYER, HEIGHT_TOL * 100))
 
 
 # ---- 4. draw budget from the committed 400-enemy dump -----------------------
