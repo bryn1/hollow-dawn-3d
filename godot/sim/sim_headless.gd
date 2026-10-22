@@ -1,0 +1,262 @@
+# Headless core-loop sim (DOD S3 row: "a full sim run (headless, seeded)
+# reaches win/gameover"). Instantiates the REAL Main.tscn, starts a run via
+# the real _start_game funnel, and drives main.gd's real _step loop manually
+# at the fixed 1/60 delta — the fast-forward is call-rate, never dt: every
+# v1 time constant stays verbatim, unscaled (reading stated in the card).
+# Dumps one JSON line per event: band index at the 149.9/150.1/299.9/300.1/
+# 449.9/450.1 samples + every band flip, GATES openings and first spawns per
+# type id, scripted WASD input with position samples, the camera rig params
+# (A8 row), a gait probe, the gameover row, and the WIN row at t >= 600 with
+# the score cross-checked against the formula. Stubbed: only the screens
+# layer (its cards build Control trees this stage does not carry).
+extends SceneTree
+
+const DT := 1.0 / 60.0
+const TOTAL_STEPS := 37200 # 620 sim-seconds; WIN fires at step 36000
+const POLICY_EVERY := 3 # input policy every 0.05 s — 0.5 s quantised
+	# reversals are how a 140 px/s survivor gets eaten by a 105 px/s scarab
+const POS_EVERY := 600 # 10 s position/stat samples
+const BAND_STEPS := {
+	8994: 149.9, 9006: 150.1, 17994: 299.9, 18006: 300.1,
+	26994: 449.9, 27006: 450.1,
+}
+const GAIT_STEPS := [9006, 27006]
+const CLASS_COUNT := 9 # non-boss 8 + warden (first_spawn watch closes early)
+
+var _main: Node
+var _pol := SimPolicy.new()
+var _band := ""
+var _open_seen := {}
+var _spawn_seen := {}
+var _boss_dumped := false
+var _done := false
+var _fail := false
+var _ended := false
+var _started := false
+var _frames := 0
+var _out: FileAccess
+
+
+# SceneTree-script quit contract: returning true from _process ends the run
+# (a bare quit() during _initialize leaves the engine idling at exit-request).
+func _process(_delta: float) -> bool:
+	_frames += 1
+	if not _started:
+		_started = true
+		_out = FileAccess.open("/tmp/hd3d-sim-dump.jsonl", FileAccess.WRITE)
+		if _out == null:
+			push_error("sim dump file could not open")
+			return true
+		_run_sim()
+	if _frames > 3 and not (_done or _fail):
+		_emit({"ev": "harness_abort", "note": "run did not finish in one frame"})
+		_fail = true
+	if _done or _fail:
+		quit(0 if _done else 3)
+		return true
+	return false
+
+
+func _run_sim() -> void:
+	seed(11101) # seeded run (DOD S3)
+	var packed: PackedScene = load("res://Main.tscn")
+	_main = packed.instantiate()
+	root.add_child(_main) # _ready wires the real 3D scene + bridge
+	var old: CanvasLayer = _main._screens
+	_main.remove_child(old)
+	old.queue_free()
+	var stub := SimStubScreens.new()
+	_main.add_child(stub)
+	_main._screens = stub
+	stub.start_pressed.connect(_main._start_game)
+	stub.card_picked.connect(_main._pick)
+	_main._start_game()
+	_pol.main = _main
+	var game = _main.game
+	game.paused = true # the tree's own tick idles; _step is driven manually
+	_dump_camera()
+	_emit({"ev": "start", "t": 0.0, "phase": game.phase, "band": 0,
+		"name": GameRenderer.biome_at(0.0).name})
+	_observe(0)
+	for n in range(1, TOTAL_STEPS + 1):
+		var game2 = _main.game
+		if game2.phase == "levelup":
+			_pick_ward()
+			continue
+		if game2.phase != "playing":
+			break
+		if n % POLICY_EVERY == 1:
+			_hold_combo(_pol.combo())
+		_main._handle_presses()
+		_main._step(DT)
+		_observe(n)
+		if _main.game.phase in ["gameover", "win"]:
+			_emit_end()
+			break
+		if _fail:
+			break
+	if not _done and not _ended:
+		_emit({"ev": "timeout", "t": _main.game.time})
+		_fail = true
+	_run_win_gate()
+
+
+# WIN-gate leg: no scripted driver survives the 12/s endgame wall, and v1
+# itself never lived past 600 s under any driver (its win-screen proof was a
+# scratch 45 s export — LEDGER DA F1). This leg restarts through the real
+# _start_game funnel, warps the CLOCK (the single stated deviation) to 599 s
+# of a fresh sparse world, and ticks the real _step loop in: main.gd's own
+# `time >= WIN_TIME` branch fires _end_run("win") + score as in a played run.
+func _run_win_gate() -> void:
+	var packed: PackedScene = load("res://Main.tscn")
+	var run2: Node = packed.instantiate()
+	root.add_child(run2)
+	var stub := SimStubScreens.new()
+	run2.add_child(stub)
+	run2._screens = stub
+	stub.start_pressed.connect(run2._start_game)
+	run2._start_game()
+	run2.game.time = 599.0
+	_main = run2
+	for i in range(120):
+		if run2.game.phase == "playing":
+			run2._step(DT)
+			if run2.game.phase == "win":
+				_emit_end()
+				break
+	if not _done:
+		_emit({"ev": "win_gate_missed", "t": run2.game.time})
+		_fail = true
+
+
+var _last_combo := ""
+
+
+func _hold_combo(combo: String) -> void:
+	if combo == _last_combo:
+		return
+	_last_combo = combo
+	_main.bridge.on_key("KeyW", combo.contains("W"))
+	_main.bridge.on_key("KeyA", combo.contains("A"))
+	_main.bridge.on_key("KeyS", combo.contains("S"))
+	_main.bridge.on_key("KeyD", combo.contains("D"))
+	_emit({"ev": "input", "t": roundi(_main.game.time * 1000.0) / 1000.0,
+		"hold": combo})
+
+
+# Scripted level-up picks: new weapon first (its bolts seek on their own),
+# then ward/ferocity/haste/grip/insight upgrades in survival order.
+func _pick_ward() -> void:
+	var idx := 0
+	var pick_rank := 9
+	for i in _main._current_offer.size():
+		var card: Dictionary = _main._current_offer[i]
+		var rank := 8
+		if card.kind == "weapon":
+			rank = 0
+		elif card.kind == "upgrade":
+			rank = [1, 2, 3, 4, 5].find(["ward", "ferocity", "haste", "grip",
+				"insight"].find(card.get("key", card.get("id", ""))))
+			if rank < 0:
+				rank = 5
+		if rank < pick_rank:
+			pick_rank = rank
+			idx = i
+	_emit({"ev": "pick", "t": roundi(_main.game.time * 1000.0) / 1000.0,
+		"card": _main._current_offer[idx].name,
+		"level": _main.game.level})
+	_main._pick(idx)
+
+
+func _observe(n: int) -> void:
+	var game = _main.game
+	var t: float = game.time
+	var band_name: String = GameRenderer.biome_at(t).name
+	var band := 0
+	for i in GameRenderer.BIOMES.size():
+		if GameRenderer.BIOMES[i].name == band_name:
+			band = i
+	if band_name != _band:
+		_emit({"ev": "band_flip", "t": roundi(t * 1000.0) / 1000.0,
+			"from": _band, "to": band_name, "band": band})
+		_band = band_name
+	if BAND_STEPS.has(n):
+		_emit({"ev": "band_sample", "t": BAND_STEPS[n], "t_sim": t,
+			"band": band, "name": band_name})
+	if n in GAIT_STEPS:
+		_main._viz.refresh()
+		_emit({"ev": "gait", "t": roundi(t * 1000.0) / 1000.0,
+			"probe": _main._viz.gait_probe()})
+	for key in _main.world._types_open(t):
+		if not _open_seen.has(key):
+			_open_seen[key] = true
+			_emit({"ev": "type_open", "t": roundi(t * 1000.0) / 1000.0,
+				"type": key, "source": "gate" if _is_gate(key) else "band"})
+	if _spawn_seen.size() < CLASS_COUNT:
+		for e in _main.world.enemies:
+			if not _spawn_seen.has(e.type):
+				_spawn_seen[e.type] = true
+				_emit({"ev": "first_spawn", "t": roundi(t * 1000.0) / 1000.0,
+					"type": e.type, "enemies": _main.world.enemies.size()})
+	if n % POS_EVERY == 0:
+		var p: Dictionary = game.player
+		_emit({"ev": "pos", "t": roundi(t * 100.0) / 100.0,
+			"x": roundi(p.x * 10.0) / 10.0, "y": roundi(p.y * 10.0) / 10.0,
+			"hp": roundi(game.hp * 10.0) / 10.0, "lvl": game.level,
+			"wpns": _build_line(game),
+			"kills": game.kills, "gold": game.gold,
+			"enemies": _main.world.enemies.size()})
+	if _main.world.boss_spawned and not _boss_dumped:
+		_boss_dumped = true
+		for e in _main.world.enemies:
+			if e.boss:
+				_emit({"ev": "boss", "t": roundi(t * 1000.0) / 1000.0,
+					"hp": e.hp, "spd": e.spd, "dmg": e.dmg})
+
+
+func _build_line(game) -> String:
+	var parts: Array = [] # "talon-2 ember-1 ward-3 ..." build snapshot
+	for w in game.weapons:
+		parts.append(str(w.id) + "-" + str(w.level))
+	for k in game.passives:
+		if game.passives[k] > 0:
+			parts.append(str(k) + "-" + str(game.passives[k]))
+	return " ".join(parts)
+
+
+func _is_gate(key: String) -> bool:
+	for gate in GameWorld.GATES:
+		if gate[1] == key:
+			return true
+	return false
+
+
+func _emit_end() -> void:
+	var game = _main.game
+	var row := {"ev": game.phase, "t": roundi(game.time * 1000.0) / 1000.0,
+		"phase": game.phase, "time": game.stats.time, "kills": game.stats.kills,
+		"level": game.stats.level, "gold": game.stats.gold,
+		"score": _main._score(game.stats)}
+	if game.phase == "win":
+		var expected: int = roundi(game.stats.time * 10.0 + game.stats.kills * 5.0
+			+ game.stats.level * 25.0 + game.stats.gold)
+		row["score_formula_check"] = expected == _main._score(game.stats)
+		_done = true
+	else:
+		_fail = true
+	_ended = true
+	_emit(row)
+
+
+func _dump_camera() -> void:
+	var cam: Camera3D = _main._rig.get_child(0)
+	_emit({"ev": "camera",
+		"projection": "PROJECTION_ORTHOGONAL" if cam.projection == Camera3D.PROJECTION_ORTHOGONAL else str(cam.projection),
+		"size": cam.size, "near": cam.near, "far": cam.far,
+		"offset": [cam.position.x, cam.position.y, cam.position.z],
+		"pitch_deg_off_straight_down": roundf((-cam.rotation_degrees.x - 90.0) * 10.0) / 10.0})
+
+
+func _emit(row: Dictionary) -> void:
+	_out.store_line(JSON.stringify(row))
+	_out.flush() # live progress readable while the engine runs
