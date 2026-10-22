@@ -4,7 +4,7 @@
 # CUDA 12.2 for nvdiffrast JIT, venv3d. Usage: run-batch-inner.sh <spec.tsv>
 set -uo pipefail
 SPINE=/opt/imagegen
-SPEC=$1
+SPEC=$(readlink -f "$1")   # resolve BEFORE cd — caller's cwd is not TRELLIS.2 (MC 11118)
 [ -f "$SPEC" ] || { echo "SPEC-MISSING: $SPEC"; exit 1; }
 cd "$SPINE/TRELLIS.2" || exit 1
 nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader
