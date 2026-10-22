@@ -16,6 +16,13 @@
 # owning level recorded, A3/D§c F-2), the §c attack pulse counter, and the
 # single-weapon kill-attribution legs (SimCombat) proving >= 1 kill per
 # weapon class. The journey itself is UNTOUCHED — same seed, same rows.
+# T-S6 adds the boss rows (MC 11107): boss_leg / boss_spawn (t ~540.0, base hp
+# 3000 on the v1 time ramp, exactly once) / boss_viz (5.33 m instance on the
+# ONE gait mechanism + the HUD bar with the pinned name) / boss_lunge /
+# boss_kill (in-game gold delta over the kill tick) / boss_once, then
+# boss_drops — the +50 gold and the guaranteed Dawnlight read exactly at the
+# kill funnel. All from SimBoss legs appended after every S3/S4 row
+# (regression rows unchanged).
 extends SceneTree
 
 const DT := 1.0 / 60.0
@@ -119,8 +126,22 @@ func _run_sim() -> void:
 	_emit({"ev": "fx_caps", "samples": _fx_samples, "violations": _fx_bad})
 	_run_win_gate()
 	_run_attribution()
+	_run_boss()
 	if _fx_bad > 0 or _hard_fail:
 		_done = false
+
+
+# T-S6 boss rows (MC 11107, A5): SimBoss legs run AFTER the journey + the S4
+# attribution legs, so every S3/S4 determinism row stays byte-identical; the
+# legs' declared deviations are documented in sim_boss.gd's header.
+func _run_boss() -> void:
+	var legs := SimBoss.new()
+	for leg in [legs.run_spawn_leg(root), legs.run_kill_leg(root),
+			legs.run_funnel_leg(root)]:
+		for row in leg:
+			_emit(row)
+			if row.get("ok", true) == false:
+				_hard_fail = true
 
 
 # WIN-gate leg: no scripted driver survives the 12/s endgame wall, and v1

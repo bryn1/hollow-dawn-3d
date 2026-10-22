@@ -11,6 +11,11 @@
 # orientation, and the §b blob-shadow MM. Class tint is
 # one StandardMaterial3D per class at albedo_color = tint_of(type) (§b).
 # Sim px map to metres on the XZ plane via CameraRig.PX_PER_M (§a collision).
+# S6 boss (MC 11107): the Warden is ONE instance of this same per-class
+# mechanism — its own MultiMesh at MODEL_H_BOSS 5.33 m, its own scissor freq
+# (spd 45 px/s -> 1.5625 Hz), the same hit_cd lunge edge (boss_pulses names
+# them); the only boss-specific code is the HP readout living on the HUD
+# (hud_3d.gd), exactly as in v1 (render.gd:185-186 excludes it from the bar).
 class_name HordeViz
 extends Node3D
 
@@ -59,6 +64,7 @@ var _blob_mmim: MultiMeshInstance3D
 var _bar_basis := Basis(Vector3(1.0, 0.0, 0.0), deg_to_rad(BAR_BILLBOARD_DEG)) # billboarded (S4)
 var _flat_basis := Basis(Vector3(1.0, 0.0, 0.0), -PI / 2.0) # quad flat on XZ, normal +Y
 var attack_pulses := 0 # §c e.hit_cd rising-edge count (RUN-CONDITIONED evidence)
+var boss_pulses := 0 # S6: of those, the ones that fired on the boss instance
 
 
 func _ready() -> void:
@@ -118,6 +124,8 @@ func refresh() -> void:
 				e.atk_armed = true
 				e.atk_t0 = game.time
 				attack_pulses += 1
+				if e.boss:
+					boss_pulses += 1 # S6: the boss rides THIS edge, no second path
 			elif e.hit_cd <= 0.0:
 				e.atk_armed = false
 			if e.get("atk_armed", false) and game.time - e.atk_t0 < ATK_TIME:
@@ -178,7 +186,8 @@ func draw_count() -> int:
 
 
 func attack_probe() -> Dictionary:
-	return {"pulses": attack_pulses, "atk_time_s": ATK_TIME, "lunge_m": LUNGE_M,
+	return {"pulses": attack_pulses, "boss_pulses": boss_pulses,
+		"atk_time_s": ATK_TIME, "lunge_m": LUNGE_M,
 		"squash": [SQUASH_LO, SQUASH_HI]}
 
 

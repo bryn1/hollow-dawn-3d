@@ -56,6 +56,7 @@ func _ready() -> void:
 
 	_hud = preload("res://scripts/hud_3d.gd").new()
 	_hud.game = game
+	_hud.world = world # S6: the boss bar scans world.enemies (mirrors _viz)
 	add_child(_hud)
 
 	_screens = preload("res://scripts/screens.gd").new()
