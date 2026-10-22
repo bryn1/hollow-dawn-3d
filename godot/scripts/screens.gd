@@ -1,6 +1,13 @@
 # Screens layer: menu, level-up cards and the end screen. Mouse works for
 # real users; keyboard picking is routed by main from the bridge press
 # queue (Contract B), never from here.
+# §j (MC 11103): every card kind resolves to an icon file. v1's blank-icon
+# path (passives shipped icon: "", levelup.gd:35) is closed structurally:
+# _card() has NO conditional around the icon TextureRect, icon_path() is
+# total over the 12 pool kinds (6 weapon + 6 upgrade via the same 6 icons,
+# 5 passives via PASSIVE_ICONS, bonus via coin), and every branch asserts
+# the file exists before load. An unmapped passive key cannot reach a card
+# (PASSIVES in levelup.gd is pinned == PASSIVE_ICONS by tests/test_card_icons.py).
 extends CanvasLayer
 
 signal start_pressed
@@ -9,6 +16,37 @@ signal card_picked(index: int)
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
 const EMBER_TINT := Color8(0xc9, 0x7b, 0x3d)
+
+# §j: the five NEW 3090-generated passive icons (assets/icons/new/, prompt
+# provenance embedded). Kept in a passives/ subdir: icon-ward.png exists
+# twice by design (weapon sigil vs. shield) and the flat names must stay
+# byte-identical to the art sources.
+const PASSIVE_ICONS := {
+	"ferocity": "res://assets/icons/passives/icon-ferocity.png",
+	"haste": "res://assets/icons/passives/icon-haste.png",
+	"ward": "res://assets/icons/passives/icon-ward.png",
+	"grip": "res://assets/icons/passives/icon-grip.png",
+	"insight": "res://assets/icons/passives/icon-insight.png",
+}
+
+# Icon fallback per §j — never blank: coin.png is a generated, non-empty
+# asset and is always reached instead of skipping the TextureRect.
+const FALLBACK_ICON := "res://assets/icons/coin.png"
+
+
+# Total resolver over the 12 pool kinds: weapons/upgrade carry the v1
+# weapon icon name in card.icon; the bonus carries "coin"; passives map by
+# key. The asserts are the in-code half of the no-blank guarantee (tests
+# assert the other half: the map is pinned and every file exists).
+static func icon_path(card: Dictionary) -> String:
+	match card.kind:
+		"passive":
+			assert(PASSIVE_ICONS.has(card.key))
+			return PASSIVE_ICONS.get(card.key, FALLBACK_ICON)
+		_:
+			var path: String = "res://assets/icons/%s.png" % card.icon
+			assert(ResourceLoader.exists(path))
+			return path if ResourceLoader.exists(path) else FALLBACK_ICON
 
 var _menu: Control
 var _levelup: Control
@@ -97,6 +135,11 @@ func _build_menu() -> void:
 
 func _build_levelup() -> void:
 	var box := _center_box(_levelup)
+	# §j: three 220-px cards + 2×18 separation = 696 need a wider column
+	# than the menu's 560 — the cards would sit visibly off-centre.
+	box.offset_left = -360
+	box.offset_right = 360
+	box.custom_minimum_size = Vector2(720, 0)
 	box.add_child(_label("Choose an upgrade", 24, BONE))
 	_cards_host = HBoxContainer.new()
 	_cards_host.add_theme_constant_override("separation", 18)
@@ -131,12 +174,17 @@ func _card(card: Dictionary, index: int) -> Control:
 	box.offset_top = 24
 	box.offset_bottom = -24
 	holder.add_child(box)
-	if card.icon != "":
-		var icon := TextureRect.new()
-		icon.texture = load("res://assets/" + card.icon + ".png")
-		icon.custom_minimum_size = Vector2(22, 22)
-		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		box.add_child(icon)
+	# §j: unconditional icon — this is where v1 could draw a blank card
+	# (v1 guarded the TextureRect on a non-empty icon string); no branch
+	# may guard this TextureRect again.
+	var icon := TextureRect.new()
+	var path: String = icon_path(card)
+	assert(ResourceLoader.exists(path))
+	icon.texture = load(path)
+	icon.custom_minimum_size = Vector2(80, 80) # brief: 64-96 px inside the frame
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	box.add_child(icon)
 	box.add_child(_label(card.name, 16, BONE))
 	box.add_child(_label(card.desc, 12, MOON))
 	if card.kind == "upgrade":
