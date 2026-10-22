@@ -167,7 +167,7 @@ def main():
     print(f"measured no-FX false-positive floor (ground grid points over their "
           f"own ground ref by >= 0.15, max over 8 walk frames): {floor} "
           f"-> footprint gate: above >= max(ceil(n/2), floor + 2); baseline "
-          f"gate (faint player-centre decals ward/talon): changed px >= "
+          f"gate (solid/faint FX on textured ground ward/talon/ember-trail): changed px >= "
           f"ambient draw-pair + {int(FX_BASE_MARGIN)}")
     for png in ["bolt.png", "ember.png", "cleaver.png", "halo.png",
                 "spike.png", "ward.png", "talon.png"]:
@@ -178,8 +178,8 @@ def main():
             continue
         slot_ok = r["rendered_counts"].get(r["slot"], 0) >= 1
         cmp_ = r["compare"]
-        if r["slot"] in ("rings", "arcs"):
-            # faint alpha decals on textured ground: pixel truth is the
+        if r["slot"] in ("rings", "arcs", "trails"):
+            # faint/solid FX over textured ground: pixel truth is the
             # BASELINE diff (first draws of the same leg, before any FX
             # existed) of the shot frame, over the draw-to-draw ambient
             # control — the terrain reference cancels out.

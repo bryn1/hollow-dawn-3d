@@ -122,38 +122,6 @@ static func luma(c: Color) -> float:
 const DIFF_THRESH := 0.10
 
 
-static func compare_radial(img: Image, pts: Array, dirs: Array,
-		dist: float, thresh := REF_THRESH) -> Dictionary:
-	# Ground reference OUTWARD along each point's own ray: the talon
-	# wedge is a solid 70-deg fan ~27 px deep on screen, so a single
-	# fixed +y reference would land inside the FX for half the points
-	# (measure-design flaw, not weakness). dirs are screen-space unit
-	# vectors away from the player, built by the leg from the same
-	# angles as pts. Same contract as compare() otherwise.
-	var wpx: int = img.get_width() - 1
-	var hpx: int = img.get_height() - 1
-	var above := 0
-	var vis := 0
-	var max_delta := 0.0
-	var _ds: Array = []
-	for i in pts.size():
-		var a: Vector2 = pts[i]
-		if a.x < 0 or a.x > wpx or a.y < 0 or a.y > hpx:
-			_ds.append("off")
-			continue
-		vis += 1
-		var q: Vector2 = a + (dirs[i] as Vector2) * dist
-		var dl: float = luma(img.get_pixel(int(a.x), int(a.y))) \
-			- luma(img.get_pixel(clampi(int(q.x), 0, wpx),
-				clampi(int(q.y), 0, hpx)))
-		_ds.append(_r4(dl))
-		if dl >= thresh:
-			above += 1
-		max_delta = maxf(max_delta, dl)
-	return {"n": pts.size(), "visible": vis, "above": above,
-		"max_delta": _r4(max_delta), "deltas": _ds}
-
-
 static func compare_vs(a_img: Image, b_img: Image, pts: Array,
 		thresh := REF_THRESH) -> Dictionary:
 	# Footprint vs the SAME pixel on the leg's pre-fire baseline draw:

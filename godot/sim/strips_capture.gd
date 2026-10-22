@@ -272,6 +272,16 @@ func _fresh_walk(key: String) -> Dictionary:
 	_main.game.paused = true # manual step: call-rate, never dt
 	for _i in WALKERS:
 		_main.world._spawn_enemy(key, _main.game, _main.VIEW)
+	# DECLARED capture placement (positions only — gait phases, speeds and
+	# every measured channel untouched): the ring spawns sit at VIEW radius
+	# (mostly off-screen); the strip panels need the walkers IN FRAME, so
+	# spread them in a visible row ahead of the player (below = +y = down
+	# on screen under the -70 deg ortho rig).
+	var n: int = _main.world.enemies.size()
+	for j in WALKERS:
+		var e: Dictionary = _main.world.enemies[n - WALKERS + j]
+		e.x = _main.game.player.x + (float(j) - 2.5) * 52.0
+		e.y = _main.game.player.y + 80.0 + float(j % 3) * 35.0
 	_main._viz.refresh() # seeds gait_p; class-last == my last spawn
 	return _main.world.enemies[-1]
 
@@ -357,7 +367,12 @@ func _step_pending() -> void:
 		_fx_pending = {}
 		_fx_shot_img = null
 		return
-	if n >= 8: # no slot-free pair arrived — emit without ambient
+	if n >= 8: # no slot-free pair arrived — emit the baseline WITHOUT
+		# ambient; the checker's gate stays RED, never silently green.
+		var r8: int = int(_fxs.shot.win)
+		var c8 := Vector2(root.size.x / 2.0, root.size.y / 2.0)
+		_fx_pending["base_diff"] = StripsProbe.diff_count(_fx_base[0],
+			_fx_shot_img, c8, r8)
 		_emit(_fx_pending)
 		_fx_pending = {}
 		_fx_shot_img = null
@@ -417,7 +432,10 @@ func _on_draw() -> void:
 func _grab_panel(img: Image) -> void:
 	var k := _want_panel
 	_want_panel = -1
-	var region: Image = img.get_region(Rect2i(0, 0, PANEL.x, PANEL.y))
+	# panel CENTRED on the viewport (player, hence the walker row below
+	# them, is at screen centre under the camera rig)
+	var region: Image = img.get_region(Rect2i((root.size.x - PANEL.x) / 2,
+		(root.size.y - PANEL.y) / 2, PANEL.x, PANEL.y))
 	_strip_img.blit_rect(region, Rect2i(0, 0, PANEL.x, PANEL.y),
 		Vector2i(_panel_i * PANEL.x, 0))
 	_panel_i += 1
@@ -428,8 +446,8 @@ func _grab_panel(img: Image) -> void:
 	var pts: Array = []
 	for i in 3:
 		for j in 3:
-			pts.append(Vector2(PANEL.x * (0.5 + 0.4 * (i - 1)),
-				PANEL.y * (0.5 + 0.14 * (j - 1))))
+			pts.append(Vector2(PANEL.x * (0.5 + 0.3 * (i - 1)),
+				PANEL.y * (0.20 + 0.09 * (j - 1))))
 	_emit({"ev": "fx_noise_floor", "frame": "%s#%d" % [_key, _panel_i - 1],
 		"compare": StripsProbe.compare(region, pts)})
 	if _panel_i >= 6:
@@ -457,7 +475,7 @@ func _make_label() -> Label:
 	layer.layer = 100
 	root.add_child(layer)
 	var l := Label.new()
-	l.position = Vector2(12, 8)
+	l.position = Vector2(332, 190) # inside the centred panel
 	l.add_theme_font_size_override("font_size", 28)
 	l.add_theme_color_override("font_color", Color(1, 1, 1))
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0))
@@ -484,13 +502,23 @@ func _grab_shot(img: Image) -> void:
 	_fxs.grab(img, _cam, bimg)
 	var row: Dictionary = _fxs.row
 	row["png_path"] = path
-	if shot.slot in ["rings", "arcs"]:
+	if shot.slot in ["rings", "arcs", "trails"]:
 		# Faint alpha decals over textured ground: their pixel truth is
 		# the BASELINE diff (pre-fire draw of this leg -> shot, player-
 		# centred window) over an AMBIENT control pair drawn AFTER the
 		# decal died (slot count 0 on both draws). Deferred emit.
 		_fx_shot_img = img.duplicate()
 		_fx_pending = row
+		# halt refire AND empty the fx world while the ambient control
+		# collects: the captured shot lives on in _fx_shot_img, and a
+		# long-lived projectile (ember bolt mid-flight) would keep its
+		# slot busy past the timeout, dying the baseline gate. (capture-
+		# side only; DECLARED — the ambient pair is the fx-free window.)
+		if _main.game.weapons.size() > 0:
+			_main.game.weapons[0].cd = 999.0 # DECLARED capture pin
+		var fxo: Object = _main.fx # transient arrays live on weapons.gd
+		for aname in ["bolts", "throws", "bursts", "arcs", "rings", "halos"]:
+			(fxo.get(aname) as Array).clear()
 		return
 	_emit(row)
 
@@ -546,4 +574,4 @@ func _hard_fail(msg: String) -> void:
 # --- GL boot workaround -----------------------------------------------------------
 
 func _frozen_decal_shot(i: int) -> bool:
-	return StripsFxLeg.SHOTS[i].slot in ["rings", "arcs"]
+	return StripsFxLeg.SHOTS[i].slot in ["rings", "arcs", "trails"]

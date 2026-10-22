@@ -42,7 +42,6 @@ var row := {}
 var want := {} # non-empty = driver freezes and grabs at the next draw
 var done := false
 var failed := ""
-var last_arc_dirs: Array = []
 var steps := 0
 
 var _fxs: Array = [] # shot results, in SHOTS order
@@ -123,13 +122,11 @@ func grab(img: Image, cam: Camera3D, base_img: Image = null) -> void:
 	var pts: Array = sample_pts(cam)
 	var px: Vector2 = pts[0]
 	row["screen_px"] = [roundf(px.x), roundf(px.y)]
-	if shot.slot == "arcs":
-		# solid 70-deg fan: a fixed +y ground reference lands inside the
-		# wedge for half the points — reference OUTWARD along each point's
-		# own ray instead (same contract; see StripsProbe.compare_radial).
-		# solid wedge: reference = the SAME pixel on this leg's pre-fire
-		# baseline draw (a ground offset inside/outside a 70-deg fan is
-		# texture noise either way — see compare_vs).
+	if shot.slot in ["arcs", "trails"]:
+		# SOLID on-screen FX (the 70-deg talon fan, the ember trail
+		# ribbon): a fixed +y ground reference lands inside the shape
+		# itself / on decorrelated texture — reference = the SAME pixel
+		# on this leg's pre-fire baseline draw (StripsProbe.compare_vs).
 		row["compare"] = StripsProbe.compare_vs(base_img, img, pts)
 	else:
 		row["compare"] = StripsProbe.compare(img, pts)
@@ -198,7 +195,6 @@ func sample_pts(cam: Camera3D) -> Array:
 		"arcs":
 			var a3: Dictionary = main.fx.arcs[-1]
 			var p2: Dictionary = main.game.player
-			last_arc_dirs.clear()
 			for frac in [0.5, 0.75]:
 				for k in 5:
 					var ang: float = a3.ang - 0.4 + 0.8 * float(k) / 4.0
@@ -206,7 +202,4 @@ func sample_pts(cam: Camera3D) -> Array:
 						(p2.x + cos(ang) * a3.range * frac) * s,
 						WeaponFxViz.Y_DECAL,
 						(p2.y + sin(ang) * a3.range * frac) * s)))
-					# screen-space outward dir along this point's own ray
-					var d3 := Vector2(cos(ang), sin(ang) * 0.34).normalized()
-					last_arc_dirs.append(d3)
 	return pts
