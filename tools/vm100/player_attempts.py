@@ -6,12 +6,13 @@ MISSING quality gates (tri budget alone passed those failures):
   gate1 extent: min(x,y,z) > 0.05 * max(x,y,z)      — rejects flat cards/sprites
   gate2 fill:   mesh_volume / bbox_volume <= 0.60    — rejects solid slabs (slab=0.80)
 Concept render per attempt is written next to the glb (<name>-render.png).
-Usage: player_attempts.py <sprite.png> <seeds csv> [base=player]"""
+MC 11134: drain_barrier + the extent/fill gate are importable (window driver
+for the scarab/hound regeneration reuses them; CLI behavior unchanged).
+Usage: player_attempts.py <sprite.png> <seeds csv> [base=player] [budget=8000]"""
 import os, re, subprocess, sys, tempfile
 sys.path.insert(0, "/opt/imagegen/venv3d/lib/python3.10/site-packages")
 import trimesh
 
-sprite, seeds, base = sys.argv[1], sys.argv[2].split(","), sys.argv[3] if len(sys.argv) > 3 else "player"
 OUT = "/opt/imagegen/output/mc11118"
 
 def drain_barrier(mins=18):
@@ -43,33 +44,46 @@ def drain_barrier(mins=18):
     print("BARRIER-ABORT: GPU never quieted — fleet contention, no attempt burned")
     sys.exit(1)
 
-drain_barrier()
+def quality(glb, label):
+    """Extent+fill quality gate on one produced glb; prints the QUALITY row.
+    MC 11134: extracted from the attempt loop (window driver reuses it)."""
+    m = trimesh.load(glb, force="scene")
+    sub = [g for g in m.geometry.values() if len(g.faces) > 10]
+    m = sub[0] if len(sub) == 1 else trimesh.util.concatenate(sub)
+    ext = m.extents
+    fill = abs(m.volume) / max(ext.prod(), 1e-9) if m.is_watertight else float("nan")
+    g1 = float(ext.min()) > 0.05 * float(ext.max())
+    g2 = (not (fill == fill)) or fill <= 0.60  # NaN (non-watertight) passes g2
+    print(f"QUALITY {label}: ext={ext[0]:.3f},{ext[1]:.3f},{ext[2]:.3f} "
+          f"fill={'watertight %.2f' % fill if fill == fill else 'non-watertight'} "
+          f"ext_gate={'PASS' if g1 else 'FAIL'} fill_gate={'PASS' if g2 else 'FAIL'}",
+          flush=True)
+    return g1 and g2
 
-for s in (int(x) for x in seeds):
+
+def attempt(s, sprite, base, budget):
     name = f"{base}-s{s}"
     spec = tempfile.NamedTemporaryFile("w", suffix=".tsv", delete=False)
-    spec.write(f"{name}\t{sprite}\t8000\t{s}\n")
+    spec.write(f"{name}\t{sprite}\t{budget}\t{s}\n")
     spec.close()
     p = subprocess.run(["/opt/imagegen/tmp/mc11118/run-batch-inner.sh", spec.name])
     glb = f"{OUT}/{name}.glb"
     ok = False
     if p.returncode == 0 and os.path.exists(glb):
-        m = trimesh.load(glb, force="scene")
-        sub = [g for g in m.geometry.values() if len(g.faces) > 10]
-        m = sub[0] if len(sub) == 1 else trimesh.util.concatenate(sub)
-        ext = m.extents
-        fill = abs(m.volume) / max(ext.prod(), 1e-9) if m.is_watertight else float("nan")
-        g1 = float(ext.min()) > 0.05 * float(ext.max())
-        g2 = (not (fill == fill)) or fill <= 0.60  # NaN (non-watertight) passes g2
-        print(f"QUALITY {name}: ext={ext[0]:.3f},{ext[1]:.3f},{ext[2]:.3f} "
-              f"fill={'watertight %.2f' % fill if fill == fill else 'non-watertight'} "
-              f"ext_gate={'PASS' if g1 else 'FAIL'} fill_gate={'PASS' if g2 else 'FAIL'}")
-        ok = g1 and g2
+        ok = quality(glb, name)
     subprocess.run(["/opt/imagegen/venvrig/bin/python", "/opt/imagegen/tmp/mc11118/dump_render.py",
-                    glb, f"{OUT}/{name}-render.png", "8000"],
+                    glb, f"{OUT}/{name}-render.png", str(budget)],
                    stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
     print(f"ATTEMPT seed={s} -> {'ACCEPT' if ok else 'REJECT'}\n", flush=True)
-    if ok:
-        print(f"ACCEPTED-SEED={s}")
-        break
-print("ATTEMPTS-DONE")
+    return ok
+
+
+if __name__ == "__main__":
+    sprite, seeds, base = sys.argv[1], sys.argv[2].split(","), sys.argv[3] if len(sys.argv) > 3 else "player"
+    budget = int(sys.argv[4]) if len(sys.argv) > 4 else 8000
+    drain_barrier()
+    for s in (int(x) for x in seeds):
+        if attempt(s, sprite, base, budget):
+            print(f"ACCEPTED-SEED={s}")
+            break
+    print("ATTEMPTS-DONE")
