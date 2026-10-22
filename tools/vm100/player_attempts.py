@@ -7,12 +7,43 @@ MISSING quality gates (tri budget alone passed those failures):
   gate2 fill:   mesh_volume / bbox_volume <= 0.60    — rejects solid slabs (slab=0.80)
 Concept render per attempt is written next to the glb (<name>-render.png).
 Usage: player_attempts.py <sprite.png> <seeds csv> [base=player]"""
-import os, subprocess, sys, tempfile
+import os, re, subprocess, sys, tempfile
 sys.path.insert(0, "/opt/imagegen/venv3d/lib/python3.10/site-packages")
 import trimesh
 
 sprite, seeds, base = sys.argv[1], sys.argv[2].split(","), sys.argv[3] if len(sys.argv) > 3 else "player"
 OUT = "/opt/imagegen/output/mc11118"
+
+def drain_barrier(mins=18):
+    """MC 11118 window-4 lesson: a VM300 seat did `systemctl restart llama-swap` INSIDE
+    the gpu-window (journal 14:30:11Z) and the 27B load OOM-killed every attempt. Barrier:
+    require (a) the gpu-window flag OPEN, (b) llama-swap inactive and gpu_used < 1000 MiB
+    held 4 consecutive samples, else ABORT before touching the GPU (no seed burned)."""
+    import time
+    st = subprocess.run(["gpu-window", "status"], capture_output=True, text=True).stdout
+    m = re.search(r'"window":\s*"(\w+)"', st)
+    if not m or m.group(1) != "OPEN":
+        print("BARRIER-ABORT: gpu-window not OPEN"); sys.exit(1)
+    held = 0
+    for _ in range(mins * 6):
+        ls = subprocess.run(["systemctl", "is-active", "llama-swap.service"],
+                            capture_output=True, text=True).stdout.strip()
+        used = int(subprocess.run(["nvidia-smi", "--query-gpu=memory.used",
+                                   "--format=csv,noheader,nounits"],
+                                  capture_output=True, text=True).stdout.strip().split("\n")[0])
+        if ls == "inactive" and used < 1000:
+            held += 1
+            if held >= 4:
+                print(f"BARRIER-PASS: llama-swap inactive, gpu_used={used}MiB held {held*10}s")
+                return
+        else:
+            held = 0
+            print(f"BARRIER-WAIT: llama-swap={ls} gpu_used={used}MiB", flush=True)
+        time.sleep(10)
+    print("BARRIER-ABORT: GPU never quieted — fleet contention, no attempt burned")
+    sys.exit(1)
+
+drain_barrier()
 
 for s in (int(x) for x in seeds):
     name = f"{base}-s{s}"
