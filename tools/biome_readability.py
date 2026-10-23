@@ -9,6 +9,19 @@ Captures the LIVE scene at the four band times t=5/200/350/500 (one shot per
 biome) through godot/sim/biome_readability_capture.gd under xvfb real GL
 (art_capture pattern, MC 11133; seed pinned 11159), then measures per shot:
 
+DETERMINISM (cycle-2 fix, MC 11191): cycle 1 sampled the live sim at
+wall-clock-driven in-game time — the capture stages advanced on RENDER
+frames (~3 fps under llvmpipe) while the sim ticked in main.gd's own
+_physics_process at 60 Hz, so the tick count between warp and save varied
+per process and block_px flickered (tundra 64/16/24 on an unchanged tree).
+The capture now idles the tree's own tick (main.set_physics_process(false),
+the sim_headless pinning pattern MC 11112) and advances the clock ONLY
+through a fixed count of _step(1/60) calls: SETTLE_TICKS = 180 sim steps
+(= 3.0 in-game s) per shot, identical RNG draws from the pinned seed, every
+process. capture() re-parses the t= on each STATE line and refuses a shot
+whose clock moved by more than the fixed budget — the deviation is bounded
+in code, not trusted.
+
   floor_lum  mean luma (0..255) of the ground crop = rows below the HUD top
              band (y >= HUD_H: v1 hud row y 8..~48 + biome banner y 140..~175
              are HUD, not floor). Gate: <= 34.
@@ -36,6 +49,7 @@ Usage:  python3 tools/biome_readability.py            # capture + gate
 Env:    HD3D_GODOT (godot binary), HD3D_SEED (capture seed).
 """
 import os
+import re
 import subprocess
 import sys
 
@@ -49,13 +63,15 @@ GODOT = os.environ.get(
 SHOTS_DIR = os.path.join(REPO, ".tmp", "biome-readability-shots")
 SCRIPT = "res://sim/biome_readability_capture.gd"
 
-# (key, png, expected BIOMES band name, warped run-clock time)
+# (key, png, expected BIOMES band name, warp time — the clock then advances
+# only through the capture's fixed SETTLE_TICKS budget, never wall clock)
 SHOTS = [
     ("grass", "readability-grass.png", "MOORLAND", 5.0),
     ("desert", "readability-desert.png", "BURNING DUNES", 200.0),
     ("frozen", "readability-frozen.png", "THE FROZEN WASTE", 350.0),
     ("tundra", "readability-tundra.png", "DEAD TUNDRA", 500.0),
 ]
+SETTLE_TICKS = 60   # must match SETTLE_TICKS in the capture script (1.0 s)
 LUM_MAX = 34.0      # owner brief: floor mean lum <= 34
 BLOCK_MAX = 48      # feature block size <= 48 px
 RATIO_MIN = 2.0     # hero/floor luma ratio >= 2.0
@@ -82,11 +98,21 @@ def capture(shots_dir):
         print(out[-3000:])
         sys.exit("CAPTURE FAILED (no CAPTURE_OK from %s)" % SCRIPT)
     for key, png, band, t in SHOTS:
-        # t is printed at SAVE time, after the settle frames have advanced
-        # the clock a little — assert band + png, not the exact warp value.
+        # t is printed at SAVE time, after the FIXED tick budget has
+        # advanced the clock — assert band + png, and that the clock moved
+        # by at most the fixed budget (warp .. warp + SETTLE_TICKS/60);
+        # _pick() consumes budget iterations, so it may advance LESS.
         if (f"STATE {band} " not in out) or (f"shot={png}" not in out):
             sys.exit("STATE row mismatch for %s: expected band '%s' + "
                      "shot=%s in dump:\n%s" % (png, band, png, out))
+        m = re.search(r"STATE %s t=([\d.]+)" % re.escape(band), out)
+        if m is None:
+            sys.exit("no parseable t= on the %s STATE row:\n%s" % (png, out))
+        shot_t = float(m.group(1))
+        if not t <= shot_t <= t + SETTLE_TICKS / 60.0 + 1e-6:
+            sys.exit("%s: clock advanced to %.1f, outside the pinned "
+                     "budget [%.1f, %.1f] — capture is not tick-driven"
+                     % (png, shot_t, t, t + SETTLE_TICKS / 60.0))
 
 
 def block_size(gray):
