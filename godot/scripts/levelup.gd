@@ -4,6 +4,8 @@ class_name LevelUpDeck
 extends RefCounted
 
 const MAX_PASSIVE_STACKS := 5
+const MAX_WEAPON_SLOTS := 6 # carry caps (PARITY-ROADMAP M1 feature 3): OUR numbers
+const MAX_PASSIVE_KINDS := 6 # — 6 weapon slots + 6 passive KINDS, pool-gated here
 
 const PASSIVES := [
 	{"key": "ferocity", "name": "Ferocity", "desc": "+10% weapon damage"},
@@ -16,6 +18,16 @@ const PASSIVES := [
 
 static func build_pool(game: GameState) -> Array:
 	var pool: Array = []
+	# Carry caps (PARITY-ROADMAP M1 feature 3, the two clauses in this one
+	# pool seam): NEW weapon kinds stop at MAX_WEAPON_SLOTS carried and NEW
+	# passive KINDS stop at MAX_PASSIVE_KINDS distinct carried. What is ALREADY
+	# carried stays offerable for its own upgrades: weapons to MAX_LEVEL,
+	# passive kinds to MAX_PASSIVE_STACKS (the 5-stack cap, untouched).
+	var slots_full: bool = game.weapons.size() >= MAX_WEAPON_SLOTS
+	var passive_kinds: int = 0
+	for key in game.passives:
+		if game.passives[key] > 0:
+			passive_kinds += 1
 	for id in WeaponSystem.IDS:
 		var owned: Dictionary = {}
 		for w in game.weapons:
@@ -24,15 +36,20 @@ static func build_pool(game: GameState) -> Array:
 				break
 		var meta: Dictionary = WeaponSystem.META[id]
 		if owned.is_empty():
-			pool.append({"kind": "weapon", "id": id, "name": meta.name,
-				"desc": meta.desc, "icon": meta.icon})
+			if not slots_full: # new kind only while a slot is open
+				pool.append({"kind": "weapon", "id": id, "name": meta.name,
+					"desc": meta.desc, "icon": meta.icon})
 		elif owned.level < WeaponSystem.MAX_LEVEL:
 			pool.append({"kind": "upgrade", "id": id, "name": meta.name,
 				"desc": meta.desc, "icon": meta.icon, "to_level": owned.level + 1})
 	for passive in PASSIVES:
-		if game.passives[passive.key] < MAX_PASSIVE_STACKS:
-			pool.append({"kind": "passive", "key": passive.key,
-				"name": passive.name, "desc": passive.desc, "icon": ""})
+		var stacks: int = game.passives[passive.key]
+		if stacks >= MAX_PASSIVE_STACKS:
+			continue # the 5-stack cap per carried kind (unchanged)
+		if stacks == 0 and passive_kinds >= MAX_PASSIVE_KINDS:
+			continue # a NEW kind never breaks the 6-KIND carry cap
+		pool.append({"kind": "passive", "key": passive.key,
+			"name": passive.name, "desc": passive.desc, "icon": ""})
 	return pool
 
 
