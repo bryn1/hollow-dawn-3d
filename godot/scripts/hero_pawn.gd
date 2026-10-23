@@ -25,7 +25,10 @@ var _mat: StandardMaterial3D
 # therefore draws UNSHADED with v1's bone hue lifted above 1 (Godot
 # multiplies albedo_color into the texture, no clamp) — the sprite-era
 # full-brightness read carried onto the GLB. iframes-alpha unchanged.
-const PLAYER_TINT := GameRenderer.BONE * 2.6
+# T-S10 (MC 11159, owner contrast ruling): the multiplier is lifted 2.6 ->
+# 3.6 — the same unshaded-multiplier seam, re-tuned against the darkened
+# (tone 0.62) ground so the hero/floor luma ratio clears the >= 2.0 gate.
+const PLAYER_TINT := GameRenderer.BONE * 3.6
 
 
 func _ready() -> void:
