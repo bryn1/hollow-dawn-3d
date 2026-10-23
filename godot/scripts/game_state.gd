@@ -4,7 +4,7 @@ extends RefCounted
 
 const BASE_SPEED := 140.0
 const IFRAMES := 0.5
-const WIN_TIME := 600.0
+const WIN_TIME := 900.0 # M1 feature 4 (PARITY-ROADMAP rev3): run length 600->900
 const MAX_HP := 100.0
 
 var phase := "menu" # menu | playing | levelup | gameover | win

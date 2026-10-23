@@ -62,8 +62,11 @@ def test_biome_flash_3s_on_the_band_banner():
 
 # ---- run numbers (N23 / N24 / N25 / N26 / N2) ----------------------------------
 
-def test_win_time_600():
-    assert const("WIN_TIME", GAME_STATE) == 600.0
+def test_win_time_900():
+    # The 600-era pin (test_win_time_600) was RETIRED AND REPLACED here per
+    # PARITY-ROADMAP rev3 M1 feature 7 row 2: M1 runs 900.0 s. Band t_starts
+    # stay 0/150/300/450 — no roadmap row re-bands them for the longer run.
+    assert const("WIN_TIME", GAME_STATE) == 900.0
     assert re.search(r"time\s*>=\s*GameState\.WIN_TIME", MAIN), \
         "main.gd must gate the win on the shared WIN_TIME constant"
 

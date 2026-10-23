@@ -36,10 +36,11 @@ def test_boss_at_540():
     assert const("BOSS_AT", WORLD) == 540.0
 
 
-def test_win_threshold_600():
-    # WIN lives in game_state.gd as WIN_TIME and is gated in main.gd; the plan
-    # pins win at 600.0 s survival.
-    assert const("WIN_TIME", GAME_STATE) == 600.0
+def test_win_threshold_900():
+    # WIN lives in game_state.gd as WIN_TIME and is gated in main.gd. The
+    # 600-era pin (test_win_threshold_600) was RETIRED AND REPLACED here per
+    # PARITY-ROADMAP rev3 M1 feature 7 row 1: M1 runs 900.0 s.
+    assert const("WIN_TIME", GAME_STATE) == 900.0
     assert re.search(r"time\s*>=\s*GameState\.WIN_TIME", MAIN), \
         "main.gd must gate the win on the shared WIN_TIME constant"
 
@@ -79,6 +80,20 @@ def test_gates_minutes():
 def test_spawn_rate_capped_12():
     assert re.search(r"minf\(\s*12\.0\s*,\s*1\.0\s*\+\s*1\.3\s*\*\s*minute\s*\)", WORLD), \
         "spawn rate must be min(12, 1 + 1.3*minute) per plan §5"
+
+
+def test_alive_cap_400_pauses_the_single_spawn_loop():
+    # M1 hard rule (PARITY-ROADMAP rev3 §b + feature 4): spawns PAUSE at 400
+    # alive inside the single spawn loop in world.gd's update_spawns. The
+    # guard must sit BEFORE the rate accumulation — pausing the accumulator
+    # is what stops a kill-gap burst-refill.
+    assert const("ALIVE_CAP", WORLD) == 400.0
+    gate = WORLD[WORLD.index("func update_spawns"):
+                 WORLD.index("func update_entities")]
+    cap_at = gate.find("enemies.size() >= ALIVE_CAP")
+    assert cap_at >= 0, "alive-cap guard missing from the spawn loop"
+    assert cap_at < gate.find("spawn_acc +="), \
+        "cap must pause accumulation too (guard before spawn_acc +=)"
 
 
 def test_enemy_base_stats_per_plan():

@@ -6,8 +6,9 @@
 # Dumps one JSON line per event: band index at the 149.9/150.1/299.9/300.1/
 # 449.9/450.1 samples + every band flip, GATES openings and first spawns per
 # type id, scripted WASD input with position samples, the camera rig params
-# (A8 row), a gait probe, the gameover row, and the WIN row at t >= 600 with
-# the score cross-checked against the formula. Stubbed: only the screens
+# (A8 row), a gait probe, the gameover row, and the WIN row at t >= WIN_TIME
+# (900 s since T-M1d) with the score cross-checked against the formula.
+# Stubbed: only the screens
 # layer (its cards build Control trees this stage does not carry).
 # T-S4 adds the combat rows (MC 11102): per-sample FX-cap rows for t < 300
 # (RENDERED live counts vs the §i formulas — per-sample rows, not averages),
@@ -26,7 +27,10 @@
 extends SceneTree
 
 const DT := 1.0 / 60.0
-const TOTAL_STEPS := 37200 # 620 sim-seconds; WIN fires at step 36000
+const TOTAL_STEPS := 37200 # 620 sim-seconds journey window; since T-M1d the
+	# win sits at WIN_TIME 900 s — out of this window by design: the journey
+	# ends gameover and the WIN row comes from the declared-warp leg below
+	# plus the real-clock s8 harness (the 620 s window stays byte-identical).
 const POLICY_EVERY := 3 # input policy every 0.05 s — 0.5 s quantised
 	# reversals are how a 140 px/s survivor gets eaten by a 105 px/s scarab
 const POS_EVERY := 600 # 10 s position/stat samples
@@ -144,7 +148,8 @@ func _run_sim() -> void:
 func _run_boss() -> void:
 	var legs := SimBoss.new()
 	for leg in [legs.run_spawn_leg(root), legs.run_kill_leg(root),
-			legs.run_funnel_leg(root)]:
+			legs.run_funnel_leg(root), legs.run_chest_leg(root),
+			legs.run_miniboss_leg(root)]:
 		for row in leg:
 			_emit(row)
 			if row.get("ok", true) == false:
@@ -154,9 +159,11 @@ func _run_boss() -> void:
 # WIN-gate leg: no scripted driver survives the 12/s endgame wall, and v1
 # itself never lived past 600 s under any driver (its win-screen proof was a
 # scratch 45 s export — LEDGER DA F1). This leg restarts through the real
-# _start_game funnel, warps the CLOCK (the single stated deviation) to 599 s
-# of a fresh sparse world, and ticks the real _step loop in: main.gd's own
-# `time >= WIN_TIME` branch fires _end_run("win") + score as in a played run.
+# _start_game funnel, warps the CLOCK (the single stated deviation) to ONE
+# SECOND SHORT OF GameState.WIN_TIME (constant-relative since T-M1d: the leg
+# never re-encodes the run length) of a fresh sparse world, and ticks the
+# real _step loop in: main.gd's own `time >= WIN_TIME` branch fires
+# _end_run("win") + score as in a played run.
 func _run_win_gate() -> void:
 	var packed: PackedScene = load("res://Main.tscn")
 	var run2: Node = packed.instantiate()
@@ -166,7 +173,7 @@ func _run_win_gate() -> void:
 	run2._screens = stub
 	stub.start_pressed.connect(run2._start_game)
 	run2._start_game()
-	run2.game.time = 599.0
+	run2.game.time = GameState.WIN_TIME - 1.0
 	_main = run2
 	for i in range(120):
 		if run2.game.phase == "playing":

@@ -151,7 +151,7 @@ consolidated `game_data.gd` is **rejected** (§h). Band/signature pins v1 never 
 
 | v1 pinned number (source) | 3D location (identical) | test |
 |---|---|---|
-| WIN_TIME 600.0 (`game_state.gd:7`) | `game_state.gd:7` | `test_game_numbers.py::test_win_threshold_600` |
+| WIN_TIME 900.0 (`game_state.gd:7`; 600.0 RE-PINNED by T-M1d, roadmap M1 feature 4) | `game_state.gd:7` | `test_game_numbers.py::test_win_threshold_900` |
 | BOSS_AT 540.0 (`world.gd:5`) | `world.gd:5` | `::test_boss_at_540` |
 | HEAL_DROP_CHANCE 0.015 / HEAL_AMOUNT 8.0 + clamp (`world.gd:6-7,158`) | same | `::test_heal_drop_chance`, `::test_heal_amount`, `::test_heal_clamp_path_exists` |
 | boss Dawnlight guaranteed (`world.gd:137`) | same | `test_biome_numbers.py` |
@@ -173,6 +173,12 @@ consolidated `game_data.gd` is **rejected** (§h). Band/signature pins v1 never 
 | Dawnlight cross + glow (`render.gd:18,174-182,252-254`) | dawnlight MM + halo MM | screenshot |
 | iframes: v1 is a CONSTANT alpha 0.55 while iframes > 0 (`render.gd:134-138`, modulate at `:137` — cycle-3 says what it is, no "pulse" fiction); player→player-alt at L5 | `hero_pawn.gd` material alpha 0.55 during iframes + L5 GLB swap | screenshot |
 | tint_of per-type (`render.gd:22-42`) | per-class `StandardMaterial3D.albedo_color` (VERIFIED member) | `::test_five_enemy_tints_present` + screenshot |
+
+**M1-era additions (not v1 pins, T-M1d):** `MINIBOSS_AT [[600, "hollow-knight"], [780,
+"hollow-deacon"]]`, `CHEST_CHANCE_BOSS 1.0`, `CHEST_CHANCE_MINIBOSS 0.6` and `ALIVE_CAP 400`
+(all in the `world.gd` constants seam, pinned by `test_boss_numbers.py` +
+`test_game_numbers.py::test_alive_cap_400_pauses_the_single_spawn_loop`); miniboss stat rows
+900/50/10 and 1400/40/11 (`::test_miniboss_enemy_rows`).
 
 ## (e) SERVER / LEADERBOARD — reuse v1 verbatim
 v1's server is **stdlib-only Python, language-agnostic** (`ARCHITECTURE.md:168` @ `5dc7679`;

@@ -48,6 +48,12 @@ const GLB_FILES := {
 	"rime-ghoul": "rime-ghoul.glb",
 	"pale-wight": "pale-wight.glb",
 	"warden": "boss-warden.glb",
+	# ponytail: the two T-M1d miniboss classes deliberately reuse the Warden
+	# glb (height-normalised to the 1.42 m horde row = literal mini-bosses);
+	# upgrade path = the M1 TRELLIS asset batch's 2 miniboss meshes swap in
+	# here, one row each (roadmap §b already counts them as +2 class MMs).
+	"hollow-knight": "boss-warden.glb",
+	"hollow-deacon": "boss-warden.glb",
 }
 
 # §c gait constants (dump acceptance rows: freq <= 2.2 Hz, scale range <= 0.24).

@@ -191,3 +191,69 @@ def test_boss_rides_the_one_gait_mechanism_placeholder_note():
     # is the committed probe dump (test_art_integration.py).
     assert "GLB_FILES" in VIZ and "\"warden\": \"boss-warden.glb\"" in VIZ, \
         "the warden class must ride the boss-warden glb"
+
+
+# ---- T-M1d miniboss schedule + chest drop pins (M1 feature 4) --------------
+# The warden pair above STAYS GREEN BY DESIGN (roadmap feature 7 stay-green
+# row: BOSS_AT unchanged at 540); these rows pin what the run-length change
+# ADDS — never a re-pin of the boss itself.
+
+def test_miniboss_schedule_600_780_exactly_once_each():
+    # Roadmap M1 feature 4 verbatim: "2 minibosses @ t=600, 780", each
+    # spawning exactly once through its own latch, same mechanism as the
+    # v1 BOSS_AT gate — and inside the SAME single spawn loop.
+    pairs = re.findall(r"\[([\d.]+),\s*\"([\w-]+)\"\]",
+                       WORLD[WORLD.index("const MINIBOSS_AT"):
+                             WORLD.index("const HEAL_DROP_CHANCE")])
+    assert [(float(t), k) for t, k in pairs] == [
+        (600.0, "hollow-knight"), (780.0, "hollow-deacon")], \
+        "MINIBOSS_AT must be the doc schedule, in order"
+    gate = block(WORLD, "func update_spawns", "func update_entities")
+    assert re.search(r"minibosses_spawned < MINIBOSS_AT\.size\(\)", gate), \
+        "schedule must be read from the ONE constant"
+    assert re.search(r"minibosses_spawned \+= 1\s*\n\s*_spawn_enemy\(mb\[1\], game, view\)", gate), \
+        "the latch must advance before the single spawn, verbatim v1 order"
+    assert gate.count("_spawn_enemy(mb[1]") == 1 and \
+        WORLD.count("_spawn_enemy(mb[1]") == 1, "one miniboss spawn site only"
+    assert re.search(r"var minibosses_spawned := 0", WORLD), "latch var must exist"
+    reset = block(WORLD, "func reset", "func _types_open")
+    assert re.search(r"minibosses_spawned = 0", reset), \
+        "the latch must reset for a re-armed run"
+
+
+def test_miniboss_enemy_rows():
+    # OUR stat rows (the doc names the schedule, not the values) — pinned so
+    # any later silent retune goes RED like every other number in this suite.
+    types_block = WORLD[WORLD.index("const ENEMY_TYPES"):]
+    for key, stats in {"hollow-knight": (900.0, 50.0, 10.0, 0.0),
+                       "hollow-deacon": (1400.0, 40.0, 11.0, 0.0)}.items():
+        row = re.search(r"\"%s\":\s*\{\"hp\":\s*([\d.]+),\s*\"spd\":\s*([\d.]+),"
+                        r"\s*\"dmg\":\s*([\d.]+),\s*\"xp\":\s*([\d.]+)" % key, types_block)
+        assert row, "ENEMY_TYPES miniboss row %s missing/wrong shape" % key
+        assert (float(row.group(1)), float(row.group(2)),
+                float(row.group(3)), float(row.group(4))) == stats
+        tail = types_block[row.start(): row.end() + 120]
+        assert '"miniboss": true' in tail and '"boss": true' not in tail, \
+            "minibosses must field the miniboss flag, NOT the boss flag"
+
+
+def test_miniboss_flag_wired_into_spawned_enemies():
+    spawn = block(WORLD, "func _spawn_enemy", "func update_spawns")
+    assert re.search(r"\"miniboss\": def\.get\(\"miniboss\", false\)", spawn), \
+        "every spawned enemy dict must carry the miniboss flag (kill funnel reads it)"
+
+
+def test_chest_drop_chances_pinned_and_wired():
+    # M1 feature 4 (DA c1 B-3): named consts in the HEAL_DROP_CHANCE pattern;
+    # the boss branch short-circuits its 1.0 roll — the guarantee IS the roll.
+    assert const("CHEST_CHANCE_BOSS", WORLD) == 1.0
+    assert const("CHEST_CHANCE_MINIBOSS", WORLD) == 0.6
+    assert re.search(r"var chests: Array = \[\]", WORLD), "chests array must exist"
+    reset = block(WORLD, "func reset", "func _types_open")
+    assert re.search(r"chests\.clear\(\)", reset), "chests must reset per run"
+    funnel = block(WORLD, "func kill_enemy", "func collect_pickups")
+    assert re.search(r"if enemy\.boss and randf\(\) < CHEST_CHANCE_BOSS:\s*\n"
+                     r"\s*chests\.append", funnel)
+    assert re.search(r"elif enemy\.miniboss and randf\(\) < CHEST_CHANCE_MINIBOSS:\s*\n"
+                     r"\s*chests\.append", funnel)
+    assert funnel.count("chests.append") == 2, "exactly the two chest drop sites"

@@ -39,8 +39,8 @@ runs the suite VERBATIM. "v1-suite" = existing test; "biome-new" = row added to
 | # | Number | Source file:line | Proven by |
 |---|---|---|---|
 | N1 | BOSS_AT = 540.0 | world.gd:5 | v1-suite `test_boss_at_540` |
-| N2 | WIN_TIME = 600.0 | game_state.gd:7 | v1-suite `test_win_threshold_600` |
-| N3 | win gate reads shared WIN_TIME | main.gd:134 | v1-suite (regex in `test_win_threshold_600`, test_game_numbers.py:43-44) |
+| N2 | WIN_TIME = 900.0 (600.0 RE-PINNED by T-M1d, roadmap M1 feature 4) | game_state.gd:7 | v1-suite row RETIRED+REPLACED: `test_win_threshold_900` |
+| N3 | win gate reads shared WIN_TIME | main.gd:134 | v1-suite regex kept (now in `test_win_threshold_900`, test_game_numbers.py) |
 | N4 | boss gate compares BOSS_AT | world.gd:84 | v1-suite `test_boss_gate_wired` (:47-48) |
 | N5 | HEAL_DROP_CHANCE = 0.015 | world.gd:6 | v1-suite `test_heal_drop_chance` |
 | N6 | HEAL_AMOUNT = 8.0 | world.gd:7 | v1-suite `test_heal_amount` |

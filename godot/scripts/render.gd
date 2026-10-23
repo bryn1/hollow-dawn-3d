@@ -56,7 +56,9 @@ const DAWN_GLOW_RADII := Vector2(14.0, 8.0)
 const DAWN_GLOW_ALPHAS := Vector2(0.25, 0.40)
 
 # Biome bands (owner ruling MC 11077): the ground tile swaps as the run's
-# clock crosses t_start; tundra carries the boss (9:00) and win (10:00) end.
+# clock crosses t_start; tundra carries the boss (9:00), the two minibosses
+# (10:00/13:00, T-M1d) and win (15:00 since M1 feature 4) end. Band
+# t_starts are NOT re-banded — no roadmap row changes them.
 # 1024px seamless tiles from static/assets/biomes, mean lum 39-55/255 — dark
 # enough to keep the tinted/glowing sprites readable on top.
 # Each band also fields its enemy roster (MC 11082, owner biome-enemies ask):

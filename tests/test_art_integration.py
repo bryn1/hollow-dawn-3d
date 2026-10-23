@@ -75,8 +75,14 @@ def glb_files_map():
 
 def test_glb_per_class_exists_and_wired():
     mapping = glb_files_map()
-    assert sorted(mapping) == sorted(CLASS_KEYS + ["warden"]), (
-        "GLB_FILES must cover exactly the 8 swarm classes + the warden")
+    # Coverage row RE-PINNED by T-M1d (M1 feature 4): the two miniboss
+    # classes joined the map deliberately riding boss-warden.glb (height-
+    # normalised mini-bosses) until the M1 asset batch lands their meshes —
+    # the file-exists loop below still requires a real committed glb.
+    assert sorted(mapping) == sorted(
+        CLASS_KEYS + ["warden", "hollow-knight", "hollow-deacon"]), (
+        "GLB_FILES must cover exactly the 8 swarm classes + the warden + the "
+        "2 miniboss classes")
     for key, fname in mapping.items():
         assert os.path.isfile(os.path.join(GLB_DIR, fname)), (
             "class %s has no committed glb at godot/assets/glb/%s" % (key, fname))

@@ -86,8 +86,10 @@ def test_contact_damage():
     assert re.search(r"p\.iframes = GameState\.IFRAMES", MAIN)
     assert const("IFRAMES", GAME_STATE) == 0.5
     dmg = [float(x) for x in re.findall(r"\"dmg\": ([\d.]+)", WORLD[:WORLD.index("const GATES")])]
-    assert dmg == [2.0, 3.0, 5.0, 6.0, 4.0, 2.0, 5.0, 9.0, 12.0], \
-        "contact dmg column must stay 2/3/5/6/4/2/5/9/12 per N10-N18"
+    # Column RE-PINNED by T-M1d (M1 feature 4): the two miniboss rows append
+    # 10/11 after the warden's 12; the nine v1 rows N10-N18 are unchanged.
+    assert dmg == [2.0, 3.0, 5.0, 6.0, 4.0, 2.0, 5.0, 9.0, 12.0, 10.0, 11.0], \
+        "contact dmg column must stay 2/3/5/6/4/2/5/9/12 per N10-N18 + 10/11 minibosses"
 
 
 # ---- drop probabilities from the N-table (N5/N6/N29/N30) -----------------------

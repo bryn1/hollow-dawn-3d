@@ -37,6 +37,13 @@
 #     play the boss dies at the survivor's feet and the same tick's
 #     collect_pickups consumes the heal instantly (world.gd:158, consumed even
 #     at full hp), which is why the rule needs this direct read.
+# (4) CHEST ROLL LEG (T-M1d, roadmap M1 feature 4 "kill-leg roll rows",
+#     DA c1 B-3): the same declared deviations as the funnel leg (clock warp,
+#     direct kill_enemy). The Warden is killed once through the funnel:
+#     CHEST_CHANCE_BOSS = 1.0 short-circuits the roll — exactly ONE chest.
+#     The miniboss row kills synthetic hollow-knight-shaped dicts (real
+#     flag shape, xp 0) under the pinned seed; the drop count is a ROLL ROW
+#     (evidence), the pin lives in the consts + the pytest suite.
 class_name SimBoss
 extends RefCounted
 
@@ -174,6 +181,76 @@ func run_funnel_leg(root: Window) -> Array:
 		"rule": "world.gd:132 gold+=50; world.gd:137 if enemy.boss or roll -> Dawnlight",
 		"ok": gold_delta == 50 and heal_delta == 1 and heal_at_boss == 1
 			and gem_delta == 0 and _count_wardens(run) == 0})
+	run.queue_free()
+	return rows
+
+
+# (4) CHEST ROLL LEG — see header. Deviations: clock warp + direct kill_enemy.
+func run_chest_leg(root: Window) -> Array:
+	seed(41110)
+	var run := _fresh_run(root)
+	run.game.time = WARP_T
+	var rows: Array = [{"ev": "boss_leg", "leg": "chest", "warp_to": WARP_T,
+		"note": "roll counts are evidence under the pinned seed; the consts are the pin"}]
+	var boss := _spawn_boss(run, SPAWN_STEPS, rows)
+	if boss.is_empty():
+		run.queue_free()
+		return rows
+	run.world.kill_enemy(run.game, boss)
+	var boss_chests: int = run.world.chests.size()
+	var mb_kills := 200
+	for i in mb_kills: # synthetic hollow-knight-shaped kills (world.gd flag shape)
+		run.world.kill_enemy(run.game, {
+			"x": 0.0, "y": 0.0, "xp": 0.0, "boss": false, "miniboss": true})
+	var mb_chests: int = run.world.chests.size() - boss_chests
+	rows.append({"ev": "chest_drops", "t": _r3(run.game.time), "seed": 41110,
+		"boss_chance": GameWorld.CHEST_CHANCE_BOSS, "boss_kills": 1,
+		"boss_chests": boss_chests,
+		"miniboss_chance": GameWorld.CHEST_CHANCE_MINIBOSS,
+		"miniboss_kills": mb_kills, "miniboss_chests": mb_chests,
+		"ok": boss_chests == 1 and mb_chests > 0 and mb_chests < mb_kills})
+	run.queue_free()
+	return rows
+
+
+# (5) MINIBOSS SCHEDULE LEG (T-M1d, roadmap M1 feature 4 "2 minibosses @
+# t=600, 780"): the REAL gates fire. Declared deviations: clock warp to just
+# before the first gate + game.hp pinned each tick (the S6 kill-leg precedent
+# — no scripted driver survives a 12/s wall at 3x hp; the CLOCK is never
+# touched beyond the warp). Rows: first-seen sim-time per schedule id +
+# alive counts in a window past the second gate. Exactly-once is pinned in
+# the suite (latch order + single spawn site); these rows prove the schedule
+# fires on the declared clock.
+func run_miniboss_leg(root: Window) -> Array:
+	seed(41111)
+	var run := _fresh_run(root)
+	run.game.time = 599.0
+	var rows: Array = [{"ev": "boss_leg", "leg": "miniboss", "warp_to": 599.0,
+		"note": "hp pinned each tick (S6 precedent); real MINIBOSS_AT gates fire"}]
+	var first := {}
+	for n in 12000:
+		_decline(run)
+		if run.game.phase != "playing":
+			break
+		run.game.hp = run.game.max_hp # DECLARED deviation, S6 kill-leg precedent
+		run._step(DT)
+		for e in run.world.enemies:
+			if e.miniboss and not first.has(e.type):
+				first[e.type] = _r3(run.game.time)
+		if run.game.time >= 785.0:
+			break
+	var alive := {"hollow-knight": 0, "hollow-deacon": 0}
+	for e in run.world.enemies:
+		if alive.has(e.type):
+			alive[e.type] += 1
+	rows.append({"ev": "miniboss_spawn", "t": _r3(run.game.time),
+		"first_hollow_knight": first.get("hollow-knight", -1.0),
+		"first_hollow_deacon": first.get("hollow-deacon", -1.0),
+		"alive_knight": alive["hollow-knight"], "alive_deacon": alive["hollow-deacon"],
+		"ok": first.get("hollow-knight", 0.0) >= 600.0
+			and first.get("hollow-knight", 10000.0) < 602.0
+			and first.get("hollow-deacon", 0.0) >= 780.0
+			and first.get("hollow-deacon", 10000.0) < 782.0})
 	run.queue_free()
 	return rows
 
