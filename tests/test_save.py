@@ -35,6 +35,29 @@ PROBE = "res://sim/save_probe.gd"
 pytestmark = pytest.mark.skipif(
     not os.path.exists(GODOT), reason="Godot binary not installed")
 
+CLASS_CACHE = os.path.join(conftest.REPO, "godot", ".godot",
+                           "global_script_class_cache.cfg")
+
+
+def ensure_class_cache():
+    # CLEAN-CHECKOUT FIX (cycle 2): godot/.godot/ — the global class_name
+    # cache save.gd's own DawnWell self-reference needs to COMPILE — is
+    # gitignored, so a fresh checkout has none and every behavior leg dies
+    # at parse (VERIFIED: preload alone cannot dodge it — save.gd itself
+    # errors "Identifier not found: DawnWell" without the cache). The fix
+    # is the engine's canonical step that the export spine already runs:
+    # --headless --import. --import carries a documented post-work
+    # shutdown-abort quirk (LEDGER T-S9), so the gate is the cache file,
+    # never the rc.
+    if os.path.exists(CLASS_CACHE):
+        return
+    subprocess.run(
+        [GODOT, "--headless", "--path", os.path.join(conftest.REPO, "godot"),
+         "--import"],
+        capture_output=True, text=True, timeout=600)
+    assert os.path.exists(CLASS_CACHE), \
+        "godot --import produced no global class cache"
+
 
 def read(name):
     with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
@@ -121,6 +144,7 @@ def probe():
     """One REAL headless run of save_probe.gd on a throwaway XDG_DATA_HOME
     (user:// lands in /tmp, never the real app_userdata; conftest's
     subprocess-env isolation pattern). Returns (rows, json_text, stderr)."""
+    ensure_class_cache()
     scratch = tempfile.mkdtemp(prefix="hd3d-save-")
     r = subprocess.run(
         [GODOT, "--headless", "--path", os.path.join(conftest.REPO, "godot"),

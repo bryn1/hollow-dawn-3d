@@ -29,7 +29,7 @@ func _init() -> void:
 
 func _leg_missing() -> void:
 	_wipe()
-	var w := DawnWell.load_save()
+	var w: DawnWell = DawnWell.load_save()
 	print("LEG missing defaults=%d corrupt_absent=%d" % [
 		int(w.gold == 0 and w.ranks.is_empty() and w.flags.is_empty()),
 		int(not _exists(CORRUPT))])
@@ -38,7 +38,7 @@ func _leg_missing() -> void:
 func _leg_roundtrip() -> void:
 	_wipe()
 	_write(TEMP, "stale torn temp") # a stale temp must not block the rename
-	var w := DawnWell.load_save()
+	var w: DawnWell = DawnWell.load_save()
 	w.gold = 123
 	w.ranks = {"might": 2}
 	w.flags = {"stage2": 1}
@@ -46,7 +46,7 @@ func _leg_roundtrip() -> void:
 	print("LEG roundtrip ok=%d file=%d temp_gone=%d" % [
 		int(ok), int(_exists(SAVE)), int(not _exists(TEMP))])
 	print("JSON " + _read(SAVE))
-	var r := DawnWell.load_save()
+	var r: DawnWell = DawnWell.load_save()
 	print("LEG reload gold=%d ranks=%d flags=%d version=%d" % [
 		r.gold, int(r.ranks.get("might", -1)), int(r.flags.get("stage2", -1)),
 		r.version])
@@ -55,7 +55,7 @@ func _leg_roundtrip() -> void:
 func _leg_corrupt() -> void:
 	_wipe()
 	_write(SAVE, "not json {{{ half a file")
-	var w := DawnWell.load_save()
+	var w: DawnWell = DawnWell.load_save()
 	print("LEG corrupt quarantined=%d defaults=%d corrupt_present=%d save_gone=%d" % [
 		int(_exists(CORRUPT)),
 		int(w.gold == 0 and w.ranks.is_empty()),
@@ -66,7 +66,7 @@ func _leg_corrupt() -> void:
 func _leg_skew() -> void:
 	_wipe()
 	_write(SAVE, JSON.stringify({"version": 999, "gold": 7}))
-	var w := DawnWell.load_save()
+	var w: DawnWell = DawnWell.load_save()
 	print("LEG skew quarantined=%d defaults=%d corrupt_present=%d" % [
 		int(_exists(CORRUPT)), int(w.gold == 0 and w.version == DawnWell.VERSION),
 		int(_exists(CORRUPT))])
@@ -75,7 +75,7 @@ func _leg_skew() -> void:
 func _leg_migrate() -> void:
 	_wipe()
 	_write(SAVE, JSON.stringify({"version": 0, "gold": 5})) # older save, new fields absent
-	var w := DawnWell.load_save()
+	var w: DawnWell = DawnWell.load_save()
 	print("LEG migrate gold=%d ranks_default=%d flags_default=%d quarantined=%d" % [
 		w.gold, int(w.ranks.is_empty()), int(w.flags.is_empty()),
 		int(_exists(CORRUPT))])
@@ -83,7 +83,7 @@ func _leg_migrate() -> void:
 
 func _leg_reset() -> void:
 	_wipe()
-	var w := DawnWell.load_save()
+	var w: DawnWell = DawnWell.load_save()
 	w.gold = 55
 	w.save()
 	w.reset()
@@ -92,7 +92,7 @@ func _leg_reset() -> void:
 
 func _leg_recreate() -> void:
 	_wipe()
-	var w := DawnWell.load_save()
+	var w: DawnWell = DawnWell.load_save()
 	w.gold = 9
 	w.save()
 	var dir := DirAccess.open("user://")
