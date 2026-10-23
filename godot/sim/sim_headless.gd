@@ -198,14 +198,18 @@ func _run_attribution() -> void:
 
 
 # §b scene draw tally: ground 1 + horde node (class MMs + bar + blob) +
-# pawn 1 + FX worst case (§i 7). The renderer issues FEWER calls when a
+# pawn 1 + FX worst case (§i 7) + pickups 4 (T-S18 MC 11201: §b's planned
+# gems/coins/dawnlight/dawn-glow rows, landed by PickupViz — the 33-row
+# budget always carried them). The renderer issues FEWER calls when a
 # class is empty — fx_live rides the FX rows.
 func _dump_draws() -> void:
 	var horde: int = _main._viz.draw_count()
 	var fxw: int = _main._fxv.draw_count()
-	var total := 1 + horde + 1 + fxw
+	var pickups: int = _main._pvz.draw_count()
+	var total := 1 + horde + 1 + fxw + pickups
 	_emit({"ev": "draws", "ground": 1, "horde": horde, "pawn": 1,
-		"fx_worst": fxw, "total": total, "planned": DRAWS_PLANNED,
+		"fx_worst": fxw, "pickups": pickups, "total": total,
+		"planned": DRAWS_PLANNED,
 		"hard_cap": DRAWS_HARD, "ok": total <= DRAWS_HARD})
 	if total > DRAWS_HARD:
 		_hard_fail = true

@@ -1,0 +1,121 @@
+# T-S18 pickups visibility + visible upgrade changes — MC 11201 (code, 2026-10-23)
+# Repo: /home/claudecode/Games/hollow_dawn_3d  base master >= ba123e8 (VERIFIED at ba123e8)
+# Owner ask (verbatim): "visible changes when upgrading skills. Also gold/exp is
+# invizible right now" (MC 11190 playtest root cause: no renderer ever read
+# world.coins/gems/heals; upgrades only showed HUD-row deltas).
+# Harness: godot/sim/upgrades_visual_capture.gd (SceneTree capture, biome
+# TICK-determinism reused: Main instantiated in _initialize, wired at stage 0,
+# clock ONLY via fixed-count _main._step(1/60), seed HD3D_SEED=11201, xvfb
+# real GL llvmpipe) + tools/upgrades_visual_probe.py (the gate).
+# No second capture mechanism; no GPU used; :8123 untouched; v1 repo read-only.
+
+$ python3 tools/upgrades_visual_probe.py        # capture + gate, unfixed master
+
+--- RED table, UNFIXED master, final palette tests (run red3) ---
+== T-S18 pickups (MC 11201) — palette px within 16 px of each projected ground pickup; kind GREEN at >= 40 px on its best frame ==
+kind             A1          A2          A3          A4          A5          A6          A7       max  verdict
+coins             0           0           0           0           0          24          22        24 RED
+gems              0           0           0           0           0           0           0         0 RED
+heals             0           0           0           0           0           0           0         0 RED
+== T-S18 weapon scaling (MC 11201) — effect-zone palette px, Lv1 vs Lv8 (halo additionally counts orbit blobs via connected components); GREEN at delta >= 25% and Lv1 >= 12 px ==
+family        px_L1      px_L8   delta%     halo blobs  verdict
+talon          837       1556      86%                 GREEN
+ember             0          0       0%                 RED        # strict EMBER test blew out; recalibrated blow-out tolerant
+cleaver          41         83     102%                 GREEN
+halo            131        261      99%         2 -> 4  GREEN
+ward            15         15       0%                 RED
+spike          226        226       0%                 RED
+families scaled: 4/6 (gate >= 5)
+GATE: RED ROWS PRESENT  (probe exit 1)
+FIRSTKILL tick=477 t=7.950 kills=1   HEALWIN tick=176 t=171.017 heals=1 kills=436
+RED honesty notes (declared):
+* master already scaled 4/6 families — the table records that honestly; the two
+  0 % rows (ward, spike) are exactly the damage-only-level families this card
+  fixes, and pickups are the no-draw-pass finding (0 px; the 24 px coin rows
+  are dune-scarab bodies sharing the gold hue, under the 40 px threshold).
+* Calibration between the first RED draft and the final tests (all measured on
+  the RED frames, none guessed): gem green test tightened (moorland grass
+  speckles peak g 137/g-r 64 — an earlier draft let them through at 42 px);
+  EMBER test keyed on the r-b axis (additive orbs blow out the G channel:
+  measured (255,250,122)); MOON b>=40 rides the measured v1-parity-alpha ring
+  band (b 52..65). Under the FINAL tests the master ward/spike rows keep delta
+  0 % because their L1/L8 states are pixel-identical on master — RED stands
+  for any threshold.
+
+$ # product fixes: godot/scripts/pickup_viz.gd NEW (4 §b draws, billboards,
+$ # coin.png/gem/cross+glow, PICK_Y 0.28, zero gameplay change); main.gd +
+$ # var/_pvz wiring; sim_headless.gd draws row +pickups; viz_fx.gd ward band
+$ # inner 0.82-0.03*(L-1) (cached mesh per level) + spike shards 8..SPARKS(20)
+$ # by level; DESIGN-3D §b/§f/§i + LEDGER rows. Two capture-side bugs fixed
+$ # with lessons in comments: stage-8 swallowed by "<= 2+N" bound (shifted B
+$ # legs), and Basis.scaled() on the rotated billboard mixing Y/Z scales
+$ # (vertical heal arm collapsed; ASCII pixel probe caught it -> _bb columns).
+
+$ python3 tools/upgrades_visual_probe.py        # capture + gate, FIXED tree
+
+--- GREEN table, fixed tree ---
+== T-S18 pickups (MC 11201) — palette px within 16 px of each projected ground pickup; kind GREEN at >= 40 px on its best frame ==
+kind             A1          A2          A3          A4          A5          A6          A7       max  verdict
+coins             0           0           0          26         133         212         219       219 GREEN
+gems              0           0         588        2155        5154        6283        7300      7300 GREEN
+heals             0           0           0           0           0           0          76        76 GREEN
+== T-S18 weapon scaling (MC 11201) — effect-zone palette px, Lv1 vs Lv8 (halo additionally counts orbit blobs via connected components); GREEN at delta >= 25% and Lv1 >= 12 px ==
+family        px_L1      px_L8   delta%     halo blobs  verdict
+talon          5059       8568      69%                 GREEN
+ember            65        194     198%                 GREEN
+cleaver          41         83     102%                 GREEN
+halo            131        261      99%         2 -> 4  GREEN
+ward           2369       4517      91%                 GREEN
+spike           111        266     140%                 GREEN
+families scaled: 6/6 (gate >= 5)
+GATE: ALL GREEN   (PROBE_EXIT=0)
+
+$ python3 /tmp/stage/mutate.py .tmp/upgrades-visual-shots && \
+  python3 tools/upgrades_visual_probe.py --gate .tmp/upgrades-visual-shots-mut
+planted: all pickup windows in all A-shots blurred; halo-L8 and spike-L8 dimmed x0.3
+--- MUTATION-RED (exit 1, rows RED exactly as planted) ---
+coins 0 0 0 0 0 0 2 max2 RED   gems all 0 RED   heals all 0 RED
+halo  131 -> 0 blobs 2 -> 0 RED ; spike 111 -> 0 RED ; families scaled 4/6 < 5
+GATE: RED ROWS PRESENT   MUT_GATE_EXIT=1
+$ python3 tools/upgrades_visual_probe.py --gate .tmp/upgrades-visual-shots
+GATE: ALL GREEN   RESTORE_EXIT=0
+
+--- regressions (fixed tree, this session) ---
+$ python3 -m pytest -q
+78 passed in 0.30s                                    # baseline 78 held; no test files touched
+$ python3 tools/strips_gate_check.py .tmp/hd3d-strips-s2p-dump.jsonl
+GATE: ALL GREEN (19 checks)                           # existing dump, as baseline
+$ python3 tools/biome_readability.py
+== T-S10 biome readability (MC 11159) — floor lum <= 34, block <= 48 px, hero/floor >= 2.0 ==
+biome     floor_lum    block_px    hero/floor  verdict
+grass          14.7          16          4.77  GREEN
+desert         17.8           8          3.85  GREEN
+frozen         15.4          24          4.53  GREEN
+tundra         17.5           8          3.94  GREEN
+GATE: ALL GREEN                                       # BIOME_EXIT=0 — pickups land on top of the floor stats, not into them
+
+# §b draws: sim_headless draws row now carries "pickups": 4 (24 total <= planned 33).
+# Screenshots (for ORCH eyes): assets/screens/pickups-visible.png (A7: Dawnlight
+# cross+glow, gem field, coins), assets/screens/upgrade-scaled.png (halo Lv8,
+# four orbit blobs vs Lv1's two).
+# Gameplay: world.gd/render.gd data untouched — same drop rates, radii, values.
+#
+--- REBASE ADDENDUM (push-time, same day) ---
+# origin had moved +4 (T-S17 doc cards + T-M1a DawnWell save + T-M1b carry caps).
+# Rebased --autostash; ONLY LEDGER.md conflicted (both appended rows — kept both).
+# Product merge auto-clean: main.gd carries upstream's DawnWell boot + this
+# card's _pvz wiring. Full suite on the rebased tree:
+#   $ python3 -m pytest -q
+#   103 passed in 18.05s      (78 base + 14 test_save + 1 carry-cap, upstream's; zero failures)
+# ENVIRONMENT GOTCHA found (upstream's own ensure_class_cache is correct, the
+# workspace was stale): godot/.godot/ class cache predates upstream save.gd ->
+# 7 spurious test_save errors "Identifier DawnWell not declared"; deleting the
+# gitignored godot/.godot/ (canonical --import rebuild) cleared it. Not a
+# product defect, not from this card's change.
+# GREEN re-run on the REBASED tree (green6): tables BYTE-IDENTICAL to green4 —
+# coins 219 / gems 7300 / heals 76 px, families 6/6 (69/198/102/99/91/140 %,
+# halo 2->4), GATE: ALL GREEN, PROBE_EXIT=0. Tick-determinism confirmed
+# end-to-end: identical shots across two independent captures.
+# Mutation-red re-run on the shipped shots: MUT_EXIT=1 (all three pickup rows +
+# halo + spike RED exactly as planted), restore RESTORE_EXIT=0.
+VERIFY_EXIT=0

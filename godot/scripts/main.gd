@@ -18,6 +18,7 @@ var _rig: Node3D
 var _ground: MeshInstance3D
 var _viz: Node3D
 var _fxv: Node3D
+var _pvz: Node3D # T-S18 pickup layer (MC 11201), reads world pickup arrays only
 var _pawn: Node3D
 var _hud: CanvasLayer
 var _screens: CanvasLayer
@@ -82,6 +83,12 @@ func _ready() -> void:
 	_fxv.game = game
 	_fxv.sim = fx
 	add_child(_fxv)
+	# T-S18 pickup layer (MC 11201): §b's planned gem/coin/dawnlight/glow
+	# MultiMeshes reading world.coins/gems/heals only — zero gameplay change.
+	_pvz = preload("res://scripts/pickup_viz.gd").new()
+	_pvz.game = game
+	_pvz.world = world
+	add_child(_pvz)
 
 	_hud = preload("res://scripts/hud_3d.gd").new()
 	_hud.game = game

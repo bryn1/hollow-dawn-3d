@@ -17,7 +17,10 @@ extends Node3D
 
 # §i draw column: 6 weapon classes, ember = orb + trail => 7 batched draws.
 const FX_DRAWS_MAX := 7
-const SPARKS := 16 # spike ground-burst shards per burst (brief cap: <= 20)
+const SPARKS := 20 # spike ground-burst shard CAP (brief §i row 4: <= 20; the
+	# suite pins this constant's name and cap). T-S18: the live COUNT rides
+	# spike level 8..20 under this cap (see _shards) — Lv1 keeps a quiet
+	# 8-shard burst, Lv8 saturates the §i budget.
 
 # Ground-plane decal heights (above ground quad y=0, below entity bodies).
 const Y_DECAL := 0.03 # talon wedge + ward ring + spike shards
@@ -42,7 +45,7 @@ func _ready() -> void:
 	_orb = _fx_mm(_orb_mesh(), _mat(GameRenderer.EMBER, true))
 	_trail = _fx_mm(_trail_mesh(), _mat(GameRenderer.EMBER, true, 0.45))
 	_axe = _fx_mm(_axe_mesh(), _mat(GameRenderer.BONE, false))
-	_ring = _fx_mm(_annulus_mesh(), _mat(GameRenderer.MOON, true))
+	_ring = _fx_mm(_annulus_mesh(0.82), _mat(GameRenderer.MOON, true))
 	_halo = _fx_mm(_orb_mesh(), _mat(GameRenderer.EMBER, true))
 	_shard = _fx_mm(_shard_mesh(), _mat(GameRenderer.ICHOR, true))
 
@@ -176,12 +179,32 @@ func _write_rings(s: float) -> void:
 		var r: Dictionary = sim.rings[-1]
 		var prog: float = 1.0 - r.life / r.max
 		var rm: float = r.r * s * (0.55 + 0.5 * prog) # expanding pulse, §i
+		# T-S18 (MC 11201) VISIBLE UPGRADES, declared: the ward's per-level
+		# sim quantity is DAMAGE ONLY (weapons.gd:145-148 — tick r stays the
+		# constant 80 px at every level), so a larger visible ring would LIE
+		# about the damage range (the DoD forbids any sim change here). The
+		# level therefore reads as INTENSITY: the annulus band widens from
+		# Lv1's v1-parity inner ratio 0.82 down to 0.61 at Lv8 (band area
+		# ~ x1.9 — the probe's measured delta), radius stays sim-truth.
+		mm.mesh = _ring_mesh(0.82 - 0.03 * float(_level("ward") - 1))
 		mm.set_instance_transform(0, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * rm),
 			Vector3(game.player.x * s, Y_DECAL + 0.01, game.player.y * s)))
 		_ring.material_override.albedo_color.a = 0.25 * r.life / r.max
 	else:
 		_ring.material_override.albedo_color.a = 0.0
 	_counts.rings = mm.instance_count
+
+
+# One cached annulus per ward level (max 8 meshes, built once on demand) —
+# §b keeps this ONE ring draw.
+var _ring_meshes := {}
+
+
+func _ring_mesh(inner: float) -> ArrayMesh:
+	var key := int(round(inner * 100.0))
+	if not _ring_meshes.has(key):
+		_ring_meshes[key] = _annulus_mesh(inner)
+	return _ring_meshes[key]
 
 
 func _write_bursts(s: float) -> void:
@@ -195,9 +218,17 @@ func _write_bursts(s: float) -> void:
 	var b: Dictionary = sim.bursts[-1] # cd >= 1.95 s > life 0.25 s
 	var prog: float = 1.0 - b.life / b.max
 	var rm: float = b.r * s * (0.25 + 0.75 * prog)
-	mm.instance_count = SPARKS
-	for i in SPARKS:
-		var a := float(i) / float(SPARKS) * TAU
+	# T-S18 (MC 11201) VISIBLE UPGRADES, declared: like ward, the spike's
+	# per-level sim quantity is DAMAGE ONLY (weapons.gd:149-166 — burst r
+	# stays the constant 56 px), so the burst RADIUS stays sim-truth and the
+	# level reads as shard COUNT: 8 at Lv1 (v1-parity quiet burst) up to the
+	# §i budget cap 20 at Lv8 (the count rides levels inside the §i <= 20
+	# cap the row always carried; sim_headless/SimCombat cap_violations
+	# re-checks exactly this bound on every FX sample).
+	var n := _shards()
+	mm.instance_count = n
+	for i in n:
+		var a := float(i) / float(n) * TAU
 		var dx := cos(a)
 		var dz := sin(a)
 		var f := frame_xz(dx, dz)
@@ -206,7 +237,12 @@ func _write_bursts(s: float) -> void:
 			Vector3(b.x * s + dx * rm, Y_DECAL + 0.2, b.y * s + dz * rm)))
 	_shard.material_override.albedo_color.a = 0.6 * b.life / b.max
 	_counts.bursts = 1
-	_counts.shards = SPARKS
+	_counts.shards = n
+
+
+func _shards() -> int:
+	var l := _level("spike")
+	return mini(8 + (l - 1) * 12 / 7, SPARKS)
 
 
 func _fx_mm(mesh: Mesh, mat: StandardMaterial3D) -> MultiMeshInstance3D:
@@ -263,15 +299,16 @@ func _wedge_mesh() -> ArrayMesh:
 	return st.commit()
 
 
-func _annulus_mesh() -> ArrayMesh:
-	# Ward ring-pulse decal: flat annulus, inner 0.82 of unit outer radius.
+func _annulus_mesh(inner: float) -> ArrayMesh:
+	# Ward ring-pulse decal: flat annulus, inner ratio of unit outer radius
+	# (T-S18: the ratio rides ward level — _ring_mesh caches one per level).
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in 24:
 		var a0 := float(i) / 24.0 * TAU
 		var a1 := float(i + 1) / 24.0 * TAU
-		var i0 := Vector3(sin(a0), 0, cos(a0)) * 0.82
-		var i1 := Vector3(sin(a1), 0, cos(a1)) * 0.82
+		var i0 := Vector3(sin(a0), 0, cos(a0)) * inner
+		var i1 := Vector3(sin(a1), 0, cos(a1)) * inner
 		var o0 := Vector3(sin(a0), 0, cos(a0))
 		var o1 := Vector3(sin(a1), 0, cos(a1))
 		_tri(st, i0, o0, o1)

@@ -47,7 +47,9 @@ precondition (F-2), wight rest exemption (F-3), conftest cite fixed (F-4). Route
 gl_compatibility WASM, threads OFF (`project.godot:19`, `export_presets.cfg:23`). Budget is **per
 class, never per enemy**: draw count is horde-size-independent.
 - **Instancing (`godot/scripts/horde_viz.gd`):** one `MultiMeshInstance3D` per enemy class (8) +
-  player + boss + gem + coin + dawnlight; `MultiMesh.transform_array` rewritten every frame —
+  player + boss + gem + coin + dawnlight (the gem/coin/dawnlight + dawn-glow rows LANDED as their
+  own read-only node `pickup_viz.gd`, T-S18 MC 11201, not inside horde_viz — same mechanism, one
+  seam per data source); `MultiMesh.transform_array` rewritten every frame —
   position, yaw-sway, lean, squash, scale (this one mechanism IS the horde animation, §c; member
   VERIFIED on the pinned binary). Per-type tint (v1 `tint_of`, `render.gd:41-42`) = **one
   `StandardMaterial3D` per class with `albedo_color = tint_of(type)`** (both VERIFIED by ClassDB
@@ -197,6 +199,10 @@ godot/scripts/horde_viz.gd      NEW — per-class MultiMeshes + per-frame transf
 godot/scripts/hero_pawn.gd      NEW — skinned player + boss (AnimationTree, retarget, iframes
                                 alpha 0.55, L5 GLB swap; §c/§d)
 godot/scripts/viz_fx.gd         NEW — halo MM passes + weapon-FX emitters (§i/§b)
+godot/scripts/pickup_viz.gd     NEW (T-S18 MC 11201) — coin/gem/Dawnlight-cross billboards +
+                                Dawnlight glow MM reading world.coins/gems/heals ONLY (the §b
+                                gem/coin/dawnlight/dawn-glow rows finally landed; v1 sizes/glow,
+                                no spawn-pop, zero gameplay change)
 godot/scripts/hud_3d.gd         NEW — hud.gd ported to a CanvasLayer over 3D + boss bar (§d)
 godot/scripts/render.gd         DECIDED — KEEP AS DATA MODULE ONLY: `class_name GameRenderer` +
                                 BIOMES/biome_at/SIZES/ENEMY_TINTS/BIOME_TINTS/tint_of/glow consts
@@ -256,6 +262,13 @@ column below IS the "FX ≤ 7" of §b):
 | ward (`weapons.gd:145-148`: cd 0.45 at `:146`; the 0.3 s tick is `e.hit_cd` at `:95` — cycle-1 cite fixed) | expanding ring-pulse decal, 0.12 s | 1 |
 | spike (`weapons.gd:149-166`, r 56 px, life 0.25) | radial shard particle burst under the densest cluster | 1 |
 Colours carried from v1 (MOON/EMBER/ICHOR/BONE, `render.gd:12-18`).
+**T-S18 (MC 11201) — upgrades must be VISIBLE:** ward and spike are the two families whose
+per-level sim quantity is DAMAGE ONLY (`weapons.gd:145-166` — tick r 80 and burst r 56 px are
+level constants), so their radii stay sim-truth and the level reads as **intensity**: ward ring
+band widens (annulus inner 0.82 → 0.61 at Lv8, band area ≈ ×1.9, one cached mesh per level) and
+spike shard COUNT rides 8 → 20 inside this table's ≤ 20 cap. Measured per family (Lv1 vs Lv8
+effect-zone pixels; halo additionally blob-counted via connected components) by
+`tools/upgrades_visual_probe.py`.
 
 ## (j) UPGRADE CARDS (level-up UI) — owner DoD
 Level-up stays a **2D `CanvasLayer` overlay** over the 3D world (`screens.gd:22` layer 10; cards
