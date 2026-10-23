@@ -3,6 +3,14 @@
 - Authored 2026-10-23 by the `design` profile. Inputs read this session: `docs/VS-FEATURES.md`
   (MC 11195 inventory), `LEDGER.md`, `docs/DESIGN-3D.md`, `godot/scripts/` (render.gd BIOMES,
   world.gd ENEMY_TYPES, weapons.gd META, levelup.gd PASSIVES, game_state.gd), `tools/` gates.
+- **REV 2, 2026-10-23, after DA cycle 1** (verdict FIX: `docs/PARITY-ROADMAP-DA.md` @ 000ba42,
+  MC 11202 — that DA doc stays immutable). The ranked 7-edit fix list is folded in: P1 carry-cap
+  + canonical worst-case loadout; suite-pin names/locations corrected (re-verified against tests/
+  this session); draw plan 33→40 declared as a divergence with its retirement row; vague
+  acceptance rows tightened (pixel floors, named shot paths, pinned constants, named
+  observables); spine doc-sync row; persistence as its own M1 work-package, M1 re-sized to
+  12–14 seat-days; M4 asset count corrected; one DA row rebutted with evidence (footer, and
+  flagged in the cycle-2 RESULT).
 - **STANDING CONSTRAINT (honesty rule, binding on every card this roadmap spawns):** the VS
   numbers are THEIRS. Parity means equivalent SYSTEMS with our own content and numbers —
   never copied values, never copied assets, never their flavor text. The VS-FEATURES.md
@@ -21,13 +29,13 @@
 | # | Family | CURRENT (code truth) | VS (cite: VS-FEATURES section ~line) | Roadmap parity target (our system, our numbers) |
 |---|--------|----------------------|--------------------------------------|--------------------------------------------------|
 | 1 | Weapons: count + behavior | 6 (`weapons.gd IDS:6`), one behavior each, MAX_LEVEL 8 (`:7`), flat `META` table, `_fire` match | 273 total = 138 base + 94 evo + 7 unions + 4 gifts + 19 counterparts + 11 special (S1 tables ~19–304; tally ~710–712); base max lvl mostly 8 (S1 intro ~15) | 16 by M1, 24 by M2, 26+ by M4 — count is NOT the parity metric; behavior-class coverage + level/pool mechanics are. Their 273 incl. DLC is not a cloning target |
-| 2 | Evolutions + unions | none | max weapon + carried passive + chest after 10:00 converts (S3 ~354–358); unions = 2 maxed weapons (S1.3 ~266–276); combo totals ~367 | M1: chest-driven evolutions (our rule, our time gate); M2: 2 unions |
-| 3 | Passives | 5 × 5 stacks (`levelup.gd:8-14`), no carry cap | 33 total (S2 ~309–311); max 6 different carried per run (S2 ~313) | 15 by M1 (one per evolution partner), 20 by M2; carry-cap rule ours |
+| 2 | Evolutions + unions | none | max weapon + carried passive + chest after 10:00 converts (S3 ~354–358); unions = 2 maxed weapons (S1.3 ~266–276); transforms inventory parse: 29 base + 64 DLC = 93 combos (S3 ~367) | M1: chest-driven evolutions (our rule, our time gate); M2: 2 unions |
+| 3 | Passives | 5 × 5 stacks (`levelup.gd:8-14`), no carry cap | 33 total (S2 ~309–311); max 6 different carried per run (S2 ~313) | 15 by M1 (one per evolution partner), 20 by M2; **M1 carry cap = 6 passive KINDS + 6 weapon slots, OUR numbers — M1 feature 3 (DA c1 P1)**; VS weapon-slot rule absent from VS-FEATURES (inventory gap — re-verify before citing any number of theirs) |
 | 4 | Stages + gimmicks | ONE arena, 4 biome bands t=0/150/300/450 (`render.gd BIOMES:66-75`), no per-stage rules | 25 stages, each time-limited (15–30 min) with gimmicks: stage items, traps, boss (S4 table ~382–409; Reaper at limit ~378) | M3: 3 selectable stages via a stage table riding the band mechanism; 1 cheap gimmick per stage from existing mechanisms |
 | 5 | End-bosses + minibosses | 1 boss (warden hp 3000 @ t=540, `world.gd:5,24`) | end-of-stage bosses per stage (S5 table ~427–439) + 72 named wave bosses (S5 ~441–457); boss chest-drop rule (S5 ~419) | M1: 2 minibosses; M2: +2; M3: 1 end-boss per stage (4 total); event swarm waves M2+ |
 | 6 | Endless mode | none — WIN_TIME 600 (`game_state.gd:7`) | cycles restart waves with per-cycle HP/qty/damage scaling; Reaper only in non-Endless (S5 ~465–471); Limit Break beyond max (S5 ~473) | M2: endless with OUR scaling curve; M4: limit-break-lite |
 | 7 | Characters + unlocks | 1 fixed character, talon start (`game_state.gd:56`) | 165 (S6 ~481; roster CONTRADICTED at 168 — treat count as ~165); gold-purchase with additive price scaling; secret unlocks (S6 ~481–483) | M4: 6 selectable, each start-weapon + one signature stat rule; purchase price curve OURS |
-| 8 | Meta shop + refund | none — gold dies with the run (score adds it, `main.gd:239`); no save file | 24/25 PowerUps table (S7 ~573–605; count CONTRADICTED 24-vs-25); refund-all rule (S7 ~609); disable-when-maxed rule (S7 ~610) | M1: meta shop (12 power-ups M1 → ~18 M2, our ranks/prices) + refund; persist via `user://save.json` |
+| 8 | Meta shop + refund | none — gold dies with the run (score adds it, `main.gd:239`); no save file | 24/25 PowerUps table (S7 ~573–605; count CONTRADICTED 24-vs-25); refund-all rule (S7 ~609); disable-when-maxed rule (S7 ~610) | M1: meta shop (12 power-ups M1 → ~18 M2, our ranks/prices) + refund; persist via `user://dawnwell.json` (format + reset rules: M1 feature 1) |
 | 9 | Pickup systems | gem/coin/heal in sim only, NO 3D draw (in-flight visibility fix); no chests, no merge, no bags; boss +50g flat (`world.gd:126–138`) | chests w/ tiers + fixed first-6 sequence (S8 ~651–656); 400-gem merge-to-red rule (S8 ~644); Coin Bag / Rich Coin Bag + light-source pickups (S8 ~649, S7 ~628) | M1: chests (single tier); M2: 3 tiers + gem-merge cap (ours) + coin-bag tiers |
 | 10 | Achievement-chain unlocks | none (no counters persisted) | passives/weapons/stages gated by achievement chains (S7 ~617–624: e.g. "Level up X to lvl 4" → passive; stage unlock = reach lvl N in previous stage ~624) | M2: unlock-flag store gating the level-up pool; M4: achievements page (~20 rows) |
 | 11 | Co-op | none | local co-op up to 4; changes pooling/shared chests (S8 ~671–674) | EXCLUDED — see §3 |
@@ -39,40 +47,102 @@
 Release spine for every phase (unchanged fleet process): version bump + release-notes line,
 web double-export + win export RC=0, VM120 field test (session-1 screenshot), playwright
 0 console errors, `gh release create` with both zips + digests (S9/S11 LEDGER rows are the
-pattern). Suite posture: the v1-verbatim pin era ENDS at the first deliberate divergence —
-the same commit that changes a pinned number RETIRES its test row and adds the new pin
-("test_win_threshold_600" → new value) — never leave a RED row.
+pattern). **Doc-sync row in the spine (DA c1 §5-2, retired-claim doctrine):** every deliberate
+divergence rewrites the docs it falsifies IN THE SAME RELEASE COMMIT — v1.2.0 rewrites
+README.md:12–14 ("same … numbers as v1 … 10-minute win") and the DESIGN-3D §b/§d notes it
+breaks; the close's grep for the retired claim must return zero. Suite posture: the
+v1-verbatim pin era ENDS at the first deliberate divergence — the same commit that changes a
+pinned number RETIRES its test row and adds the new pin — never leave a RED row; M1's exact
+retire-and-replace list is named in M1 feature 7. **Version convention (DA c1 F-1):** major =
+a new player-navigated UI surface (M3 stage select → v2.0.0); new subsystems and changed run
+numbers ride minor (M1 → v1.2.0, M2 → v1.3.0, M4 → v2.1.0). Stated so M3's major is a rule,
+not post-hoc.
 
-Engine budgets, standing for all phases (from DESIGN-3D §b, restated): concurrent horde
-cap **400 alive** (new hard rule M1: spawns pause at cap — our analogue of their 300-alive
-pause, S5 ~422, OUR number); draw plan ≤ 40 / **hard cap 60** (every new FX class batches
-into MultiMesh pools; re-tally via the art-probe fixture per phase); sim legs stay
-seed-pinned headless runs; web rAF reported against the DECLARED software-GL floor (~20 fps
-llvmpipe), never owner-hardware claims.
+Engine budgets, standing for all phases. **Draw plan 33→40 declared as a deliberate
+divergence (DA c1 E-2c/C-1):** DESIGN-3D §b pins planned-33 and
+`tests/test_art_integration.py:42,144` asserts it — the M1 commit that raises the plan to 40
+RETIRES and REPLACES that row (same commit, plus the §b note rewrite via the spine doc-sync
+row). Hard cap stays **60**; re-tally via the art-probe fixture per phase. **Canonical
+WORST-CASE LOADOUT:** every budget acceptance line (≤ 40 planned, ≤ 60 total, 400-alive) is
+computed against one NAMED loadout, never whatever a verifier's sim leg happened to own —
+six weapon slots (feature 3) filled by the max-FX-class set, all at L8/evolved: Red Wail,
+Thousand Darts, Rot Spiral, Judgement Cross, Eternal Matins, The Sluice, with evolution
+partners Cracked Heart / Iron Wrap / Tall Candles / Four-Leaf Charm / Knotted Chain /
+Loadstone carried (6/6 passive kinds). Expected draw under it ≈ 37–40 (§b 33 + 2 miniboss
+class MMs + zone/chest FX ≈ 2–3; DA c1 C-1's own re-tally) ≤ 60. Horde cap **400 alive**
+(new hard rule M1: spawns pause at the cap in the single spawn loop `world.gd:83-92`; our
+analogue of their 300-alive pause S5 ~422, OUR number); a verifier leg with fewer owned
+weapons gets NO budget credit (DA c1 A-1). Sim legs stay seed-pinned headless runs.
+**Web-rAF honesty (DA c1 C-2):** playwright rAF is measured in the 10 s boot window only
+(24.5/20.4 fps llvmpipe declared floor); endgame frame-time under the worst-case loadout is
+proven ONLY by the real-clock sim tick-rate rows (s8 pattern) plus a named per-frame draw
+re-tally row — no rAF claim is made for endgame.
 
-### M1 — v1.2.0 "Evolutions & Dawn Well" (~10 seat-days)
+### M1 — v1.2.0 "Evolutions & Dawn Well" (~12–14 seat-days; re-sized after DA c1 A-2 — persistence is a NEW subsystem and the ledger's card granularity says 12–14, not 10)
 
 Prereq (in flight, not counted here): gold/XP pickup visibility fix + S12 playtest verdict
-(visible gold/XP, readable upgrade cards) — §4.
+(visible gold/XP, readable upgrade cards) — §4; DA c1 E-3 flags S12 has no repo trace, the
+orchestrator confirms the card on the board before M1 build cards are filed.
 
-1. **Meta shop "Dawn Well" + refund.** Persistent gold (`user://save.json`); 12-power-up
-   table (our names/ranks/prices; effect stats ours) bought with run-gold; refund-all button
-   (their refund semantics S7 ~609, our rounding honest). ACCEPT: pytest regex-pin of the
-   power-up table; sim leg — run ends, gold persists, buy rank, next run sees `+stat`
-   (snapshot row proves it); refund returns gold minus declared fee; shop UI Xvfb screenshot;
-   planted-red: tamper save → migration leg must fail loudly.
-2. **Run length + bosses.** WIN 600→900 s (suite row retired+new pin in same commit);
+1. **W-P persistence — the Dawn Well save subsystem (NEW subsystem, own work package; DA c1
+   A-2: grep `user://` across godot/ = ZERO hits, none exists).** File `user://dawnwell.json`,
+   format `{version:int, gold:int, ranks:{powerup_id:rank}, flags:{unlock_id:1}}`. Reset/
+   recovery rules (all observables, no "fails loudly"): missing file → fresh defaults;
+   undecodable → rename to `dawnwell.corrupt.json`, start with defaults, print
+   `SAVE_LOAD_FAIL path=...` to stderr (the pytest leg asserts BOTH the rename and the
+   stderr marker — planted-red both sides); `version` newer than code knows → refuse load,
+   same quarantine path; a save from an older version migrates field-by-field (new fields
+   default). Meta ranks are consumed at `start_run()` (`game_state.gd:44-59`) so snapshot
+   `maxHp`/`xpNext` legitimately shift with bought ranks (stated, contract-visible but
+   field-compatible). ACCEPT: pytest pin of the format keys + reset-rule table; planted
+   corrupt/quasi-future-version save fixtures (RED+green pairs); quarantine-file existence
+   assertion in the leg output.
+2. **Meta shop "Dawn Well" + refund.** 12-power-up table (our names/ranks/prices; effect
+   stats ours) bought with run-gold; refund-all button (their refund semantics S7 ~609;
+   OUR fee pinned as a table row — `REFUND_FEE_PCT := 5` (floor division), governed by the
+   same pytest regex-pin as the table, not prose). **M1's power-up effects are restricted to
+   snapshot-EXPOSED stats (maxHp, xpNext, gold-rate via gold/kills rows) (DA c1 B-5);**
+   speed/area/cooldown/luck-class powerups are deferred to M2 and proven by named
+   `HD3D_OUT` dump-probe rows, never by the 12-field Contract-B snapshot. ACCEPT: pytest
+   regex-pin of the power-up table incl. REFUND_FEE_PCT; persistence+shop leg — run ends,
+   gold persists, buy rank, next run's `start_run()` applies it: per power-up dump-probe row
+   `dawnwell.<id>.rank` and matching snapshot row (`maxHp == 100 + Σ maxHp-ranks*10`,
+   `xpNext == xp_need(level)` unchanged where applicable) — exact named checks, not "+stat";
+   refund leg asserts gold returned == Σ spent floor × (1 − REFUND_FEE_PCT/100); shop UI leg
+   under Xvfb, shot path `assets/screens/m1-dawnwell.png`, shop-panel crop non-bg pixels
+   **≥ 200** vs a hidden-UI empty baseline (S8 HUD pixel-floor pattern; DA c1 B-1);
+   planted-red: hand-corrupt the save → quarantine leg rows go RED/GREEN as named above.
+3. **Carry caps (DA c1 P1/A-1 — without these the budget rows are unbounded and unverifiable;
+   OUR numbers, named rule):** **6 weapon slots + 6 passive KINDS** (existing 5-stack cap
+   per passive kind unchanged). Pool consequence: `build_pool` (`levelup.gd:17-36`, the one
+   pool source) drops NEW-weapon offers when 6 slots are full (owned-weapon upgrades stay
+   offerable) and drops a passive KIND once it is the 6th distinct carried; evolutions
+   replace in-slot, never add a 7th. Honest inventory note: VS-FEATURES carries ONLY the
+   6-passive rule (:313); their weapon-slot count is an **inventory gap** — do NOT invent
+   their number; 6/6 is OUR rule, re-verify the slot rule publicly before the gap table ever
+   cites it as theirs. ACCEPT both sides: full-slots leg — scripted policy owns 6 weapons,
+   100 dumped offers contain ZERO kind:"weapon" rows (RED if pool leaks); <6 leg — new-weapon
+   offers present; same both-sides pair for passive kinds; the §2 WORST-CASE LOADOUT sim leg
+   runs under exactly this cap.
+4. **Run length + bosses.** WIN 600→900 s (BOTH suite pins retired+replaced — feature 7);
    2 minibosses @ t=600, 780 (static meshes + Route-A gait per DESIGN §c — no new UniRig
    runs); horde cap 400 rule. ACCEPT: sim_s8-style real-clock legs at the new WIN; max-alive
-   row ≤ 400 in the 900 s dump; boss/miniboss chest-drop roll rows (their chest-on-kill rule
-   S5 ~419, our rate).
-3. **Chests + evolutions.** Chest pickup from boss/miniboss kills; opening pauses and grants
-   a reward card (level-up fallback = gold, ours). Evolution rule (our gate values): weapon
-   MAX + partner passive carried (any rank) + chest opened at t ≥ 600 → replace base with
-   evolved, reset its cooldown. ACCEPT: `sim_evolve.gd` scripted leg (owns L-max weapon +
-   partner → chest after gate → evolved id in `game.weapons`, base removed); planted-red
-   chest at t < gate must NOT evolve; evolution table pytest pin; chest-open screenshot.
-4. **10 new weapons** (names ours; archetype = behavior class; mechanism = reuse):
+   row ≤ 400 in the 900 s dump **under the WORST-CASE LOADOUT policy**; chest-drop rate
+   pinned as named consts in the `world.gd` HEAL_DROP_CHANCE pattern: `CHEST_CHANCE_BOSS :=
+   1.0` (guaranteed, S5 ~419 shape ref), `CHEST_CHANCE_MINIBOSS := 0.6`, pytest-pinned +
+   kill-leg roll rows (DA c1 B-3).
+5. **Chests + evolutions.** Chest pickup from boss/miniboss kills; opening pauses and grants
+   a reward card (level-up fallback = gold, ours). Phase decision stated (DA c1 A-2): chest
+   opening reuses the frozen `levelup` pause phase (menu|playing|levelup|gameover|win stays
+   the enum; Contract B untouched). Evolution rule (our gate values): weapon MAX + partner
+   passive carried (any rank) + chest opened at t ≥ 600 → replace base with evolved, reset
+   its cooldown. **Gate provenance (DA c1 G-1): 600 is OUR value — it is our own v1
+   WIN_TIME; their page also says 10:00 — coincidence stated so no later reading mistakes
+   it for a copied number.** ACCEPT: `sim_evolve.gd` scripted leg (owns L-max weapon +
+   partner → chest after gate → evolved id in `game.weapons`, base removed, slot count
+   unchanged); planted-red chest at t < gate must NOT evolve; evolution table pytest pin;
+   chest-open shot `assets/screens/m1-chest.png` non-bg pixels ≥ 200 vs empty baseline.
+6. **10 new weapons** (names ours; archetype = behavior class; mechanism = reuse):
 
    | ours | archetype (S1 row) | behavior (ours) | reuses | partner passive (new) → evolution |
    |---|---|---|---|---|
@@ -88,16 +158,35 @@ Prereq (in flight, not counted here): gold/XP pickup visibility fix + S12 playte
    | Doom Sigil | Pentagram (S1 ~34) | rare screen-clear blast | `_hit` full-screen, long cd | Gilded Skull (+xp) → Pale Moon (blast + gem rain) |
 
    ACCEPT: per weapon — sim leg owns it + kill attribution row (per-weapon-kills pattern from
-   S4); `_hit` remains the SINGLE damage entry; FX draws re-tallied ≤ cap (new: zones MM +1,
-   chest MM +1 → planned ≤ 40); 16 weapon icons visible on cards (screens leg, no-blank rule
-   stays); planted-red per new behavior (cooldown never reaches fire → leg goes RED).
-5. **10 partner passives** (15 total; each a stat row on GameState, our values).
-   ACCEPT: pytest pin table; one per-stat sim probe each.
+   S4); `_hit` remains the SINGLE damage entry; FX draws re-tallied ≤ cap under the
+   WORST-CASE LOADOUT (new: zones MM +1, chest MM +1 → planned 40, declared above); 16 weapon
+   icons visible on cards (screens leg, no-blank rule stays); planted-red per new behavior
+   (cooldown never reaches fire → leg goes RED).
+7. **10 partner passives** (15 total; each a stat row on GameState, our values) **and the M1
+   retire-and-replace suite list** (all rows retired AND replaced in the same commit —
+   locations re-grepped this session, see REBUTTAL):
+   - `tests/test_game_numbers.py::test_win_threshold_600` (:39) → new-value pin (900)
+   - `tests/test_biome_numbers.py::test_win_time_600` (:65) → new-value pin (900)
+   - `tests/test_biome_numbers.py::test_six_weapon_ids_and_meta` (:226, verbatim 6-IDS regex +
+     META name order) → 16-weapon IDS + META pin (REPLACE, not add)
+   - `tests/test_card_icons.py` PASSIVES↔PASSIVE_ICONS key-set pins (:81, :111, "both orders")
+     → 15-passive key sets + 10 new passive icon rows (the no-blank card rule keeps the
+     resolver total)
+   - `tests/test_art_integration.py` planned-33 assert (:42, :144) → planned-40 row (§b note
+     rewritten in the same commit)
+   - STAY-GREEN pairs (no retirement): `test_game_numbers.py::test_boss_at_540` (:35) +
+     `tests/test_boss_numbers.py::test_boss_spawns_exactly_once_at_540` (:64) — BOSS_AT
+     unchanged at 540; `MAX_PASSIVE_STACKS == 5` (test_biome_numbers.py:238) unchanged.
+   ACCEPT: pytest 100 % green on the M1 tip (no RED carry); each retired name returns zero
+   hits on grep (retired-claim doctrine); per-stat dump probe for each new passive.
 
 3090 asset rows (M1): **31 imagegen 2D icons** (10 weapon + 10 evolution + 10 passive +
 1 chest; 512² RGBA, imagegen spine + provenance rows, DESIGN-3D §j pattern) and
 **12 TRELLIS 3D meshes** (10 weapon meshes + 2 miniboss meshes; class tri budgets §b;
-minibosses static+gait, NOT skinned).
+minibosses static+gait, NOT skinned) — planned as **one batch + a declared re-roll reserve
+(~30 % of rows held)**: the ledger's own yield history (S1a 10/11 with the player row
+skipped, S1p remaster card, S1q regen card) says first-pass acceptance is not 100 %
+(DA c1 item-8/A-2). Same reserve wording applies to every phase's asset rows below.
 
 ### M2 — v1.3.0 "Depth & Cycles" (~7 seat-days)
 
@@ -149,8 +238,11 @@ Assets (M3): 3 seamless 1024² tiles (v2 recipe + biome_readability gate), 2 end
 4. **Player-character skins** — 5 extra TRELLIS meshes retargeted onto the EXISTING
    player rig + clips (tools/mocap pipeline; same 34-joint skeleton, no new rig class).
 
-Assets (M4): 6 character meshes + 6 rig-retarget runs (pipeline exists) = **6 TRELLIS**;
-**6 portraits + ~6 achievement badge icons** (badges may reuse existing icons — stated).
+Assets (M4): **11 TRELLIS-class items** — 6 character meshes + 5 alternate skins, each a
+DISTINCT mesh on the same 34-joint rig (DA c1 P2-6 fix: skins are real meshes, not re-tints;
+skins may share a decimated base but ship as their own GLB+tri dump rows) + 6 rig-retarget
+runs (pipeline exists, tools/mocap); **6 portraits + ~6 achievement badge icons** (badges may
+reuse existing icons — stated). Batch + ~30 % re-roll reserve as in M1.
 
 ### Stretch (unplanned, name only — no DoD here)
 Hidden-evolution relic chain (their rings/Metaglio route S3 ~369), more stages toward 5+,
@@ -181,15 +273,22 @@ merchant NPC, audio (already open polish), light-source destructibles.
   session by grep: no draw references outside world.gd).
 - **Biome v2 tiles merged** (T-S15, master 130b33d + tick-deterministic gate) → M3 stage
   tiles reuse the v2 recipe; `tools/biome_readability.py` is the stage-readability gate.
-- **Suite pins** — WIN_TIME 600 / BOSS_AT 540 are test-pinned (`test_game_numbers.py`);
-  M1's run-length change must retire+replace those rows in the same commit (no RED carry).
+- **Suite pins** (corrected per DA c1 E-2, re-grepped this session) — WIN_TIME 600 is pinned
+  TWICE: `tests/test_game_numbers.py:39` + `tests/test_biome_numbers.py:65`; BOSS_AT 540 twice:
+  `tests/test_game_numbers.py:35` + `tests/test_boss_numbers.py:64` (stays 540 in M1 — must
+  stay GREEN). M1's run-length change retires+replaces BOTH WIN pins in the same commit; the
+  full retire list is M1 feature 7 (no RED carry).
 - **Contract B snapshot** (exact 12 fields, `game_state.gd:87-104` + bridge/web JS) —
   meta/evolution state lives OUTSIDE the run snapshot (menu layer + new snapshot version if
   ever exposed); any field addition is an owner-visible contract change, flagged at M1 design.
 - **Draw/horde budget + Route A** (DESIGN-3D §b/§c) — every M-phase FX addition re-tallies
   the draw budget; no skinned horde, no per-enemy draws, ever.
 - **GPU windows (vm100 3090)** — TRELLIS/imagegen batches run per-phase off-peak with
-  drain_barrier + trap-close (S1a/S1p pattern); asset rows above assume one batch per phase.
+  drain_barrier + trap-close (S1a/S1p pattern); asset rows are planned as ONE batch per phase
+  **plus a declared re-roll reserve (~30 % of rows)** — S1a/S1p/S1q history shows first-pass
+  acceptance < 100 % (DA c1 item-8).
+- **S12 in-flight status (DA c1 E-3)** — UNVERIFIABLE from the repo (no S12 row in LEDGER,
+  no git trace); the orchestrator confirms the board card before M1 build cards are filed.
 - **Fleet law** — roadmap-gated build cards are filed ONLY after the DA SHIP on this
   roadmap (§5); each M-phase build parent then runs its own phase-0 front-matter where not
   already covered by this document.
@@ -213,5 +312,26 @@ architecture map = §1 + §4, phase plan = §2. The DA must check, at minimum:
 8. Effort sizing is honest for ~4 releases of systems + assets.
 9. Gap table VS column is section-cited and its own CONTRADICTED/UNVERIFIED caveats respected.
 10. The v1-verbatim suite retirement handling (retire+replace in same commit) is stated, not glossed.
+
+**Cycle state (rev 2):** DA cycle 1 ran — verdict FIX (`docs/PARITY-ROADMAP-DA.md` @ 000ba42);
+its ranked 7-edit list is folded into this rev. One DA fact-row is rebutted below (the fix
+list itself is adopted IN FULL — the rebuttal disputes an evidence claim, not the edit).
+Roadmap-gated build cards stay filed-only-after cycle-2 SHIP.
+
+## REBUTTAL (cycle-2 judgment material — fix list still adopted in full)
+
+- **DA E-2(a)/(b) fact-row is CONTRADICTED (re-grepped rev-2 session):** the DA says
+  `test_win_threshold_600` "does not exist" and WIN/BOSS pins live "in test_biome_numbers.py:65
+  / test_boss_numbers.py:64, NOT in test_game_numbers.py as §4 claims". Grep this session:
+  `tests/test_game_numbers.py:39` **defines** `def test_win_threshold_600()` (asserts
+  `const("WIN_TIME", GAME_STATE) == 600.0` + the main.gd gate regex) and `:35` defines
+  `test_boss_at_540` — the v1-verbatim copies, present and green. Rev-1 §4's attribution was
+  TRUE. The DA's SUBSTANTIVE finding is also true and is adopted in full: a SECOND pin pair
+  exists (`test_biome_numbers.py:65`, `test_boss_numbers.py:64`) and the IDS pin
+  (`test_biome_numbers.py:226`) plus the PASSIVES↔icons pins (`test_card_icons.py:81,111`)
+  and the planned-33 assert (`test_art_integration.py:42,144`) were unlisted — rev 2 names all
+  six obligations in M1 feature 7. Net effect: retirement list grew, nothing in the fix list
+  is refused; only the "no such test exists" evidence claim is rebutted, because an executor
+  trusting it would have DELETED a live green pin instead of retiring it deliberately.
 
 --- END ROADMAP ---
