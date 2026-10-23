@@ -13,6 +13,7 @@ var game: GameState
 var world: GameWorld
 var fx: WeaponSystem
 var bridge: Node
+var _dawnwell: DawnWell # meta-progression save (M1 W-P, MC 11205)
 var _rig: Node3D
 var _ground: MeshInstance3D
 var _viz: Node3D
@@ -32,6 +33,14 @@ func _ready() -> void:
 	fx = WeaponSystem.new()
 	fx.bind(world, game)
 	_web = OS.has_feature("web")
+
+	# M1 W-P persistence (MC 11205): load the Dawn Well save once at boot.
+	# A missing file is the normal first-run defaults case; an undecodable
+	# or future-version file quarantines itself inside load_save() (rename
+	# to dawnwell.corrupt.json + SAVE_LOAD_FAIL stderr line) and boot
+	# continues on defaults. Nothing here mutates it yet: the shop card
+	# (T-M1f) is the first consumer, run gold stays run-local.
+	_dawnwell = DawnWell.load_save()
 
 	# Visible layer (DESIGN-3D §a/§b): every node reads game/world/fx each
 	# frame; the sim stays 2D px and the viz converts to metres (S = 24).
@@ -242,3 +251,14 @@ func _score(stats: Dictionary) -> int:
 func _fmt_time(t: float) -> String:
 	var s := int(maxf(0.0, floor(t)))
 	return "%02d:%02d" % [int(s / 60.0), s % 60]
+
+
+# Save-on-meta-change funnel (MC 11205): the ONE place meta state is
+# persisted. The Dawn Well shop (T-M1f) mutates _dawnwell (gold / ranks /
+# flags) and calls this after EVERY mutation — save() writes the whole save
+# atomically (temp file + rename), and delete-while-running is UNDEFINED BY
+# DESIGN: the in-memory state re-creates the file at the next call
+# (PARITY-ROADMAP M1 feature 1). No caller mutates meta state on this card:
+# no shop UI, no run behavior change — the boot load above is the only use.
+func _meta_changed() -> void:
+	_dawnwell.save()
