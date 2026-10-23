@@ -3,6 +3,13 @@
 - Authored 2026-10-23 by the `design` profile. Inputs read this session: `docs/VS-FEATURES.md`
   (MC 11195 inventory), `LEDGER.md`, `docs/DESIGN-3D.md`, `godot/scripts/` (render.gd BIOMES,
   world.gd ENEMY_TYPES, weapons.gd META, levelup.gd PASSIVES, game_state.gd), `tools/` gates.
+- **REV 3, 2026-10-23, after DA cycle 2** (`docs/PARITY-ROADMAP-DA-c2.md` @ d2897da, MC 11203
+  — immutable): adoption audited 7/7 and the rev-2 REBUTTAL **UPHELD** (c2 PASS 2: c1
+  EVIDENCE-ERROR, both-pins-true, DA re-ran the greps + pytest 58 green itself). The 3 c2 P2s
+  land as exact edits (N-1 → feature 7 WEAPON-side icon-suite bullet; N-2 → §2 loadout
+  construction channel; N-3 → feature 3 passive clause mirrored to the weapon clause) and the
+  3 c2 P3s fold (N-4 write-path atomicity, N-5 re-estimate note, N-6 loadout wording); no
+  decomposition change.
 - **REV 2, 2026-10-23, after DA cycle 1** (verdict FIX: `docs/PARITY-ROADMAP-DA.md` @ 000ba42,
   MC 11202 — that DA doc stays immutable). The ranked 7-edit fix list is folded in: P1 carry-cap
   + canonical worst-case loadout; suite-pin names/locations corrected (re-verified against tests/
@@ -65,10 +72,19 @@ RETIRES and REPLACES that row (same commit, plus the §b note rewrite via the sp
 row). Hard cap stays **60**; re-tally via the art-probe fixture per phase. **Canonical
 WORST-CASE LOADOUT:** every budget acceptance line (≤ 40 planned, ≤ 60 total, 400-alive) is
 computed against one NAMED loadout, never whatever a verifier's sim leg happened to own —
-six weapon slots (feature 3) filled by the max-FX-class set, all at L8/evolved: Red Wail,
+six weapon slots (feature 3) filled by the class-covering set (activates the zone MM; every
+weapon-FX class live; fixture re-tally is the gate — c2 N-6), all at L8/evolved: Red Wail,
 Thousand Darts, Rot Spiral, Judgement Cross, Eternal Matins, The Sluice, with evolution
 partners Cracked Heart / Iron Wrap / Tall Candles / Four-Leaf Charm / Knotted Chain /
-Loadstone carried (6/6 passive kinds). Expected draw under it ≈ 37–40 (§b 33 + 2 miniboss
+Loadstone carried (6/6 passive kinds). **Construction channel (c2 N-2): the loadout is a
+DECLARED-PIN scripted leg** — pinned into `game.weapons`/`game.passives` via the existing
+`sim_boss.gd:215` pattern (`run.game.weapons = build # DECLARED pin (SimCombat pattern)`),
+zero new mechanism; PLAY-reachability of the full evolved set by 900 s is explicitly NOT
+claimed (≈ 30 level-up picks available vs ≈ 54 needed, and ≤ ~3 chest rolls available vs 6
+evolutions). The PLAYED cap-curve (what a real policy run actually owns at the caps) is a
+SEPARATE acceptance row: the M1 sim-policy leg dumps its owned-set rows and the offer-gating
+legs (feature 3) cover it — budget legs do not double as play-reachability claims.
+Expected draw under the pinned loadout ≈ 37–40 (§b 33 + 2 miniboss
 class MMs + zone/chest FX ≈ 2–3; DA c1 C-1's own re-tally) ≤ 60. Horde cap **400 alive**
 (new hard rule M1: spawns pause at the cap in the single spawn loop `world.gd:83-92`; our
 analogue of their 300-alive pause S5 ~422, OUR number); a verifier leg with fewer owned
@@ -78,7 +94,7 @@ weapons gets NO budget credit (DA c1 A-1). Sim legs stay seed-pinned headless ru
 proven ONLY by the real-clock sim tick-rate rows (s8 pattern) plus a named per-frame draw
 re-tally row — no rAF claim is made for endgame.
 
-### M1 — v1.2.0 "Evolutions & Dawn Well" (~12–14 seat-days; re-sized after DA c1 A-2 — persistence is a NEW subsystem and the ledger's card granularity says 12–14, not 10)
+### M1 — v1.2.0 "Evolutions & Dawn Well" (~12–14 seat-days; re-sized after DA c1 A-2 — persistence is a NEW subsystem and the ledger's card granularity says 12–14, not 10; c2 N-5: honest at the edge, the M1 parent RE-ESTIMATES after the W-P persistence card closes)
 
 Prereq (in flight, not counted here): gold/XP pickup visibility fix + S12 playtest verdict
 (visible gold/XP, readable upgrade cards) — §4; DA c1 E-3 flags S12 has no repo trace, the
@@ -92,7 +108,11 @@ orchestrator confirms the card on the board before M1 build cards are filed.
    `SAVE_LOAD_FAIL path=...` to stderr (the pytest leg asserts BOTH the rename and the
    stderr marker — planted-red both sides); `version` newer than code knows → refuse load,
    same quarantine path; a save from an older version migrates field-by-field (new fields
-   default). Meta ranks are consumed at `start_run()` (`game_state.gd:44-59`) so snapshot
+   default). **Write path (c2 N-4):** every rank/gold/refund mutation writes via
+   temp-file + rename (atomic — a torn write cannot land mid-save; a corrupt file can only
+   come from outside), and delete-while-running is UNDEFINED BY DESIGN: the in-memory state
+   re-creates the file at the next mutation (stated, not a bug). Meta ranks are consumed at
+   `start_run()` (`game_state.gd:44-59`) so snapshot
    `maxHp`/`xpNext` legitimately shift with bought ranks (stated, contract-visible but
    field-compatible). ACCEPT: pytest pin of the format keys + reset-rule table; planted
    corrupt/quasi-future-version save fixtures (RED+green pairs); quarantine-file existence
@@ -116,8 +136,10 @@ orchestrator confirms the card on the board before M1 build cards are filed.
    OUR numbers, named rule):** **6 weapon slots + 6 passive KINDS** (existing 5-stack cap
    per passive kind unchanged). Pool consequence: `build_pool` (`levelup.gd:17-36`, the one
    pool source) drops NEW-weapon offers when 6 slots are full (owned-weapon upgrades stay
-   offerable) and drops a passive KIND once it is the 6th distinct carried; evolutions
-   replace in-slot, never add a 7th. Honest inventory note: VS-FEATURES carries ONLY the
+   offerable), and identically **drops NEW passive KIND offers when 6 distinct KINDS are
+   already carried — carried-kind upgrades stay offerable up to the 5-stack cap** (c2 N-3
+   wording fix: the old "drops once it is the 6th" phrasing off-by-one'd the cap to 5);
+   evolutions replace in-slot, never add a 7th. Honest inventory note: VS-FEATURES carries ONLY the
    6-passive rule (:313); their weapon-slot count is an **inventory gap** — do NOT invent
    their number; 6/6 is OUR rule, re-verify the slot rule publicly before the gap table ever
    cites it as theirs. ACCEPT both sides: full-slots leg — scripted policy owns 6 weapons,
@@ -169,6 +191,11 @@ orchestrator confirms the card on the board before M1 build cards are filed.
    - `tests/test_biome_numbers.py::test_win_time_600` (:65) → new-value pin (900)
    - `tests/test_biome_numbers.py::test_six_weapon_ids_and_meta` (:226, verbatim 6-IDS regex +
      META name order) → 16-weapon IDS + META pin (REPLACE, not add)
+   - `tests/test_card_icons.py` WEAPON-side pins (c2 N-1): static `WEAPON_KEYS` 6-ID list
+     (:29), `meta_icons()` table equality `sorted(table) == sorted(WEAPON_KEYS)` (:76), and
+     the pool-count pin `assert len(rows) == 12` (:124) → 16-weapon keys, 16+15+1=32-kind
+     count, + 10 new weapon-icon provenance rows (REPLACE — same RED class as the PASSIVES
+     bullet below; the first M1 weapon-icon commit breaks all three otherwise)
    - `tests/test_card_icons.py` PASSIVES↔PASSIVE_ICONS key-set pins (:81, :111, "both orders")
      → 15-passive key sets + 10 new passive icon rows (the no-blank card rule keeps the
      resolver total)
@@ -313,12 +340,16 @@ architecture map = §1 + §4, phase plan = §2. The DA must check, at minimum:
 9. Gap table VS column is section-cited and its own CONTRADICTED/UNVERIFIED caveats respected.
 10. The v1-verbatim suite retirement handling (retire+replace in same commit) is stated, not glossed.
 
-**Cycle state (rev 2):** DA cycle 1 ran — verdict FIX (`docs/PARITY-ROADMAP-DA.md` @ 000ba42);
-its ranked 7-edit list is folded into this rev. One DA fact-row is rebutted below (the fix
-list itself is adopted IN FULL — the rebuttal disputes an evidence claim, not the edit).
-Roadmap-gated build cards stay filed-only-after cycle-2 SHIP.
+**Cycle state (rev 3):** DA cycle 1 → FIX (c1 @ 000ba42, adopted 7/7 + 6 P3s in rev 2);
+cycle 2 → FIX with adoption audited 7/7, **rebuttal UPHELD** (c2 @ d2897da — both-pins-true,
+pytest 58 green run by the DA itself), its 3 P2s + 3 P3s landed in this rev. Roadmap-gated
+build cards stay filed-only-after the cycle-3 verdict SHIPs.
 
 ## REBUTTAL (cycle-2 judgment material — fix list still adopted in full)
+
+**RESOLVED — UPHELD by DA cycle 2 (c2 PASS 2, MC 11203): the DA re-ran the greps and pytest
+(58 passed) itself and ruled the producer right; state of the world = both-pins-true.**
+Section kept below immutable as the cycle-2 judgment record.
 
 - **DA E-2(a)/(b) fact-row is CONTRADICTED (re-grepped rev-2 session):** the DA says
   `test_win_threshold_600` "does not exist" and WIN/BOSS pins live "in test_biome_numbers.py:65
