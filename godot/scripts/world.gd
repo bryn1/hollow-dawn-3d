@@ -48,7 +48,7 @@ var enemies: Array = []
 var gems: Array = []
 var coins: Array = []
 var heals: Array = [] # Dawnlight pickups; +HEAL_AMOUNT hp, clamped to max_hp
-var chests: Array = [] # chest DROPS (M1 f4); opening is M1 f5, not here
+var chests: Array = [] # chest DROPS (M1 f4); opening rides collect_pickups (M1 f5)
 var spawn_acc := 0.0
 var boss_spawned := false
 var minibosses_spawned := 0 # latches MINIBOSS_AT in schedule order, once each
@@ -191,6 +191,19 @@ func collect_pickups(game: GameState) -> int:
 		if _dist(h, game.player) < 16.0:
 			heals.remove_at(i) # consumed even at full hp — never a wasted item
 			game.hp = minf(game.max_hp, game.hp + HEAL_AMOUNT)
+	# Chest OPENING (M1 feature 5): the same 16 px touch funnel. Opening
+	# runs the ONE evolution rule first (evolutions fire at OPEN time, the
+	# gate reads game.time here), then grants ONE reward card by riding the
+	# frozen levelup pause phase — the same pending_levels -> _enter_levelup
+	# seam a level-up rides; the exhausted-pool fallback stays the ONE
+	# bonus_card (gold) mechanism, ours (roadmap feature 5 phase decision,
+	# DA c1 A-2: the enum menu|playing|levelup|gameover|win is untouched).
+	for i in range(chests.size() - 1, -1, -1):
+		var c: Dictionary = chests[i]
+		if _dist(c, game.player) < 16.0:
+			chests.remove_at(i)
+			EvolutionSystem.try_evolve(game)
+			game.pending_levels += 1
 	return gold
 
 

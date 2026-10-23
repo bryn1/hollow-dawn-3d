@@ -142,8 +142,12 @@ def test_band_signature_stats_per_plan():
 # ---- pickups + contact (N27 / N28 / N43) ----------------------------------------
 
 def test_pickup_radius_16px():
-    # world.gd:146: every pickup kind consumes inside 16 px.
-    assert WORLD.count("< 16.0") == 3, "gems + coins + heals each test 16.0"
+    # world.gd: every pickup kind consumes inside 16 px. RETIRED+REPLACED
+    # by T-M1e (MC 11209, roadmap feature 7 replace-row discipline): the
+    # 3-kind count predates the CHEST open funnel — chests ride the SAME
+    # 16 px touch funnel, so the honest row is now 4 sites.
+    assert WORLD.count("< 16.0") == 4, \
+        "gems + coins + heals + chests each test 16.0"
 
 
 def test_contact_radii():

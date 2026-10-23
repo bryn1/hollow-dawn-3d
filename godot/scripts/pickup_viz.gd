@@ -39,7 +39,14 @@ const ARM_PX := 14.0 # v1 _draw_dawnlight ARM (v1 render.gd:176)
 const BAR_PX := 4.0 # v1 _draw_dawnlight BAR
 const BILLBOARD_DEG := -70.0 # == CameraRig.PITCH_DEG (§d bar convention)
 const GEM_BRIGHT := 1.15 # ICHOR uplift, declared above
-const DRAWS := 4 # gem + coin + cross + dawn-glow (§b's planned rows)
+const CHEST_PX := 28.0 # M1 f5 (MC 11209): OUR chest billboard size (the doc
+	# names no v1 chest — single-tier M1 chest, icon-chest.png from the M1c
+	# batch, the §j naming convention); rides the same billboard mechanism.
+const DRAWS := 5 # gem + coin + cross + dawn-glow (§b's planned rows) +
+	# chests 1 (M1 f5). The §b planned note stays 33 on purpose: the roadmap
+	# re-tallies the WORST-CASE LOADOUT draws to planned 40 on the feature-6
+	# card (that row names this chest MM by name) — note kept, never a gate;
+	# the hard 60 cap row below is the gate and 34 ≤ 60.
 
 var game: GameState
 var world: GameWorld
@@ -48,6 +55,7 @@ var _gem: MultiMeshInstance3D
 var _coin: MultiMeshInstance3D
 var _cross: MultiMeshInstance3D
 var _glow: MultiMeshInstance3D
+var _chest: MultiMeshInstance3D
 var _counts := {}
 
 
@@ -63,6 +71,7 @@ func _ready() -> void:
 	_coin = _mm(_quad(), _coin_mat())
 	_cross = _mm(_quad(), _mat(GameRenderer.BLOOD))
 	_glow = _mm(_quad(), _mat(GameRenderer.DAWNLIGHT, 0.25)) # §b dawn-glow 1
+	_chest = _mm(_quad(), _icon_mat("res://assets/icons/icon-chest.png"))
 
 
 func _process(_delta: float) -> void:
@@ -82,6 +91,9 @@ func refresh() -> void:
 		GameRenderer.SIZES.coin)
 	_write_items(_glow, world.heals, basis,
 		2.0 * GameRenderer.DAWN_GLOW_RADII.x, 2.0 * GameRenderer.DAWN_GLOW_RADII.x)
+	# M1 f5 (MC 11209): the chest rides the SAME billboard write — reads
+	# world.chests only, never writes sim state (opening stays world.gd's).
+	_write_items(_chest, world.chests, basis, CHEST_PX, CHEST_PX)
 	# v1 cross: two bars per Dawnlight (ARM x BAR + BAR x ARM), 1 MM 2 draws'
 	# worth of instances (the §b dawnlight-1 draw stays ONE call)
 	var mm: MultiMesh = _cross.multimesh
@@ -97,6 +109,7 @@ func refresh() -> void:
 	_counts.gems = world.gems.size()
 	_counts.coins = world.coins.size()
 	_counts.heals = world.heals.size()
+	_counts.chests = world.chests.size()
 
 
 # RENDERED instance counts per pickup slot from the last refresh.
@@ -167,6 +180,12 @@ func _mat(col: Color, alpha := 1.0) -> StandardMaterial3D:
 
 
 func _coin_mat() -> StandardMaterial3D:
+	return _icon_mat("res://assets/icons/coin.png")
+
+
+func _icon_mat(path: String) -> StandardMaterial3D:
+	# Textured billboard material — the ONE such mechanism here (coin, then
+	# the M1 chest; both unshaded white albedo over the icon file).
 	var m := _mat(Color.WHITE)
-	m.albedo_texture = load("res://assets/icons/coin.png")
+	m.albedo_texture = load(path)
 	return m

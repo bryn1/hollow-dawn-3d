@@ -183,7 +183,14 @@ func _render_weapon_row() -> void:
 	for w in game.weapons:
 		var cell := VBoxContainer.new()
 		var icon := TextureRect.new()
-		icon.texture = load("res://assets/icons/" + WeaponSystem.META[w.id].icon + ".png")
+		# M1 f5 (MC 11209): evolved weapon ids ride the SEPARATE evolution
+		# table (DA c3 C-2) and are deliberately NOT in WeaponSystem.META —
+		# the icon falls back to the ONE naming convention (icon-<id>.png,
+		# the §j tree the evo icons shipped into), so an evolved weapon
+		# still reads on the HUD row.
+		var icon_name: String = WeaponSystem.META[w.id].icon \
+				if WeaponSystem.META.has(w.id) else "icon-" + w.id
+		icon.texture = load("res://assets/icons/" + icon_name + ".png")
 		icon.custom_minimum_size = Vector2(18, 18)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED

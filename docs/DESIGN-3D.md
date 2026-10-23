@@ -180,6 +180,17 @@ consolidated `game_data.gd` is **rejected** (§h). Band/signature pins v1 never 
 `test_game_numbers.py::test_alive_cap_400_pauses_the_single_spawn_loop`); miniboss stat rows
 900/50/10 and 1400/40/11 (`::test_miniboss_enemy_rows`).
 
+**M1-era additions (not v1 pins, T-M1e, MC 11209):** chest OPENING rides the ONE
+`collect_pickups` 16 px touch funnel (`world.gd`); the evolution rule is the ONE entry
+`EvolutionSystem.try_evolve` (`evolutions.gd`: `GATE_T 600` — our own v1 WIN_TIME, DA c1 G-1 —
+plus the 10-row partner TABLE; DA c3 C-2: a SEPARATE table, never `WeaponSystem.META`); the
+reward card rides the frozen `pending_levels -> _enter_levelup` seam (DA c1 A-2, enum
+untouched); the chest pickup billboard (`icon-chest.png`, `CHEST_PX 28` OUR row) is
+`pickup_viz`'s 5th MM slot — §b's planned-33 note stays kept (the roadmap's planned-40
+re-tally rides the feature-6 card; the 60 hard cap is the gate and holds); the HUD weapon
+row falls back to the `icon-<id>.png` naming convention for evolved ids. Pinned by
+`test_chests_evolve.py` + the committed `chests-evolve-m1e.jsonl` dump.
+
 ## (e) SERVER / LEADERBOARD — reuse v1 verbatim
 v1's server is **stdlib-only Python, language-agnostic** (`ARCHITECTURE.md:168` @ `5dc7679`;
 `server.py:1-6`); `/api/health` + `/api/highscores` (`ARCHITECTURE.md:37-42` @ `5dc7679`) are
