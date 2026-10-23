@@ -67,7 +67,11 @@ func _process(_delta: float) -> bool:
 	_frames += 1
 	if not _started:
 		_started = true
-		_out = FileAccess.open("/tmp/hd3d-sim-dump.jsonl", FileAccess.WRITE)
+	# per-leg dump path (S8 scan convention, same shape as HD3D_SEED); the
+		# default keeps the S3 dump byte-identical.
+		var out := OS.get_environment("HD3D_OUT")
+		_out = FileAccess.open(out if out != "" else "/tmp/hd3d-sim-dump.jsonl",
+				FileAccess.WRITE)
 		if _out == null:
 			push_error("sim dump file could not open")
 			return true
@@ -82,7 +86,10 @@ func _process(_delta: float) -> bool:
 
 
 func _run_sim() -> void:
-	seed(11101) # seeded run (DOD S3)
+	# seeded run (DOD S3); HD3D_SEED overrides the default leg per the
+	# S2h/S2i per-leg seed convention (T-S8 win-leg seed search).
+	var s := OS.get_environment("HD3D_SEED")
+	seed(s.to_int() if s != "" else 11101)
 	var packed: PackedScene = load("res://Main.tscn")
 	_main = packed.instantiate()
 	root.add_child(_main) # _ready wires the real 3D scene + bridge
@@ -219,24 +226,10 @@ func _hold_combo(combo: String) -> void:
 		"hold": combo})
 
 
-# Scripted level-up picks: new weapon first (its bolts seek on their own),
-# then ward/ferocity/haste/grip/insight upgrades in survival order.
+# Scripted level-up picks: the ranking lives in SimPolicy.pick_index
+# (T-S8: shared with the real-clock sim_s8.gd legs), the row stays here.
 func _pick_ward() -> void:
-	var idx := 0
-	var pick_rank := 9
-	for i in _main._current_offer.size():
-		var card: Dictionary = _main._current_offer[i]
-		var rank := 8
-		if card.kind == "weapon":
-			rank = 0
-		elif card.kind == "upgrade":
-			rank = [1, 2, 3, 4, 5].find(["ward", "ferocity", "haste", "grip",
-				"insight"].find(card.get("key", card.get("id", ""))))
-			if rank < 0:
-				rank = 5
-		if rank < pick_rank:
-			pick_rank = rank
-			idx = i
+	var idx: int = _pol.pick_index(_main)
 	_emit({"ev": "pick", "t": roundi(_main.game.time * 1000.0) / 1000.0,
 		"card": _main._current_offer[idx].name,
 		"level": _main.game.level})

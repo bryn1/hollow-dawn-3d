@@ -82,6 +82,29 @@ func combo() -> String:
 		("S" if iy > 0 else "") + ("D" if ix > 0 else "")
 
 
+# Scripted level-up pick (T-S8, MC 11148): the sim_headless.gd ranking moved
+# VERBATIM so the real-clock legs (sim_s8.gd) drive the same brain as the
+# S3 journey — new weapon first (its bolts seek on their own), then
+# ward/ferocity/haste/grip/insight upgrades in survival order.
+func pick_index(main: Node) -> int:
+	var idx := 0
+	var pick_rank := 9
+	for i in main._current_offer.size():
+		var card: Dictionary = main._current_offer[i]
+		var rank := 8
+		if card.kind == "weapon":
+			rank = 0
+		elif card.kind == "upgrade":
+			rank = [1, 2, 3, 4, 5].find(["ward", "ferocity", "haste", "grip",
+				"insight"].find(card.get("key", card.get("id", ""))))
+			if rank < 0:
+				rank = 5
+		if rank < pick_rank:
+			pick_rank = rank
+			idx = i
+	return idx
+
+
 # Hysteresis so the kiter never chatters on the fence: engage inside 140 px,
 # release past 180 px (both far outside the 33 px contact ring).
 func _flee_state(nearest: float) -> bool:

@@ -1,8 +1,14 @@
 # HUD over the 3D world (§f hud_3d.gd): the biome-name banner ported from v1
 # hud.gd — BIOME_FLASH and the band-change rule run through the ONE
 # GameRenderer.biome_at mechanism (DESIGN-3D §d A6 row: banner text = BIOMES
-# name, alpha-up 3.0 s). S3 scope is the text-only banner; the timer/HP/XP/
-# weapon rows land on this same CanvasLayer with the upgrade-UI stage.
+# name, alpha-up 3.0 s). THE v1 HUD ROW (timer, HP bar + text, XP bar, level,
+# gold, kills, weapon icon row, PAUSED) LANDED HERE AT T-S8 (MC 11148): the
+# S3 header deferred these rows "with the upgrade-UI stage" and S5 shipped
+# only the cards — the row was never in the tree, which is why MC 11139 saw
+# no HUD on the web capture (root cause of the A1 pixel FAIL). It is now the
+# v1 hud.gd:31-155 row VERBATIM on this same CanvasLayer (data layer already
+# verbatim; the only deviation is the icon dir, res://assets/icons/, per the
+# S5 icon-tree layout that screens.gd:25-29 established).
 # S6 adds the boss bar (§d row "boss bar + name"): the v1 world-canvas draw
 # (render.gd:194-207) ported to this CanvasLayer with its geometry, colours
 # and fill rule kept — outside the 3D draw budget (§b), and the ONLY boss HP
@@ -10,7 +16,11 @@
 # 185-186 `if e.boss ...: return`, mirrored in horde_viz.gd).
 extends CanvasLayer
 
+const INK := Color8(0x10, 0x13, 0x1c)
+const BLOOD := Color8(0x8e, 0x2f, 0x35)
+const ICHOR := Color8(0x6f, 0xae, 0x5a)
 const BONE := Color8(0xd8, 0xd2, 0xc0)
+const EMBER_TINT := Color8(0xc9, 0x7b, 0x3d)
 
 const BIOME_FLASH := 3.0 # seconds the biome-name banner stays up, fading last 1s
 
@@ -25,15 +35,48 @@ const BOSS_NAME := "THE HOLLOW WARDEN"
 var game: GameState
 var world: GameWorld # boss scan source (main.gd wires it, mirrors _viz)
 
+var _timer: Label # v1 hud.gd row, verbatim field set
+var _hp_fill: ColorRect
+var _hp_text: Label
+var _xp_fill: ColorRect
+var _level: Label
+var _gold: Label
+var _kills: Label
+var _weapons: HBoxContainer
+var _pause: Label
 var _biome: Label
 var _biome_name := ""
 var _biome_left := 0.0
+var _row_sig := ""
 var _boss_root: Control
 var _boss_fill: ColorRect
 
 
 func _ready() -> void:
 	layer = 5
+	var panel := PanelContainer.new() # v1 hud.gd:33-62 row, verbatim
+	panel.position = Vector2(8, 8)
+	add_child(panel)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	_timer = _label("00:00")
+	row.add_child(_timer)
+	row.add_child(_bar("hp", 160))
+	row.add_child(_bar("xp", 160))
+	_level = _label("Lv 1")
+	row.add_child(_level)
+	_gold = _label("Gold 0")
+	row.add_child(_gold)
+	_kills = _label("Kills 0")
+	row.add_child(_kills)
+	_weapons = HBoxContainer.new()
+	_weapons.add_theme_constant_override("separation", 4)
+	row.add_child(_weapons)
+	_pause = _label("PAUSED")
+	_pause.modulate = EMBER_TINT
+	_pause.visible = false
+	row.add_child(_pause)
 	_biome = Label.new()
 	_biome.add_theme_font_size_override("font_size", 26)
 	_biome.add_theme_color_override("font_color", BONE)
@@ -48,6 +91,16 @@ func _ready() -> void:
 func update(delta: float) -> void:
 	if game == null:
 		return
+	_timer.text = _fmt_time(game.time) # v1 hud.gd:68-78, verbatim
+	_hp_fill.size = Vector2(158.0 * clampf(game.hp / game.max_hp, 0.0, 1.0), 14)
+	_hp_text.text = "%d/%d" % [int(maxf(0.0, ceil(game.hp))), int(game.max_hp)]
+	var need := float(GameState.xp_need(game.level))
+	_xp_fill.size = Vector2(158.0 * clampf(game.xp / need, 0.0, 1.0), 14)
+	_level.text = "Lv %d" % game.level
+	_gold.text = "Gold %d" % game.gold
+	_kills.text = "Kills %d" % game.kills
+	_pause.visible = game.paused and game.phase == "playing"
+	_render_weapon_row()
 	_update_biome_flash(delta)
 	_update_boss_bar()
 
@@ -114,6 +167,71 @@ func _update_boss_bar() -> void:
 		return
 	_boss_fill.size = Vector2(
 		BOSS_BAR_W * clampf(boss.hp / boss.max_hp, 0.0, 1.0), BOSS_BAR_H)
+
+
+# v1 hud.gd:98-118 weapon icon row, verbatim (icon dir deviation: the S5 tree
+# carries the weapon icons in res://assets/icons/, screens.gd:25-29 layout).
+func _render_weapon_row() -> void:
+	var sig := ""
+	for w in game.weapons:
+		sig += w.id + str(w.level) + ","
+	if sig == _row_sig:
+		return
+	_row_sig = sig
+	for child in _weapons.get_children():
+		child.queue_free()
+	for w in game.weapons:
+		var cell := VBoxContainer.new()
+		var icon := TextureRect.new()
+		icon.texture = load("res://assets/icons/" + WeaponSystem.META[w.id].icon + ".png")
+		icon.custom_minimum_size = Vector2(18, 18)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cell.add_child(icon)
+		var lv := _label(str(w.level))
+		lv.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cell.add_child(lv)
+		_weapons.add_child(cell)
+
+
+# v1 hud.gd:121-143 bar factory, verbatim.
+func _bar(kind: String, width: float) -> Control:
+	var track := Control.new()
+	track.custom_minimum_size = Vector2(width, 16)
+	track.clip_contents = true
+	var bg := ColorRect.new()
+	bg.color = Color(INK, 0.9)
+	bg.size = Vector2(width - 2.0, 14)
+	bg.position = Vector2.ONE
+	track.add_child(bg)
+	var fill := ColorRect.new()
+	fill.color = BLOOD if kind == "hp" else ICHOR
+	fill.position = Vector2.ONE
+	fill.size = Vector2(width - 2.0, 14)
+	track.add_child(fill)
+	if kind == "hp":
+		_hp_fill = fill
+		_hp_text = _label("100/100")
+		_hp_text.add_theme_font_size_override("font_size", 10)
+		_hp_text.position = Vector2(4, 1)
+		track.add_child(_hp_text)
+	else:
+		_xp_fill = fill
+	return track
+
+
+# v1 hud.gd:146-151, verbatim.
+func _label(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", BONE)
+	return label
+
+
+func _fmt_time(t: float) -> String:
+	var s := int(maxf(0.0, floor(t)))
+	return "%02d:%02d" % [int(s / 60.0), s % 60]
 
 
 # Runtime probe for the sim dump (A5 row: bar + name visible while the boss
