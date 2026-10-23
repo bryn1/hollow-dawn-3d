@@ -1,7 +1,7 @@
 # LEDGER — hollow-dawn-3d
 - master @ seed; repo created 2026-10-21 (owner ruling: own repo + own releases, verbatim in run goal.md)
 - run dir: ../.audits/$(basename $RUN) era 2026-10-21; parent MC 11094
-STATUS: EXECUTION (design phase CLOSED 2026-10-21/22: DESIGN-3D@db743a4 + DOD-ACCEPTANCE@52ade44 pinned via merge 83c1f27, DA gate 4 cycles c4 SHIP run 202610211928; build stages S1/S3 starting; DINOv3 HF-gate owner-approval pending for TRELLIS leg)
+STATUS: RELEASE (2026-10-23: all 8 owner DoD rows PASS in .audits/202610211928-81bb9a6c/out/DONE.md on EVIDENCE-runtime-20261022.md — real-clock gameover+win legs @1.0x (hp-pin declared on win leg), mocap both rigs, HUD pixel row built+proved, boss bar SEEN by orchestrator; v0.2.0-test published, GA v1.0.0 cut in flight MC 11151; polish tier open: audio, boss zoom presence, ground tiles)
 
 - S3 core loop MERGED 606405d (MC 11101): ortho rig 30@20deg, biome bands, v1-verbatim data layer, gait stub, headless sim (gameover 467.083 / WIN 600.017), suite 39/39.
 - S4 combat MERGED 9496ea2 (MC 11102): 6 weapon FX classes 7 draws, per-sample caps 0/601 violations, per-weapon kills, RUN-CONDITIONED halo owned t=26.9, suite 52/52.
