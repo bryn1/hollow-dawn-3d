@@ -91,3 +91,58 @@ The nine game-use glbs (8 swarm classes + boss-warden) MOVED to
 row; provenance rows above are unchanged). `player-alt.glb` and
 `boss-warden-rigged.glb` stay in `assets/glb/` — neither is wired: the
 rigged variant waits for the mocap card, player-alt for MC 11132.
+
+## M1c art batch (T-M1c, MC 11207, 2026-10-23)
+
+**31 icons** (10 weapon + 10 evolution + 10 partner-passive + 1 chest, PARITY-ROADMAP
+rev3 M1 asset row — the DOC is the manifest: 10+10+10+1=31, no Dawn-Well icon rows in
+it). Generator: the harness `imagegen` MCP tool (Qwen-Image t2i, transparent cutout,
+512×512 RGBA, fast quality), ONE window session 20:56→21:31:10Z. Style anchor = the
+verbatim §j family (palette of pale moonlight blue-grey, bone white, ember crimson
+and ichor green; centered, thick outline, no frame). Provenance = the existing
+convention: the full prompt embedded as PNG tEXt `impeccable:prompt` (the key
+test_card_icons.py reads; the `impeccable` CLI is not installed on this host, PIL
+wrote the same key). Variant manifest: `tools/vm100/icons-batch-m1c.tsv`
+(id, dest, seed, prompt-sha256[:16]). Legibility gate: `tools/vm100/icon_gate.py`
+(aspect_gate.py pattern reused: DIMS/TRANSP/FILL/PROV rows, 31/31 PASS, red-proved
+on planted PROV + TRANSP legs). Declared re-roll reserve burned: evo-rot-spiral (73→
+173), evo-judgement-cross (74→274), passive-cracked-heart (81→281), passive-loadstone
+(86→186) — firsts framed as cards / too sparse; captures `.tmp/m1c-art.txt`.
+
+**10 weapon meshes** (static props; the 2 miniboss rows are DECLARED-DEFER — character-
+class items, own card, designs not in the doc yet). Generator: TRELLIS.2 batch
+(`tools/vm100/art-batch-m1c.tsv`), inputs = this card's weapon icons (BiRefNet matte
+in-pipeline), prop tri budget 1500 (swarmer-class row, OUR prop row — stated), batch +
+regen spec `art-batch-m1c-regen.tsv`. The batch ran WITH the extent+fill quality gate
+enabled (MC 11207 extension of `batch_trellis.py` reusing `player_attempts.quality`;
+drain_barrier moved into the driver). Batch a (window 21:44:26→22:02:54Z): 6/10 OK,
+4 SKIPPED on flat-card collapse (all 12 seeds burned per row). Remaster inputs (3/4
+prop renders, imagegen window 22:05→22:08:21Z, committed at
+`assets/art-src/weapon-*-remaster.png`) + regen window (22:09:17→22:24:30Z): 4/4 OK.
+TRIS are the headless bpy dumps (dump_render.py, CPU, outside windows); VISUAL_VALID
+PASS 10/10 (validate_glb.py visual = the static-prop expect-mode; rigged mode NOT
+applicable — nothing skinned). ASPECT rows below are the character-era 1.42 m
+normalization printout — weapon props have no §a height row yet (a later card pins it);
+the aspect_gate exits RED for THREE rows at that (non-applicable) target: bone-whip
+(17.35, flat planar coil) and fire-lash (4.61, long coiled whip) on the scale-invariant
+ASPECT leg, hewn-axe (INFLATION 2.03, ASPECT 1.31 PASS) on the 1.42 m leg only — all
+three FLAGGED for that future card, not re-rolled here against an invented target.
+
+| asset | source | seed | tris / budget | dims_m (x,y,z) | aspect | sha256[:16] | render |
+|---|---|---|---|---|---|---|---|
+| weapon-bone-whip | icons/weapon-bone-whip.png | 93 | 1296 / 1500 | 0.713,0.057,0.984 | 17.35 FLAG | fff152fb776b2d17 | concepts/weapon-bone-whip-render.png |
+| weapon-dart-loop | icons/weapon-dart-loop.png | 95 | 1483 / 1500 | 0.972,0.991,0.968 | 0.98 | ece41bd85d779154 | concepts/weapon-dart-loop-render.png |
+| weapon-hewn-axe | icons/weapon-hewn-axe.png | 94 | 1470 / 1500 | 0.913,0.699,0.080 | 1.31 | a21954ebc53a3ba4 | concepts/weapon-hewn-axe-render.png |
+| weapon-pilgrim-cross | icons/weapon-pilgrim-cross.png | 95 | 1461 / 1500 | 0.810,0.988,0.910 | 0.92 | 2f505a43fd57dfbf | concepts/weapon-pilgrim-cross-render.png |
+| weapon-censer-of-hours | art-src/weapon-censer-of-hours-remaster.png | 112 | 1384 / 1500 | 0.723,0.878,0.567 | 0.82 | 947cae29ec5ee4e7 | concepts/weapon-censer-of-hours-render.png |
+| weapon-rot-water | art-src/weapon-rot-water-remaster.png | 115 | 1489 / 1500 | 0.833,0.999,0.831 | 0.83 | 874540d1237f17f4 | concepts/weapon-rot-water-render.png |
+| weapon-spectral-disc | icons/weapon-spectral-disc.png | 98 | 1444 / 1500 | 0.996,0.987,0.955 | 1.01 | bf8dfd2ecd025255 | concepts/weapon-spectral-disc-render.png |
+| weapon-storm-peal | art-src/weapon-storm-peal-remaster.png | 114 | 1479 / 1500 | 0.790,0.903,0.795 | 0.88 | bdf233122b7dbdae | concepts/weapon-storm-peal-render.png |
+| weapon-fire-lash | art-src/weapon-fire-lash-remaster.png | 115 | 1447 / 1500 | 0.753,0.177,0.815 | 4.61 FLAG | 25a542e68dafcf7e | concepts/weapon-fire-lash-render.png |
+| weapon-doom-sigil | icons/weapon-doom-sigil.png | 101 | 1467 / 1500 | 0.967,0.827,0.972 | 1.18 | def5f16ce9722272 | concepts/weapon-doom-sigil-render.png |
+
+Notes: `weapon-rot-water` regen seeds 113/114 died to a CUDA OOM mid-window (fleet
+co-tenant, not counted as quality seeds; 115 accepted — honest ledger per MC 11118
+window-4 precedent). Seeds 92, 96–99, 100–103 burned on flat-card collapse (QUALITY
+rows in `.tmp/m1c-batch-a.log` / regen log excerpts in the capture). The rejected flat
+exports stayed on vm100; repo carries only accepted rows.

@@ -1,0 +1,7 @@
+# MC 11207 T-M1c REGEN spec — the 4 flat-collapsed rows from art-batch-m1c.tsv,
+# inputs replaced by three-quarter prop remasters (S1q pattern: assets/art-src/).
+# name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+weapon-censer-of-hours	/opt/imagegen/tmp/mc11207/icons/weapon-censer-of-hours-remaster.png	1500	112	quality
+weapon-rot-water	/opt/imagegen/tmp/mc11207/icons/weapon-rot-water-remaster.png	1500	113	quality
+weapon-storm-peal	/opt/imagegen/tmp/mc11207/icons/weapon-storm-peal-remaster.png	1500	114	quality
+weapon-fire-lash	/opt/imagegen/tmp/mc11207/icons/weapon-fire-lash-remaster.png	1500	115	quality

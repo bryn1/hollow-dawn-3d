@@ -33,9 +33,12 @@ def count_tris(path):
     sc = trimesh.load(path, force="scene")
     return sum(len(g.faces) for g in sc.geometry.values())
 
-def attempt(pipe, png, out, seed, budget):
+def attempt(pipe, png, out, seed, budget, quality_on=False):
     """One seed: gen + export; up to 3 decimation retries if the export exceeds budget.
-    Returns (tris, ok). Raises on gen/export failure (caller counts the seed failure)."""
+    Returns (tris, ok). Raises on gen/export failure (caller counts the seed failure).
+    MC 11207: optional 5th spec column "quality" reuses player_attempts.quality
+    (the MC 11118/11134 extent+fill gate) as an ACCEPTANCE leg inside the seed loop —
+    a within-budget but flat-card/slab export raises, burning the next seed."""
     image = Image.open(png)
     mesh = pipe.run(image, seed=seed, pipeline_type="1024")[0]
     mesh.simplify(16777216)  # nvdiffrast limit (vendor example)
@@ -50,6 +53,10 @@ def attempt(pipe, png, out, seed, budget):
         glb.export(out)
         tris = count_tris(out)
         if tris <= budget:
+            if quality_on:
+                from player_attempts import quality
+                if not quality(out, os.path.basename(out) + f" seed={seed}"):
+                    raise RuntimeError(f"QUALITY-FAIL seed={seed} tris={tris}/{budget}")
             return tris, True
         log(f"  decim retry {k+1}: tris={tris} > budget={budget} -> target x{frac*0.8:.2f}")
     return tris, False  # generated but over budget after retries
@@ -59,10 +66,15 @@ rows = []
 for line in open(spec):
     line = line.strip()
     if line and not line.startswith("#"):
-        name, png, budget, seed = line.split("\t")
-        rows.append((name, png, int(budget), int(seed)))
+        parts = line.split("\t")
+        name, png, budget, seed = parts[:4]
+        q = "quality" in parts[4:]  # MC 11207 optional 5th column; 4-col rows unchanged
+        rows.append((name, png, int(budget), int(seed), q))
 
 t0 = time.time()
+from player_attempts import drain_barrier  # MC 11118 window-4 lesson, MC 11207: the
+drain_barrier()  # barrier moves INTO the shared driver — no batch touches the GPU
+                 # while llama-swap is mid-restart, no seed burned (see docstring there)
 log(f"loading pipeline microsoft/TRELLIS.2-4B (one session for {len(rows)} rows)")
 pipe = Trellis2ImageTo3DPipeline.from_pretrained("microsoft/TRELLIS.2-4B")
 pipe.cuda()
@@ -70,13 +82,13 @@ log(f"load_s={time.time()-t0:.1f}")
 
 ok_n = 0
 results = []
-for name, png, budget, seed in rows:
+for name, png, budget, seed, q in rows:
     out = os.path.join(outdir, f"{name}.glb")
     t = time.time()
     skipped_err = None
     for s in (seed, seed + 1, seed + 2):  # 3 distinct-seed attempts
         try:
-            tris, within = attempt(pipe, png, out, s, budget)
+            tris, within = attempt(pipe, png, out, s, budget, quality_on=q)
             if within:
                 ok_n += 1
                 results.append((name, "OK", s, tris, budget))

@@ -1,0 +1,17 @@
+# MC 11207 T-M1c mesh batch spec — name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+# Inputs = the 3090 icon renders from THIS card's icon batch (one loaded window later);
+# staged to /opt/imagegen/tmp/mc11207/icons/ before the window (sha256-verified, capture).
+# Budgets: weapon props carry the swarmer-class row 1500 (DESIGN-3D §b nearest class;
+# stated as OUR prop row in the capture). 5th col = extent+fill quality gate (MC 11207
+# extension of batch_trellis.py reusing player_attempts.quality). 3-seed fail policy.
+# The 2 miniboss rows are DECLARED-DEFER (character-class items, own card; not invented here).
+weapon-bone-whip	/opt/imagegen/tmp/mc11207/icons/weapon-bone-whip.png	1500	92	quality
+weapon-dart-loop	/opt/imagegen/tmp/mc11207/icons/weapon-dart-loop.png	1500	93	quality
+weapon-hewn-axe	/opt/imagegen/tmp/mc11207/icons/weapon-hewn-axe.png	1500	94	quality
+weapon-pilgrim-cross	/opt/imagegen/tmp/mc11207/icons/weapon-pilgrim-cross.png	1500	95	quality
+weapon-censer-of-hours	/opt/imagegen/tmp/mc11207/icons/weapon-censer-of-hours.png	1500	96	quality
+weapon-rot-water	/opt/imagegen/tmp/mc11207/icons/weapon-rot-water.png	1500	97	quality
+weapon-spectral-disc	/opt/imagegen/tmp/mc11207/icons/weapon-spectral-disc.png	1500	98	quality
+weapon-storm-peal	/opt/imagegen/tmp/mc11207/icons/weapon-storm-peal.png	1500	99	quality
+weapon-fire-lash	/opt/imagegen/tmp/mc11207/icons/weapon-fire-lash.png	1500	100	quality
+weapon-doom-sigil	/opt/imagegen/tmp/mc11207/icons/weapon-doom-sigil.png	1500	101	quality
