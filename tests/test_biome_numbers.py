@@ -176,7 +176,15 @@ def test_boss_death_gold():
 
 
 def test_enemy_hp_scaling():
-    assert re.search(r"1\.0 \+ 0\.22 \* \(game\.time / 60\.0\)", WORLD)
+    # REPLACED at T-M2e (MC 11237, M2-SPEC §A.1; falsified-by-design, LEDGER
+    # row): the inline `1.0 + 0.22 * (game.time / 60.0)` term is now the
+    # cycle-local ramp read at the SAME seam — `cycle_minute(game)` IS
+    # game.time/60.0 while cycle 0 (every non-endless run), times HP_CYC(0) =
+    # 1.0 exact, then ONE clamp at def.hp * HP_EFFECTIVE_MULT_CAP (18). The
+    # 0.22/minute growth itself is UNTOUCHED (spec: "not a second ramp").
+    assert re.search(r"1\.0 \+ 0\.22 \* cycle_minute\(game\)\) \* "
+                     r"hp_cyc\(game\.cycle\)", WORLD)
+    assert re.search(r"minf\(hp, def\.hp \* HP_EFFECTIVE_MULT_CAP\)", WORLD)
 
 
 def test_magnet_base_growth_and_pull():

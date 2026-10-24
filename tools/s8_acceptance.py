@@ -113,6 +113,23 @@ def main():
         n_hud >= NON_BG_MIN, "Pixel", "%s vs %s crop(0,0,720,56) n=%d px"
         % (hud_png.replace(REPO + "/", ""), base_png.replace(REPO + "/", ""), n_hud))
 
+    # ---- CYCLE-HUD row (T-M2e A-E7, MC 11237): the endless cycle text on the
+    # playing frame. Baseline = hud.png (SAME frozen state, endless OFF -> the
+    # cycle label hidden; s8_capture stage 5-6 pins endless+cycle then shoots
+    # cycle-hud.png), so the counted pixels are the cycle text INSIDE the
+    # opaque HUD panel. Window = the capture's own cycle_row_state STATE line
+    # (label at x 566..610, y 19..37 — 44x18) padded: (552,12,624,44).
+    # Planted red = feed the baseline against itself -> 0 px -> this row
+    # FAILs, exit 1 (the s8 header's own mutation convention; both runs in
+    # the T-M2e capture).
+    cyc_png = os.path.join(SHOTS, "cycle-hud.png")
+    n_cyc = crop_nonbg(cyc_png, hud_png, (552, 12, 624, 44)) \
+        if os.path.exists(cyc_png) and os.path.exists(hud_png) else -1
+    row("CYCLE-HUD", "endless cycle text reads on the playing HUD frame",
+        n_cyc >= NON_BG_MIN, "Pixel", "%s vs %s crop(552,12,624,44) n=%d px "
+        "(panel-interior; label rect 566,19,44,18 + pad)"
+        % (cyc_png.replace(REPO + "/", ""), hud_png.replace(REPO + "/", ""), n_cyc))
+
     # ---- A2: skinned player clips
     a2 = None
     if os.path.exists(CSV_FRAMEDIFF):

@@ -44,6 +44,7 @@ var _gold: Label
 var _kills: Label
 var _weapons: HBoxContainer
 var _pause: Label
+var _cycle: Label # M2 §A/§A.2 (T-M2e): the cycle row — endless ON only
 var _biome: Label
 var _biome_name := ""
 var _biome_left := 0.0
@@ -77,6 +78,14 @@ func _ready() -> void:
 	_pause.modulate = EMBER_TINT
 	_pause.visible = false
 	row.add_child(_pause)
+	# M2 §A.2 (rev-2 P3-3, T-M2e): the cycle text lands in hud_3d.gd on the
+	# v1 row (existing _label style, BONE 13), appended AFTER the verbatim
+	# v1 row — invisible for every non-endless run, so the M1 HUD stays as
+	# shipped. The number shown is the sim's 0-based cycle index, the SAME
+	# value the dump rows and dawnwell.best_cycle carry (one truth, stated).
+	_cycle = _label("Cycle 0")
+	_cycle.visible = false
+	row.add_child(_cycle)
 	_biome = Label.new()
 	_biome.add_theme_font_size_override("font_size", 26)
 	_biome.add_theme_color_override("font_color", BONE)
@@ -100,6 +109,10 @@ func update(delta: float) -> void:
 	_gold.text = "Gold %d" % game.gold
 	_kills.text = "Kills %d" % game.kills
 	_pause.visible = game.paused and game.phase == "playing"
+	# §A/§A.2 cycle row: endless-gated (flag-off HUD stays byte-identical).
+	_cycle.visible = game.endless
+	if game.endless:
+		_cycle.text = "Cycle %d" % game.cycle
 	_render_weapon_row()
 	_update_biome_flash(delta)
 	_update_boss_bar()
@@ -247,3 +260,13 @@ func boss_bar_state() -> Dictionary:
 	return {"visible": _boss_root.visible, "name": BOSS_NAME,
 		"fill_w": roundf(_boss_fill.size.x * 1000.0) / 1000.0,
 		"max_w": BOSS_BAR_W, "h": BOSS_BAR_H, "y": BOSS_BAR_Y}
+
+
+# A-E7 probe (T-M2e): live cycle-row state + global rect, read back the same
+# way boss_bar_state reads the bar — the s8 capture prints it and the pixel
+# crop window (tools/s8_acceptance.py CYCLE-HUD row) is pinned to it.
+func cycle_row_state() -> Dictionary:
+	var r: Rect2 = _cycle.get_global_rect()
+	return {"visible": _cycle.visible, "text": _cycle.text,
+		"x": roundf(r.position.x), "y": roundf(r.position.y),
+		"w": roundf(r.size.x), "h": roundf(r.size.y)}

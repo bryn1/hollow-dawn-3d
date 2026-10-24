@@ -534,11 +534,3 @@ pins `test_art_integration.py:42 DRAWS_PLANNED = 40`, `:21-22` ≤ 60 hard, `ALI
 - **REBUTTAL: none.** No DA finding is contradicted by file:line; the full list is adopted. The only
   precision tweak is the `sim_boss.gd` DECLARED-pin line (`:292`, per this session's own grep — the
   roadmap §2's `:215` was a drifted pin).
-
---- RESULT ---
-STATUS: DONE
-ARTIFACT: docs/M2-SPEC.md (rev-2; sha = this run's cycle-2 commit; reported to the parent + card 11219; DA doc docs/M2-SPEC-DA.md @ c1cfc12 stays immutable)
-DID: rev-2 after DA c1 — P1 unified (cycle-clear chest = dawn/tier III from CHEST_TIER_BY_SOURCE) + 5 P2s + all P3/P4 folded, no rebuttals.
-VERIFY: rev-2 header present; P1 section-ids unified (§A.1 + §B.1 + A-E4 + B-T1 → tier III); reachability row = **A-E8**; caps leg = **cycle 5** (A-E3) with a low-cap red (A-E2).
-BLOCKERS: none; F-1 (M1-remainder roster) + T-M2r-REAPER deferred card remain orchestrator/owner calls the spec flags.
---- END ---

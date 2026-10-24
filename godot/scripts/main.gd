@@ -9,6 +9,14 @@ extends Node3D
 
 const VIEW := Vector2(1280, 720)
 
+# M2 §A.1 (T-M2e): the absolute per-hit contact-damage cap at the contact
+# site, BEFORE damage_taken (ward/rotten-plate reduction stays downstream).
+# 20.0 is the rev-2 P2-1 REACHABLE boss-class bound: max base contact damage
+# 12 (world.gd warden) x DMG_CYC >= 1.7 (cycle >= 4) exceeds it, while
+# cycle-0 raw == base dmg (DMG_CYC(0) = 1.0) is never capped — flag-off
+# byte-stable.
+const MAX_CONTACT_DMG := 20.0
+
 var game: GameState
 var world: GameWorld
 var fx: WeaponSystem
@@ -195,7 +203,12 @@ func _step(dt: float) -> void:
 		var dx: float = e.x - p.x
 		var dy: float = e.y - p.y
 		if dx * dx + dy * dy < (er + 16.0) * (er + 16.0) and p.iframes <= 0.0:
-			game.hp -= game.damage_taken(e.dmg)
+			# §A.1: cycle-scaled contact damage, ONE clamped read before
+			# damage_taken. cycle 0: dmg_cyc = 1.0 exact and every base dmg
+			# (max 12) < MAX_CONTACT_DMG, so the raw read is the verbatim
+			# e.dmg — flag-off byte-stable (F-4).
+			var raw: float = minf(e.dmg * GameWorld.dmg_cyc(game.cycle), MAX_CONTACT_DMG)
+			game.hp -= game.damage_taken(raw)
 			p.iframes = GameState.IFRAMES
 			break
 	game.gold += world.collect_pickups(game)
@@ -204,10 +217,35 @@ func _step(dt: float) -> void:
 		_end_run("gameover")
 		return
 	if game.time >= GameState.WIN_TIME:
-		_end_run("win")
-		return
+		# M2 pillar A (§A.1): with the flag ON the limit does NOT end the
+		# run — the existing win BRANCH becomes the cycle-clear crossing
+		# (latched: fires once per WIN_TIME boundary, cycle = int(time //
+		# WIN_TIME), the ONE clock). Flag OFF keeps M1's win byte-identical.
+		if game.endless:
+			var next_cycle := int(game.time / GameState.WIN_TIME)
+			if next_cycle > game.cycle:
+				game.cycle = next_cycle
+				_cycle_clear()
+		else:
+			_end_run("win")
+			return
 	if game.pending_levels > 0:
 		_enter_levelup()
+
+
+# §A.1 cycle clear: phase stays "playing", the clock keeps running (no new
+# clock), the reward card rides the FROZEN pending_levels -> _enter_levelup
+# seam (same step below), and the clear's drop rides the world's single drop
+# funnel (tier dawn per §B.1's map). best_cycle is updated HERE and in
+# _end_run only, through the ONE _meta_changed funnel (§A.3). The drop is
+# the existing world funnel — no drop-kind UI or phase ever appears in this
+# file (the test_chests_evolve phase-enum pin stays green by construction).
+func _cycle_clear() -> void:
+	game.pending_levels += 1
+	world.cycle_clear(game)
+	if game.cycle > _dawnwell.best_cycle:
+		_dawnwell.best_cycle = game.cycle
+	_meta_changed()
 
 
 func _start_game() -> void:
@@ -223,6 +261,10 @@ func _start_game() -> void:
 	# aliasing the live shop dictionary).
 	game.meta_ranks = _dawnwell.ranks.duplicate()
 	game.start_run()
+	# The endless hand-in (F-4, meta_ranks pattern): the ONE _dawnwell ->
+	# start seam, AFTER start_run (which resets the run-mode vars, §A.2).
+	# No flag row = endless false = every M1 byte unchanged.
+	game.endless = int(_dawnwell.flags.get("endless", 0)) == 1
 	_current_offer = []
 	_screens.hide_all()
 
@@ -253,6 +295,12 @@ func _end_run(result: String) -> void:
 	# 1:1 at EVERY run end — death AND win (the gap-table row "gold dies
 	# with the run" is what M1 feature 2 closes; conversion declared in the
 	# card capture) — and the ONE funnel persists it.
+	# §A.3 best_cycle: max-update at EVERY run end (gameover included) and
+	# at every cycle clear (_cycle_clear); NEVER decreases (A-E5). Flag-off
+	# runs sit at cycle 0, so their best_cycle write is the field default —
+	# the field-by-field save migration keeps older files at 0 (§A.3).
+	if game.cycle > _dawnwell.best_cycle:
+		_dawnwell.best_cycle = game.cycle
 	_dawnwell.gold += game.stats.gold
 	_meta_changed()
 	_screens.show_end(result == "win", [

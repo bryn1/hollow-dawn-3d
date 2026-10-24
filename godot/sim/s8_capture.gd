@@ -75,6 +75,18 @@ func _on_frame() -> void:
 			_stage = 5
 		5:
 			_save("bossbar")
+			# M2 T-M2e A-E7 stage: the cycle HUD row. DECLARED pins (the
+			# stated capture reading this harness already carries — HUD text
+			# reads game state, the world stays live, chase stays frozen):
+			# endless ON + cycle counter at 2 (the A-E8 reached-cycle value);
+			# the HAND-IN seam itself is behavior-tested in sim_endless.
+			_main.game.endless = true
+			_main.game.cycle = 2
+			_wait = SETTLE
+			_stage = 6
+		6:  # cycle-HUD shot: same frozen world, HUD now carries the cycle row
+			_stage = 7 # one-shot: the PERSISTENT frame chain must not re-save
+			_save("cycle-hud")
 			print("CAPTURE_OK")
 			quit()
 
@@ -96,9 +108,10 @@ func _boss() -> Dictionary:
 
 func _save(kind: String) -> void:
 	var boss: Dictionary = _boss()
-	print("STATE %s t=%.3f phase=%s alive=%d hud_visible=%s bar=%s" % [
+	print("STATE %s t=%.3f phase=%s alive=%d hud_visible=%s bar=%s cycle_row=%s" % [
 		kind, _main.game.time, _main.game.phase, _main.world.enemies.size(),
-		str(_main._hud.visible), JSON.stringify(_main._hud.boss_bar_state())])
+		str(_main._hud.visible), JSON.stringify(_main._hud.boss_bar_state()),
+		JSON.stringify(_main._hud.cycle_row_state())])
 	var img: Image = root.get_texture().get_image()
 	var path: String = _out_dir() + "/" + kind + ".png"
 	assert(img.save_png(path) == OK)

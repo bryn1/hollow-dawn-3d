@@ -243,8 +243,12 @@ def test_buy_and_save_roundtrip(probe):
     assert rows["buy"] == {"ok": 1, "rank": 1, "gold": 960,
                            "reloaded_rank": 1, "reloaded_gold": 960}
     disk = json.loads(json_text)
-    assert disk == {"version": 1, "gold": 960,
-                    "ranks": {"vitality": 1}, "flags": {}}
+    # on-disk shape REPLACED at T-M2e (MC 11237): §A.3's best_cycle joins the
+    # four roadmap keys (VERSION unchanged) — falsified-by-design + replaced,
+    # LEDGER row; the shop card's own rule (rank 1 @ 40, gold 960) is the
+    # row's point and is UNTOUCHED.
+    assert disk == {"version": 1, "gold": 960, "ranks": {"vitality": 1},
+                    "flags": {}, "best_cycle": 0}
 
 
 def test_poor_buy_declines(probe):

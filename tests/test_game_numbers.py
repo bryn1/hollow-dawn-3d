@@ -78,8 +78,14 @@ def test_gates_minutes():
 
 
 def test_spawn_rate_capped_12():
-    assert re.search(r"minf\(\s*12\.0\s*,\s*1\.0\s*\+\s*1\.3\s*\*\s*minute\s*\)", WORLD), \
-        "spawn rate must be min(12, 1 + 1.3*minute) per plan §5"
+    # REPLACED at T-M2e (MC 11237, M2-SPEC §A.1 rev-2 P2-3; falsified-by-
+    # design, LEDGER row): the 12/s CEILING ITSELF is untouched and still
+    # pins here — the term inside it now rides the cycle-local minute (IS
+    # game.time/60.0 at cycle 0) times QTY_CYC (1.0 at cycle 0), so flag-off
+    # byte-stability holds while quantity growth saturates against this cap.
+    assert re.search(r"minf\(\s*12\.0\s*,\s*\(1\.0 \+ 1\.3 \* minute\) \* "
+                     r"qty_cyc\(game\.cycle\)\s*\)", WORLD), \
+        "spawn rate must stay min(12, (1 + 1.3*minute) * QTY_CYC) — §5 cap + §A.1"
 
 
 def test_alive_cap_400_pauses_the_single_spawn_loop():

@@ -17,6 +17,47 @@ const CHEST_CHANCE_MINIBOSS := 0.6
 const ALIVE_CAP := 400 # M1 hard rule (roadmap §b): spawns PAUSE at the cap in
 # the single spawn loop below — no accumulate-then-burst across a kill gap.
 
+# M2 pillar A (MC 11237 T-M2e, M2-SPEC §A.1): the three capped cycle scalars,
+# OUR numbers, in the ONE spawn/damage seams — not a second mechanism beside
+# the existing ramp. HP's deep-cycle clamp is the "cannot explode" bound: the
+# effective multiplier never exceeds def.hp * HP_EFFECTIVE_MULT_CAP at ANY
+# depth (rev-2 P2-2: it binds at cycle 5 near cycle-end, cycles <= 4 never
+# clamp — max product 4.3 * 4.0 = 17.2 < 18). Quantity and damage growth
+# saturate against the UNTOUCHED existing ceilings (rate 12/s + ALIVE_CAP)
+# and main.gd's MAX_CONTACT_DMG. The statics are read by the spawn/damage
+# sites AND the sim_endless eval legs — one formula, no copy.
+const HP_EFFECTIVE_MULT_CAP := 18.0
+
+
+static func hp_cyc(cycle: int) -> float:
+	return minf(1.0 + 0.75 * cycle, 6.0)
+
+
+static func qty_cyc(cycle: int) -> float:
+	return minf(1.0 + 0.25 * cycle, 2.0)
+
+
+static func dmg_cyc(cycle: int) -> float:
+	return minf(1.0 + 0.20 * cycle, 2.5)
+
+
+# Within-cycle minute m_c (§A.1 rev-2 P3-1: "waves restart" = the per-minute
+# HP/qty RAMP restarts at the boundary, not the composition — biome bands +
+# GATES stay keyed to absolute game.time). With cycle 0 (every non-endless
+# run, and every committed dump) this is exactly game.time / 60.0, so the
+# flag-off path stays byte-stable (F-4).
+static func cycle_minute(game: GameState) -> float:
+	return (game.time - game.cycle * GameState.WIN_TIME) / 60.0
+
+
+# Pillar B §B.1 source->tier map, the SINGLE source of truth for chest
+# tiers (rev-2 P1: §A.1 defers to this row). ENDLESS (this card) consumes
+# the endless-cycle row at the cycle clear; the boss/miniboss tier wiring on
+# the drop side rides T-M2t, and the event row is the §B.1 P4-1 forward-
+# declared reservation (event-waves are an excluded pillar). OUR mapping.
+const CHEST_TIER_BY_SOURCE := {"miniboss": "ember", "warden": "warden",
+	"endless-cycle": "dawn", "event": "dawn"}
+
 # Stats + sprite per enemy id (plan §5 classics pinned by the acceptance
 # suite; biome signature creatures MC 11082 — sprites mirrored from
 # static/assets/enemies/ under res://assets/enemies/). Which ids spawn when:
@@ -85,7 +126,13 @@ func _spawn_enemy(type_key: String, game: GameState, view: Vector2) -> void:
 	var def: Dictionary = ENEMY_TYPES[type_key]
 	var angle := randf() * TAU
 	var r := _spawn_ring(view)
-	var hp := roundf(def.hp * (1.0 + 0.22 * (game.time / 60.0)))
+	# §A.1 cycle scaling on the ONE existing ramp term: cycle-local minute
+	# (m_c) rides the M1 per-minute term verbatim, HP_CYC multiplies it, and
+	# the single HP_EFFECTIVE_MULT_CAP clamp below is the deep-cycle bound.
+	# cycle 0: hp_cyc = 1.0 (exact float identity) and the clamp is vacuous
+	# (ramp max 4.3 < 18), so flag-off spawns stay byte-stable.
+	var hp := roundf(def.hp * (1.0 + 0.22 * cycle_minute(game)) * hp_cyc(game.cycle))
+	hp = minf(hp, def.hp * HP_EFFECTIVE_MULT_CAP)
 	enemies.append({
 		"type": type_key,
 		"x": game.player.x + cos(angle) * r,
@@ -114,8 +161,12 @@ func update_spawns(dt: float, game: GameState, view: Vector2) -> void:
 	if enemies.size() >= ALIVE_CAP:
 		return # M1 hard rule: PAUSE the horde loop at the cap — no rate
 		# accumulation either, so kills never burst-refill the queue
-	var minute := game.time / 60.0
-	spawn_acc += minf(12.0, 1.0 + 1.3 * minute) * dt
+	# §A.1: cycle-local minute + QTY_CYC on the existing rate term; the
+	# minf(12.0, …) ceiling stays UNTOUCHED (§A.1 "cannot explode": quantity
+	# growth saturates against it + ALIVE_CAP above). cycle 0: qty_cyc = 1.0
+	# exact and m_c = game.time/60 — flag-off byte-stable.
+	var minute := cycle_minute(game)
+	spawn_acc += minf(12.0, (1.0 + 1.3 * minute) * qty_cyc(game.cycle)) * dt
 	var open := _types_open(game.time)
 	while spawn_acc >= 1.0:
 		spawn_acc -= 1.0
@@ -152,6 +203,16 @@ func _magnetize(items: Array, p: Dictionary, magnet: float, dt: float) -> void:
 		if gd < magnet:
 			g.x += gx / gd * 220.0 * dt
 			g.y += gy / gd * 220.0 * dt
+
+
+# M2 §A.1 cycle clear: the clear's ONE drop through the single drop array,
+# tier from CHEST_TIER_BY_SOURCE's endless-cycle row (dawn = tier III — the
+# A-E4 / B-T1 single-source row, rev-2 P1). Rides the existing chest array +
+# the 16 px collect/open funnel (pickup_viz draws it; no new kind, the
+# test_biome_numbers 4-kind pin holds).
+func cycle_clear(game: GameState) -> void:
+	chests.append({"x": game.player.x, "y": game.player.y,
+		"tier": CHEST_TIER_BY_SOURCE["endless-cycle"]})
 
 
 # Death payout: ~70% gem, 6% coin (1-3g); the Warden adds +50 gold.

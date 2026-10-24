@@ -19,6 +19,15 @@ var xp := 0.0
 var gold := 0
 var kills := 0
 var pending_levels := 0
+# M2 pillar A (MC 11237 T-M2e, M2-SPEC §A): endless is a RUN MODE hand-in
+# (F-4), not a phase value, and cycle is the 0-based cycle index (cycle =
+# int(time // WIN_TIME), §A.1 — WIN_TIME stays the ONE clock). Both live
+# OUTSIDE the 12-field Contract B snapshot below (F-3 frozen): neither name
+# may ever appear in snapshot_json. start_run() resets both; main.gd hands
+# the flag in through the ONE _dawnwell -> start seam after start_run
+# (the meta_ranks pattern: empty input = every pre-endless byte unchanged).
+var endless := false
+var cycle := 0
 var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
 # The 15 passive STAT ROWS (PARITY-ROADMAP rev3 features 3+7: original five
 # + the ten evolution partners, T-M1h). Seeded here AND in start_run so
@@ -104,6 +113,8 @@ func start_run() -> void:
 	meta_gold_mult = 1.0 + PowerUps.gold_bonus(meta_ranks)
 	kills = 0
 	pending_levels = 0
+	endless = false # §A.2: fresh-run reset; the flag is re-handed by main._start_game
+	cycle = 0     # after start_run (hand-in seam, never a start_run default)
 	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]
 	passives = {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0,
 		"cracked-heart": 0, "iron-wrap": 0, "tall-candles": 0, "four-leaf-charm": 0,

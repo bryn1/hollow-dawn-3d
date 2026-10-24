@@ -5,7 +5,8 @@ reset-rule table ... quarantine-file existence assertion in the leg
 output"):
 
 1. SOURCE TRUTH (the repo's test idiom, test_game_numbers-style): save.gd
-   pins the file names, the int VERSION, the four format keys, the
+   pins the file names, the int VERSION, the four roadmap format keys +
+   M2 §A.3's best_cycle (T-M2e replaced rows, LEDGER-logged), the
    temp+rename write path, the SAVE_LOAD_FAIL marker, plus the main.gd
    boot wiring and the meta-change funnel — and the no-run-change rule
    (run gold still only touched by the collect line).
@@ -95,9 +96,15 @@ def test_version_is_int_one():
 
 def test_format_keys_pinned():
     # roadmap format {version:int, gold:int, ranks:{id:rank}, flags:{id:1}}
+    # + M2 §A.3's best_cycle:int (T-M2e MC 11237): the four roadmap keys
+    # PLUS the field-by-field ADDED row, VERSION unchanged — this row was
+    # FALSIFIED BY DESIGN when §A.3 landed the fifth field and REPLACED
+    # (LEDGER T-M2e row), not deleted: the exactness of the key set is
+    # exactly what pins the format.
     m = re.search(r'"version":\s*version,\s*"gold":\s*gold,\s*'
-                  r'"ranks":\s*ranks,\s*"flags":\s*flags', SAVE)
-    assert m, "as_data() must serialize exactly the four roadmap keys"
+                  r'"ranks":\s*ranks,\s*"flags":\s*flags,\s*'
+                  r'"best_cycle":\s*best_cycle', SAVE)
+    assert m, "as_data() must serialize exactly the four roadmap keys + best_cycle"
 
 
 def test_write_path_is_temp_plus_rename():
@@ -172,11 +179,14 @@ def test_valid_roundtrip(probe):
     rows, json_text, _ = probe
     assert rows["roundtrip"] == {"ok": 1, "file": 1, "temp_gone": 1}
     disk = json.loads(json_text)
-    assert set(disk) == {"version", "gold", "ranks", "flags"}, \
-        "on-disk keys must be exactly the roadmap's four"
-    assert disk == {"version": 1, "gold": 123,
-                    "ranks": {"might": 2}, "flags": {"stage2": 1}}
-    assert rows["reload"] == {"gold": 123, "ranks": 2, "flags": 1, "version": 1}
+    # FALSIFIED-BY-DESIGN + REPLACED at T-M2e (MC 11237, LEDGER row): the
+    # key set gained §A.3's best_cycle; exactness of the NEW set is the pin.
+    assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle"}, \
+        "on-disk keys must be exactly the roadmap's four + best_cycle (§A.3)"
+    assert disk == {"version": 1, "gold": 123, "ranks": {"might": 2},
+                    "flags": {"stage2": 1}, "best_cycle": 3}
+    assert rows["reload"] == {"gold": 123, "ranks": 2, "flags": 1,
+                              "version": 1, "best_cycle": 3}
     # a stale torn temp must not block the atomic rename (recreate from garbage)
     assert re.search(r'"version":\s*1', json_text), "version must serialize as an int"
 
@@ -210,9 +220,20 @@ def test_version_skew_quarantines(probe):
 
 def test_older_version_migrates_field_by_field(probe):
     rows, _, stderr = probe
+    # best_cycle_default=1: A-E5's older-save leg (field absent -> 0, §A.3
+    # field-by-field migration, no VERSION bump) — row EXTENDED at T-M2e.
     assert rows["migrate"] == {"gold": 5, "ranks_default": 1,
-                               "flags_default": 1, "quarantined": 0}
+                               "flags_default": 1, "quarantined": 0,
+                               "best_cycle_default": 1}
     assert not any("reason=migrate" in ln for ln in stderr.splitlines())
+
+
+def test_best_cycle_persists(probe):
+    # A-E5 save side: a persisted best_cycle reloads intact (the never-
+    # decreases rule is main.gd's, pinned in test_endless + behavior-run in
+    # the sim_endless endless_bestcycle leg).
+    rows, _, _ = probe
+    assert rows["bestcycle"] == {"persisted": 1, "value": 7}
 
 
 def test_reset_verb(probe):

@@ -82,9 +82,17 @@ def test_gold_rows():
 # ---- contact damage (N28/N26 + ENEMY_TYPES dmg column) -------------------------
 
 def test_contact_damage():
-    assert re.search(r"game\.hp -= game\.damage_taken\(e\.dmg\)", MAIN)
+    # REPLACED at T-M2e (MC 11237, M2-SPEC §A.1; falsified-by-design, LEDGER
+    # row): e.dmg now enters the SAME single damage_taken seam through the
+    # one clamped cycle read — minf(e.dmg * DMG_CYC(cycle), MAX_CONTACT_DMG
+    # 20) — which at cycle 0 IS e.dmg (DMG_CYC(0)=1.0, every base dmg below
+    # the cap), so the v1 damage column below is untouched and byte-stable.
+    assert re.search(r"var raw: float = minf\(e\.dmg \* GameWorld\.dmg_cyc"
+                     r"\(game\.cycle\), MAX_CONTACT_DMG\)\s*\n"
+                     r"\t*game\.hp -= game\.damage_taken\(raw\)", MAIN)
     assert re.search(r"p\.iframes = GameState\.IFRAMES", MAIN)
     assert const("IFRAMES", GAME_STATE) == 0.5
+    assert const("MAX_CONTACT_DMG", MAIN) == 20.0
     dmg = [float(x) for x in re.findall(r"\"dmg\": ([\d.]+)", WORLD[:WORLD.index("const GATES")])]
     # Column RE-PINNED by T-M1d (M1 feature 4): the two miniboss rows append
     # 10/11 after the warden's 12; the nine v1 rows N10-N18 are unchanged.

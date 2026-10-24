@@ -21,6 +21,7 @@ func _init() -> void:
 	_leg_corrupt()
 	_leg_skew()
 	_leg_migrate()
+	_leg_bestcycle()
 	_leg_reset()
 	_leg_recreate()
 	print("PROBE_DONE")
@@ -42,14 +43,15 @@ func _leg_roundtrip() -> void:
 	w.gold = 123
 	w.ranks = {"might": 2}
 	w.flags = {"stage2": 1}
+	w.best_cycle = 3 # M2 §A.3 (T-M2e): the new row roundtrips on the same path
 	var ok := w.save()
 	print("LEG roundtrip ok=%d file=%d temp_gone=%d" % [
 		int(ok), int(_exists(SAVE)), int(not _exists(TEMP))])
 	print("JSON " + _read(SAVE))
 	var r: DawnWell = DawnWell.load_save()
-	print("LEG reload gold=%d ranks=%d flags=%d version=%d" % [
+	print("LEG reload gold=%d ranks=%d flags=%d version=%d best_cycle=%d" % [
 		r.gold, int(r.ranks.get("might", -1)), int(r.flags.get("stage2", -1)),
-		r.version])
+		r.version, r.best_cycle])
 
 
 func _leg_corrupt() -> void:
@@ -76,9 +78,21 @@ func _leg_migrate() -> void:
 	_wipe()
 	_write(SAVE, JSON.stringify({"version": 0, "gold": 5})) # older save, new fields absent
 	var w: DawnWell = DawnWell.load_save()
-	print("LEG migrate gold=%d ranks_default=%d flags_default=%d quarantined=%d" % [
+	print("LEG migrate gold=%d ranks_default=%d flags_default=%d quarantined=%d best_cycle_default=%d" % [
 		w.gold, int(w.ranks.is_empty()), int(w.flags.is_empty()),
-		int(_exists(CORRUPT))])
+		int(_exists(CORRUPT)), int(w.best_cycle == 0)]) # A-E5: no field -> 0
+
+
+func _leg_bestcycle() -> void:
+	# A-E5 save side: a DEEPLY-persisted best survives reload; the never-
+	# decreases rule itself is main.gd's max-update at the ONE funnel
+	# (behavior leg: sim_endless endless_bestcycle; source pin: test_endless).
+	_wipe()
+	var w: DawnWell = DawnWell.load_save()
+	w.best_cycle = 7
+	w.save()
+	var r: DawnWell = DawnWell.load_save()
+	print("LEG bestcycle persisted=%d value=%d" % [int(r.best_cycle == 7), r.best_cycle])
 
 
 func _leg_reset() -> void:

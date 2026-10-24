@@ -1,6 +1,8 @@
 # Dawn Well meta-progression save (M1 W-P persistence work package, MC 11205).
 # Format per PARITY-ROADMAP.md M1 feature 1 rev 3: user://dawnwell.json =
-# {version:int, gold:int, ranks:{powerup_id:rank}, flags:{unlock_id:1}}.
+# {version:int, gold:int, ranks:{powerup_id:rank}, flags:{unlock_id:1}} +
+# M2 §A.3's best_cycle:int (T-M2e, MC 11237) — a field-by-field ADDED row,
+# VERSION unchanged (1) exactly as §A.3 pins it.
 # Recovery rules (all observables, roadmap reset table): missing file -> fresh
 # defaults; undecodable -> quarantine (rename to dawnwell.corrupt.json kept +
 # stderr `SAVE_LOAD_FAIL path=...`) + defaults; version newer than this code
@@ -24,6 +26,12 @@ var version := VERSION
 var gold := 0
 var ranks: Dictionary = {} # powerup_id -> rank (int)
 var flags: Dictionary = {} # unlock_id -> 1
+# M2 §A.3 (T-M2e): the deepest cycle any run has CLEARED (or died in),
+# updated ONLY through main.gd's max-rule at a cycle clear / run end, on the
+# ONE _meta_changed funnel. NO VERSION bump — the field-by-field migration
+# above defaults a missing field, so an older save keeps working and a fresh
+# one reads 0 (A-E5).
+var best_cycle := 0
 
 
 # Boot load: missing file is NOT a failure — fresh defaults, silent.
@@ -49,6 +57,7 @@ static func load_save() -> DawnWell:
 	well.gold = int(data.get("gold", 0))
 	well.ranks = _int_dict(data.get("ranks", {}))
 	well.flags = _int_dict(data.get("flags", {}))
+	well.best_cycle = int(data.get("best_cycle", 0)) # §A.3: older saves -> 0
 	return well
 
 
@@ -77,6 +86,7 @@ func reset() -> void:
 	gold = 0
 	ranks = {}
 	flags = {}
+	best_cycle = 0
 	var dir := DirAccess.open("user://")
 	if dir != null and dir.file_exists(SAVE_PATH.trim_prefix("user://")):
 		dir.remove(SAVE_PATH.trim_prefix("user://"))
@@ -96,7 +106,8 @@ static func quarantine(reason: String) -> void:
 
 
 func as_data() -> Dictionary:
-	return {"version": version, "gold": gold, "ranks": ranks, "flags": flags}
+	return {"version": version, "gold": gold, "ranks": ranks, "flags": flags,
+		"best_cycle": best_cycle}
 
 
 static func _int_dict(src: Variant) -> Dictionary:
