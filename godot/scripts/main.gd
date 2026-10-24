@@ -39,8 +39,9 @@ func _ready() -> void:
 	# A missing file is the normal first-run defaults case; an undecodable
 	# or future-version file quarantines itself inside load_save() (rename
 	# to dawnwell.corrupt.json + SAVE_LOAD_FAIL stderr line) and boot
-	# continues on defaults. Nothing here mutates it yet: the shop card
-	# (T-M1f) is the first consumer, run gold stays run-local.
+	# continues on defaults. Since T-M1f the Dawn Well shop mutates it —
+	# every mutation lands through the _meta_changed funnel below, and run
+	# gold stays run-local until the run ends (_end_run cashes it out).
 	_dawnwell = DawnWell.load_save()
 
 	# Visible layer (DESIGN-3D §a/§b): every node reads game/world/fx each
@@ -99,6 +100,14 @@ func _ready() -> void:
 	add_child(_screens)
 	_screens.start_pressed.connect(_start_game)
 	_screens.card_picked.connect(_pick)
+	# Dawn Well shop (T-M1f): the menu seam opens the panel; the shop only
+	# emits verbs, the mutations happen HERE and persist through the ONE
+	# _meta_changed funnel (T-M1a contract: the funnel below stays the file's
+	# only call into save()).
+	_screens.shop_requested.connect(_open_shop)
+	_screens.shop_buy.connect(_shop_buy)
+	_screens.shop_refund.connect(_shop_refund)
+	_screens.shop_refund_all.connect(_shop_refund_all)
 
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
@@ -151,7 +160,9 @@ func _handle_presses() -> void:
 			game.muted = not game.muted # internal flag; this build ships no audio
 		elif code == "Escape" and game.phase == "playing":
 			game.paused = not game.paused
-		elif game.phase == "menu" and bridge.is_enter(code):
+		# The shop is menu-phase UI: while it is open the Enter that would
+		# start a run is inert (the panel's own mouse buttons own input).
+		elif game.phase == "menu" and bridge.is_enter(code) and not _screens.shop_visible():
 			_start_game()
 		elif game.phase == "levelup":
 			if code == "Digit1":
@@ -207,6 +218,10 @@ func _start_game() -> void:
 	_js_eval("var vsPanel=document.getElementById('vs-submit'); if (vsPanel) vsPanel.remove();")
 	world.reset()
 	fx.clear_fx()
+	# Hand the bought meta ranks to the ONE consumption seam (roadmap M1 f2:
+	# ranks are consumed at start_run; the duplicate keeps run state from
+	# aliasing the live shop dictionary).
+	game.meta_ranks = _dawnwell.ranks.duplicate()
 	game.start_run()
 	_current_offer = []
 	_screens.hide_all()
@@ -234,6 +249,12 @@ func _pick(index: int) -> void:
 
 func _end_run(result: String) -> void:
 	game.end_run(result)
+	# Dawn Well gold income (T-M1f): the run's gold cashes out into the well
+	# 1:1 at EVERY run end — death AND win (the gap-table row "gold dies
+	# with the run" is what M1 feature 2 closes; conversion declared in the
+	# card capture) — and the ONE funnel persists it.
+	_dawnwell.gold += game.stats.gold
+	_meta_changed()
 	_screens.show_end(result == "win", [
 		"Survived " + _fmt_time(game.stats.time),
 		"Kills %d" % game.stats.kills,
@@ -262,10 +283,38 @@ func _fmt_time(t: float) -> String:
 
 # Save-on-meta-change funnel (MC 11205): the ONE place meta state is
 # persisted. The Dawn Well shop (T-M1f) mutates _dawnwell (gold / ranks /
-# flags) and calls this after EVERY mutation — save() writes the whole save
-# atomically (temp file + rename), and delete-while-running is UNDEFINED BY
-# DESIGN: the in-memory state re-creates the file at the next call
-# (PARITY-ROADMAP M1 feature 1). No caller mutates meta state on this card:
-# no shop UI, no run behavior change — the boot load above is the only use.
+# flags) through the verbs below and calls this after EVERY mutation —
+# save() writes the whole save atomically (temp file + rename), and
+# delete-while-running is UNDEFINED BY DESIGN: the in-memory state
+# re-creates the file at the next call (PARITY-ROADMAP M1 feature 1).
 func _meta_changed() -> void:
 	_dawnwell.save()
+
+
+# --- Dawn Well shop verbs (T-M1f) --------------------------------------------
+# The rules live in PowerUps (the ONE table); these are thin mutators over
+# the loaded save + the funnel. A no-op mutation (unaffordable, maxed, or an
+# empty refund) does NOT write: the funnel fires only on real change, and
+# refresh_shop() re-reads state either way so a disabled button re-labels
+# itself after every click.
+
+func _open_shop() -> void:
+	_screens.show_shop(_dawnwell)
+
+
+func _shop_buy(id: String) -> void:
+	if PowerUps.buy(_dawnwell, id):
+		_meta_changed()
+	_screens.refresh_shop()
+
+
+func _shop_refund(id: String) -> void:
+	if PowerUps.refund(_dawnwell, id) > 0:
+		_meta_changed()
+	_screens.refresh_shop()
+
+
+func _shop_refund_all() -> void:
+	if PowerUps.refund_all(_dawnwell) > 0:
+		_meta_changed()
+	_screens.refresh_shop()

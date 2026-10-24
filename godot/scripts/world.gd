@@ -204,7 +204,10 @@ func collect_pickups(game: GameState) -> int:
 			chests.remove_at(i)
 			EvolutionSystem.try_evolve(game)
 			game.pending_levels += 1
-	return gold
+	# The meta gold-rate (T-M1f) rides the ONE pickup funnel: collected raw
+	# gold enters the run only through GameState.credit_gold — identity with
+	# no ranks bought, so every pre-shop dump byte stays identical.
+	return game.credit_gold(gold)
 
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:

@@ -23,3 +23,10 @@ func show_levelup(_offer: Array) -> void:
 
 func show_end(_win: bool, _lines: Array) -> void:
 	pass
+
+
+# T-M1f surface parity: main's menu-Enter branch asks the screens whether the
+# shop is open; this stage never carries one (the branch is menu-phase only,
+# the sim runs play straight through).
+func shop_visible() -> bool:
+	return false

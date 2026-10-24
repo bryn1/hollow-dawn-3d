@@ -23,6 +23,17 @@ var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
 var passives := {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0}
 var player := {"x": 0.0, "y": 0.0, "dir_x": 1.0, "dir_y": 0.0, "iframes": 0.0}
 var stats: Dictionary = {}
+# Dawn Well meta ranks (T-M1f, roadmap M1 feature 2): the ONE consumption
+# point is start_run() below (roadmap: "Meta ranks are consumed at
+# start_run() ... snapshot maxHp/xpNext legitimately shift with bought
+# ranks"). main.gd hands the loaded save's ranks in as a plain Dictionary —
+# this file never touches DawnWell/persistence. Empty ranks (every run
+# before the shop exists, and every committed sim dump) leave ALL multi-
+# pliers at their exact pre-shop values, so v1-parity rows stay byte-stable.
+var meta_ranks: Dictionary = {}
+var meta_xp_mult := 1.0
+var meta_gold_mult := 1.0
+var gold_frac := 0.0 # gold-rate carry: whole coins only ever enter `gold`
 
 
 static func xp_need(level: int) -> int:
@@ -46,11 +57,17 @@ func start_run() -> void:
 	paused = false
 	time = 0.0
 	run_id = "rd-" + _random_hex(8)
-	hp = MAX_HP
-	max_hp = MAX_HP
+	# Meta-rank consumption (T-M1f): maxHp = 100 + Σ maxhp-ranks * 10 exactly
+	# as the roadmap pins it; the xp/gold rates fold into multipliers here.
+	# With empty meta_ranks every value is the pre-shop constant, byte-equal.
+	max_hp = MAX_HP + PowerUps.max_hp_bonus(meta_ranks)
+	hp = max_hp
 	level = 1
 	xp = 0.0
 	gold = 0
+	gold_frac = 0.0
+	meta_xp_mult = 1.0 + PowerUps.xp_bonus(meta_ranks)
+	meta_gold_mult = 1.0 + PowerUps.gold_bonus(meta_ranks)
 	kills = 0
 	pending_levels = 0
 	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]
@@ -75,12 +92,29 @@ func end_run(result: String) -> void:
 
 
 # Insight multiplies gained xp; overflow may raise several levels at once.
+# The meta xp multiplier (T-M1f) is a plain *1.0 factor with no ranks bought
+# — the IEEE product is unchanged for every pre-shop run.
 func add_xp(amount: float) -> void:
-	xp += amount * (1.0 + 0.15 * passives.insight)
+	xp += amount * (1.0 + 0.15 * passives.insight) * meta_xp_mult
 	while xp >= float(xp_need(level)):
 		xp -= float(xp_need(level))
 		level += 1
 		pending_levels += 1
+
+
+# The gold-rate seam (T-M1f, roadmap "gold-rate via gold/kills rows"): raw
+# pickup gold enters the run through HERE, multiplied by the meta gold rate
+# with the fractional remainder carried, so `gold` (an int in the Contract B
+# snapshot) only ever moves by whole coins. meta_gold_mult 1.0 returns raw
+# exactly. The Warden's direct +50 kill bounty (world.gd) is NOT doubled by
+# the rate — the rate is a PICKUP effect (declared in the card capture).
+func credit_gold(raw: int) -> int:
+	if raw <= 0:
+		return raw
+	gold_frac += float(raw) * meta_gold_mult
+	var whole := int(floor(gold_frac))
+	gold_frac -= float(whole)
+	return whole
 
 
 # Exact Contract B shape, field for field, serialized for window.__vsSnapshot.

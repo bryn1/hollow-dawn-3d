@@ -125,7 +125,8 @@ def test_boot_and_funnel_wired_in_main():
     assert re.search(r"func _meta_changed\(\) -> void:\s*\n\s*_dawnwell\.save\(\)", MAIN), \
         "main.gd must carry the save-on-meta-change funnel calling save()"
     assert MAIN.count("_dawnwell.save()") == 1, \
-        "the funnel is the ONE save call site until the shop (T-M1f)"
+        "the funnel is the ONE save call site; the shop (T-M1f) mutates through " \
+        "verbs and persists via _meta_changed(), never its own save()"
 
 
 def test_run_behavior_untouched():

@@ -1,6 +1,8 @@
-# Screens layer: menu, level-up cards and the end screen. Mouse works for
-# real users; keyboard picking is routed by main from the bridge press
-# queue (Contract B), never from here.
+# Screens layer: menu, level-up cards, the end screen and the Dawn Well
+# meta shop (T-M1f — the shop is a FOURTH overlay in this ONE panel style:
+# same _overlay/_center_box/_label/_button idiom, zero new UI mechanism).
+# Mouse works for real users; keyboard picking is routed by main from the
+# bridge press queue (Contract B), never from here.
 # §j (MC 11103): every card kind resolves to an icon file. v1's blank-icon
 # path (passives shipped icon: "", levelup.gd:35) is closed structurally:
 # _card() has NO conditional around the icon TextureRect, icon_path() is
@@ -12,6 +14,10 @@ extends CanvasLayer
 
 signal start_pressed
 signal card_picked(index: int)
+signal shop_requested
+signal shop_buy(id: String)
+signal shop_refund(id: String)
+signal shop_refund_all
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -54,6 +60,12 @@ var _end: Control
 var _end_title: Label
 var _end_stats: Label
 var _cards_host: HBoxContainer
+# Dawn Well shop (T-M1f): DISPLAY of the passed-in DawnWell only — every
+# mutation is main.gd's verb, every rebuild is refresh_shop().
+var _shop: Control
+var _well: DawnWell
+var _shop_gold: Label
+var _shop_rows: VBoxContainer
 
 
 func _ready() -> void:
@@ -64,12 +76,15 @@ func _ready() -> void:
 	_build_levelup()
 	_end = _overlay()
 	_build_end()
+	_shop = _overlay() # on top of _end (added last): the shop dims all
+	_build_shop()
 	show_menu()
 
 
 func show_menu() -> void:
 	_end.visible = false
 	_levelup.visible = false
+	_shop.visible = false
 	_menu.visible = true
 
 
@@ -77,6 +92,7 @@ func hide_all() -> void:
 	_menu.visible = false
 	_levelup.visible = false
 	_end.visible = false
+	_shop.visible = false
 
 
 func show_levelup(offer: Array) -> void:
@@ -131,6 +147,7 @@ func _build_menu() -> void:
 	box.add_child(_label("WASD / Arrows — move\nEsc — pause\nM — mute (no audio in this build)\n1 / 2 / 3 — choose a card",
 		13, MOON))
 	box.add_child(_button("Enter the night", _on_start))
+	box.add_child(_button("The Dawn Well", _on_shop))
 
 
 func _build_levelup() -> void:
@@ -200,6 +217,103 @@ func _card(card: Dictionary, index: int) -> Control:
 
 func _on_start() -> void:
 	start_pressed.emit()
+
+
+func _on_shop() -> void:
+	shop_requested.emit()
+
+
+# --- Dawn Well shop (T-M1f): the fourth overlay in the ONE panel style ----
+
+# main owns the DawnWell object; the panel only shows it and emits the verb
+# signals (buy / refund / refund-all) — main mutates + persists (T-M1a funnel)
+# and calls refresh_shop() after every mutation.
+func show_shop(well: DawnWell) -> void:
+	_well = well
+	_menu.visible = false
+	_shop.visible = true
+	refresh_shop()
+
+
+func shop_visible() -> bool:
+	return _shop.visible
+
+
+func close_shop() -> void:
+	_shop.visible = false
+	show_menu()
+
+
+func refresh_shop() -> void:
+	# Rebuilds the 24 rows from the ONE table (powerups.gd): name + rank,
+	# OUR per-rank effect line, cost curve row. disable-when-maxed (S7 ~610):
+	# a maxed row's Buy is DISABLED, never hidden; refund sits on the rank-0
+	# floor with its Refund disabled there.
+	for child in _shop_rows.get_children():
+		child.queue_free()
+	_shop_gold.text = "Gold in the well: %d" % _well.gold
+	for row in PowerUps.TABLE:
+		var id: String = row.id
+		var rank := int(_well.ranks.get(id, 0))
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 10)
+		var title := _label("%s  %d/%d" % [row.name, rank, PowerUps.MAX_RANK],
+			13, BONE)
+		# Row text opts OUT of the shared _label autowrap (menu cards wrap;
+		# a table row that wraps one letter per line is unreadable) and
+		# carries its column width, so the HBox lays out L->R.
+		title.autowrap_mode = TextServer.AUTOWRAP_OFF
+		title.custom_minimum_size = Vector2(170, 0)
+		line.add_child(title)
+		var effect := _label(row.desc, 12, MOON)
+		effect.autowrap_mode = TextServer.AUTOWRAP_OFF
+		effect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		effect.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		line.add_child(effect)
+		var price := PowerUps.cost(id, rank)
+		var buy := Button.new()
+		buy.text = "MAX" if rank >= PowerUps.MAX_RANK else "Buy %dg" % price
+		buy.disabled = rank >= PowerUps.MAX_RANK or _well.gold < price
+		buy.pressed.connect(func(): shop_buy.emit(id))
+		line.add_child(buy)
+		var back := Button.new()
+		back.text = "Refund %dg" % PowerUps.refund_for(id, rank)
+		back.disabled = rank <= 0
+		back.pressed.connect(func(): shop_refund.emit(id))
+		line.add_child(back)
+		_shop_rows.add_child(line)
+
+
+func _build_shop() -> void:
+	var box := _center_box(_shop)
+	# §j precedent (_build_levelup's wider column): a 24-row table with a
+	# name column, an effect line and TWO buttons needs more than the
+	# menu's 560 — the Refund buttons clipped at the scroll edge.
+	box.offset_left = -380
+	box.offset_right = 380
+	box.custom_minimum_size = Vector2(760, 0)
+	box.add_child(_label("The Dawn Well", 24, BONE))
+	_shop_gold = _label("Gold in the well: 0", 15, EMBER_TINT)
+	box.add_child(_shop_gold)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(760, 320)
+	box.add_child(scroll)
+	_shop_rows = VBoxContainer.new()
+	_shop_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# The ScrollContainer gives its child no natural width — the table must
+	# carry one (740 inside the 760 column), else every column collapses.
+	_shop_rows.custom_minimum_size = Vector2(740, 0)
+	_shop_rows.add_theme_constant_override("separation", 6)
+	scroll.add_child(_shop_rows)
+	var buttons := HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 18)
+	var refund_all := Button.new()
+	refund_all.text = "Refund everything (-%d%%)" % PowerUps.REFUND_FEE_PCT
+	refund_all.pressed.connect(func(): shop_refund_all.emit())
+	buttons.add_child(refund_all)
+	buttons.add_child(_button("Back to the menu", close_shop))
+	box.add_child(buttons)
 
 
 func _button(text: String, handler: Callable) -> Button:
