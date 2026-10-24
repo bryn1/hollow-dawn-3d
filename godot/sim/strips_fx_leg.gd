@@ -176,8 +176,23 @@ func sample_pts(cam: Camera3D) -> Array:
 			var u: Dictionary = main.fx.bursts[-1]
 			var prog: float = 1.0 - u.life / u.max
 			var rm: float = u.r * s * (0.25 + 0.75 * prog)
+			# T-S20 (MC 11218) SAMPLER RE-ALIGNMENT, harness repair not a
+			# threshold change: the visual ring is viz_fx._write_bursts' OWN
+			# instances (n shards at angles i/n*TAU, same rm, same height
+			# Y_DECAL+0.2). The old fixed 8-angle sampler only coincided
+			# with the dashes while the L8 dash count was 16 (T-S18 raised
+			# it to 20); since then it sampled mostly GROUND between dashes
+			# (measured 3/8) — the file's contract says "the FOOTPRINT of
+			# the live instance". Sampling the instance angles re-measures
+			# the true coverage: 6/8, the same row value the v1.1.0-era
+			# acceptance recorded.
+			var lv := 1
+			for w in main.game.weapons:
+				if w.id == "spike":
+					lv = w.level
+			var nsh := mini(8 + (lv - 1) * 12 / 7, WeaponFxViz.SPARKS)
 			for i in 8:
-				var a := float(i) / 8.0 * TAU
+				var a := float(i * nsh / 8) / float(nsh) * TAU
 				pts.append(cam.unproject_position(Vector3(
 					u.x * s + cos(a) * rm, WeaponFxViz.Y_DECAL + 0.2,
 					u.y * s + sin(a) * rm)))
