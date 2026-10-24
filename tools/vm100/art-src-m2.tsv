@@ -1,0 +1,6 @@
+# M2a mesh-ref batch MC 11236 (3 rows) — variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha256[:16]
+# Three-quarter prop refs for the two union meshes (icons-batch-m1c.tsv convention reused;
+# imagegen MCP, one window 2026-10-24 09:16->09:33Z + re-roll 09:36->09:38Z).
+weapon-requiem-toll	assets/art-src/weapon-requiem-toll-ref.png	411	487a88dab3c5161e	# bell-in-one-thick-hoop (lasso/torus class) — ACCEPTED mesh input seed 421
+weapon-dirge-eternal-v1	assets/art-src/weapon-dirge-eternal-ref-v1.png	412	03e2569cab5df458	# REJECTED pre-commit: drew a two-turn helix vapor wrap + smoke wisps = the §M1c2 spring/coil shatter class; kept as the documented failed variant, NOT fed to TRELLIS
+weapon-dirge-eternal	assets/art-src/weapon-dirge-eternal-ref-v2.png	413	6cbff11bde4b072e	# urn + ONE welded solid planet-ring, no vapor — ACCEPTED mesh input seed 431 (solid-body class)

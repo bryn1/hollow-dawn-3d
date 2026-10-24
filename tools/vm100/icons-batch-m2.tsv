@@ -1,0 +1,10 @@
+# M2a icon batch MC 11236 (5 rows) — variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha256[:16] (icons-batch-m1c.tsv convention)
+# §6 count: n=5 — chest tier II (warden), chest tier III (dawn), bulk gem, union requiem-toll, union dirge-eternal.
+# 512x512 RGBA transparent, imagegen MCP (ONE window, 2026-10-24 09:16->09:33Z), tEXt impeccable:prompt =
+# the tool-reported prompt_sent (DESIGN-3D §j family, single studio-background tail); byte-identical copies in assets/icons/new/.
+# Re-roll reserve (+2, §6) NOT needed: 5/5 first-batch acceptance, icon_gate PASS x5 (red-proof in .tmp/m2a-art.txt).
+chest-warden	godot/assets/icons/icon-chest-warden.png	401	6563df850a391a1e
+chest-dawn	godot/assets/icons/icon-chest-dawn.png	402	14af5c9abc17fff2
+gem-bulk	godot/assets/icons/icon-gem-bulk.png	403	7cbd09975dd57a97
+requiem-toll	godot/assets/icons/icon-requiem-toll.png	404	aa70ed4fe6029b15
+dirge-eternal	godot/assets/icons/icon-dirge-eternal.png	405	9baacdc1287f6768

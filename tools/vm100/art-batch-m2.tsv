@@ -1,0 +1,11 @@
+# MC 11236 T-M2a mesh spec — name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+# 2 rows (§6 n=2 union weapon props), ONE row per window (the §M1c2 in-session VRAM
+# accumulation lesson), runid mc11236, 3-distinct-seed fail policy:
+#   Prop tri budget 1500 = the §M1c stated prop row (swarmer-class), unchanged.
+#   Inputs = three-quarter volumetric prop refs (the §M1c flat-card lesson; icon
+#   renders are NOT valid mesh inputs — §M1c2). Pose classes chosen from the §M1c2
+#   accepted map: closed thick hoop = lasso/torus class (bone-whip v6/7 solid),
+#   fused planet-ring urn = solid-body class; NOT coil/spiral/ball (shatter/OOM classes).
+#   5th col quality = extent+fill gate (player_attempts.quality) INSIDE the seed loop.
+weapon-requiem-toll	/opt/imagegen/tmp/mc11236/refs/weapon-requiem-toll-ref.png	1500	421	quality
+weapon-dirge-eternal	/opt/imagegen/tmp/mc11236/refs/weapon-dirge-eternal-ref-v2.png	1500	431	quality

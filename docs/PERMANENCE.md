@@ -194,3 +194,32 @@ TRELLIS target; only the exotic coil/ball prop poses fought the pipeline. Contac
 `assets/screens/m1c2-art-sheet.png` (before/after turntables, all four assets). GPU windows:
 4 imagegen (ref generations) + 8 TRELLIS (batches/regens), all CLOSED rc=0, llama-swap
 serving at every close (ledger + VERIFY_EXIT=0 in `.tmp/m1c2-art.txt`).
+
+## M2a union asset batch (T-M2a, MC 11236, 2026-10-24)
+
+The §6 asset batch for M2 (docs/M2-SPEC.md rev-2): **5 icons + 2 union weapon meshes**,
+icons via the imagegen MCP (one window), meshes via TRELLIS.2 on the same recipe chain
+(batch_trellis.py, quality gate ON, 3-seed policy, runid mc11236). Icons (manifest
+`tools/vm100/icons-batch-m2.tsv`): `godot/assets/icons/icon-{chest-warden,chest-dawn,
+gem-bulk,requiem-toll,dirge-eternal}.png` (chest tiers II/III per CHEST_TIER_BY_SOURCE
+names, bulk gem, union icons on the `icon-<id>.png` HUD-fallback convention), 512 RGBA
+transparent, tEXt impeccable:prompt, byte-identical copies in `assets/icons/new/`;
+icon_gate 5/5 PASS, planted-red PROV+TRANSP/FILL legs RED same run.
+
+| asset | source ref | seed | tris / budget | dims_m (x,y,z) | aspect | sha256[:16] | render |
+|---|---|---|---|---|---|---|---|
+| weapon-requiem-toll | art-src/weapon-requiem-toll-ref.png | 421 | 1474 / 1500 | 0.654,0.995,0.362 | 0.66 GREEN | d9e3699beb27c6ed | concepts/weapon-requiem-toll-render.png |
+| weapon-dirge-eternal | art-src/weapon-dirge-eternal-ref-v2.png | 431 | 1496 / 1500 | 0.675,0.939,0.695 | 0.74 GREEN | 2aeab3ff1bb092c8 | concepts/weapon-dirge-eternal-render.png |
+
+Both first-seed accepts (seeds 421/431; the +1 mesh re-roll reserve NOT needed). Refs
+manifest `tools/vm100/art-src-m2.tsv` (3 rows), spec `tools/vm100/art-batch-m2.tsv`.
+**Pose-class lesson APPLIED, not re-learned:** the first dirge ref (seed 412, committed
+as the documented failed variant `-ref-v1`) drew a two-turn helix vapor wrap — the §M1c2
+spring/coil SHATTER class — and was REJECTED PRE-COMMIT, never fed to TRELLIS; the v2
+ref (solid urn + one welded planet-ring) decodes solid. Both shipped meshes carry the
+**bpy turntable visual EYEBALL rows (yaws 0/90/180/270, the binding prop gate per
+§M1c2): both SOLID, complete bodies, no fragmentary surfaces** (capture
+`.tmp/m2a-art.txt`; contact sheet `assets/screens/m2a-art-sheet.png`). validate_glb
+VISUAL 2/2 PASS, aspect_gate 2/2 PASS @1.42 (GREEN_RC=0). GPU windows: 2 imagegen +
+2 TRELLIS (single-row per the §M1c2 accumulation lesson), all CLOSED rc=0, llama-swap
+serving at every close. NO code/wiring/tests touched (pytest 163 green, additive card).
