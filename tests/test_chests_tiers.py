@@ -27,11 +27,18 @@ Row map (spec row -> evidence here / in the dump):
        A-E4 committed row (endless-m2.jsonl) + the B-T1 dump row + the
        world.gd map source all agree on tier "dawn" for cycle-clear — the
        DA-P1 law stays true in ONE pytest row reading all three sources.
+  B-T2 filter flavour (deterministic twin of the drain rows)
+       chest_filter_probe x3 — DA-C1 fix leg (see below).
   B-T5 per-tier pixel floors    the two shot assets + the gate's per-row
        floor + the capture's dawn stage pins below; pixels proven by the
        gate run in the capture.
 
 Replace-not-delete ledger (rows this card REPLACED, none deleted):
+  DA-C1 verify-loop finding (same card, fixed here): the flavour source pin
+  could be satisfied by apply_offer's own "weapon" arm (vacuous alternative)
+  and the seed's drain offers could cover a removed filter — REPLACED by
+  body-scoped arm pins + the chest_filter_probe dump legs (fresh RED proof:
+  arm rename now REDs both layers, capture).
   tests/test_chests_evolve.py::test_chest_open_wired_in_collect_pickups —
   the M1e "+1 card" wiring pin -> the transform-first + ChestRewards.grant
   pin (the claim "the open runs the ONE funnel" is unchanged, the wiring it
@@ -160,9 +167,15 @@ def test_seam_extension_frozen_shapes_kept():
     # make_offer grows a kind param; the "" default is the untouched pool
     assert re.search(r'static func make_offer\(game: GameState, '
                      r'kind := ""\) -> Array:', LEVELUP)
-    assert re.search(r'if kind == "weapon"', LEVELUP) \
-        or re.search(r'"weapon":', LEVELUP)
-    assert re.search(r'pool = \[\]', LEVELUP)  # gold: the bonus fill IS it
+    # (DA-C1 fix) the match arms are pinned INSIDE make_offer's body: the
+    # old "or 'weapon': anywhere" shape was vacuous (apply_offer carries the
+    # same word); renaming the filter arm no longer survives this row
+    mo = LEVELUP.split("static func make_offer")[1].split("static func ")[0]
+    assert re.search(r'"weapon":\s*\n\s*pool = pool\.filter\(func\(c\): '
+                     r'return c\.kind == "weapon" or c\.kind == "upgrade"\)', mo)
+    assert re.search(r'"passive":\s*\n\s*pool = pool\.filter\(func\(c\): '
+                     r'return c\.kind == "passive"\)', mo)
+    assert re.search(r'"gold":\s*\n\s*pool = \[\]', mo)  # bonus fill IS it
     assert "pool[i] if i < pool.size() else bonus_card()" in LEVELUP
     # main routes BOTH offer sites through one popper; the queue lives on
     # GameState, reset in start_run, OUTSIDE the 12-field snapshot
@@ -211,6 +224,17 @@ def test_bt2_grant_rows_per_tier():
             assert set(cards) <= allowed, (tier, kind, cards)
 
 
+def test_bt2_filter_probe_legs_deterministic():
+    # DA-C1: 60 direct make_offer calls per kind — while the kind filters
+    # exist a wrong-flavour card is IMPOSSIBLE; once any is removed the
+    # full pool makes it CERTAIN within the sample (fresh RED proof in the
+    # capture: renaming the weapon arm turns these rows ok=false)
+    probes = {r["kind"]: r for r in rows_of("chest_filter_probe")}
+    assert set(probes) == {"weapon", "passive", "gold"}
+    for r in probes.values():
+        assert r["ok"] and r["wrong_cards_180"] == 0
+
+
 def test_bt3_pick_sequence_and_weight_zero_legs():
     picks = {p["tier"]: p for p in rows_of("chest_pick_weights")}
     assert set(picks) == {"ember", "warden", "dawn"}
@@ -231,9 +255,9 @@ def test_bt4_precedence_row():
 
 def test_dump_verdict_green():
     v = rows_of("chest_tiers_verdict")[0]
-    # 11 evidence rows precede the verdict (drop 1 + grant 3 + weights 3 +
-    # zero-instruments 3 + precedence 1); the file holds verdict + 11 = 12
-    assert v["ok"] is True and v["rows"] == 11
+    # 14 evidence rows precede the verdict (drop 1 + grant 3 + weights 3 +
+    # zero-instruments 3 + filter-probes 3 + precedence 1); file = 15 lines
+    assert v["ok"] is True and v["rows"] == 14
 
 
 # ---- the UNIFIED-TIER law (rev-2 P1): A-E4 and B-T1 read ONE map row --------

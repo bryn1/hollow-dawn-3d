@@ -8,5 +8,8 @@
 {"checks":{"never_picked":true},"ev":"chest_weight_zero","hits":0,"kind":"weapon","ok":true,"weights":{"gold":20,"passive":40,"weapon":0}}
 {"checks":{"never_picked":true},"ev":"chest_weight_zero","hits":0,"kind":"passive","ok":true,"weights":{"gold":20,"passive":0,"weapon":40}}
 {"checks":{"never_picked":true},"ev":"chest_weight_zero","hits":0,"kind":"gold","ok":true,"weights":{"gold":0,"passive":40,"weapon":40}}
-{"checks":{"base_removed":true,"cards_full_after_transform":true,"exactly_one_transform":true,"gold_in_range":true,"in_slot_level_kept":true},"ev":"chest_precedence","evolved":["red-wail"],"gold_delta":24,"item_count":2,"ok":true,"pending":2}
-{"ev":"chest_tiers_verdict","ok":true,"rows":11}
+{"checks":{"no_wrong_flavour_in_60":true},"ev":"chest_filter_probe","kind":"weapon","ok":true,"wrong_cards_180":0}
+{"checks":{"no_wrong_flavour_in_60":true},"ev":"chest_filter_probe","kind":"passive","ok":true,"wrong_cards_180":0}
+{"checks":{"no_wrong_flavour_in_60":true},"ev":"chest_filter_probe","kind":"gold","ok":true,"wrong_cards_180":0}
+{"checks":{"base_removed":true,"cards_full_after_transform":true,"exactly_one_transform":true,"gold_in_range":true,"in_slot_level_kept":true},"ev":"chest_precedence","evolved":["red-wail"],"gold_delta":18,"item_count":2,"ok":true,"pending":2}
+{"ev":"chest_tiers_verdict","ok":true,"rows":14}

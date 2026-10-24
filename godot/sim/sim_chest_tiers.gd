@@ -256,6 +256,40 @@ func _leg_weight_zero(kind: String) -> void:
 
 
 # B-T4: the ONE transform lands FIRST, the FULL tier cards ride after it.
+
+# DA-C1 FIX (MC 11239): the ONE flavour catcher must be DETERMINISTIC. The
+# drain rows above carry per-offer flavour checks, but with the pinned seed
+# three weapon offers can still cover a removed filter (D2 probe: renaming
+# the levelup.gd "weapon" arm left them green). This leg calls the ONE
+# offer builder directly, 60x per kind: a weapon offer containing a PASSIVE
+# card (or a passive offer containing weapon/upgrade cards, or a non-bonus
+# card in a gold offer) is IMPOSSIBLE while the kind filters exist and
+# CERTAIN within 60 draws once any is removed. Direct-call channel DECLARED
+# (same class as the pick-weight legs above): the frozen seam's queue and
+# drain are covered by the real-funnel rows; this instrument isolates the
+# pool-filter rule itself.
+func _leg_filter_probe(kind: String) -> void:
+	var run := _fresh_run()
+	var game = run.game
+	var bad := 0
+	for i in 60:
+		for c in LevelUpDeck.make_offer(game, kind):
+			var ck: String = String(c["kind"])
+			var ok_kind := false
+			match kind:
+				"weapon":
+					ok_kind = ck in ["weapon", "upgrade", "bonus"]
+				"passive":
+					ok_kind = ck in ["passive", "bonus"]
+				"gold":
+					ok_kind = ck == "bonus"
+			if not ok_kind:
+				bad += 1
+	_check("chest_filter_probe", {"no_wrong_flavour_in_60": bad == 0},
+		{"kind": kind, "wrong_cards_180": bad})
+	run.queue_free()
+
+
 func _leg_precedence() -> void:
 	var run := _fresh_run()
 	var game = run.game
@@ -319,5 +353,8 @@ func _run_legs() -> void:
 	_leg_weight_zero("weapon")
 	_leg_weight_zero("passive")
 	_leg_weight_zero("gold")
+	_leg_filter_probe("weapon")
+	_leg_filter_probe("passive")
+	_leg_filter_probe("gold")
 	_leg_precedence()
 	_rows.append({"ev": "chest_tiers_verdict", "ok": _ok, "rows": _rows.size()})
