@@ -62,6 +62,9 @@ var _out: FileAccess
 var _fx_bad := 0 # §i cap violations across every t<300 sample (must stay 0)
 var _fx_samples := 0
 var _hard_fail := false # S4 gate rows (draws/fx caps/legs) — forces rc != 0
+var _journey_failed := false # TQ-01 (MC 11252): the seeded journey never
+	# reached its terminal row (timeout) — the win-gate leg's _done must NOT
+	# mask it; forces rc != 0 alongside _hard_fail below.
 var _rc := {} # RUN-CONDITIONED state (own/level/t once, check at t>120)
 
 
@@ -134,11 +137,12 @@ func _run_sim() -> void:
 	if not _done and not _ended:
 		_emit({"ev": "timeout", "t": _main.game.time})
 		_fail = true
+		_journey_failed = true
 	_emit({"ev": "fx_caps", "samples": _fx_samples, "violations": _fx_bad})
 	_run_win_gate()
 	_run_attribution()
 	_run_boss()
-	if _fx_bad > 0 or _hard_fail:
+	if _fx_bad > 0 or _hard_fail or _journey_failed:
 		_done = false
 
 
