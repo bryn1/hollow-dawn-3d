@@ -8,6 +8,11 @@
 # maps rot-water's lingering zone onto the ward ring-tick class (declared
 # deviation from the roadmap's "NEW zones list" cell; zones MM stays
 # deferred, plan 40 unconsumed). Damage routes ONLY through _hit below.
+# Since T-M2u (M2-SPEC rev-2 §D) the file also carries the TWO UNION
+# orbiters (requiem-toll, dirge-eternal) in _update_orbit — union ids ride
+# union.gd's table, never IDS/META (DA c3 C-2 math preserved), and their
+# branches are compositions of the existing halo/spike/ward classes: the
+# effect-class count stays SIX.
 class_name WeaponSystem
 extends RefCounted
 
@@ -73,9 +78,16 @@ static func rate(level: int, base: float) -> float:
 
 
 func update(dt: float, game: GameState) -> void:
+	# §D unions ride the halo orbit class: the ONE halos list is recomputed
+	# every step — cleared ONCE here (it lived inside _update_halo, its
+	# only writer until T-M2u added the two union orbiters sharing it) —
+	# then every orbit weapon appends its own orbs. Pre-union builds get
+	# the byte-identical sequence (a lone halo clears then appends in the
+	# same step, exactly as before).
+	halos.clear()
 	for w in game.weapons:
-		if w.id == "halo":
-			_update_halo(w, dt, game)
+		if w.id == "halo" or w.id == "requiem-toll" or w.id == "dirge-eternal":
+			_update_orbit(w, dt, game)
 			continue
 		w.cd -= dt
 		if w.cd > 0.0:
@@ -314,24 +326,90 @@ func _fire(w: Dictionary, game: GameState) -> void:
 			# shipped semantics; the pool never offers an evolved id).
 
 
-# Orbit positions are continuous (no cooldown): recomputed every step.
-func _update_halo(w: Dictionary, dt: float, game: GameState) -> void:
+# Orbit positions are continuous (no cooldown): recomputed every step for
+# the halo class (v1 branch, byte-verbatim numbers — S4 pins) AND the two
+# M2 §D unions, all sharing the ONE halos list (cleared in update). The
+# union branches are COMPOSITIONS of the existing branches, no new viz
+# mechanism (standing ruling):
+#  * requiem-toll = THIS orbit branch ∩ the spike cluster burst — orbiting
+#    burst-cinders ride halos + bursts (spec D.1 row "reuses halos +
+#    bursts"), its volley targets the densest cluster AT fire time (the
+#    spike semantic; projectiles then fly through the ONE _hit entry).
+#  * dirge-eternal = the ward/rot-water ring-TICK zone class ∩ this orbit
+#    branch — spec D.1 row "reuses the zones MM + halos"; the zones MM has
+#    stayed DEFERRED since the T-M1h declared mapping (rot-water's zone
+#    rides the ward ring-tick class), so the orbiting zone rides that SAME
+#    class: ticked hits along the orbit band + the ONE ring pulse class +
+#    halos for the orbs. Our numbers on both rows.
+func _update_orbit(w: Dictionary, dt: float, game: GameState) -> void:
 	var p: Dictionary = game.player
 	var mul := game.damage_multiplier()
-	var count := 1 + int(ceil(w.level / 3.0))
-	var radius: float = 52.0 + 3.0 * w.level
-	var speed: float = 2.4 + 0.08 * w.level
-	var dmg: float = (6.0 + 2.0 * w.level) * mul
 	if not w.has("orbit"):
 		w.orbit = 0.0
-	w.orbit = fmod(w.orbit + speed * dt, TAU)
-	halos.clear()
-	for i in count:
-		var a: float = w.orbit + i * TAU / count
-		var ox: float = p.x + cos(a) * radius
-		var oy: float = p.y + sin(a) * radius
-		halos.append({"x": ox, "y": oy})
-		_hit({"x": ox, "y": oy, "r": 17.0}, dmg, true)
+	match w.id:
+		"requiem-toll":
+			var rl: int = w.level
+			w.orbit = fmod(w.orbit + (2.4 + 0.08 * rl) * dt, TAU)
+			var rc := 1 + int(ceil(rl / 3.0))
+			var rr: float = 58.0 + 3.0 * rl
+			var rd: float = (8.0 + 2.5 * rl) * mul
+			for i in rc:
+				var a: float = w.orbit + i * TAU / rc
+				var ox: float = p.x + cos(a) * rr
+				var oy: float = p.y + sin(a) * rr
+				halos.append({"x": ox, "y": oy})
+				_hit({"x": ox, "y": oy, "r": 17.0}, rd, true)
+			w.cd -= dt
+			if w.cd <= 0.0:
+				w.cd = rate(rl, 2.2)
+				var burst_r := 60.0
+				var best: Dictionary = {}
+				var best_n := 0
+				for cand in _world.enemies:
+					var n := 0
+					for e in _world.enemies:
+						if _dist2(cand, e) < burst_r * burst_r:
+							n += 1
+					if n > best_n:
+						best_n = n
+						best = cand
+				if best.is_empty():
+					return
+				_hit({"x": best.x, "y": best.y, "r": burst_r},
+					(20.0 + 8.0 * rl) * mul)
+				bursts.append({"x": best.x, "y": best.y, "r": burst_r,
+					"life": 0.25, "max": 0.25})
+		"dirge-eternal":
+			var dl: int = w.level
+			w.orbit = fmod(w.orbit + (1.8 + 0.06 * dl) * dt, TAU)
+			var dc := 1 + int(ceil(dl / 3.0))
+			var dr: float = 50.0 + 3.0 * dl
+			var dz: float = (28.0 + 2.0 * dl) * game.area_mult()
+			var dd: float = (5.0 + 2.0 * dl) * mul
+			for i in dc:
+				var da: float = w.orbit + i * TAU / dc
+				var ox2: float = p.x + cos(da) * dr
+				var oy2: float = p.y + sin(da) * dr
+				halos.append({"x": ox2, "y": oy2})
+				_hit({"x": ox2, "y": oy2, "r": dz}, dd, true)
+			w.cd -= dt
+			if w.cd <= 0.0:
+				w.cd = 0.7
+				var fz: float = dr + dz
+				_hit({"x": p.x, "y": p.y, "r": fz},
+					(4.0 + 1.5 * dl) * mul, true)
+				rings.append({"r": fz, "life": 0.5, "max": 0.5})
+		_:
+			w.orbit = fmod(w.orbit + (2.4 + 0.08 * w.level) * dt, TAU)
+			var count := 1 + int(ceil(w.level / 3.0))
+			var radius: float = 52.0 + 3.0 * w.level
+			var dmg: float = (6.0 + 2.0 * w.level) * mul
+			for i in count:
+				var a2: float = w.orbit + i * TAU / count
+				var hx: float = p.x + cos(a2) * radius
+				var hy: float = p.y + sin(a2) * radius
+				halos.append({"x": hx, "y": hy})
+				_hit({"x": hx, "y": hy, "r": 17.0}, dmg, true)
 
 
 # Bolts and throws are single-hit: they vanish on the frame they land.

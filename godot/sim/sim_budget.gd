@@ -146,6 +146,68 @@ func _run_legs() -> void:
 	run.world.enemies.clear()
 	run._viz.refresh()
 
+	# (2b) budget_draws_unions — T-M2u D-U6 RE-CHECK leg (M2 §7: union FX
+	# add ZERO draw classes — requiem-toll rides halos + bursts,
+	# dirge-eternal the ward ring-tick class + halos, per §D.1; the zones
+	# MM stays DEFERRED per the T-M1h declared mapping, stated): the §2
+	# WORST-CASE LOADOUT with the two unions SUBSTITUTED for two evolved
+	# entries (slot math: a union consumes two bases' slots and takes one,
+	# so the six-slot build is 4 evolved + 2 unions), insight + loadstone
+	# carried in the six-kind cap, the unions FIRE under a live 400-enemy
+	# horde (60 real _step ticks, hp pinned — the declared S6/sim_boss
+	# precedent), then the same draw_count() instrument. The pin is
+	# restored verbatim for the budget_900 dump below.
+	var u_build: Array = []
+	for uid in ["requiem-toll", "dirge-eternal", "red-wail", "thousand-darts",
+			"rot-spiral", "judgement-cross"]:
+		u_build.append({"id": uid, "level": 8, "cd": 0.0})
+	run.game.weapons = u_build # DECLARED pin (channel verbatim)
+	run.game.passives = {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0,
+		"insight": 5, "cracked-heart": 5, "iron-wrap": 5, "tall-candles": 5,
+		"four-leaf-charm": 5, "knotted-chain": 0, "loadstone": 5,
+		"rotten-plate": 0, "twin-runes": 0, "gall-vial": 0, "gilded-skull": 0}
+	for i in 400:
+		run.world._spawn_enemy(CAST[i % CAST.size()], run.game,
+			GameRenderer.VIEW)
+	var u_halos := 0
+	var u_bursts := 0
+	var u_rings := 0
+	for s in 60: # the unions fire: halos/bursts/rings live at the tally
+		run.game.hp = run.game.max_hp # DECLARED pin (S6 precedent row)
+		run._step(DT)
+		u_halos = maxi(u_halos, run.fx.halos.size())
+		u_bursts = maxi(u_bursts, run.fx.bursts.size())
+		u_rings = maxi(u_rings, run.fx.rings.size())
+	run._viz.refresh()
+	run._fxv.refresh() # the unions fired DURING the ticks — sample NOW
+	var u_horde: int = run._viz.draw_count()
+	var u_fxw: int = run._fxv.draw_count()
+	var u_pick: int = run._pvz.draw_count()
+	var u_total := 1 + u_horde + 1 + u_fxw + u_pick
+	var u_kinds := 0
+	for k in run.game.passives:
+		if run.game.passives[k] > 0:
+			u_kinds += 1
+	_rows.append({"ev": "budget_draws_unions", "alive": run.world.enemies.size(),
+		"ground": 1, "horde": u_horde, "pawn": 1, "fx_worst": u_fxw,
+		"pickups": u_pick, "total": u_total, "planned": DRAWS_PLANNED,
+		"hard_cap": DRAWS_HARD, "weapon_slots": run.game.weapons.size(),
+		"passive_kinds": u_kinds,
+		"unions_fired": {"halos_max": u_halos, "bursts_max": u_bursts,
+			"rings_max": u_rings},
+		"note": "D-U6: 4 evolved + 2 unions (substituted for eternal-matins" +
+			"/the-sluice), insight+loadstone in the 6-kind cap; zero new " +
+			"draw CLASS (spec §7) — unions reuse halos+bursts / ring-tick" +
+			"+halos. Measured under a live firing horde (60 ticks, hp " +
+			"pinned, S6 declared precedent).",
+		"ok": u_total <= DRAWS_HARD \
+				and u_kinds <= LevelUpDeck.MAX_PASSIVE_KINDS \
+				and u_halos >= 1 and u_bursts >= 1 and u_rings >= 1})
+	run.world.enemies.clear()
+	run._viz.refresh()
+	run.game.passives["insight"] = 0 # undo this leg's declared passive swap...
+	_pin_worst_case(run) # ...then restore the named loadout for the 900 s dump
+
 	# (3) budget_900 — scripted 900 s dump UNDER THE PIN. DECLARED
 	# deviations: hp pinned every tick (S6/sim_boss kill-leg precedent —
 	# no scripted driver survives the 12/s wall; the CLOCK is never touched

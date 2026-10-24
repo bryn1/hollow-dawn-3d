@@ -50,8 +50,15 @@ static func try_evolve(game: GameState) -> String:
 		return ""
 	for w in game.weapons:
 		var row: Dictionary = TABLE.get(w.id, {})
+		# Rev-2 P3-6 RESERVE (T-M2u, union.gd header): a TABLE weapon that
+		# is a UNION base is skipped while its union partner is carried
+		# below MAX — evolving it now would permanently foreclose that
+		# union cross-time (rot-water/censer-of-hours are both an evolution
+		# base and a union base). Partner gone => union unreachable => the
+		# reserve lifts and this row evolves as before.
 		if row.is_empty() or w.level < WeaponSystem.MAX_LEVEL \
-				or int(game.passives.get(row.partner, 0)) < 1:
+				or int(game.passives.get(row.partner, 0)) < 1 \
+				or UnionSystem.reserved_for_union(game, w.id):
 			continue
 		w.id = row.evo
 		w.cd = 0.0

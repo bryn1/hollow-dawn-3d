@@ -33,6 +33,25 @@
 #                         out of the 16 px touch before the next tick).
 #   m2-chest-dawn-baseline.png  its own empty baseline (same ticked state,
 #                         chests cleared — enemies/tiles byte-equal).
+#   m2u-union-hud.png     T-M2u D-U7 (MC 11240): the union HUD leg, ONE
+#                         fresh real run (game.start_run + world.reset):
+#                         halo+spike pinned at MAX with insight carried
+#                         (DECLARED-PIN loadout, the sim_evolve channel),
+#                         a real boss-kill chest dropped, pawn stepped
+#                         onto it, the real collect funnel fires
+#                         try_union — requiem-toll lands IN-SLOT and its
+#                         icon renders on the v1 HUD weapon row through
+#                         the ONE icon-<id>.png naming convention
+#                         (hud_3d.gd fallback; union ids ride union.gd's
+#                         table, NOT WeaponSystem.META, DA c3 C-2). The
+#                         tier cards this chest pays are DECLINED (the
+#                         frozen card seam is evo_card_seam's proof; this
+#                         leg is the icon pixel). The UNION_HUD row carries
+#                         the icon cell's screen rect.
+#   m2u-union-hud-baseline.png  S8 hidden-element baseline: the SAME
+#                         ticked state with the union entry popped (no
+#                         tick runs between the saves — the diff isolates
+#                         the icon cell; blank icon => 0 px => gate RED).
 # Declared deviations (spelled where they land): the chest is PLACED through
 # the REAL drop funnel (world.kill_enemy on a synthetic boss-flagged kill
 # dict — the sim_boss chest-roll-leg shape, CHEST_CHANCE_BOSS 1.0 is the
@@ -50,6 +69,12 @@ const DROP_OFFSET_PX := 120.0 # chest beside the hero: in frame, > 16 px
 const POST_DROP_TICKS := 30 # the chest sits one half-second in the live sim
 const CHEST_MARGIN := 40.0 # CHEST rows only inside the frame margins (px)
 const PICK_Y := 0.28 # mirrors PickupViz.PICK_Y (harness convention)
+# T-M2u D-U7: the union the HUD leg renders (the §D.1 row with the base
+# pair this capture can pin to MAX in one loadout).
+const UNION_ID := "requiem-toll"
+const UNION_A := "halo"
+const UNION_B := "spike"
+const UNION_PASSIVE := "insight"
 
 var _main: Node
 var _cam: Camera3D
@@ -121,6 +146,43 @@ func _on_frame() -> void:
 		return
 	if _stage == 5:
 		_save_png("m2-chest-dawn-baseline.png", false)
+		_setup_union() # T-M2u D-U7: the union HUD leg starts here
+		_wait = SETTLE_FRAMES
+		_advance(6)
+		return
+	if _stage == 6:
+		# Control layout flush: the rebuilt cells only get their global
+		# rects after a full layout pass settles (the labels prove it in
+		# the frame BEFORE any rect is trusted) — one extra forced update
+		# + settle, then stage 7 reads LIVE rects and saves.
+		_main._hud.update(0.0)
+		_wait = SETTLE_FRAMES
+		_advance(7)
+		return
+	if _stage == 7:
+		_save_union_shot("m2u-union-hud.png")
+		# S8 hidden-element baseline (the chest shots' own pattern): the
+		# SAME ticked state with the union entry popped from game.weapons
+		# — nothing else moves (no tick runs between the two saves), so
+		# the gate's diff isolates the union icon cell (D-U7 no-blank).
+		for i in _main.game.weapons.size():
+			if _main.game.weapons[i].id == UNION_ID:
+				_main.game.weapons.remove_at(i)
+				break
+		_main._hud.update(0.0) # force the row rebuild (same convention)
+		_wait = SETTLE_FRAMES
+		_advance(8)
+		return
+	if _stage == 8:
+		_main._hud.update(0.0) # flush the SHRUNK layout before the shot
+		_wait = SETTLE_FRAMES
+		_advance(9)
+		return
+	if _stage == 9:
+		print("UNION-HUD pre-baseline: hud_cells=%d weapons=%d" % [
+			_main._hud._weapons.get_child_count(),
+			_main.game.weapons.size()])
+		_save_png("m2u-union-hud-baseline.png", false)
 		_write_rows()
 		print("CAPTURE_OK")
 		quit()
@@ -201,6 +263,73 @@ func _save_chest_shot(png: String) -> void:
 		"in_frame": sp.x >= CHEST_MARGIN and sp.y >= CHEST_MARGIN
 				and sp.x <= GameRenderer.VIEW.x - CHEST_MARGIN
 				and sp.y <= GameRenderer.VIEW.y - CHEST_MARGIN})
+	_save_png(png, true)
+
+
+# T-M2u D-U7: fresh real run + DECLARED-PIN union loadout + the real
+# collect funnel (header row for the whole leg). The pawn is teleported
+# ONTO the dropped chest (the sim_evolve._open pose, declared) so ONE
+# _step consumes it; the tier-card offers are DECLINED (pending_levels
+# zeroed at the levelup phase, the sim_boss._decline shape) to keep the
+# build — and the HUD row — exactly talon + the union.
+func _setup_union() -> void:
+	var game = _main.game
+	game.start_run()
+	_main.world.reset()
+	game.weapons.append({"id": UNION_A, "level": WeaponSystem.MAX_LEVEL,
+		"cd": 5.0})
+	game.weapons.append({"id": UNION_B, "level": WeaponSystem.MAX_LEVEL,
+		"cd": 5.0})
+	game.passives[UNION_PASSIVE] = 1
+	game.time = 601.0 # the OPEN gate's own input (the clock is not warped
+	# for the scene — the drop is time-free, only OPENING gates; stated)
+	_drop_chest()
+	var p: Dictionary = game.player
+	var c: Dictionary = _main.world.chests[0]
+	p.x = c.x # DECLARED pose: stand on the chest (sim_evolve._open shape)
+	p.y = c.y
+	_main._step(DT) # the real collect funnel: chest gone, union landed
+	while game.phase == "levelup":
+		game.pending_levels = 0 # DECLINED (header): the card seam is elsewhere
+		game.set_phase("playing")
+	assert(_main.world.chests.is_empty())
+	var landed := false
+	for w in game.weapons:
+		if w.id == UNION_ID:
+			landed = true
+	assert(landed) # a union that does not land is a capture FAIL, not a shot
+	# The capture harness never trusts node _process (the viz refresh
+	# convention, verbatim): force the HUD's row rebuild NOW (main.gd:153
+	# is the product call site; here the settle frames then only need to
+	# retire the queue_free'd old cells).
+	_main._hud.update(0.0)
+	print("UNION stage live: t=%.3f weapons=%s" % [game.time,
+			str(game.weapons.map(func(w): return w.id))])
+
+
+func _save_union_shot(png: String) -> void:
+	var game = _main.game
+	var idx := -1
+	for i in game.weapons.size():
+		if game.weapons[i].id == UNION_ID:
+			idx = i
+	assert(idx >= 0)
+	# The HUD row rebuilds on the render frames (main._process -> _hud.
+	# update); the settle already happened, so the cell tree is final.
+	var cell = _main._hud._weapons.get_child(idx)
+	var rect: Rect2 = cell.get_child(0).get_global_rect()
+	assert(rect.size.x > 0.0 and rect.size.y > 0.0)
+	var cx: float = rect.position.x + rect.size.x / 2.0
+	var cy: float = rect.position.y + rect.size.y / 2.0
+	print("UNION-HUD cell=%d hud_cells=%d rect=%.1f,%.1f %.1fx%.1f hud_gold=%s" % [
+			idx, _main._hud._weapons.get_child_count(), rect.position.x,
+			rect.position.y, rect.size.x, rect.size.y,
+			str(_main._hud._gold.text)])
+	_rows.append({"leg": "union_hud", "png": png, "union": UNION_ID,
+		"baseline": "m2u-union-hud-baseline.png",
+		"win": int(ceil(maxf(rect.size.x, rect.size.y) / 2.0)),
+		"cx": roundf(cx * 10.0) / 10.0, "cy": roundf(cy * 10.0) / 10.0,
+		"t": roundf(game.time * 100.0) / 100.0})
 	_save_png(png, true)
 
 

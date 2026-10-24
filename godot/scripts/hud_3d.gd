@@ -144,6 +144,15 @@ func _build_boss_bar() -> void:
 	_boss_root.position = Vector2(0, 0)
 	_boss_root.size = Vector2(GameRenderer.VIEW.x, BOSS_BAR_Y + BOSS_BAR_H + 26.0)
 	_boss_root.visible = false
+	# T-M2u (MC 11240, D-U7 pixel-leg finding): as a CanvasLayer sibling
+	# added AFTER the HUD panel, the bar painted OVER the v1 weapon-icon
+	# row whenever a boss lived — every weapon icon (union ids included)
+	# blanked behind the EMBER fill. Draw order only: the bar now paints
+	# FIRST (z -1); geometry/fill/name/visibility rules untouched, so the
+	# row reads on top exactly where the HUD panel occupies the bar band,
+	# while the bar's centred 420 px body stays fully visible (the panel
+	# ends left of the bar's centre).
+	_boss_root.z_index = -1
 	add_child(_boss_root)
 	var bg := ColorRect.new()
 	bg.color = GameRenderer.INK

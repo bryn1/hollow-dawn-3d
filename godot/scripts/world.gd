@@ -306,9 +306,9 @@ func collect_pickups(game: GameState) -> int:
 			game.hp = minf(game.max_hp, game.hp + HEAL_AMOUNT)
 	# Chest OPENING (M1 feature 5): the same 16 px touch funnel. The M2 §B.1
 	# OPEN ORDER is exactly three lines: the ONE transform first (evolutions
-	# fire at OPEN time, the gate reads game.time here; the union pillar's
-	# try_union takes its try_union-else-try_evolve precedence slot at THIS
-	# site when T-M2u lands), then the tier cards + the gold line, both owned
+	# fire at OPEN time, the gate reads game.time here; since T-M2u the
+	# union pillar holds the try_union-else-try_evolve precedence slot at
+	# THIS site), then the tier cards + the gold line, both owned
 	# by chest_rewards.gd — the cards ride the frozen pending_levels ->
 	# _enter_levelup seam (each is one 3-card offer, the per-offer reward
 	# kind pops the game.reward_kinds FIFO), the gold roll returns raw and
@@ -319,7 +319,11 @@ func collect_pickups(game: GameState) -> int:
 		var c: Dictionary = chests[i]
 		if _dist(c, game.player) < 16.0:
 			chests.remove_at(i)
-			EvolutionSystem.try_evolve(game)
+			# T-M2u landed: union precedence > evolution (§D) — a chest
+			# performs the UNION when eligible, else the evolution (still
+			# exactly ONE weapon-transform per chest).
+			if UnionSystem.try_union(game) == "":
+				EvolutionSystem.try_evolve(game)
 			gold += ChestRewards.grant(game, c)
 	# The meta gold-rate (T-M1f) rides the ONE pickup funnel: collected raw
 	# gold enters the run only through GameState.credit_gold — identity with

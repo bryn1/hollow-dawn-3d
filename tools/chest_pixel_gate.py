@@ -14,7 +14,10 @@ the pixels whose max channel delta from that row's baseline exceeds DELTA in
 that row's window (the projected centre +/- win px) and GREENs each row at
 >= 200 (PX_MIN: the roadmap floor, verbatim, applied per tier row). A
 baseline-vs-baseline copy scores 0 — this is the shape the planted-red run
-exercises.
+exercises. T-M2u (MC 11240) adds the D-U7 UNION_HUD row to this SAME
+harness (no second gate): the union icon cell on the v1 HUD weapon row,
+shot vs the S8 hidden-element baseline (union entry popped), floored at
+PX_MIN_HUD (stated below).
 
 Usage:  python3 tools/chest_pixel_gate.py             # capture + gate
         python3 tools/chest_pixel_gate.py --gate DIR  # gate a shot dir
@@ -39,8 +42,16 @@ GODOT = os.environ.get(
 SHOTS_DIR = os.path.join(REPO, ".tmp", "chest-shots")
 SCRIPT = "res://sim/chest_capture.gd"
 LEG = "chest_shot"
+UNION_LEG = "union_hud"  # T-M2u D-U7 row in the SAME harness (no 2nd tool)
 DELTA = 12           # per-pixel max-channel delta that counts as a drawn px
 PX_MIN = 200         # roadmap floor, verbatim (B-T5 keeps it per tier row)
+# D-U7 floor, OURS and stated: the HUD weapon-row cell is 18x18 CSS px
+# (v1 hud row); the baseline is the SAME state with the union entry
+# popped (S8 hidden-element pattern), so a BLANK icon scores ~0 px —
+# exactly what the planted-red leg measures. 100 = the honest half of
+# the roadmap floor, MEASURED against the real render before pinning
+# (capture run, .tmp/m2u-unions.txt).
+PX_MIN_HUD = 100
 
 
 def capture():
@@ -57,11 +68,12 @@ def capture():
 
 def gate(dir_path):
     rows = json.load(open(os.path.join(dir_path, "rows.json")))
-    shots = [r for r in rows if r["leg"] == LEG]
-    assert shots, "no chest_shot rows in rows.json"
+    shots = [r for r in rows if r["leg"] in (LEG, UNION_LEG)]
+    assert shots, "no chest_shot/union_hud rows in rows.json"
     ok = True
     for row in shots:
-        if not row["in_frame"]:
+        is_hud = row["leg"] == UNION_LEG
+        if not is_hud and not row["in_frame"]:
             print("FAIL %s chest projected outside the frame: %s"
                   % (row["tier"], row))
             ok = False
@@ -72,7 +84,8 @@ def gate(dir_path):
             dtype=np.int16)
         if chest.shape != base.shape:
             print("FAIL %s shot/baseline shape mismatch %s vs %s"
-                  % (row["tier"], chest.shape, base.shape))
+                  % (row.get("tier", row.get("union")), chest.shape,
+                     base.shape))
             sys.exit(1)
         cx, cy = int(round(row["cx"])), int(round(row["cy"]))
         half = int(row["win"])
@@ -81,12 +94,15 @@ def gate(dir_path):
         diff = np.abs(chest - base).max(axis=2)
         win_px = int((diff[y0:y1, x0:x1] > DELTA).sum())
         total_px = int((diff > DELTA).sum())
-        state_ok = win_px >= PX_MIN
+        floor = PX_MIN_HUD if is_hud else PX_MIN
+        state_ok = win_px >= floor
         ok = ok and state_ok
-        print("CHEST-WINDOW leg=%s tier=%s cx=%d cy=%d half=%d "
+        print("%s leg=%s what=%s cx=%d cy=%d half=%d "
               "window=[%d:%d,%d:%d] non-bg_px=%d (floor %d) frame-wide_diff=%d %s"
-              % (row["leg"], row["tier"], cx, cy, half, x0, x1, y0, y1,
-                 win_px, PX_MIN, total_px, "PASS" if state_ok else "FAIL"))
+              % ("HUD-WINDOW" if is_hud else "CHEST-WINDOW", row["leg"],
+                 row.get("tier", row.get("union", "?")), cx, cy, half,
+                 x0, x1, y0, y1, win_px, floor, total_px,
+                 "PASS" if state_ok else "FAIL"))
     return ok
 
 
