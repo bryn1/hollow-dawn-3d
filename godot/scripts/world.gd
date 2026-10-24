@@ -17,6 +17,15 @@ const CHEST_CHANCE_MINIBOSS := 0.6
 const ALIVE_CAP := 400 # M1 hard rule (roadmap §b): spawns PAUSE at the cap in
 # the single spawn loop below — no accumulate-then-burst across a kill gap.
 
+# M2 pillar C (MC 11238 T-M2g, M2-SPEC §C.1): the field-merge rule's two consts,
+# OUR values — the threshold is a draw-budget tie (well under the 400 horde
+# cap, §7's "gem array additionally bounded <= 200"), the batch keeps the fold
+# coarse so bulk drops stay rare. VS-FEATURES §S8 shape ref (>400 gems => the
+# source folds into one red gem) with OUR numbers and OUR granularity; we never
+# lose XP — the fold carries the merged gems' xp SUM (the _merge_gems invariant).
+const GEM_MERGE_THRESHOLD := 200
+const GEM_MERGE_BATCH := 100
+
 # M2 pillar A (MC 11237 T-M2e, M2-SPEC §A.1): the three capped cycle scalars,
 # OUR numbers, in the ONE spawn/damage seams — not a second mechanism beside
 # the existing ramp. HP's deep-cycle clamp is the "cannot explode" bound: the
@@ -192,6 +201,12 @@ func update_entities(dt: float, game: GameState) -> void:
 	_magnetize(heals, p, magnet, dt)
 	if p.iframes > 0.0:
 		p.iframes -= dt
+	# §C.1 field-merge rides this ONE entity update, after the drop (the drop
+	# happens in kill_enemy between two updates): the merge check runs every
+	# tick, so the array leaves this seam at <= GEM_MERGE_THRESHOLD (the C-G3
+	# observation point; a same-tick kill burst can transiently sit above the
+	# threshold and is folded at the next update — stated reading).
+	_merge_gems()
 
 
 # Grip-scaled pull shared by every magnetised pickup kind (gems + Dawnlight).
@@ -203,6 +218,31 @@ func _magnetize(items: Array, p: Dictionary, magnet: float, dt: float) -> void:
 		if gd < magnet:
 			g.x += gx / gd * 220.0 * dt
 			g.y += gy / gd * 220.0 * dt
+
+
+# §C.1 field-merge: at the threshold the OLDEST GEM_MERGE_BATCH gems (append
+# order = drop order, so the array head) fold into ONE bulk gem at their
+# centroid carrying the SUM of their xp plus big:true (the ONE flag
+# pickup_viz.gd reads for the larger+brighter draw). The gem-array Σxp is
+# UNCHANGED across the fold — the unconditional XP-neutrality invariant
+# (rev-2 P2-4); the sum accumulates head-to-tail so the bulk's xp is a fixed
+# float result, independent of the fold's position in the tick. The bulk gem
+# is the same dict kind riding the same array: no new pickup kind, the magnet
+# path and the 16 px collect funnel below eat it like any gem.
+func _merge_gems() -> void:
+	if gems.size() < GEM_MERGE_THRESHOLD:
+		return
+	var cx := 0.0
+	var cy := 0.0
+	var sxp := 0.0
+	for i in GEM_MERGE_BATCH:
+		cx += gems[i].x
+		cy += gems[i].y
+		sxp += gems[i].xp
+	for i in range(GEM_MERGE_BATCH - 1, -1, -1):
+		gems.remove_at(i) # the oldest BATCH entries, tail-first (stable head)
+	gems.append({"x": cx / GEM_MERGE_BATCH, "y": cy / GEM_MERGE_BATCH,
+		"xp": sxp, "big": true})
 
 
 # M2 §A.1 cycle clear: the clear's ONE drop through the single drop array,

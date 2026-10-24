@@ -1,0 +1,78 @@
+== T-M2g GEM-MERGE capture (MC 11238) 2026-10-24T12:45:33Z ==
+-- engine + base --
+4.7.2.stable.official.ed1daf0bf
+b8e35c1 T-M2e LEDGER row: endless pillar A shipped, replaced falsified rows, M2-SPEC leak strip
+WT:  M LEDGER.md
+WT:  M godot/scripts/pickup_viz.gd
+WT:  M godot/scripts/world.gd
+WT:  M tools/upgrades_visual_probe.py
+WT: ?? assets/screens/m2-gemmerge.png
+WT: ?? godot/sim/gemmerge_capture.gd
+WT: ?? godot/sim/gemmerge_capture.gd.uid
+WT: ?? godot/sim/sim_gems.gd
+WT: ?? godot/sim/sim_gems.gd.uid
+WT: ?? tests/fixtures/gem-merge-m2g.jsonl
+WT: ?? tests/test_gem_merge.py
+-- sim_gems re-dump #1/#2 (seed 11238) + fixture cmp --
+GEMS_OK rows=6 ok=true
+GEMS_OK rows=6 ok=true
+CMP_RERUN1_2_IDENTICAL
+CMP_FIXTURE_IDENTICAL
+      1 "ev":"gem_boundary"
+      1 "ev":"gem_bounded_spam"
+      2 "ev":"gem_sum_conserved"
+      1 "ev":"gems_verdict"
+      1 "ev":"gem_xp_byte_equal"
+-- rows ok-flags (fixture) --
+ROW gem_boundary ok= True
+ROW gem_sum_conserved ok= True
+ROW gem_sum_conserved ok= True
+ROW gem_xp_byte_equal ok= True
+ROW gem_bounded_spam ok= True
+ROW gems_verdict ok= True
+-- planted-red #1 (merge-break): recorded --
+sed break: sxp += gems[i].xp -> ... if i > 0 else 0.0 (world.gd _merge_gems)
+sim rc: GEMS_OK rows=6 ok=false | defaults ok=False sum_pre=248.5 sum_post=248.0 | pinned-multipliers ok=False sum_pre=248.5 sum_post=248.0
+restore: cmp world.gd /tmp/m2g/world-exact.gd -> RESTORE_BYTE_EXACT; re-run GEMS_OK rows=6 ok=true; REDUMP_CMP_IDENTICAL_THIRD (see above flow)
+-- C-G4 bulk gate: fresh gate on canonical shots --
+BULK-GEM leg=bulk_gem_shot cx=490 cy=357 delta_px=588 palette_px=588 (floor 200 each) GREEN
+-- planted-reds #2-#4: recorded (same-session runs) --
+gate copy baseline-vs-itself: BULK-GEM delta_px=0 palette_px=0 (floor 200 each) RED rc=1
+product GEM_BULK_SCALE:=1.0 (forgot to grow): delta_px=0 palette_px=0 RED rc=1 (a 6%-roll coin at the shared drop pose covers a 1x bulk; growth is what makes it read) -> restore BYTE-EXACT, re-green 588/588 rc=0
+product GEM_BULK_TINT:=Color(1,1,1,1) (forgot to brighten): delta_px=588 palette_px=0 RED rc=1 -> restore BYTE-EXACT, re-green 588/588 rc=0
+GEMMERGE x=490.0 y=357.4 t=1.033 gems=101 bulk_xp=200.0
+-- shot determinism across capture runs --
+SHOT_BYTE_IDENTICAL_ACROSS_RUNS
+-- post-change committed-fixture byte-pins (recorded this session) --
+endless-m2 POST_ENDLESS_IDENTICAL | chests-evolve-m1e POST_EVOLVE_IDENTICAL | carry-caps-m1b POST_CAPS_IDENTICAL
+-- M1 sim_headless journey dump: STATED MOVEMENT (spec-sanctioned, uncommitted regression dump) --
+first divergence t=169.92 xp 22.0->20.0 (fold relocates uncollected ground XP to centroid); gameover 495.4->597.533; win leg byte-stable 900.017; C-G2b byte-equality is the PINNED m=1.0 channel per rev-2 P2-4, not this trajectory; no pytest row pins journey values
+-- T-S18 full probe re-run post-format-change (recorded) --
+talon          5051       8560      69%                 GREEN
+ember            65        194     198%                 GREEN
+cleaver          38         79     108%                 GREEN
+halo            131        261      99%         2 -> 4  GREEN
+ward           2368       4516      91%                 GREEN
+spike           111        266     140%                 GREEN
+families scaled: 6/6 (gate >= 5)
+GATE: ALL GREEN
+TS18_RC=0
+-- pytest full suite --
+..................................................                       [100%]
+194 passed in 5.14s
+DONE
+-- mechanical gate: all required evidence tokens --
+TOKEN OK  CMP_RERUN1_2_IDENTICAL
+TOKEN OK  CMP_FIXTURE_IDENTICAL
+TOKEN OK  GEMS_OK rows=6 ok=true
+TOKEN OK  delta_px=588 palette_px=588
+TOKEN OK  delta_px=0 palette_px=0
+TOKEN OK  delta_px=588 palette_px=0
+TOKEN OK  POST_ENDLESS_IDENTICAL
+TOKEN OK  POST_EVOLVE_IDENTICAL
+TOKEN OK  POST_CAPS_IDENTICAL
+TOKEN OK  GATE: ALL GREEN
+TOKEN OK  194 passed
+TOKEN OK  DONE
+GATE_BAD=0
+VERIFY_EXIT=0

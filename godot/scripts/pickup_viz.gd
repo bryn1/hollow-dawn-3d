@@ -42,6 +42,14 @@ const GEM_BRIGHT := 1.15 # ICHOR uplift, declared above
 const CHEST_PX := 28.0 # M1 f5 (MC 11209): OUR chest billboard size (the doc
 	# names no v1 chest — single-tier M1 chest, icon-chest.png from the M1c
 	# batch, the §j naming convention); rides the same billboard mechanism.
+const GEM_BULK_SCALE := 2.0 # M2g §C.1 (MC 11238): bulk-gem foot-print, OUR
+	# value — a 28 px draw on the 14 px gem row (same order as the chest's 28 px
+	# billboard). The probe's BULK floor is measured ABOVE a single gem's crop,
+	# so a bulk that forgot to grow scores at or below the single-gem floor = RED.
+const GEM_BULK_TINT := Color(1.2, 1.22, 0.9) # §C.1 "brighter via a per-instance
+	# COLOR" (rev-2 P4-5): the multiplier rides the gem slot's instance color —
+	# measured green channel ~244 on the capture vs the normal gem's ~200 (the
+	# BULK palette test gates above 200, so "brighter" is a measured pixel claim).
 const DRAWS := 5 # gem + coin + cross + dawn-glow (§b's planned rows) +
 	# chests 1 (M1 f5). The §b planned note stays 33 on purpose: the roadmap
 	# re-tallies the WORST-CASE LOADOUT draws to planned 40 on the feature-6
@@ -67,7 +75,12 @@ func _ready() -> void:
 	# origin too — the first build rendered every coin/gem within centimetres
 	# of origin, invisible in every frame (found only by pixel probing — the
 	# §e law that only real pixels are proof).
-	_gem = _mm(_quad(), _mat(GameRenderer.ICHOR * GEM_BRIGHT))
+	# M2g §C.1/C.2 (MC 11238): the gem slot moves from transform-only to a
+	# COLOR-INSTANCE format (use_colors) — the ONE named format change of the
+	# pillar: still ONE MM class, draws unchanged, but per-instance COLOR now
+	# carries the bulk-gem brightness (normal gems ride an exact WHITE
+	# multiplier, a float no-op — the T-S18 gem pixels stay byte-stable).
+	_gem = _mm(_quad(), _mat(GameRenderer.ICHOR * GEM_BRIGHT), true)
 	_coin = _mm(_quad(), _coin_mat())
 	_cross = _mm(_quad(), _mat(GameRenderer.BLOOD))
 	_glow = _mm(_quad(), _mat(GameRenderer.DAWNLIGHT, 0.25)) # §b dawn-glow 1
@@ -86,7 +99,7 @@ func refresh() -> void:
 		return
 	var basis := Basis(Vector3(1.0, 0.0, 0.0), deg_to_rad(BILLBOARD_DEG))
 	_write_items(_gem, world.gems, basis, GameRenderer.SIZES.gem,
-		GameRenderer.SIZES.gem)
+		GameRenderer.SIZES.gem, GEM_BULK_SCALE)
 	_write_items(_coin, world.coins, basis, GameRenderer.SIZES.coin,
 		GameRenderer.SIZES.coin)
 	_write_items(_glow, world.heals, basis,
@@ -138,15 +151,21 @@ func _bb(basis: Basis, w: float, h: float, th: float) -> Basis:
 
 
 func _write_items(mmim: MultiMeshInstance3D, items: Array, basis: Basis,
-		w_px: float, h_px: float) -> void:
+		w_px: float, h_px: float, bulk_scale := 0.0) -> void:
 	var s := 1.0 / CameraRig.PX_PER_M
 	var mm: MultiMesh = mmim.multimesh
 	mm.instance_count = items.size()
-	var b := _bb(basis, w_px * s, h_px * s, s)
 	for i in items.size():
 		var it: Dictionary = items[i]
-		mm.set_instance_transform(i, Transform3D(b,
+		# big:true (world.gd's fold flag) rides per-instance SCALE (+COLOR on
+		# the gem slot) — the §C.1 mechanism, no new draw, no new node.
+		var big: bool = bulk_scale > 0.0 and it.get("big", false)
+		var f: float = bulk_scale if big else 1.0
+		mm.set_instance_transform(i, Transform3D(
+			_bb(basis, w_px * s * f, h_px * s * f, s),
 			Vector3(it.x * s, PICK_Y, it.y * s)))
+		if bulk_scale > 0.0: # the color-instance slot (gems only)
+			mm.set_instance_color(i, GEM_BULK_TINT if big else Color(1, 1, 1, 1))
 
 
 func _quad() -> QuadMesh:
@@ -155,9 +174,19 @@ func _quad() -> QuadMesh:
 	return q
 
 
-func _mm(mesh: Mesh, mat: StandardMaterial3D) -> MultiMeshInstance3D:
+func _mm(mesh: Mesh, mat: StandardMaterial3D,
+		color_instance := false) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = color_instance # §C.1 format row (gems only, header note)
+	if color_instance:
+		# The engine only multiplies per-instance COLOR into the albedo when
+		# the material opts in (measured on the pinned 4.7.2 binary: without
+		# this the bulk gem drew byte-equal to a normal gem — the pixel gate's
+		# RED that forced the fix; the 4.x row is a BOOL, not the 3.x enum).
+		# WHITE stays an exact no-op multiplier, so the T-S18 gem pixels are
+		# untouched by this opt-in.
+		mat.vertex_color_use_as_albedo = true
 	mm.mesh = mesh
 	var mmim := MultiMeshInstance3D.new()
 	mmim.multimesh = mm
