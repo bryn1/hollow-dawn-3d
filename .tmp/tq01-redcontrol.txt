@@ -1,0 +1,40 @@
+== TQ-01 sim_headless journey-fail mask: FIX + COMMITTED RED CONTROL (MC 11252) 2026-10-24T16:15:31Z ==
+-- engine + base --
+4.7.2.stable.official.ed1daf0bf
+zip sha256  cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4 (== VERSIONS.txt/github digest)
+bin sha256  8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e (== tools/VERSIONS.txt:7 pin)
+base e058490 T-M2u (MC 11240): weapon unions — §D SHIPPED as written
+-- GREEN baseline, pre-fix tree (repo invocation shape: godot --headless --path godot -s res://sim/sim_headless.gd, HD3D_OUT set) --
+BASELINE sim_headless EXIT=0
+baseline dump sha 843e63b8443a4a388fbdffc1b9a5d692ded51e6f1ea9a4f1240e20ca47c00e81
+{"ev":"gameover","gold":52,"kills":4217,"level":16,"phase":"gameover","score":27512,"t":597.533,"time":597.533333333119}
+{"ev":"win","gold":0,"kills":0,"level":1,"phase":"win","score":9025,"score_formula_check":true,"t":900.017,"time":900.01
+-- FIX: godot/sim/sim_headless.gd — new _journey_failed flag set on the timeout branch, consulted by the exit demotion check (the S6/audit-minimal fix; _fail stays the journey-TERMINAL flag, gameover stays expected-green) --
+ godot/sim/sim_headless.gd | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+-- GREEN re-run, fixed tree --
+FIXED-CLEAN sim_headless EXIT=0
+DUMP_BYTE_IDENTICAL
+-- RED CONTROL on the FIXED tree: tools/red_controls/mut_a_invincibility.sh --
+-- plant MUT-A (player invincible: damage_taken -> 0.0) --
+ godot/scripts/game_state.gd | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-- run sim_headless on the MUTATED build --
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+MUT-A sim_headless EXIT=3
+-- dump tell (journey rows) --
+{"ev":"timeout","t":619.733333333098}
+PASS: mutated build exits non-zero (gate reds on the planted defect).
+RESTORE:
+tree byte-exact
+VERIFY: MUTATED_EXIT=3 EXPECTED=nonzero CONTROL_EXIT=0
+-- CONTROL-CONTROL: same script vs the OLD masked gate (fix stashed) — the control FAILS LOUD, proving it is not vacuous --
+MUT-A sim_headless EXIT=0
+{"ev":"timeout","t":619.733333333098}
+FAIL: gate GREEN on a planted invincibility defect — the journey-fail mask REGRESSED (sim_headless exited 0 although the journey timed out).
+CONTROL_RC_PREFIX=1 (control red on the masked gate, as required)
+-- restore --
+WT:  M godot/sim/sim_headless.gd
+game_state.gd restore: byte-exact (above WT shows ONLY the intentional sim_headless.gd fix)
+VERIFY_EXIT=0
