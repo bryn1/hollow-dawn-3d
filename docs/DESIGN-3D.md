@@ -199,6 +199,25 @@ the HUD weapon
 row falls back to the `icon-<id>.png` naming convention for evolved ids. Pinned by
 `test_chests_evolve.py` + the committed `chests-evolve-m1e.jsonl` dump.
 
+**M2-era additions (not v1 pins, T-M2e/T-M2g/T-M2t/T-M2u, MC 11237-11240):** endless mode
+is a `DawnWell.flags["endless"]` hand-in consumed at the ONE `_dawnwell -> start` seam
+(`main.gd`), with `cycle = int(time // WIN_TIME)` as the crossing, the three capped scalars
+`HP_CYC = min(1+0.75k, 6)` / `QTY_CYC = min(1+0.25k, 2)` / `DMG_CYC = min(1+0.20k, 2.5)` and
+the two clamps `HP_EFFECTIVE_MULT_CAP 18` + `MAX_CONTACT_DMG 20` all in the ONE spawn/damage
+seams (`world.gd`, `main.gd`), and a `best_cycle` save field (no VERSION bump); chest
+`tier` is stamped at DROP from the ONE `CHEST_TIER_BY_SOURCE` map (`world.gd`) and the tier
+table + weighted picker live in the ONE new rule module `chest_rewards.gd`; ground gems
+merge at `GEM_MERGE_THRESHOLD 200` / `GEM_MERGE_BATCH 100` in the ONE entity update
+(`world.gd`), bulk gem on the ONE gem MM (color-instance format, rev-2 P4-5); unions are the
+ONE `union.gd` TABLE (`:33`, 2 rows) with precedence over evolution at the ONE chest-open
+funnel and a cross-time reserve rule for shared bases. §b draw budget: **0 new draw classes
+in all of M2** — tiers ride the chest MM, the bulk gem the gem MM, union FX `halos`/`bursts`
+/the ward ring-tick class; the measured 27 / plan 40 / hard 60 row re-ran UNCHANGED
+(`sim_budget` unions leg, D-U6). Contract B (12 fields) untouched by every pillar (F-3).
+Pinned by `test_endless.py` / `test_gem_merge.py` / `test_chests_tiers.py` /
+`test_unions.py` + the committed `endless-m2` / `gem-merge-m2g` / `chests-tiers-m2` /
+`unions-m2u` dumps.
+
 ## (e) SERVER / LEADERBOARD — reuse v1 verbatim
 v1's server is **stdlib-only Python, language-agnostic** (`ARCHITECTURE.md:168` @ `5dc7679`;
 `server.py:1-6`); `/api/health` + `/api/highscores` (`ARCHITECTURE.md:37-42` @ `5dc7679`) are

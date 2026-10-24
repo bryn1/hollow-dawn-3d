@@ -102,7 +102,7 @@ def main():
                % (ge.get("t_sim", -1), ge.get("wall_s", -1), ge.get("ticks_per_s", -1),
                   we.get("t_sim", -1), we.get("wall_s", -1), we.get("ticks_per_s", -1),
                   kills60))
-    row("A1", "full playable game, real-clock t=0..death + t=0..600 win",
+    row("A1", "full playable game, real-clock t=0..death + t=0..900 win (WIN_TIME re-pinned 600->900 by T-M1d)",
         a1, "RUNTIME", ".tmp/s8-gameover.jsonl + .tmp/s8-win.jsonl", why)
 
     # ---- HUD pixel row (T-S8 build: v1 hud.gd row on the 3D CanvasLayer)
@@ -221,7 +221,7 @@ def main():
         a6, "TESTED", "band_sample/band_flip rows of .tmp/hd3d-boss-s6-dump.jsonl"
         " + hud_3d.gd")
 
-    # ---- A7: 12/12 cards with real icons (pytest gate, no capture re-run)
+    # ---- A7: all pool kinds with real icons (32 kinds since T-M1h; pytest gate, no capture re-run)
     rc = subprocess.run([sys.executable, "-m", "pytest", "-q",
                          "tests/test_card_icons.py"], cwd=REPO,
                         capture_output=True, text=True).returncode
@@ -229,7 +229,7 @@ def main():
                          ".tmp/s5-cards/cards-passives.png",
                          ".tmp/s5-cards/cards-bonus.png")
              if os.path.exists(os.path.join(REPO, p))]
-    row("A7", "12/12 card kinds resolve a real icon; card shots committed",
+    row("A7", "all 32 pool kinds (16 weapons + 15 passives + 1 bonus) resolve a real icon; card shots committed",
         rc == 0 and len(cards) == 3, "TESTED",
         "tests/test_card_icons.py (rerun rc=%d) + .tmp/s5-cards/" % rc)
 

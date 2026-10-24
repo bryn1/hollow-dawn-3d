@@ -35,15 +35,15 @@
 
 | # | Family | CURRENT (code truth) | VS (cite: VS-FEATURES section ~line) | Roadmap parity target (our system, our numbers) |
 |---|--------|----------------------|--------------------------------------|--------------------------------------------------|
-| 1 | Weapons: count + behavior | 6 (`weapons.gd IDS:6`), one behavior each, MAX_LEVEL 8 (`:7`), flat `META` table, `_fire` match | 273 total = 138 base + 94 evo + 7 unions + 4 gifts + 19 counterparts + 11 special (S1 tables ~19–304; tally ~710–712); base max lvl mostly 8 (S1 intro ~15) | 16 by M1, 24 by M2, 26+ by M4 — count is NOT the parity metric; behavior-class coverage + level/pool mechanics are. Their 273 incl. DLC is not a cloning target |
-| 2 | Evolutions + unions | none | max weapon + carried passive + chest after 10:00 converts (S3 ~354–358); unions = 2 maxed weapons (S1.3 ~266–276); transforms inventory parse: 29 base + 64 DLC = 93 combos (S3 ~367) | M1: chest-driven evolutions (our rule, our time gate); M2: 2 unions |
-| 3 | Passives | 5 × 5 stacks (`levelup.gd:8-14`), no carry cap | 33 total (S2 ~309–311); max 6 different carried per run (S2 ~313) | 15 by M1 (one per evolution partner), 20 by M2; **M1 carry cap = 6 passive KINDS + 6 weapon slots, OUR numbers — M1 feature 3 (DA c1 P1)**; VS weapon-slot rule absent from VS-FEATURES (inventory gap — re-verify before citing any number of theirs) |
+| 1 | Weapons: count + behavior | 16 (`weapons.gd IDS:19` — roster wired by T-M1h; 6 until v1.1.1), one behavior each, MAX_LEVEL 8 (`:22`), flat `META` table, `_fire` match | 273 total = 138 base + 94 evo + 7 unions + 4 gifts + 19 counterparts + 11 special (S1 tables ~19–304; tally ~710–712); base max lvl mostly 8 (S1 intro ~15) | 16 by M1, 24 by M2, 26+ by M4 — count is NOT the parity metric; behavior-class coverage + level/pool mechanics are. Their 273 incl. DLC is not a cloning target. LANDED-M1h: 16 (M2's +8 rides the deferred roster-expansion card, M2-SPEC §8.5) |
+| 2 | Evolutions + unions | evolutions LIVE + pool-reachable (`evolutions.gd` 10-row TABLE, T-M1e + T-M1h) + 2 UNIONS (`union.gd:33` TABLE, T-M2u); chest-open precedence union→evolution | max weapon + carried passive + chest after 10:00 converts (S3 ~354–358); unions = 2 maxed weapons (S1.3 ~266–276); transforms inventory parse: 29 base + 64 DLC = 93 combos (S3 ~367) | M1: chest-driven evolutions (our rule, our time gate); M2: 2 unions — LANDED both |
+| 3 | Passives | 15 × 5 stacks (`levelup.gd:10` PASSIVES, T-M1h), carry cap 6 KINDS + 6 weapon slots | 33 total (S2 ~309–311); max 6 different carried per run (S2 ~313) | 15 by M1 (one per evolution partner), 20 by M2; **M1 carry cap = 6 passive KINDS + 6 weapon slots, OUR numbers — M1 feature 3 (DA c1 P1)**; VS weapon-slot rule absent from VS-FEATURES (inventory gap — re-verify before citing any number of theirs). LANDED-M1h: 15 (M2's +5 deferred with the roster expansion) |
 | 4 | Stages + gimmicks | ONE arena, 4 biome bands t=0/150/300/450 (`render.gd BIOMES:66-75`), no per-stage rules | 25 stages, each time-limited (15–30 min) with gimmicks: stage items, traps, boss (S4 table ~382–409; Reaper at limit ~378) | M3: 3 selectable stages via a stage table riding the band mechanism; 1 cheap gimmick per stage from existing mechanisms |
-| 5 | End-bosses + minibosses | 1 boss (warden hp 3000 @ t=540, `world.gd:5,24`) | end-of-stage bosses per stage (S5 table ~427–439) + 72 named wave bosses (S5 ~441–457); boss chest-drop rule (S5 ~419) | M1: 2 minibosses; M2: +2; M3: 1 end-boss per stage (4 total); event swarm waves M2+ |
-| 6 | Endless mode | none — WIN_TIME 600 (`game_state.gd:7`) | cycles restart waves with per-cycle HP/qty/damage scaling; Reaper only in non-Endless (S5 ~465–471); Limit Break beyond max (S5 ~473) | M2: endless with OUR scaling curve; M4: limit-break-lite |
+| 5 | End-bosses + minibosses | 1 boss (warden hp 3000 @ t=540, `world.gd:5`) + 2 minibosses @600/780 (`MINIBOSS_AT`, `world.gd:9`, T-M1d, own meshes since T-M1g) | end-of-stage bosses per stage (S5 table ~427–439) + 72 named wave bosses (S5 ~441–457); boss chest-drop rule (S5 ~419) | M1: 2 minibosses; M2: +2; M3: 1 end-boss per stage (4 total); event swarm waves M2+. M2's +2 NOT LANDED — rides the deferred event-wave card (M2-SPEC §8.5) |
+| 6 | Endless mode | ENDLESS LIVE (T-M2e): `cycle = time // WIN_TIME` (`game_state.gd:7` WIN_TIME 900), flag `DawnWell.flags["endless"]`, capped scalars `HP_CYC`/`QTY_CYC`/`DMG_CYC` + clamps (`world.gd`, `main.gd:18`), best_cycle save row | cycles restart waves with per-cycle HP/qty/damage scaling; Reaper only in non-Endless (S5 ~465–471); Limit Break beyond max (S5 ~473) | M2: endless with OUR scaling curve — LANDED; M4: limit-break-lite; Reaper analogue DEFERRED (`T-M2r-REAPER`, M2-SPEC §8.3) |
 | 7 | Characters + unlocks | 1 fixed character, talon start (`game_state.gd:56`) | 165 (S6 ~481; roster CONTRADICTED at 168 — treat count as ~165); gold-purchase with additive price scaling; secret unlocks (S6 ~481–483) | M4: 6 selectable, each start-weapon + one signature stat rule; purchase price curve OURS |
-| 8 | Meta shop + refund | none — gold dies with the run (score adds it, `main.gd:239`); no save file | 24/25 PowerUps table (S7 ~573–605; count CONTRADICTED 24-vs-25); refund-all rule (S7 ~609); disable-when-maxed rule (S7 ~610) | M1: meta shop (12 power-ups M1 → ~18 M2, our ranks/prices) + refund; persist via `user://dawnwell.json` (format + reset rules: M1 feature 1) |
-| 9 | Pickup systems | gem/coin/heal in sim only, NO 3D draw (in-flight visibility fix); no chests, no merge, no bags; boss +50g flat (`world.gd:126–138`) | chests w/ tiers + fixed first-6 sequence (S8 ~651–656); 400-gem merge-to-red rule (S8 ~644); Coin Bag / Rich Coin Bag + light-source pickups (S8 ~649, S7 ~628) | M1: chests (single tier); M2: 3 tiers + gem-merge cap (ours) + coin-bag tiers |
+| 8 | Meta shop + refund | LIVE (T-M1f): `DawnWell` save (`save.gd`, `user://dawnwell.json`) + the shop panel (`screens.gd`, fourth overlay, one style); 24 power-up rows (12 live effects, 12 sealed pending the M2 probe — T-M1h STAT-ROW count), per-rank refunds + refund-all, run gold → well gold at every run end | 24/25 PowerUps table (S7 ~573–605; count CONTRADICTED 24-vs-25); refund-all rule (S7 ~609); disable-when-maxed rule (S7 ~610) | M1: meta shop (12 power-ups M1 → ~18 M2, our ranks/prices) + refund — LANDED (24 rows shipped, 12 sealed); persist via `user://dawnwell.json` — LANDED |
+| 9 | Pickup systems | pickups DRAW via `pickup_viz` MultiMeshes (T-S18); chests in 3 tiers stamped at drop from `CHEST_TIER_BY_SOURCE` (`world.gd:69`, T-M2t) + gem-merge cap 200/batch 100 (`world.gd:26-27`, T-M2g, bulk gem same array); coin-bag tiers NOT shipped | chests w/ tiers + fixed first-6 sequence (S8 ~651–656); 400-gem merge-to-red rule (S8 ~644); Coin Bag / Rich Coin Bag + light-source pickups (S8 ~649, S7 ~628) | M1: chests (single tier); M2: 3 tiers + gem-merge cap (ours) — LANDED both (ours: 200-threshold, weighted rolls, NOT their fixed 1-1-3-1-1-5); coin-bag tiers DEFERRED (M2-SPEC §8.1) |
 | 10 | Achievement-chain unlocks | none (no counters persisted) | passives/weapons/stages gated by achievement chains (S7 ~617–624: e.g. "Level up X to lvl 4" → passive; stage unlock = reach lvl N in previous stage ~624) | M2: unlock-flag store gating the level-up pool; M4: achievements page (~20 rows) |
 | 11 | Co-op | none | local co-op up to 4; changes pooling/shared chests (S8 ~671–674) | EXCLUDED — see §3 |
 | 12 | Mobile | none (desktop/web builds) | official mobile releases exist; control details UNVERIFIED (S8 ~676–678) | EXCLUDED (revisit on owner word) — see §3 |
@@ -240,8 +240,30 @@ skipped, S1p remaster card, S1q regen card) says first-pass acceptance is not 10
    ACCEPT: fresh-save leg shows gated card ABSENT, flagged save shows it PRESENT (both sides).
 5. **+2 minibosses + first event-wave** (swarm-wall from one edge). ACCEPT: alive-cap holds.
 
+**M2 landing note (v1.3.0, MC 11241, greps re-run at the v1.3.0 base — the same
+retire-and-replace discipline as the M1 notes above):** LANDED — item 1 ENDLESS as built by
+T-M2e (`DawnWell.flags["endless"]` hand-in, cycle-clear chest + reward card on the frozen
+seams, capped `HP_CYC` ≤ 6 with the 18× clamp / `QTY_CYC` ≤ 2 / `DMG_CYC` ≤ 2.5 with the
+`MAX_CONTACT_DMG 20` contact clamp, `best_cycle` save row, endless-gated cycle HUD row;
+ACCEPT rows A-E1..A-E8 all green in the v1.3.0 acceptance capture) — **except** the Reaper
+analogue, DEFERRED as card `T-M2r-REAPER` (M2-SPEC §8.3: roadmap-is-law, no owner artifact
+retires it, so it stays tracked, not silently dropped). Item 2 LANDED as chest tiers (T-M2t:
+`CHEST_TIER_BY_SOURCE` single-source map incl. the endless-cycle → dawn row +
+`chest_rewards.gd` weighted rolls — NOT their fixed 1-1-3-1-1-5) + gem-merge (T-M2g: 200/100
+fold on the ONE gems array, bulk gem, both XP-conservation legs) — **except** coin-bag
+tiers, DEFERRED (M2-SPEC §8.1, named follow-on). Item 3 LANDED as the 2 unions (T-M2u:
+`union.gd` 2-row TABLE, precedence over evolution, the reserve rule for shared bases) riding
+the roster prerequisite T-M1h (16/15 pool LIVE) — the roadmap's 24/20 (+8 weapons/+5
+passives) and the knockback-lite row ride a named follow-on card (M2-SPEC §8.5). Items 4
+(unlock-flag store) and 5 (+2 minibosses + event-wave) NOT LANDED — named follow-on M2
+cards, `event` stays the forward-declared chest-source row (M2-SPEC §B.1 P4-1).
+
 Assets (M2): 8 weapon + 8 evo + 2 union + 5 passive + 3 pickup icons = **26 icons**;
-8 weapon + 2 union + 2 miniboss meshes = **12 meshes**.
+8 weapon + 2 union + 2 miniboss meshes = **12 meshes**. LANDING NOTE (M2-SPEC §6 divergence,
+adopted): the four-pillar batch is **5 icons + 2 union meshes** (T-M2a LANDED, first-batch
+5/5 + 2/2); the 8-weapon/8-evo/5-passive/3-pickup icon rows and the 8-weapon/2-miniboss
+mesh rows ride the deferred roster-expansion/event-wave cards (their 10 weapon + 10 passive
+icons already shipped in the M1 batch T-M1c).
 
 ### M3 — v2.0.0 "Stages" (~8 seat-days) — major-version-worthy: stage select exists
 
