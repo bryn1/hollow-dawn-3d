@@ -60,10 +60,12 @@ static func cycle_minute(game: GameState) -> float:
 
 
 # Pillar B §B.1 source->tier map, the SINGLE source of truth for chest
-# tiers (rev-2 P1: §A.1 defers to this row). ENDLESS (this card) consumes
-# the endless-cycle row at the cycle clear; the boss/miniboss tier wiring on
-# the drop side rides T-M2t, and the event row is the §B.1 P4-1 forward-
-# declared reservation (event-waves are an excluded pillar). OUR mapping.
+# tiers (rev-2 P1: §A.1 defers to this row). LIVE SINCE T-M2t (MC 11239):
+# every drop site stamps its tier from THIS map — endless-cycle at the cycle
+# clear (T-M2e), warden/miniboss at kill_enemy (T-M2t) — and the A-E4/B-T1
+# ACCEPT rows assert the SAME tier from the SAME row (the DA-P1 law). The
+# event row stays the §B.1 P4-1 forward-declared reservation (event-waves
+# are an excluded pillar — the source cannot fire yet). OUR mapping.
 const CHEST_TIER_BY_SOURCE := {"miniboss": "ember", "warden": "warden",
 	"endless-cycle": "dawn", "event": "dawn"}
 
@@ -271,10 +273,17 @@ func kill_enemy(game: GameState, enemy: Dictionary) -> void:
 		coins.append({"x": enemy.x, "y": enemy.y, "gold": 1 + randi() % 3})
 	if enemy.boss or randf() < HEAL_DROP_CHANCE:
 		heals.append({"x": enemy.x, "y": enemy.y})
+	# T-M2t §B.1: every drop carries its tier FROM THE MAP at the drop site
+	# (kill_enemy = the boss/miniboss sources; cycle_clear above = endless-
+	# cycle; the event row stays the §B.1 P4-1 forward-declared reservation).
+	# Strict map lookup: a bypassed source crashes at the drop, never silently
+	# de-tiered (the map-bypass planted-red rides this).
 	if enemy.boss and randf() < CHEST_CHANCE_BOSS:
-		chests.append({"x": enemy.x, "y": enemy.y})
+		chests.append({"x": enemy.x, "y": enemy.y,
+			"tier": CHEST_TIER_BY_SOURCE["warden"]})
 	elif enemy.miniboss and randf() < CHEST_CHANCE_MINIBOSS:
-		chests.append({"x": enemy.x, "y": enemy.y})
+		chests.append({"x": enemy.x, "y": enemy.y,
+			"tier": CHEST_TIER_BY_SOURCE["miniboss"]})
 
 
 # Consume pickups inside touch range; returns gold picked up this step.
@@ -295,19 +304,23 @@ func collect_pickups(game: GameState) -> int:
 		if _dist(h, game.player) < 16.0:
 			heals.remove_at(i) # consumed even at full hp — never a wasted item
 			game.hp = minf(game.max_hp, game.hp + HEAL_AMOUNT)
-	# Chest OPENING (M1 feature 5): the same 16 px touch funnel. Opening
-	# runs the ONE evolution rule first (evolutions fire at OPEN time, the
-	# gate reads game.time here), then grants ONE reward card by riding the
-	# frozen levelup pause phase — the same pending_levels -> _enter_levelup
-	# seam a level-up rides; the exhausted-pool fallback stays the ONE
-	# bonus_card (gold) mechanism, ours (roadmap feature 5 phase decision,
-	# DA c1 A-2: the enum menu|playing|levelup|gameover|win is untouched).
+	# Chest OPENING (M1 feature 5): the same 16 px touch funnel. The M2 §B.1
+	# OPEN ORDER is exactly three lines: the ONE transform first (evolutions
+	# fire at OPEN time, the gate reads game.time here; the union pillar's
+	# try_union takes its try_union-else-try_evolve precedence slot at THIS
+	# site when T-M2u lands), then the tier cards + the gold line, both owned
+	# by chest_rewards.gd — the cards ride the frozen pending_levels ->
+	# _enter_levelup seam (each is one 3-card offer, the per-offer reward
+	# kind pops the game.reward_kinds FIFO), the gold roll returns raw and
+	# enters the run through the ONE credit_gold funnel below (roadmap
+	# feature 5 phase decision, DA c1 A-2: the enum
+	# menu|playing|levelup|gameover|win is untouched).
 	for i in range(chests.size() - 1, -1, -1):
 		var c: Dictionary = chests[i]
 		if _dist(c, game.player) < 16.0:
 			chests.remove_at(i)
 			EvolutionSystem.try_evolve(game)
-			game.pending_levels += 1
+			gold += ChestRewards.grant(game, c)
 	# The meta gold-rate (T-M1f) rides the ONE pickup funnel: collected raw
 	# gold enters the run only through GameState.credit_gold — identity with
 	# no ranks bought, so every pre-shop dump byte stays identical.

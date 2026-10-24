@@ -271,8 +271,20 @@ func _start_game() -> void:
 
 func _enter_levelup() -> void:
 	game.set_phase("levelup")
-	_current_offer = LevelUpDeck.make_offer(game)
+	_current_offer = _next_offer()
 	_screens.show_levelup(_current_offer)
+
+
+# The ONE offer funnel of the levelup seam. A queued tier reward kind (the
+# §B.1 grant FIFO, game_state.reward_kinds) shapes the next offer through
+# the SAME make_offer seam; "" is the untouched pool (every pre-tier byte,
+# the shuffle RNG consumption included, is unchanged). The pop never moves
+# pending_levels — the frozen phase/drain seam is exactly as shipped.
+func _next_offer() -> Array:
+	var kind: String = ""
+	if not game.reward_kinds.is_empty():
+		kind = game.reward_kinds.pop_front()
+	return LevelUpDeck.make_offer(game, kind)
 
 
 func _pick(index: int) -> void:
@@ -281,7 +293,7 @@ func _pick(index: int) -> void:
 	LevelUpDeck.apply_offer(game, _current_offer[index])
 	game.pending_levels -= 1
 	if game.pending_levels > 0:
-		_current_offer = LevelUpDeck.make_offer(game)
+		_current_offer = _next_offer()
 		_screens.show_levelup(_current_offer)
 		return
 	_current_offer = []

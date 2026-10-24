@@ -8,17 +8,31 @@
 # NO render-frame physics — the stage machine only ever saves after a FIXED
 # settle-frame count. Run:
 #   xvfb-run godot --render-driver opengl3 --path . -s res://sim/chest_capture.gd
-# Shots (one live Main.tscn, in stage order):
-#   m1-chest.png          chest ON the ground, in view, not yet collected
-#                         (> 16 px away — the touch funnel must NOT eat it
-#                         before the frame); the CHEST row carries its
-#                         screen-projected centre at PICK_Y (PICK_Y == the
-#                         PickupViz billboard height, harness mirror).
+# Shots (one live Main.tscn, in stage order; T-M2t per-tier rows B-T5):
+#   m1-chest.png          tier II (warden) chest ON the ground, in view, not
+#                         yet collected (> 16 px away — the touch funnel must
+#                         NOT eat it before the frame). The boss kill now
+#                         stamps its tier from CHEST_TIER_BY_SOURCE, so the
+#                         M1 shot is the tier-II render: drawn at
+#                         PickupViz.CHEST_TIER_SCALE["warden"] on the icon-
+#                         sampled tint. The CHEST row carries its screen-
+#                         projected centre at PICK_Y (PICK_Y == the PickupViz
+#                         billboard height, harness mirror) + its tier + a
+#                         per-tier window ("win").
 #   m1-chest-baseline.png the EMPTY baseline: the SAME ticked state with
 #                         world.chests cleared (DECLARED deviation — this is
 #                         exactly the S8 HUD pattern: same scene, element
 #                         hidden; every other pixel is then byte-equal and
 #                         the gate's diff isolates the chest's pixels).
+#   m2-chest-dawn.png     tier III (dawn), same pose: the real
+#                         world.cycle_clear drop (the ONLY dawn drop funnel,
+#                         it stamps map["endless-cycle"] itself) with the
+#                         dropped dict REPOSED beside the hero (the POSE
+#                         deviation class, declared below — the drop and the
+#                         tier stamp are real; only the dict position moves
+#                         out of the 16 px touch before the next tick).
+#   m2-chest-dawn-baseline.png  its own empty baseline (same ticked state,
+#                         chests cleared — enemies/tiles byte-equal).
 # Declared deviations (spelled where they land): the chest is PLACED through
 # the REAL drop funnel (world.kill_enemy on a synthetic boss-flagged kill
 # dict — the sim_boss chest-roll-leg shape, CHEST_CHANCE_BOSS 1.0 is the
@@ -87,13 +101,26 @@ func _on_frame() -> void:
 		_advance(2)
 		return
 	if _stage == 2:
-		_save_chest_shot()
+		_save_chest_shot("m1-chest.png")
 		_main.world.chests.clear() # DECLARED: the empty-baseline deviation
 		_wait = SETTLE_FRAMES
 		_advance(3)
 		return
 	if _stage == 3:
 		_save_png("m1-chest-baseline.png", false)
+		_drop_dawn_chest() # the real cycle-clear drop, REPOSED (header)
+		_run_ticks(POST_DROP_TICKS)
+		_wait = SETTLE_FRAMES
+		_advance(4)
+		return
+	if _stage == 4:
+		_save_chest_shot("m2-chest-dawn.png")
+		_main.world.chests.clear() # DECLARED: the empty-baseline deviation
+		_wait = SETTLE_FRAMES
+		_advance(5)
+		return
+	if _stage == 5:
+		_save_png("m2-chest-dawn-baseline.png", false)
 		_write_rows()
 		print("CAPTURE_OK")
 		quit()
@@ -117,6 +144,21 @@ func _drop_chest() -> void:
 	assert(_main.world.chests.size() == 1)
 
 
+func _drop_dawn_chest() -> void:
+	# T-M2t B-T5: the ONLY dawn drop funnel is the real world.cycle_clear
+	# (it stamps map["endless-cycle"] itself). Its drop lands ON the pawn
+	# (16 px touch would eat it before the frame), so the dropped DICT is
+	# moved to the same pose offset as the boss stage — the POSE deviation
+	# class (display), the drop + tier stamp stay real (header).
+	_main.world.cycle_clear(_main.game)
+	assert(_main.world.chests.size() == 1)
+	var p: Dictionary = _main.game.player
+	var c: Dictionary = _main.world.chests[0]
+	assert(String(c["tier"]) == String(GameWorld.CHEST_TIER_BY_SOURCE["endless-cycle"]))
+	c.x = p.x + DROP_OFFSET_PX
+	c.y = p.y
+
+
 # Fixed-count _step drive (biome convention): the clock advances by CALL
 # COUNT only; a transient level-up (xp cannot exist here, drained anyway)
 # never rides into a frame. gameover/win idles the loop.
@@ -138,20 +180,28 @@ func _chest_screen_center() -> Vector2:
 		c.y / CameraRig.PX_PER_M))
 
 
-func _save_chest_shot() -> void:
+func _save_chest_shot(png: String) -> void:
 	assert(_main.world.chests.size() == 1)
 	var c: Dictionary = _main.world.chests[0]
 	var p: Dictionary = _main.game.player
 	var sp := _chest_screen_center()
-	print("CHEST x=%.1f y=%.1f t=%.3f chests=%d dist_px=%.1f" % [sp.x, sp.y,
-		_main.game.time, _main.world.chests.size(),
-		sqrt(pow(c.x - p.x, 2) + pow(c.y - p.y, 2))])
-	_rows.append({"leg": "chest_shot", "cx": roundf(sp.x * 10.0) / 10.0,
+	var tier: String = String(c["tier"])
+	# per-tier window: the chest billboard at this tier's viz scale, plus
+	# margin (the gate counts non-bg px in THIS window on the shot vs the
+	# same-state baseline — the B-T5 "per-tier window row").
+	var scale: float = float(PickupViz.CHEST_TIER_SCALE.get(tier, 1.0))
+	var win: int = int(ceil(PickupViz.CHEST_PX * scale / 2.0)) + 12
+	print("CHEST x=%.1f y=%.1f t=%.3f chests=%d dist_px=%.1f tier=%s" % [sp.x,
+		sp.y, _main.game.time, _main.world.chests.size(),
+		sqrt(pow(c.x - p.x, 2) + pow(c.y - p.y, 2)), tier])
+	_rows.append({"leg": "chest_shot", "png": png, "tier": tier, "win": win,
+		"baseline": png.replace(".png", "-baseline.png"),
+		"cx": roundf(sp.x * 10.0) / 10.0,
 		"cy": roundf(sp.y * 10.0) / 10.0, "t": roundf(_main.game.time * 100.0) / 100.0,
 		"in_frame": sp.x >= CHEST_MARGIN and sp.y >= CHEST_MARGIN
 				and sp.x <= GameRenderer.VIEW.x - CHEST_MARGIN
 				and sp.y <= GameRenderer.VIEW.y - CHEST_MARGIN})
-	_save_png("m1-chest.png", true)
+	_save_png(png, true)
 
 
 func _save_png(png: String, with_state: bool) -> void:

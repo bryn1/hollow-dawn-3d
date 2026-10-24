@@ -50,6 +50,21 @@ const GEM_BULK_TINT := Color(1.2, 1.22, 0.9) # §C.1 "brighter via a per-instanc
 	# COLOR" (rev-2 P4-5): the multiplier rides the gem slot's instance color —
 	# measured green channel ~244 on the capture vs the normal gem's ~200 (the
 	# BULK palette test gates above 200, so "brighter" is a measured pixel claim).
+# M2 §B.1/§B.2 (MC 11239 T-M2t): CHEST TIERS ride this same chest MM as
+# per-instance SCALE + TINT (spec law: "tier is per-instance scale/tint, no
+# new MM class" — the M2g color-instance format mechanism, reused). The tier
+# TINTS are not invented numbers: each is the alpha-weighted mean colour of
+# its tier icon, consumed through the ONE icon-<id>.png naming convention
+# (icon-chest-warden.png / icon-chest-dawn.png, the §6 M2a batch) normalised
+# against the tier-I icon's mean — so brighter tier == brighter pixels, the
+# measured GEM_BULK_TINT pattern again. SCALES are OUR §B values (28 px row:
+# 1.0 / 1.35 / 1.7 — a bigger tier draws bigger, the m1-chest 28 px row).
+const CHEST_TIER_ICON := {
+	"ember": "res://assets/icons/icon-chest.png",
+	"warden": "res://assets/icons/icon-chest-warden.png",
+	"dawn": "res://assets/icons/icon-chest-dawn.png",
+}
+const CHEST_TIER_SCALE := {"ember": 1.0, "warden": 1.35, "dawn": 1.7}
 const DRAWS := 5 # gem + coin + cross + dawn-glow (§b's planned rows) +
 	# chests 1 (M1 f5). The §b planned note stays 33 on purpose: the roadmap
 	# re-tallies the WORST-CASE LOADOUT draws to planned 40 on the feature-6
@@ -65,6 +80,7 @@ var _cross: MultiMeshInstance3D
 var _glow: MultiMeshInstance3D
 var _chest: MultiMeshInstance3D
 var _counts := {}
+var _tier_tint := {} # tier -> Color multiplier, sampled at _ready (header)
 
 
 func _ready() -> void:
@@ -84,7 +100,11 @@ func _ready() -> void:
 	_coin = _mm(_quad(), _coin_mat())
 	_cross = _mm(_quad(), _mat(GameRenderer.BLOOD))
 	_glow = _mm(_quad(), _mat(GameRenderer.DAWNLIGHT, 0.25)) # §b dawn-glow 1
-	_chest = _mm(_quad(), _icon_mat("res://assets/icons/icon-chest.png"))
+	# The chest slot moves to the color-instance format (the §C.1 mechanism,
+	# reused for §B tiers): tier I stays an exact WHITE multiplier, so the
+	# M1 chest pixels keep byte-stability up to the tier the drop now carries.
+	_tier_tint = _sample_tier_tints()
+	_chest = _mm(_quad(), _icon_mat(CHEST_TIER_ICON["ember"]), true)
 
 
 func _process(_delta: float) -> void:
@@ -106,7 +126,8 @@ func refresh() -> void:
 		2.0 * GameRenderer.DAWN_GLOW_RADII.x, 2.0 * GameRenderer.DAWN_GLOW_RADII.x)
 	# M1 f5 (MC 11209): the chest rides the SAME billboard write — reads
 	# world.chests only, never writes sim state (opening stays world.gd's).
-	_write_items(_chest, world.chests, basis, CHEST_PX, CHEST_PX)
+	# T-M2t: the tiered write (per-instance scale + icon-sampled tint).
+	_write_items(_chest, world.chests, basis, CHEST_PX, CHEST_PX, 0.0, true)
 	# v1 cross: two bars per Dawnlight (ARM x BAR + BAR x ARM), 1 MM 2 draws'
 	# worth of instances (the §b dawnlight-1 draw stays ONE call)
 	var mm: MultiMesh = _cross.multimesh
@@ -151,21 +172,64 @@ func _bb(basis: Basis, w: float, h: float, th: float) -> Basis:
 
 
 func _write_items(mmim: MultiMeshInstance3D, items: Array, basis: Basis,
-		w_px: float, h_px: float, bulk_scale := 0.0) -> void:
+		w_px: float, h_px: float, bulk_scale := 0.0, tiered := false) -> void:
 	var s := 1.0 / CameraRig.PX_PER_M
 	var mm: MultiMesh = mmim.multimesh
 	mm.instance_count = items.size()
 	for i in items.size():
 		var it: Dictionary = items[i]
 		# big:true (world.gd's fold flag) rides per-instance SCALE (+COLOR on
-		# the gem slot) — the §C.1 mechanism, no new draw, no new node.
+		# the gem slot) — the §C.1 mechanism, no new draw, no new node. The
+		# chest tier (world.gd's drop stamp) rides the SAME per-instance pair
+		# (§B.1: scale/tint, no new MM class), its tint icon-sampled above.
 		var big: bool = bulk_scale > 0.0 and it.get("big", false)
 		var f: float = bulk_scale if big else 1.0
+		var col := Color(1, 1, 1, 1)
+		if tiered:
+			var tier: String = String(it.get("tier", "ember"))
+			f = float(CHEST_TIER_SCALE.get(tier, 1.0))
+			col = _tier_tint.get(tier, Color(1, 1, 1, 1))
 		mm.set_instance_transform(i, Transform3D(
 			_bb(basis, w_px * s * f, h_px * s * f, s),
 			Vector3(it.x * s, PICK_Y, it.y * s)))
-		if bulk_scale > 0.0: # the color-instance slot (gems only)
-			mm.set_instance_color(i, GEM_BULK_TINT if big else Color(1, 1, 1, 1))
+		if bulk_scale > 0.0 or tiered: # the color-instance slots (gem, chest)
+			mm.set_instance_color(i, GEM_BULK_TINT if big else col)
+
+
+# The tier tints, SAMPLED not typed: each tier icon's alpha-weighted mean
+# colour, normalised against the tier-I mean (a Color multiplier >1 brightens
+# over the texture, the GEM_BULK_TINT order — measured on the §6 batch: mean
+# luma 51.4 / 62.7 / 70.3 rising with the tier). Deterministic fixed-stride
+# maths on the imported images => the same floats every run, dump-safe. Icons
+# load through CHEST_TIER_ICON, the ONE icon-<id>.png naming convention.
+func _sample_tier_tints() -> Dictionary:
+	var means := {}
+	for tier in CHEST_TIER_ICON:
+		var img: Image = (load(CHEST_TIER_ICON[tier]) as Texture2D).get_image()
+		var sr := 0.0
+		var sg := 0.0
+		var sb := 0.0
+		var sa := 0.0
+		# Stride-4 sampling (every 4th px of the 512 icon): ~16 k taps per
+		# icon, boot-cheap and exactly deterministic — no resize/interpolation
+		# is touched (a mean needs no blend mode; skipping it keeps the float
+		# bytes run-invariant for the dump gates).
+		for y in range(0, img.get_height(), 4):
+			for x in range(0, img.get_width(), 4):
+				var p := img.get_pixel(x, y)
+				sr += p.r * p.a
+				sg += p.g * p.a
+				sb += p.b * p.a
+				sa += p.a
+		means[tier] = Vector3(sr, sg, sb) / maxf(sa, 0.0001)
+	var base: Vector3 = means["ember"]
+	var out := {}
+	for tier in means:
+		var m: Vector3 = means[tier]
+		out[tier] = Color(
+			m.x / maxf(base.x, 0.0001), m.y / maxf(base.y, 0.0001),
+			m.z / maxf(base.z, 0.0001), 1.0)
+	return out
 
 
 func _quad() -> QuadMesh:
@@ -178,7 +242,7 @@ func _mm(mesh: Mesh, mat: StandardMaterial3D,
 		color_instance := false) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = color_instance # §C.1 format row (gems only, header note)
+	mm.use_colors = color_instance # §C.1 format row (gem + chest slots)
 	if color_instance:
 		# The engine only multiplies per-instance COLOR into the albedo when
 		# the material opts in (measured on the pinned 4.7.2 binary: without

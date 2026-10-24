@@ -19,6 +19,13 @@ var xp := 0.0
 var gold := 0
 var kills := 0
 var pending_levels := 0
+# M2 §B.1 (MC 11239 T-M2t): the chest tier reward kinds (weapon|passive|gold)
+# queue here FIFO at the ONE open funnel; the frozen levelup seam pops one
+# kind per offer through make_offer ("" = the untouched full pool). Like
+# endless/cycle this rides OUTSIDE the 12-field Contract B snapshot (F-3)
+# and is reset in start_run below; the queue can never raise pending_levels
+# by itself (grant() raises BOTH, in lockstep — chest_rewards.gd).
+var reward_kinds: Array = []
 # M2 pillar A (MC 11237 T-M2e, M2-SPEC §A): endless is a RUN MODE hand-in
 # (F-4), not a phase value, and cycle is the 0-based cycle index (cycle =
 # int(time // WIN_TIME), §A.1 — WIN_TIME stays the ONE clock). Both live
@@ -113,6 +120,7 @@ func start_run() -> void:
 	meta_gold_mult = 1.0 + PowerUps.gold_bonus(meta_ranks)
 	kills = 0
 	pending_levels = 0
+	reward_kinds = []
 	endless = false # §A.2: fresh-run reset; the flag is re-handed by main._start_game
 	cycle = 0     # after start_run (hand-in seam, never a start_run default)
 	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]

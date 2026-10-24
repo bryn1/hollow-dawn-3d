@@ -125,13 +125,18 @@ def test_evo_and_partner_icon_files_exist():
 # ---- the open site: collect_pickups, the ONE touch funnel -------------------
 
 def test_chest_open_wired_in_collect_pickups():
+    # RETIRED+REPLACED by T-M2t (MC 11239): the M1e row pinned the open as
+    # try_evolve then the fixed "+1" card; the tier grant (item_count cards
+    # + the gold line, §B.1) moved into ChestRewards.grant at the SAME ONE
+    # site. The claim the row makes is unchanged — ONE open funnel, rule
+    # first — the wiring it pins is the shipped tier grant.
     collect = WORLD[WORLD.index("func collect_pickups"):]
     assert re.search(r"for i in range\(chests\.size\(\) - 1, -1, -1\):", collect)
     assert re.search(r"_dist\(c, game\.player\) < 16\.0", collect), \
         "chest touch range must be the same 16 px funnel as the other pickups"
     assert re.search(r"EvolutionSystem\.try_evolve\(game\)\s*\n"
-                     r"\s*game\.pending_levels \+= 1", collect), \
-        "the rule fires at OPEN, then the reward card rides pending_levels"
+                     r"\s*gold \+= ChestRewards\.grant\(game, c\)", collect), \
+        "the rule fires at OPEN, then the tier grant rides the ONE site"
     assert collect.count("chests.remove_at") == 1, "one consume site"
 
 

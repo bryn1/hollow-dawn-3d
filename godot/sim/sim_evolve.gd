@@ -175,7 +175,12 @@ func _leg_single(base: String, level: int, partner: String, rank: int,
 				else true,
 		"in_slot": _slot_kept(game, evo_id, expect_evo, level),
 		"slot_count": game.weapons.size() == 2, # talon + the pinned weapon
-		"reward_card": game.pending_levels == int(before["pending0"]) + 1,
+		# T-M2t: the chest these legs drop is the boss kill -> tier warden
+		# (CHEST_TIER_BY_SOURCE row, B-T1); the card grant is that row's
+		# item_count, not the pre-tier +1 (replace-not-delete: the claim the
+		# row makes, "the reward card is granted", is unchanged)
+		"reward_card": game.pending_levels == int(before["pending0"]) \
+				+ ChestRewards.TIERS["warden"].item_count,
 	}
 	_gate(leg_name, before, after, t, checks, "")
 
@@ -239,14 +244,23 @@ func _leg_card_seam() -> void:
 	var game = _main.game
 	var checks := {
 		"phase_stays_playing": game.phase == "playing",
-		"pending_raised": game.pending_levels == int(before["pending0"]) + 1,
+		# T-M2t: warden chest = item_count offers through the ONE seam
+		"pending_raised": game.pending_levels == int(before["pending0"]) \
+				+ ChestRewards.TIERS["warden"].item_count,
 	}
 	_main._enter_levelup()
 	checks["seam_phase_levelup"] = game.phase == "levelup"
 	checks["offer_nonempty"] = _main._current_offer.size() == 3
 	_main._pick(0)
+	# a tier chest leaves several pending offers; drain the rest through the
+	# SAME seam (_pick's own refill) until the phase closes
+	var drained := 1
+	while game.phase == "levelup":
+		_main._pick(0)
+		drained += 1
 	checks["back_to_playing"] = game.phase == "playing"
 	checks["pending_spent"] = game.pending_levels == int(before["pending0"])
+	checks["drained_all_offers"] = drained == ChestRewards.TIERS["warden"].item_count
 	checks["evo_survives_pick"] = _evo_entry_kept(game, PIN_T_EVO,
 		WeaponSystem.MAX_LEVEL, 1) # a pick may upgrade OTHER slots; the evolved
 	# entry itself must be untouched by the seam (in-slot, cd reset kept)

@@ -71,8 +71,21 @@ static func bonus_card() -> Dictionary:
 	return {"kind": "bonus", "name": "Coin Cache", "desc": "+25 gold, +10 hp", "icon": "coin"}
 
 
-static func make_offer(game: GameState) -> Array:
+# kind (M2 §B.1, MC 11239 T-M2t): the frozen offer seam EXTENDED for tier
+# reward kinds — weapon/passive offers draw the SAME build_pool filtered to
+# their category, a gold offer takes an empty pool so the untouched
+# bonus_card fill below IS the reward (the one gold-card mechanism, ours).
+# kind "" (every pre-tier call) is the verbatim full pool — the shuffle
+# consumes the same RNG and the same three cards come out.
+static func make_offer(game: GameState, kind := "") -> Array:
 	var pool := build_pool(game)
+	match kind:
+		"weapon":
+			pool = pool.filter(func(c): return c.kind == "weapon" or c.kind == "upgrade")
+		"passive":
+			pool = pool.filter(func(c): return c.kind == "passive")
+		"gold":
+			pool = []
 	pool.shuffle()
 	var cards: Array = []
 	for i in 3:
