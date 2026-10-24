@@ -1,0 +1,12 @@
+# M1c2 ref batch MC 11213 (11 rows) — variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha256[:16]
+# Remaster refs for the two FLAGGED prop meshes (icons-batch-m1c.tsv convention reused)
+# + the 2 DECLARED-DEFER miniboss concepts (taller/warden-silhouette family, T-M1d note).
+weapon-bone-whip	assets/art-src/weapon-bone-whip-remaster2.png	321	191b98d3d9a2e45c	# NOTE: accepted seed on extent/fill gates, mesh REJECTED on turntable visual (fragmentary coil); final regen input is the -v6/-v7 row below
+weapon-fire-lash	assets/art-src/weapon-fire-lash-remaster2.png	322	0025fc49c6a645cf	# NOTE: accepted seed on extent/fill gates, mesh REJECTED on turntable visual (fragmentary coil); final regen input is the -v6/-v7 row below
+hollow-knight	assets/art-src/hollow-knight-remaster.png	323	a5c70274b831271e
+hollow-deacon	assets/art-src/hollow-deacon-remaster.png	324	78e55c4c8f3960af
+weapon-bone-whip-v4	assets/art-src/weapon-bone-whip-remaster4.png	341	bfa5fb497a3ae479
+weapon-fire-lash-v4	assets/art-src/weapon-fire-lash-remaster4.png	342	ffada6b555910bb4
+weapon-bone-whip-v6	assets/art-src/weapon-bone-whip-remaster6.png	361	63e7e12205672326	# lasso-loop pose (dart-loop class: single thick tube, sparse interior decodes solid)
+weapon-fire-lash-v6	assets/art-src/weapon-fire-lash-remaster6.png	362	036056cfee9d43fd	# lasso-loop pose
+weapon-bone-whip-v7	assets/art-src/weapon-bone-whip-remaster7.png	371	0bfebfe2717ce709	# hanging S-curve (shaft/limb class) — ACCEPTED regen seed 183

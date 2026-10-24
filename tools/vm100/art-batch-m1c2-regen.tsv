@@ -1,0 +1,12 @@
+# MC 11213 T-M1c2 REGEN spec — the FINAL accepted rows for the two FLAGGED prop meshes.
+# Original batch art-batch-m1c2.tsv seeds 140/150 passed extent+fill quality gates but were
+# REJECTED on the bpy turntable visual (fragmentary coil — fill gate no-ops non-watertight by
+# design, a documented blind spot). Ref pose journey (refs committed, manifest
+# tools/vm100/art-src-m1c2.tsv): v2 spring (thin tubes shatter) -> v4 thick spring (shatter at
+# 1500 AND 3000 tri) -> v5 ball (fills voxel interior, 1024 shape decoder OOM >23 GiB every
+# seed) -> v6 lasso loop (fire-lash ACCEPTED — dart-loop torus class) -> v7 hanging S-curve
+# (bone-whip ACCEPTED — shaft/limb class). Fresh windows per single-row regen: dense decodes
+# accumulate VRAM within a session (regen2: in-session growth OOMed fire-lash 3 seeds).
+# name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+weapon-bone-whip	/opt/imagegen/tmp/mc11213/refs/weapon-bone-whip-remaster7.png	1500	183	quality
+weapon-fire-lash	/opt/imagegen/tmp/mc11213/refs/weapon-fire-lash-remaster6.png	1500	189	quality

@@ -130,7 +130,7 @@ three FLAGGED for that future card, not re-rolled here against an invented targe
 
 | asset | source | seed | tris / budget | dims_m (x,y,z) | aspect | sha256[:16] | render |
 |---|---|---|---|---|---|---|---|
-| weapon-bone-whip | icons/weapon-bone-whip.png | 93 | 1296 / 1500 | 0.713,0.057,0.984 | 17.35 FLAG | fff152fb776b2d17 | concepts/weapon-bone-whip-render.png |
+| weapon-bone-whip | icons/weapon-bone-whip.png | 93 | 1296 / 1500 | 0.713,0.057,0.984 | 17.35 FLAG → REPLACED §M1c2 (seed 183, aspect 0.23) | fff152fb776b2d17 | concepts/weapon-bone-whip-render.png |
 | weapon-dart-loop | icons/weapon-dart-loop.png | 95 | 1483 / 1500 | 0.972,0.991,0.968 | 0.98 | ece41bd85d779154 | concepts/weapon-dart-loop-render.png |
 | weapon-hewn-axe | icons/weapon-hewn-axe.png | 94 | 1470 / 1500 | 0.913,0.699,0.080 | 1.31 | a21954ebc53a3ba4 | concepts/weapon-hewn-axe-render.png |
 | weapon-pilgrim-cross | icons/weapon-pilgrim-cross.png | 95 | 1461 / 1500 | 0.810,0.988,0.910 | 0.92 | 2f505a43fd57dfbf | concepts/weapon-pilgrim-cross-render.png |
@@ -138,7 +138,7 @@ three FLAGGED for that future card, not re-rolled here against an invented targe
 | weapon-rot-water | art-src/weapon-rot-water-remaster.png | 115 | 1489 / 1500 | 0.833,0.999,0.831 | 0.83 | 874540d1237f17f4 | concepts/weapon-rot-water-render.png |
 | weapon-spectral-disc | icons/weapon-spectral-disc.png | 98 | 1444 / 1500 | 0.996,0.987,0.955 | 1.01 | bf8dfd2ecd025255 | concepts/weapon-spectral-disc-render.png |
 | weapon-storm-peal | art-src/weapon-storm-peal-remaster.png | 114 | 1479 / 1500 | 0.790,0.903,0.795 | 0.88 | bdf233122b7dbdae | concepts/weapon-storm-peal-render.png |
-| weapon-fire-lash | art-src/weapon-fire-lash-remaster.png | 115 | 1447 / 1500 | 0.753,0.177,0.815 | 4.61 FLAG | 25a542e68dafcf7e | concepts/weapon-fire-lash-render.png |
+| weapon-fire-lash | art-src/weapon-fire-lash-remaster.png | 115 | 1447 / 1500 | 0.753,0.177,0.815 | 4.61 FLAG → REPLACED §M1c2 (seed 189, aspect 0.85) | 25a542e68dafcf7e | concepts/weapon-fire-lash-render.png |
 | weapon-doom-sigil | icons/weapon-doom-sigil.png | 101 | 1467 / 1500 | 0.967,0.827,0.972 | 1.18 | def5f16ce9722272 | concepts/weapon-doom-sigil-render.png |
 
 Notes: `weapon-rot-water` regen seeds 113/114 died to a CUDA OOM mid-window (fleet
@@ -146,3 +146,51 @@ co-tenant, not counted as quality seeds; 115 accepted — honest ledger per MC 1
 window-4 precedent). Seeds 92, 96–99, 100–103 burned on flat-card collapse (QUALITY
 rows in `.tmp/m1c-batch-a.log` / regen log excerpts in the capture). The rejected flat
 exports stayed on vm100; repo carries only accepted rows.
+
+## M1c2 prop remasters + miniboss meshes (T-M1c2, MC 11213, 2026-10-24)
+
+Two prop meshes were **FLAGGED in §M1c** for flat-card collapse (weapon-bone-whip
+aspect 17.35, weapon-fire-lash 4.61 — planar coils that inflate 8–25× at the 1.42 m
+prop height). This card re-masters both to a volumetric silhouette AND builds the two
+miniboss meshes (hollow-knight, hollow-deacon) that §M1c declared-defer as
+character-class items (own card; T-M1d world.gd MINIBOSS_AT rows reference the
+boss-warden stand-in silhouette — these give them a distinct warden-family body).
+
+**4 accepted meshes** (TRELLIS.2 batch, prop budget 1500, miniboss budget 4000 — the
+biggest-horde-character row, OUR miniboss row; three-quarter refs per the §M1c lesson
+that front-view 2D refs collapse flat). The two remasters replace the live files IN
+PLACE; the old flat copies are archived under `assets/glb/superseded/` (versioned-truth,
+MC 202610221908) with a DO-NOT-USE README. The minibosses are additive; `horde_viz.gd`
+GLB_FILES still maps them to boss-warden.glb (drop-in — a later card swaps the row), so
+the height class is held compatible: every new mesh passes `aspect_gate --target 1.42`
+with INFLATION ≈ 1.42–1.51 (warden stand-in raw INFLATION 1.44).
+
+| asset | source ref | seed | tris / budget | dims_m (x,y,z) | aspect | sha256[:16] | render |
+|---|---|---|---|---|---|---|---|
+| weapon-bone-whip (v7 hang) | art-src/weapon-bone-whip-remaster7.png | 183 | 1454 / 1500 | 0.220,0.974,0.078 | 0.23 GREEN | 27d9e253b1734eba | concepts/weapon-bone-whip-render.png |
+| weapon-fire-lash (v6 lasso) | art-src/weapon-fire-lash-remaster6.png | 189 | 1437 / 1500 | 0.800,0.938,0.104 | 0.85 GREEN | bba2abd7ad7bec0e | concepts/weapon-fire-lash-render.png |
+| hollow-knight | art-src/hollow-knight-remaster.png | 160 | 3830 / 4000 | 0.485,1.000,0.291 | 0.48 GREEN | ae16bce31d559f33 | concepts/hollow-knight-render.png |
+| hollow-deacon | art-src/hollow-deacon-remaster.png | 170 | 3960 / 4000 | 0.327,0.993,0.265 | 0.33 GREEN | 8181597d2083274d | concepts/hollow-deacon-render.png |
+
+**Honest seed ledger — the remaster pose journey (a GATE blind spot, documented).** The
+first seeds 140/150 passed the extent+fill QUALITY gate AND `validate_glb` AND
+`aspect_gate` (volumetric extents), yet every turntable render showed a **fragmentary
+shattered coil** — the fill gate no-ops non-watertight meshes by design, so a Swiss-cheese
+surface sails through all three automated gates and is caught ONLY by the bpy turntable
+visual. Every automated gate is green on a broken mesh: the human turntable check is the
+binding gate for props and is recorded per-asset in the capture. Pose classes tried
+(refs committed, manifest `tools/vm100/art-src-m1c2.tsv`, regen spec
+`art-batch-m1c2-regen.tsv`): spring (v2/v4, thin tubes shatter at 1500 AND 3000 tri) →
+ball (v5, fills the voxel interior, the 1024 shape decoder OOMs >23 GiB on every seed) →
+lasso loop (v6, dart-loop torus class — **fire-lash accepted seed 189**) → hanging S-curve
+(v7, shaft/limb class — **bone-whip accepted seed 183**). Burned seeds: 140,145,149,177,179
+(bone-whip, each passed gates then REJECTED on visual), 150,155,159 (fire-lash, same),
+175/176 bone + 169/170/171 lash (CUDA OOM during the dense ball decodes, in-session
+VRAM accumulation — regen2 burned 3 lash seeds to OOM after bone-whip filled the session;
+single-row windows fixed it). `dump_render.py` gained an optional yaw argument (arg 4,
+default 0 = byte-identical hero shot) for the turntables. The minibosses (seeds 160/170)
+passed all gates AND the visual on first seed — a full humanoid is a well-conditioned
+TRELLIS target; only the exotic coil/ball prop poses fought the pipeline. Contact sheet
+`assets/screens/m1c2-art-sheet.png` (before/after turntables, all four assets). GPU windows:
+4 imagegen (ref generations) + 8 TRELLIS (batches/regens), all CLOSED rc=0, llama-swap
+serving at every close (ledger + VERIFY_EXIT=0 in `.tmp/m1c2-art.txt`).

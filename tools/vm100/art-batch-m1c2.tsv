@@ -1,0 +1,20 @@
+# MC 11213 T-M1c2 mesh spec — name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+# 4 rows, ONE loaded TRELLIS session (batch_trellis.py, runid mc11213):
+#  (1)+(2) the two FLAGGED M1c prop meshes remastered from three-quarter volumetric
+#      refs (PERMANENCE §M1c aspect flags: bone-whip 17.35 flat planar coil,
+#      fire-lash 4.61 flat coiled ring). Prop tri budget stays the swarmer-class
+#      row 1500 (the §M1c stated prop row — unchanged).
+#  (3)+(4) the 2 DECLARED-DEFER miniboss meshes (t=600/780 classes, T-M1d
+#      MINIBOSS_AT + the horde_viz.gd ponytail note): taller/warden-silhouette
+#      family concepts (imagegen refs, tools/vm100/art-src-m1c2.tsv). Budget
+#      4000 = the biggest-horde-character row (moor-brute/pale-wight era),
+#      OUR miniboss row — stated; they render through the same ClassMesh
+#      horde pass (1.42 m height-normalised), and must pass the SAME
+#      aspect_gate (INFLATION<=2.0 AND ASPECT<=2.0 @1.42) the stand-in
+#      boss-warden.glb satisfies, so GLB_FILES swap-in stays drop-in.
+# Seeds 140+/150+/160+/170+ (3 distinct seeds per row per driver; ranges unused
+# by s1a/mc11207 batches).
+weapon-bone-whip	/opt/imagegen/tmp/mc11213/refs/weapon-bone-whip-remaster2.png	1500	140	quality
+weapon-fire-lash	/opt/imagegen/tmp/mc11213/refs/weapon-fire-lash-remaster2.png	1500	150	quality
+hollow-knight	/opt/imagegen/tmp/mc11213/refs/hollow-knight-remaster.png	4000	160	quality
+hollow-deacon	/opt/imagegen/tmp/mc11213/refs/hollow-deacon-remaster.png	4000	170	quality
