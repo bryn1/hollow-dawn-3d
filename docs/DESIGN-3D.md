@@ -71,7 +71,10 @@ class, never per enemy**: draw count is horde-size-independent.
 - **Numeric budget (replaces cycle-1's "≤ 45 exact", which left zero headroom):** ground 1 + enemy MM
   8 + enemy-halo MM 8 + **boss-halo MM 1 (cycle-3 P4: BOSS_GLOW_RADII `render.gd:51` is its own
   radii ⇒ its own instance set)** + blobs 1 + hp-bars 1 + gems 1 + coins 1 + dawnlight 1 + dawn-glow
-  1 + player 1 + boss 1 = 26, + FX ≤ 7 (§i batched) ⇒ **planned worst case 33, hard cap 60 (≈ 2× headroom)**.
+  1 + player 1 + boss 1 = 26, + FX ≤ 7 (§i batched) ⇒ v1-era plan 33; the M1 re-tally
+  (roadmap §2, T-M1g MC 11211: +2 miniboss class MMs + zone/chest FX reserve; measured budget
+  draw row 27/60 under the WORST-CASE LOADOUT, sim_budget.gd) ⇒ **planned worst case 40, hard
+  cap 60** — plan retired+replaced at `art_probe.gd` / `sim_headless.gd` / the fixture in that commit.
   **"300+" is a design-time margin, not a v1 fact** (no v1 doc measures peak alive; the spawn math —
   rate cap `min(12, …)/s` from t ≈ 508 s, `world.gd:88` — implies ≈ 1800 spawns in the last band
   alone; budget assumes ≤ 400 concurrent).
@@ -186,8 +189,10 @@ consolidated `game_data.gd` is **rejected** (§h). Band/signature pins v1 never 
 plus the 10-row partner TABLE; DA c3 C-2: a SEPARATE table, never `WeaponSystem.META`); the
 reward card rides the frozen `pending_levels -> _enter_levelup` seam (DA c1 A-2, enum
 untouched); the chest pickup billboard (`icon-chest.png`, `CHEST_PX 28` OUR row) is
-`pickup_viz`'s 5th MM slot — §b's planned-33 note stays kept (the roadmap's planned-40
-re-tally rides the feature-6 card; the 60 hard cap is the gate and holds); the HUD weapon
+`pickup_viz`'s 5th MM slot — §b's plan note was RAISED to 40 by T-M1g's budget re-tally
+(measured draw row 27/60 under the WORST-CASE LOADOUT, sim_budget.gd; the zones MM +1 rides
+the feature-6 card and the plan-40 room covers it; the 60 hard cap is the gate and holds);
+the HUD weapon
 row falls back to the `icon-<id>.png` naming convention for evolved ids. Pinned by
 `test_chests_evolve.py` + the committed `chests-evolve-m1e.jsonl` dump.
 

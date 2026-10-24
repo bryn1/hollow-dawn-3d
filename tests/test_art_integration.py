@@ -19,7 +19,7 @@ Readings stated where the brief left them open:
   pinned structurally there and by the player's own live-height table row
   (red when the live mesh off-specs the §a row by more than 10 %).
 * Draw budget: the fixture's draws row (400 alive) must total <= 60 hard
-  cap with the §b planned-33 note kept.
+  cap with the §b planned-40 note kept (M1 budget re-tally, T-M1g).
 """
 
 import json
@@ -39,7 +39,8 @@ SPEC_H_BOSS = 5.33
 SPEC_H_PLAYER = 1.67  # §a row: v1 player 40 px / S (live row since T-S2p)
 HEIGHT_TOL = 0.10  # brief §4: within 10 %
 DRAWS_HARD = 60  # §b hard cap
-DRAWS_PLANNED = 33  # §b planned worst case (note kept, not a gate)
+DRAWS_PLANNED = 40  # §b planned worst case, M1 re-tally 33 -> 40 (T-M1g;
+# RETIRE-AND-REPLACE per roadmap §2 — the note, not a gate)
 ALIVE_TARGET = 400  # brief §5: dump at a 400-enemy sim
 CLASS_KEYS = ["wraith", "hound", "crawler", "cultist", "moor-brute",
               "dune-scarab", "rime-ghoul", "pale-wight"]  # 8 swarm + warden
@@ -97,7 +98,13 @@ def test_glb_per_class_exists_and_wired():
 def test_height_table_within_spec():
     rows = [r for r in fixture_rows() if r["ev"] == "height"]
     by_class = {r["class"]: r for r in rows}
-    assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player"])
+    # Coverage RETIRE-AND-REPLACE (T-M1g, MC 11211, roadmap M1 asset row):
+    # the two miniboss classes joined the measured table when T-M1c2's real
+    # meshes swapped in at the named horde_viz seam — both measure 1.42 m at
+    # the §a enemy row (rel_err 0.0), gate unchanged at 10 %.
+    assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player",
+                                                    "hollow-knight",
+                                                    "hollow-deacon"])
     for key, row in by_class.items():
         spec = {"warden": SPEC_H_BOSS,
                 "player": SPEC_H_PLAYER}.get(key, SPEC_H_ENEMY)
@@ -147,7 +154,7 @@ def test_draw_budget_from_committed_dump():
     row = rows[0]
     assert row["alive"] >= ALIVE_TARGET, (
         "dump must run at a 400-enemy sim (alive %s)" % row["alive"])
-    assert row["planned"] == DRAWS_PLANNED, "§b planned-33 note must stay kept"
+    assert row["planned"] == DRAWS_PLANNED, "§b planned-40 note must stay kept"
     assert row["hard_cap"] == DRAWS_HARD
     assert row["total"] <= row["hard_cap"], (
         "draws %d over the §b hard cap of %d" % (row["total"], row["hard_cap"]))

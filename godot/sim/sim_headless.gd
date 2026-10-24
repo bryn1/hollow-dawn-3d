@@ -12,7 +12,7 @@
 # layer (its cards build Control trees this stage does not carry).
 # T-S4 adds the combat rows (MC 11102): per-sample FX-cap rows for t < 300
 # (RENDERED live counts vs the §i formulas — per-sample rows, not averages),
-# the scene draw-count row (planned 33 / hard 60, §b), XP/gold progression
+# the scene draw-count row (planned 40 / hard 60, §b + M1 re-tally T-M1g), XP/gold progression
 # rows, the RUN-CONDITIONED pick rows (own ward or halo by t <= 120 with the
 # owning level recorded, A3/D§c F-2), the §c attack pulse counter, and the
 # single-weapon kill-attribution legs (SimCombat) proving >= 1 kill per
@@ -37,7 +37,7 @@ const POS_EVERY := 600 # 10 s position/stat samples
 const FX_EVERY := 30 # 0.5 s FX-cap sample rows while t < FX_WINDOW
 const PROG_EVERY := 1800 # 30 s XP/gold progression rows while t < FX_WINDOW
 const FX_WINDOW := 300.0 # brief: the dump window proving the caps is t < 300
-const DRAWS_PLANNED := 33 # §b planned worst case
+const DRAWS_PLANNED := 40 # §b planned worst case (M1 re-tally T-M1g)
 const DRAWS_HARD := 60 # §b hard cap
 const BAND_STEPS := {
 	8994: 149.9, 9006: 150.1, 17994: 299.9, 18006: 300.1,
@@ -206,8 +206,8 @@ func _run_attribution() -> void:
 
 # §b scene draw tally: ground 1 + horde node (class MMs + bar + blob) +
 # pawn 1 + FX worst case (§i 7) + pickups 4 (T-S18 MC 11201: §b's planned
-# gems/coins/dawnlight/dawn-glow rows, landed by PickupViz — the 33-row
-# budget always carried them). The renderer issues FEWER calls when a
+# gems/coins/dawnlight/dawn-glow rows, landed by PickupViz — the §b
+# plan-row always carried them). The renderer issues FEWER calls when a
 # class is empty — fx_live rides the FX rows.
 func _dump_draws() -> void:
 	var horde: int = _main._viz.draw_count()

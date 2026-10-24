@@ -5,7 +5,8 @@
 # channels x/z only, vertical stays 1.0, so mesh aabb = live instance
 # height); (2) the §b draw tally at a 400-enemy sim — 400 alive through the
 # real _spawn_enemy funnel, refresh() forced, tally ground + horde MMs +
-# pawn + FX worst case (planned 33 / hard cap 60); (3) the player's own
+# pawn + FX worst case (planned 40 / hard cap 60 — plan raised 33 -> 40 by
+# the M1 budget re-tally, PARITY-ROADMAP §2, T-M1g MC 11211); (3) the player's own
 # live-height row (T-S2p, MC 11135: the GLB pawn mesh — the same
 # measured-aabb reading as the class rows). One JSON
 # line per row; the committed copy lives at
@@ -13,7 +14,8 @@
 extends SceneTree
 
 const ALIVE_TARGET := 400 # brief §5: draw dump at a 400-enemy sim
-const DRAWS_PLANNED := 33 # §b planned worst case (note kept in the rows)
+const DRAWS_PLANNED := 40 # §b planned worst case (M1 re-tally: 33 + 2
+#   miniboss class MMs + zone/chest FX reserve, roadmap §2 T-M1g; note kept in the rows)
 const DRAWS_HARD := 60 # §b hard cap
 const OUT_ENV := "HD3D_ART_DUMP"
 const SWARMERS := ["wraith", "hound", "crawler", "cultist", "moor-brute",
