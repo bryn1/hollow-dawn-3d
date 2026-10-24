@@ -6,10 +6,11 @@
 # §j (MC 11103): every card kind resolves to an icon file. v1's blank-icon
 # path (passives shipped icon: "", levelup.gd:35) is closed structurally:
 # _card() has NO conditional around the icon TextureRect, icon_path() is
-# total over the 12 pool kinds (6 weapon + 6 upgrade via the same 6 icons,
-# 5 passives via PASSIVE_ICONS, bonus via coin), and every branch asserts
-# the file exists before load. An unmapped passive key cannot reach a card
-# (PASSIVES in levelup.gd is pinned == PASSIVE_ICONS by tests/test_card_icons.py).
+# total over the 32 pool kinds (T-M1h M1 count: 16 weapon + 16 upgrade via
+# the same 16 icons, 15 passives via PASSIVE_ICONS, bonus via coin), and
+# every branch asserts the file exists before load. An unmapped passive key
+# cannot reach a card (PASSIVES in levelup.gd is pinned == PASSIVE_ICONS by
+# tests/test_card_icons.py).
 extends CanvasLayer
 
 signal start_pressed
@@ -23,16 +24,26 @@ const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
 const EMBER_TINT := Color8(0xc9, 0x7b, 0x3d)
 
-# §j: the five NEW 3090-generated passive icons (assets/icons/new/, prompt
-# provenance embedded). Kept in a passives/ subdir: icon-ward.png exists
-# twice by design (weapon sigil vs. shield) and the flat names must stay
-# byte-identical to the art sources.
+# §j: the 3090-generated passive icons (assets/icons/new/, prompt
+# provenance embedded; the ten weapon-partner rows landed with T-M1h). Kept
+# in a passives/ subdir: icon-ward.png exists twice by design (weapon sigil
+# vs. shield) and the flat names must stay byte-identical to the art sources.
 const PASSIVE_ICONS := {
 	"ferocity": "res://assets/icons/passives/icon-ferocity.png",
 	"haste": "res://assets/icons/passives/icon-haste.png",
 	"ward": "res://assets/icons/passives/icon-ward.png",
 	"grip": "res://assets/icons/passives/icon-grip.png",
 	"insight": "res://assets/icons/passives/icon-insight.png",
+	"cracked-heart": "res://assets/icons/passives/icon-cracked-heart.png",
+	"iron-wrap": "res://assets/icons/passives/icon-iron-wrap.png",
+	"tall-candles": "res://assets/icons/passives/icon-tall-candles.png",
+	"four-leaf-charm": "res://assets/icons/passives/icon-four-leaf-charm.png",
+	"knotted-chain": "res://assets/icons/passives/icon-knotted-chain.png",
+	"loadstone": "res://assets/icons/passives/icon-loadstone.png",
+	"rotten-plate": "res://assets/icons/passives/icon-rotten-plate.png",
+	"twin-runes": "res://assets/icons/passives/icon-twin-runes.png",
+	"gall-vial": "res://assets/icons/passives/icon-gall-vial.png",
+	"gilded-skull": "res://assets/icons/passives/icon-gilded-skull.png",
 }
 
 # Icon fallback per §j — never blank: coin.png is a generated, non-empty
@@ -40,8 +51,8 @@ const PASSIVE_ICONS := {
 const FALLBACK_ICON := "res://assets/icons/coin.png"
 
 
-# Total resolver over the 12 pool kinds: weapons/upgrade carry the v1
-# weapon icon name in card.icon; the bonus carries "coin"; passives map by
+# Total resolver over the 32 pool kinds: weapons/upgrade carry the weapon
+# icon name in card.icon; the bonus carries "coin"; passives map by
 # key. The asserts are the in-code half of the no-blank guarantee (tests
 # assert the other half: the map is pinned and every file exists).
 static func icon_path(card: Dictionary) -> String:

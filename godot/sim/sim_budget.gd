@@ -9,14 +9,15 @@
 # CONSTRUCTION CHANNEL (c2 N-2, verbatim): a DECLARED-PIN scripted leg — the
 # loadout pinned into game.weapons/game.passives via the existing sim_boss
 # pattern (sim_boss._pin_full_build), ZERO new mechanism. DECLARED (doc §2
-# row + sim_caps precedent): these six evolved ids and six partner keys are
-# entries the POOL cannot offer until the feature 6/7 weapon cards land —
-# they ride the shipped evolutions.gd TABLE and the T-M1c icons, and the
-# fire path no-ops an unknown id (weapons.gd _fire match has no default
-# branch, tick just re-calls a no-op), so the pin is SAFE headless and the
-# doc's own disclaimers ship with it: PLAY-reachability of the full evolved
-# set by 900 s is explicitly NOT claimed; the PLAYED cap-curve row is the
-# sim-policy owned-set wpns row (its own line, not this leg's).
+# row + sim_caps precedent): the six evolved ids are CHEST-ONLY entries the
+# POOL never offers (feature 5's rule), and the fire path no-ops an unknown
+# id (weapons.gd _fire fallback arm), so the pin is SAFE headless. ROSTER
+# note (T-M1h, MC 11220): the six partner keys are now REAL pool passives
+# and the six evolved ids' BASE weapons are pool-reachable (the reachability
+# + full-evolution legs ride that in sim_evolve); PLAY-reachability of the
+# full evolved SET by 900 s is still explicitly NOT claimed (evolution needs
+# three late chests); the PLAYED cap-curve row is the sim-policy owned-set
+# wpns row (its own line, not this leg's).
 # ROWS (same headless funnel as sim_headless/sim_caps): budget_loadout (the
 # pin + 6/6 carry-cap counts — roadmap feature 3 "the §2 WORST-CASE LOADOUT
 # sim leg runs under exactly this cap"), budget_draws (the §b draw tally
@@ -91,7 +92,7 @@ func _pin_worst_case(run: Node) -> void:
 		build.append({"id": id, "level": 8, "cd": 0.0})
 	run.game.weapons = build # DECLARED pin (SimCombat pattern)
 	for k in PARTNERS:
-		run.game.passives[k] = 5 # DECLARED pin: keys the pool cannot offer yet
+		run.game.passives[k] = 5 # DECLARED pin: real keys at the 5-stack cap
 
 
 func _decline(run: Node) -> void:
@@ -116,8 +117,9 @@ func _run_legs() -> void:
 		"levels": 8, "passives": PARTNERS, "stacks": 5,
 		"max_weapon_slots": LevelUpDeck.MAX_WEAPON_SLOTS,
 		"max_passive_kinds": LevelUpDeck.MAX_PASSIVE_KINDS,
-		"declared": "pool-unreachable ids/keys until the feature 6/7 cards " +
-			"land (doc §2 construction-channel row; play-reachability NOT claimed)",
+		"declared": "evolved ids stay CHEST-ONLY (pool never offers them); " +
+			"partner keys are real pool passives since T-M1h; play-reachability " +
+			"of the full evolved set NOT claimed (doc §2 row)",
 		"ok": slots_ok and kinds_ok})
 
 	# (2) budget_draws — MEASURED §b tally at 400 alive, class-covering
@@ -134,9 +136,11 @@ func _run_legs() -> void:
 		"ground": 1, "horde": horde, "pawn": 1, "fx_worst": fxw,
 		"pickups": pickups, "total": total, "planned": DRAWS_PLANNED,
 		"hard_cap": DRAWS_HARD,
-		"note": "zones MM (+1) + chest FX ship WITH the feature-6 weapon " +
-			"card (the ONE new mechanism, roadmap feature 6 table); absent " +
-			"here = the honest measured build; plan 40 leaves room for them",
+		"note": "T-M1h (MC 11220) MAPS rot-water's lingering zone onto the " +
+			"ward ring-tick class (brief's NO-NEW-VIZ ruling supersedes the " +
+			"roadmap's NEW-zones-list cell; zones MM deferred, the +1 it " +
+			"would have added stays UNCONSUMED inside plan 40). Measured " +
+			"tally re-run on the T-M1h tree under the same pin.",
 		"ok": total <= DRAWS_HARD and DRAWS_PLANNED <= DRAWS_HARD})
 	# clear the sim for the 900 s dump (spawn fresh through the game's loop)
 	run.world.enemies.clear()

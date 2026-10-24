@@ -91,15 +91,45 @@ func live_draws() -> int:
 	return n
 
 
-# §i formulas, spelled as weapons.gd spells them (same cap source):
+# §i formulas, spelled as weapons.gd spells them (same cap source). M1h
+# (roster): the ten new weapons REUSE these effect classes, so the render
+# cap is the FAMILY sum — the pinned ember/cleaver terms stay verbatim and
+# each bolt-/throw-class roster weapon adds its OWN fire-count (the table
+# sim_combat mirrors). A build without the roster gets the OLD caps exactly
+# (extra = 0, every pre-M1h cap row byte-equal).
+const BOLT_ROSTER := ["dart-loop", "fire-lash", "spectral-disc", "censer-of-hours"]
+const THROW_ROSTER := ["hewn-axe", "pilgrim-cross"]
+
+# Per-weapon fire-count, spelled as weapons.gd _fire spells its appends
+# (ONE table, both count sites — sim_combat.caps calls this same table).
+static func roster_one_cap(id: String, level: int) -> int:
+	match id:
+		"dart-loop":
+			return 1 + int((level - 1) / 3)
+		"hewn-axe":
+			return 1 + int((level - 1) / 4)
+		"censer-of-hours":
+			return 4 # the cross volley
+		_:
+			return 1
+
+
 func _cap(id: String) -> int:
 	match id:
 		"ember":
-			return 1 + int((_level("ember") - 1) / 3)
+			return 1 + int((_level("ember") - 1) / 3) + _roster_cap(BOLT_ROSTER)
 		"cleaver":
-			return 1 + int((_level("cleaver") - 1) / 4)
+			return 1 + int((_level("cleaver") - 1) / 4) + _roster_cap(THROW_ROSTER)
 		_:
 			return 0
+
+
+func _roster_cap(family: Array) -> int:
+	var n := 0
+	for w in game.weapons:
+		if family.has(w.id):
+			n += roster_one_cap(w.id, w.level)
+	return n
 
 
 # One rotation frame whose local +Z is the given XZ direction (sim px space

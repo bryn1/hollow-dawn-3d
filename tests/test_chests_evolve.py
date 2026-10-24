@@ -92,12 +92,19 @@ def test_evolution_table_rows_match_doc():
     assert len(triples) == 10
 
 
-def test_table_is_separate_never_in_meta():
-    # DA c3 C-2 reading: evolved ids NEVER ride WeaponSystem.META (else the
-    # test_card_icons 16/32 replacement math breaks).
+def test_table_is_separate_evolved_never_in_meta():
+    # DA c3 C-2, REPLACED-not-deleted at T-M1h (MC 11220): the EVOLVED ids
+    # must never ride WeaponSystem.META/IDS (the separate-table rule keeps
+    # the test_card_icons 16/32 math true). The dead-table-era half of the
+    # old pin — base ids absent from weapons.gd — is exactly what feature 6
+    # REVERSED: the ten base ids now RIDE IDS (the live-TABLE claim; also
+    # pinned in test_biome_numbers::test_sixteen_weapon_ids_and_meta).
+    ids = re.search(r"const IDS := \[((?:[^\]]|\n)*?)\]", WEAPONS).group(1)
     for base, (_, evo) in DOC_TABLE.items():
-        assert '"%s"' % base not in WEAPONS and '"%s"' % evo not in WEAPONS, \
-            "table ids must stay out of weapons.gd"
+        assert '"%s"' % evo not in WEAPONS, \
+            "evolved id %s must never ride META (DA c3 C-2)" % evo
+        assert '"%s"' % base in ids, \
+            "table base %s must ride IDS (TABLE is live since T-M1h)" % base
     assert "TABLE" not in WEAPONS
 
 
@@ -178,9 +185,41 @@ def test_dump_shape_and_verdict():
                     "evo_underlevel_partner", "evo_max_nopartner",
                     "evo_max_wrong_passive", "evo_partner_any_rank",
                     "evo_non_table_weapon", "evo_all_ten_rows",
-                    "evo_one_per_chest", "evo_card_seam"]
+                    "evo_one_per_chest", "evo_card_seam",
+                    # T-M1h (MC 11220) APPENDED rows (existing rows stay
+                    # byte-identical — the new legs run after them):
+                    "evo_pool_reachability",
+                    "evo_full_bone-whip", "evo_full_rot-water",
+                    "evo_full_doom-sigil"]
     assert all(g["ok"] for g in gates().values()), "committed dump has a RED leg"
     assert [r for r in rows if r["ev"] == "evolve_verdict"][-1]["ok"] is True
+
+
+def test_pool_reachability_leg():
+    # T-M1h: the ONE pool source offers EVERY table base + its partner
+    # (the "sim can now acquire both parts" row — dead-table era over).
+    g = gates()["evo_pool_reachability"]
+    assert g["ok"] is True
+    for base in DOC_TABLE:
+        assert g["checks"][base], "pool cannot offer %s + partner" % base
+
+
+def test_full_evolve_legs():
+    # T-M1h: >= 3 FULL evolutions end-to-end — every weapon/passive/
+    # upgrade entry acquired through the REAL offer funnel (no id pinned),
+    # then the real chest evolves it IN-SLOT. All three rows were runtime-
+    # DEAD before T-M1h (their base/partner could not exist).
+    assert len([n for n in gates() if n.startswith("evo_full_")]) >= 3
+    for base, (partner, evo) in DOC_TABLE.items():
+        name = "evo_full_" + base
+        if name not in gates():
+            continue
+        g = gates()[name]
+        for k in ("weapon_acquired_by_pick", "partner_acquired_by_pick",
+                  "evolved", "base_gone", "in_slot", "slot_cap_kept"):
+            assert g["checks"][k], "%s: %s" % (name, k)
+        assert "%s-8-0" % evo in g["after"], name
+        assert base not in g["after"], name
 
 
 def test_evolve_leg_with_partner():

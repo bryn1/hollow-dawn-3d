@@ -1,7 +1,8 @@
-"""Carry caps (MC 11206 T-M1b): PARITY-ROADMAP rev3 M1 feature 3, OUR
-numbers — 6 weapon slots + 6 passive KINDS, gated in the ONE pool source
-levelup.gd build_pool. The existing 5-stack cap per passive kind is
-unchanged (MAX_PASSIVE_STACKS stays pinned in test_biome_numbers.py).
+"""Carry caps (MC 11206 T-M1b; pool ENLARGED by MC 11220 T-M1h): PARITY-
+ROADMAP rev3 M1 feature 3, OUR numbers — 6 weapon slots + 6 passive KINDS,
+gated in the ONE pool source levelup.gd build_pool. The existing 5-stack
+cap per passive kind is unchanged (MAX_PASSIVE_STACKS stays pinned in
+test_biome_numbers.py).
 
 Source-truth suite convention (see test_game_numbers.py header): the .gd
 files are read as text. Pins here cover (1) the named cap consts, (2) the
@@ -12,12 +13,12 @@ append must sit on its own unguarded elif (a plant that gates upgrades too
 breaks exactly this pin, mirroring the sim's plant E).
 
 Behaviour rows are the committed dump (godot/sim/sim_caps.gd, seed-pinned
-11206, byte-stable): the REAL offer funnel (_enter_levelup -> _current_offer
--> decline) driven 100 offers per leg under DECLARED-PIN loadouts (the
-sim_boss.gd:215 construction channel §2 names). The two legs carrying a
-synthetic slot/kind pin are declared in their rows: the roster is exactly
-6 weapon kinds and 5 passive kinds, so without a synthetic carrier the
-full-slots legs could not leak and could not go RED.
+11206, byte-stable, RE-DUMPED on the T-M1h enlarged pool: 16 weapon kinds +
+15 passive kinds). The two legs carrying a synthetic slot/kind pin are
+declared in their rows — the synthetic carriers keep the exact 6th-slot/
+6th-kind shape the T-M1b planted-red pair exercised; the new-kind cap side
+now has fully REAL legs too (passive_roster_kind: the 7th NEW kind never
+offered at cap while a carried NEW-kind upgrade stays offerable).
 """
 
 import json
@@ -124,7 +125,8 @@ def test_dump_shape():
     gates = [r for r in rows if r["ev"] == "caps_gate"]
     assert [g["leg"] for g in gates] == [
         "weapon_full_slots", "weapon_all_six_real", "weapon_below_cap",
-        "passive_full_kinds", "passive_below_kinds", "passive_stack_cap_edge"]
+        "passive_full_kinds", "passive_below_kinds", "passive_stack_cap_edge",
+        "passive_roster_kind"]
     assert all(g["ok"] for g in gates), "committed dump carries a RED leg"
     assert [r for r in rows if r["ev"] == "caps_verdict"][-1]["ok"] is True
     for name, (cards, gate) in legs().items():
@@ -144,11 +146,17 @@ def test_weapon_full_slots_legs():
 
 
 def test_weapon_below_cap_leg():
-    # <6 slots: the un-carried kind IS offered — and only it.
+    # <6 slots: the un-carried kinds ARE offered — on the T-M1h enlarged
+    # roster that is the whole un-carried rest, spike + the ten feature-6
+    # weapons (the six-era pin {"spike"} was REPLACED, not deleted, when
+    # the pool grew; no CARRIED kind may ever leak into these rows).
     cards, gate = legs()["weapon_below_cap"]
     weapons, _, _ = _counts(cards)
     assert len(weapons) > 0
-    assert set(c["id"] for c in weapons) == {"spike"}
+    assert set(c["id"] for c in weapons) == {
+        "spike", "bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross",
+        "censer-of-hours", "rot-water", "spectral-disc", "storm-peal",
+        "fire-lash", "doom-sigil"}
     assert gate["ok"] is True
 
 
@@ -178,4 +186,17 @@ def test_passive_stack_cap_edge_leg():
     _, _, passives = _counts(cards)
     assert [c for c in passives if c["id"] == "insight"] == []
     assert len([c for c in passives if c["id"] == "ferocity"]) > 0
+    assert gate["ok"] is True
+
+
+def test_passive_roster_kind_leg():
+    # T-M1h NEW leg (brief: 7th NEW kind never offered at the 6-KIND cap,
+    # NEW-kind upgrades offerable), fully REAL pins: three feature-6
+    # partners carried inside a legal 6-kind loadout.
+    cards, gate = legs()["passive_roster_kind"]
+    _, _, passives = _counts(cards)
+    assert [c for c in passives if c["id"] == "loadstone"] == []
+    assert len([c for c in passives if c["id"] == "cracked-heart"]) > 0
+    assert gate["checks"]["new_kind_rows_zero"] is True
+    assert gate["checks"]["new_kind_upgrade_present"] is True
     assert gate["ok"] is True

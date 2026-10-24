@@ -10,9 +10,11 @@
 # keeping the 16/32 WEAPON_KEYS pin math true). Base/partner/evolved ids
 # follow the ONE icon naming convention (assets/icons/icon-<id>.png — the
 # ten evo icons + ten partner-passive icons shipped by T-M1c, manifest
-# tools/vm100/icons-batch-m1c.tsv; the weapon/partner themselves land with
-# feature 6/7 cards — until then try_evolve simply never matches a base id
-# the pool cannot offer).
+# tools/vm100/icons-batch-m1c.tsv. SINCE T-M1h (MC 11220) the ten base
+# weapons ride WeaponSystem.IDS/META and the ten partners ride levelup.gd
+# PASSIVES — the TABLE is LIVE: the pool can offer both parts, and
+# sim_evolve's reachability + full-evolution legs ride that (the evolved
+# ids still stay out of META, DA c3 C-2, keeping the 16/32 math true).
 class_name EvolutionSystem
 extends RefCounted
 

@@ -5,21 +5,27 @@
 # — the DECLARED-PIN construction channel §2 names verbatim (the
 # sim_boss.gd:215 pattern) — then the REAL offer funnel runs 100 times:
 # pending_levels = 1 -> _enter_levelup() (the exact call _step makes at
-# main.gd:183) dumps _current_offer -> decline (sim_boss._decline). Rows:
+# main.gd:183) dumps _current_offer -> decline (sim_boss._decline). ROSTER
+# note (T-M1h, MC 11220): the roster is now 16
+# weapon KINDS + 15 passive KINDS, so the full-slots / full-kinds caps are
+# NON-VACUOUS with real entries (10 weapons and 9 kinds stay un-carried) —
+# the two synthetic pins below still ride as DECLARED carriers of the exact
+# 6th slot / 6th kind (sim_caps precedent), and the new passive_roster_kind
+# leg proves the cap on NEW (feature-6) kinds with fully REAL pins. Rows:
 # caps_leg (the pin + counts), one caps_offer per offer, caps_gate per leg,
-# caps_verdict last. The two DECLARED pins the roster cannot express yet are
-# declared in their leg rows: a 6th weapon SLOT and a 6th passive KIND are
-# synthetic entries (ids/keys the pool never matches) because the roster is
-# exactly 6 weapon kinds and 5 passive kinds — without the pin, "full slots"
-# would be vacuous (owning 6 = owning the whole roster). Checks:
+# caps_verdict last. Checks:
 # weapon_full_slots / weapon_all_six_real: zero kind:"weapon" rows AND
 # kind:"upgrade" rows present (owned-weapon upgrades stay offerable at 6
-# carried); weapon_below_cap: the uncarried kind IS offered at 5 slots;
-# passive_full_kinds: the un-carried KIND is never offered at 6 kinds while
-# carried-kind upgrades stay; passive_below_kinds: the new KIND is offered
-# below the cap; passive_stack_cap_edge: a carried kind at the 5-stack cap is
-# gone while one at 4 stacks stays. Seed-pinned (HD3D_SEED, default 11206) —
-# the dump is byte-stable; the committed copy gates test_levelup_caps.py.
+# carried); weapon_below_cap: the un-carried kinds ARE offered at 5 slots
+# and no CARRIED kind leaks as a new-weapon row; passive_full_kinds: the
+# un-carried KIND is never offered at 6 kinds while carried-kind upgrades
+# stay; passive_below_kinds: the new KIND is offered below the cap;
+# passive_stack_cap_edge: a carried kind at the 5-stack cap is gone while
+# one at 4 stacks stays; passive_roster_kind: at 6 carried KINDS (three of
+# them feature-6 partners, all REAL) the 7th NEW kind is never offered
+# while a carried NEW-kind upgrade stays offerable. Seed-pinned
+# (HD3D_SEED, default 11206) — the dump is byte-stable; the committed copy
+# gates test_levelup_caps.py.
 extends SceneTree
 
 const OFFERS := 100 # roadmap: "100 dumped offers"
@@ -74,6 +80,7 @@ func _run() -> void:
 	_leg_passive_full_kinds()
 	_leg_passive_below_kinds()
 	_leg_passive_stack_cap_edge()
+	_leg_passive_roster_kind()
 	_emit({"ev": "caps_verdict", "ok": _ok})
 	for r in _rows:
 		_out.store_line(JSON.stringify(r))
@@ -86,9 +93,11 @@ func _run() -> void:
 
 func _leg_weapon_full_slots() -> void:
 	# DECLARED pin (declared in the row): 5 real kinds + one synthetic slot
-	# = 6 carried while a real kind (spike) stays un-carried — the only
-	# state in which the 6-slot cap can LEAK with a 6-kind roster, so the
-	# zero-weapon-rows check below can actually go RED.
+	# = 6 carried while a real kind (spike) stays un-carried — a DECLARED
+	# carrier of the exact 6th slot (since T-M1h the roster has 16 kinds,
+	# so weapon_all_six_real is non-vacuous too; this pin keeps the exact
+	# synthetic-slot shape the T-M1b planted-red pair exercised). The
+	# zero-weapon-rows check below can go RED (10 real kinds stay open).
 	var pin := [["talon", 1], ["ember", 2], ["cleaver", 3], ["halo", 4],
 		["ward", 5], [SLOT_PIN_ID, 1]]
 	var cards := _offers_pin_weapons(pin)
@@ -111,14 +120,19 @@ func _leg_weapon_all_six_real() -> void:
 
 
 func _leg_weapon_below_cap() -> void:
-	# <6 leg: at 5 carried slots the un-carried kind IS still offered.
+	# <6 leg: at 5 carried slots the un-carried kinds ARE still offered —
+	# the whole un-carried rest of the roster (T-M1h: 11 kinds, spike + the
+	# ten feature-6 weapons), and no CARRIED kind ever leaks as a NEW-
+	# weapon row (upgrade rows for carried kinds are the other kind).
 	var pin := [["talon", 1], ["ember", 2], ["cleaver", 3], ["halo", 4],
 		["ward", 5]]
 	var cards := _offers_pin_weapons(pin)
 	var leaks := 0
 	for c in cards:
-		if c.kind == "weapon" and c.id != "spike":
-			leaks += 1 # only spike is un-carried here
+		if c.kind == "weapon":
+			for r in pin:
+				if c.id == r[0]:
+					leaks += 1 # a carried kind must never appear as "weapon"
 	_gate("weapon_below_cap", pin, {}, cards, {
 		"new_weapon_offers_present": _count_kind(cards, "weapon") > 0,
 		"new_weapon_only_uncarried_kind": leaks == 0,
@@ -128,10 +142,11 @@ func _leg_weapon_below_cap() -> void:
 func _leg_passive_full_kinds() -> void:
 	# DECLARED pin (declared in the row): 4 real kinds @1 + 2 synthetic
 	# carried kinds = 6 distinct KINDS already carried while insight (0
-	# stacks) stays un-carried — the only state in which the 6-KIND cap can
-	# leak with a 5-kind roster (the cap blocks the 7th KIND, never the
-	# 6th: c2 N-3). The un-carried KIND must never be offered; carried-kind
-	# upgrades stay (all @1 < the 5-stack cap).
+	# stacks) stays un-carried (the cap blocks the 7th KIND, never the 6th:
+	# c2 N-3). The un-carried KIND must never be offered; carried-kind
+	# upgrades stay (all @1 < the 5-stack cap). Since T-M1h the roster has
+	# 15 real KINDS, so the full 12 other kinds may also never appear —
+	# the passive_roster_kind leg pins that side with REAL entries.
 	var pin := {"ferocity": 1, "haste": 1, "ward": 1, "grip": 1,
 		KIND_PIN_KEYS[0]: 1, KIND_PIN_KEYS[1]: 1}
 	var cards := _offers_pin_passives(pin)
@@ -167,6 +182,23 @@ func _leg_passive_stack_cap_edge() -> void:
 	}, "")
 
 
+func _leg_passive_roster_kind() -> void:
+	# T-M1h NEW leg (brief: "7th new-kind never offered at cap; new-kind
+	# upgrades offerable") — the cap enforced on the FEATURE-6 partner
+	# kinds with FULLY REAL pins (no synthetic carriers needed any more):
+	# 6 distinct carried KINDS, three of them partners (cracked-heart,
+	# iron-wrap, tall-candles @1). The 7th NEW kind (loadstone, 0 stacks)
+	# is never offered; the carried NEW-kind upgrade (cracked-heart @1 <
+	# the 5-stack cap) stays offerable.
+	var pin := {"ferocity": 1, "haste": 1, "ward": 1,
+		"cracked-heart": 1, "iron-wrap": 1, "tall-candles": 1}
+	var cards := _offers_pin_passives(pin)
+	_gate("passive_roster_kind", [["talon", 1]], pin, cards, {
+		"new_kind_rows_zero": _count_passive_key(cards, "loadstone") == 0,
+		"new_kind_upgrade_present": _count_passive_key(cards, "cracked-heart") > 0,
+	}, "REAL pins (roster 15 kinds since T-M1h)")
+
+
 # --- the one offer funnel, driven OFFERS times ------------------------------
 
 func _reset() -> void:
@@ -182,7 +214,7 @@ func _offers_pin_weapons(pin: Array) -> Array:
 
 
 func _offers_pin_passives(pin: Dictionary) -> Array:
-	_reset() # keeps the canonical 5-key passives dict + talon L1
+	_reset() # keeps the canonical 15-key passives dict + talon L1
 	for key in pin:
 		_main.game.passives[key] = pin[key]
 	return _dump_offers()

@@ -13,6 +13,19 @@ const PASSIVES := [
 	{"key": "ward", "name": "Warding", "desc": "-1 damage taken"},
 	{"key": "grip", "name": "Grip", "desc": "+25% pickup radius"},
 	{"key": "insight", "name": "Insight", "desc": "+15% xp gain"},
+	# The ten weapon partner kinds (PARITY-ROADMAP rev3 feature 6 table,
+	# T-M1h; OUR desc rows). Each carries the ONE icon naming convention
+	# (passives/icon-<key>.png, screens.gd PASSIVE_ICONS; T-M1c batch).
+	{"key": "cracked-heart", "name": "Cracked Heart", "desc": "+10 max hp"},
+	{"key": "iron-wrap", "name": "Iron Wrap", "desc": "+6% proj speed"},
+	{"key": "tall-candles", "name": "Tall Candles", "desc": "+6% weapon area"},
+	{"key": "four-leaf-charm", "name": "Four-Leaf Charm", "desc": "+luck (M2)"},
+	{"key": "knotted-chain", "name": "Knotted Chain", "desc": "+8% proj duration"},
+	{"key": "loadstone", "name": "Loadstone", "desc": "+25% pickup radius"},
+	{"key": "rotten-plate", "name": "Rotten Plate", "desc": "-1 damage taken"},
+	{"key": "twin-runes", "name": "Twin Runes", "desc": "+1 projectile"},
+	{"key": "gall-vial", "name": "Gall Vial", "desc": "+8% weapon damage"},
+	{"key": "gilded-skull", "name": "Gilded Skull", "desc": "+8% xp gain"},
 ]
 
 
@@ -78,6 +91,12 @@ static func apply_offer(game: GameState, card: Dictionary) -> void:
 					break
 		"passive":
 			game.passives[card.key] += 1
+			if card.key == "cracked-heart":
+				# +10 max hp (and +10 with it) per stack, applied AT the ONE
+				# passive pick site — the same event application seam the
+				# Coin Cache bonus uses for its +10 hp (M1h partner row).
+				game.max_hp += 10.0
+				game.hp += 10.0
 		_:
 			game.gold += 25
 			game.hp = minf(game.max_hp, game.hp + 10.0)

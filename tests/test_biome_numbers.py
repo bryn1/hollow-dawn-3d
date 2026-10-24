@@ -228,15 +228,25 @@ def test_hit_cd_immunity():
     assert re.search(r"e\.hit_cd = 0\.3", WEAPONS)
 
 
-def test_six_weapon_ids_and_meta():
-    assert re.search(
-        r"const IDS := \[\"talon\", \"ember\", \"cleaver\", \"halo\", \"ward\", \"spike\"\]",
-        WEAPONS)
+def test_sixteen_weapon_ids_and_meta():
+    # The six-weapon pin was RETIRED AND REPLACED here per PARITY-ROADMAP
+    # rev3 M1 feature 7 row 3 (T-M1h, MC 11220): IDS + META are the 16-
+    # weapon roster, verbatim order (the six originals first — the v1
+    # card/HUD order — then the ten feature-6 weapons in table order).
+    ids = re.search(r"const IDS := \[((?:[^\]]|\n)*?)\]", WEAPONS).group(1)
+    assert [s.strip().strip('"') for s in ids.split(",")] == [
+        "talon", "ember", "cleaver", "halo", "ward", "spike",
+        "bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross",
+        "censer-of-hours", "rot-water", "spectral-disc", "storm-peal",
+        "fire-lash", "doom-sigil"]
     meta = WEAPONS[WEAPONS.index("const META"):]
     meta = meta[:meta.index("\n\n")]
     assert re.findall(r"\"name\":\s*\"([^\"]+)\"", meta) == [
         "Talon Lash", "Ember Bolt", "Bone Cleaver", "Cinder Halo",
-        "Warding Aura", "Grave Spike"]
+        "Warding Aura", "Grave Spike",
+        "Bone Whip", "Dart Loop", "Hewn Axe", "Pilgrim Cross",
+        "Censer of Hours", "Rot Water", "Spectral Disc", "Storm Peal",
+        "Fire Lash", "Doom Sigil"]
 
 
 # ---- levelup (N40) ---------------------------------------------------------------

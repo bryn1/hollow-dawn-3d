@@ -43,7 +43,7 @@ func _on_frame() -> void:
 			_main._enter_levelup()
 			_advance(2)
 		2:  # apply the pick (real path), then own every weapon at MAX_LEVEL
-			# and clear the passive stacks → pool = exactly the 5 passive cards.
+			# and clear the passive stacks → pool = exactly the 15 passive cards (T-M1h).
 			_save(0)
 			_main._pick(0)
 			var owned := {}

@@ -1,17 +1,20 @@
-"""A7 icon gate (MC 11103 T-S5): the 12 upgrade-card pool kinds must each
-resolve to a NON-BLANK icon file. Source-truth suite convention (see
-test_game_numbers.py header): the .gd files are read as text — the offer
-dicts levelup.gd builds are mirrored here from the same source, and the
-icon resolver is the PASSIVE_ICONS table + path rule regexed out of
-screens.gd, so this file fails if either side drifts.
+"""A7 icon gate (MC 11103 T-S5; counts REPLACED by MC 11220 T-M1h): every
+upgrade-card pool kind must resolve to a NON-BLANK icon file. Source-truth
+suite convention (see test_game_numbers.py header): the .gd files are read
+as text — the offer dicts levelup.gd builds are mirrored here from the same
+source, and the icon resolver is the PASSIVE_ICONS table + path rule
+regexed out of screens.gd, so this file fails if either side drifts.
 
-Rows (DOD-ACCEPTANCE A7 + N45): 6 weapon icons + coin REUSE v1
-static/assets PNGs byte-identical (MANIFEST.md:28-33,35); 5 passive icons
-are the NEW 3090 renders — 512x512 RGBA with embedded prompt provenance
-(PIL .text). The v1 blank-icon path (levelup.gd "icon": "") must be
-structurally unreachable: screens.gd has NO conditional guarding the icon
-TextureRect, the resolver is total over the 12 kinds, and PASSIVES ==
-PASSIVE_ICONS keys is pinned here.
+Rows (DOD-ACCEPTANCE A7 + N45 + roadmap feature 7 REPLACE rows): the 32
+pool kinds = 16 weapon + 15 passive + bonus (16+15+1 = 32, the M1 count).
+The original 6 weapon icons + coin stay byte-identical REUSES of the v1
+static/assets PNGs (MANIFEST.md:28-33,35); the ten feature-6 weapon icons
+and all 15 passive icons are 3090 renders — 512x512 RGBA with embedded
+prompt provenance (PIL .text), byte-identical to the assets/icons/new/ art
+sources (T-M1c manifest tools/vm100/icons-batch-m1c.tsv). The v1 blank-icon
+path (levelup.gd "icon": "") must be structurally unreachable: screens.gd
+has NO conditional guarding the icon TextureRect, the resolver is total
+over the 32 kinds, and PASSIVES == PASSIVE_ICONS keys is pinned here.
 """
 
 import hashlib
@@ -26,8 +29,18 @@ GODOT = os.path.join(conftest.REPO, "godot")
 V1_ASSETS = "/home/claudecode/Games/vampire_survivor/static/assets"
 NEW_SRC = os.path.join(conftest.REPO, "assets", "icons", "new")
 
-WEAPON_KEYS = ["talon", "ember", "cleaver", "halo", "ward", "spike"]
-NEW_KEYS = ["ferocity", "haste", "ward", "grip", "insight"]
+# 16 kinds = the 6 v1-reused originals + the 10 feature-6 renders; 15
+# passive keys = the 5 originals + the 10 partners (all renders).
+WEAPON_KEYS = ["talon", "ember", "cleaver", "halo", "ward", "spike",
+               "bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross",
+               "censer-of-hours", "rot-water", "spectral-disc", "storm-peal",
+               "fire-lash", "doom-sigil"]
+V1_WEAPON_KEYS = WEAPON_KEYS[:6]
+ROSTER_WEAPON_KEYS = WEAPON_KEYS[6:]
+NEW_KEYS = ["ferocity", "haste", "ward", "grip", "insight",
+            "cracked-heart", "iron-wrap", "tall-candles", "four-leaf-charm",
+            "knotted-chain", "loadstone", "rotten-plate", "twin-runes",
+            "gall-vial", "gilded-skull"]
 
 
 def read(name):
@@ -48,7 +61,7 @@ def res_to_fs(res_path):
 # ---- the resolver mirrored out of screens.gd (single source of truth) ----
 
 ICONS_TABLE = dict(
-    re.findall(r'"(\w+)":\s*"(res://assets/icons/passives/[\w./-]+\.png)"', SCREENS)
+    re.findall(r'"([\w-]+)":\s*"(res://assets/icons/passives/[\w./-]+\.png)"', SCREENS)
 )
 ICON_PATH_RULE = re.search(
     r'"(res://assets/icons/%s\.png)"\s*%\s*card\.icon', SCREENS
@@ -57,7 +70,7 @@ FALLBACK = re.search(r'const FALLBACK_ICON := "(res://[\w./-]+\.png)"', SCREENS)
 
 
 def resolve_icon(kind, key=None, icon=None):
-    """Mirror of screens.gd icon_path() for the 12 pool kinds."""
+    """Mirror of screens.gd icon_path() for the 32 pool kinds."""
     if ICON_PATH_RULE is None or FALLBACK is None:
         raise AssertionError("screens.gd lost its total icon resolver")
     if kind == "passive":
@@ -65,13 +78,15 @@ def resolve_icon(kind, key=None, icon=None):
     return res_to_fs(ICON_PATH_RULE.group(1) % icon)
 
 
-# ---- 12 kinds, straight out of the offer source ----
+# ---- 32 kinds, straight out of the offer source ----
 
 def meta_icons():
-    """weapons.gd META: {id: icon} for the 6 weapon kinds (kind weapon and
-    kind upgrade share these icons, levelup.gd build_pool)."""
+    """weapons.gd META: {id: icon} for the 16 weapon kinds (kind weapon and
+    kind upgrade share these icons, levelup.gd build_pool). Hyphen ids since
+    T-M1h — the key class is [\\w-] (the six-key-era class would silently
+    match zero roster rows)."""
     table = dict(
-        re.findall(r'"(\w+)":\s*\{.*?"icon":\s*"([\w-]+)"', WEAPONS, re.S)
+        re.findall(r'"([\w-]+)":\s*\{.*?"icon":\s*"([\w-]+)"', WEAPONS, re.S)
     )
     assert sorted(table) == sorted(WEAPON_KEYS), table
     return table
@@ -79,7 +94,7 @@ def meta_icons():
 
 def passive_keys():
     block = re.search(r"const PASSIVES := \[(.*?)\]\n", LEVELUP, re.S).group(1)
-    return re.findall(r'"key":\s*"(\w+)"', block)
+    return re.findall(r'"key":\s*"([\w-]+)"', block)
 
 
 def bonus_icon():
@@ -115,14 +130,14 @@ def test_passives_table_pinned_to_pool():
 
 # ---- per-kind: file exists, non-empty, dims right, provenance kept ----
 
-def test_all_12_kinds_resolve_to_real_icons():
+def test_all_32_kinds_resolve_to_real_icons():
     rows = []
     for icon in meta_icons().values():
         rows.append(resolve_icon("weapon", icon=icon))
     for key in passive_keys():
         rows.append(resolve_icon("passive", key=key))
     rows.append(resolve_icon("bonus", icon=bonus_icon()))
-    assert len(rows) == 12
+    assert len(rows) == 32  # 16 weapons + 15 passives + bonus (M1 count)
     for path in rows:
         assert os.path.isfile(path), path
         assert os.path.getsize(path) > 0, path
@@ -139,17 +154,41 @@ def test_new_icons_512_rgba_with_provenance():
 
 
 def test_reused_icons_byte_identical_to_v1():
-    for icon in meta_icons().values():
+    # REPLACE-not-delete (feature 7): only the SIX v1-era weapon icons + the
+    # bonus ride v1 bytes; the ten feature-6 icons are the new-batch renders
+    # pinned by test_roster_icons_512_rgba_with_provenance below.
+    table = meta_icons()
+    for icon in (table[k] for k in V1_WEAPON_KEYS):
         src = os.path.join(V1_ASSETS, icon + ".png")
         dst = resolve_icon("weapon", icon=icon)
         _assert_same_bytes(src, dst)
     src = os.path.join(V1_ASSETS, bonus_icon() + ".png")
     _assert_same_bytes(src, resolve_icon("bonus", icon=bonus_icon()))
     # dims = source dims (A7: "source dims for reused")
-    for icon in list(meta_icons().values()) + [bonus_icon()]:
+    for icon in [table[k] for k in V1_WEAPON_KEYS] + [bonus_icon()]:
         src = Image.open(os.path.join(V1_ASSETS, icon + ".png"))
         dst = Image.open(resolve_icon("weapon", icon=icon))
         assert src.size == dst.size
+
+
+# ---- +10 NEW weapon-icon provenance rows (T-M1h replace-bullet) --------------
+
+def test_roster_icons_512_rgba_with_provenance():
+    table = meta_icons()
+    for key in ROSTER_WEAPON_KEYS:
+        path = resolve_icon("weapon", icon=table[key])
+        im = Image.open(path)
+        assert im.size == (512, 512), (path, im.size)
+        assert im.mode == "RGBA", path
+        assert im.text.get("impeccable:prompt", "").strip(), \
+            "%s lost its embedded prompt provenance" % path
+
+
+def test_roster_icons_byte_identical_to_art_source():
+    table = meta_icons()
+    for key in ROSTER_WEAPON_KEYS:
+        src = os.path.join(NEW_SRC, "%s.png" % table[key])
+        _assert_same_bytes(src, resolve_icon("weapon", icon=table[key]))
 
 
 def test_new_icons_byte_identical_to_art_source():

@@ -190,8 +190,11 @@ plus the 10-row partner TABLE; DA c3 C-2: a SEPARATE table, never `WeaponSystem.
 reward card rides the frozen `pending_levels -> _enter_levelup` seam (DA c1 A-2, enum
 untouched); the chest pickup billboard (`icon-chest.png`, `CHEST_PX 28` OUR row) is
 `pickup_viz`'s 5th MM slot — §b's plan note was RAISED to 40 by T-M1g's budget re-tally
-(measured draw row 27/60 under the WORST-CASE LOADOUT, sim_budget.gd; the zones MM +1 rides
-the feature-6 card and the plan-40 room covers it; the 60 hard cap is the gate and holds);
+(measured draw row 27/60 under the WORST-CASE LOADOUT, sim_budget.gd; the zones MM +1 the
+feature-6 plan carried was NOT shipped by T-M1h — the MC 11220 dispatch ruling maps
+rot-water's lingering zone onto the ward ring-tick class, NO new viz mechanism, so the +1
+stays an UNCONSUMED plan-40 reserve and the measured row re-runs unchanged; the 60 hard cap
+is the gate and holds);
 the HUD weapon
 row falls back to the `icon-<id>.png` naming convention for evolved ids. Pinned by
 `test_chests_evolve.py` + the committed `chests-evolve-m1e.jsonl` dump.

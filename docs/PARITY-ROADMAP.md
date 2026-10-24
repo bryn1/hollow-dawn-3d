@@ -184,6 +184,14 @@ orchestrator confirms the card on the board before M1 build cards are filed.
    WORST-CASE LOADOUT (new: zones MM +1, chest MM +1 → planned 40, declared above); 16 weapon
    icons visible on cards (screens leg, no-blank rule stays); planted-red per new behavior
    (cooldown never reaches fire → leg goes RED).
+
+   T-M1h landing note (MC 11220 dispatch, NO-NEW-VIZ-MECHANISM ruling; the two cells whose
+   "reuses" column implied new machinery LANDED MAPPED, declared in the M1h capture's mapping
+   table): Rot Water rides the ward ring-tick class (rings FX + ticked `_hit` at the feet —
+   the zones list stays deferred, the plan-40 +1 reserve stays unconsumed); Censer of Hours
+   rides the bolts class as a rotating cross volley (the `halos` array has ONE writer by
+   design — a second clearing/refilling writer beside `halo` would fight — and the §i
+   HALO_MAX ≤ 4 row stays byte-true). Every other table cell landed verbatim.
 7. **10 partner passives** (15 total; each a stat row on GameState, our values) **and the M1
    retire-and-replace suite list** (all rows retired AND replaced in the same commit —
    locations re-grepped this session, see REBUTTAL):

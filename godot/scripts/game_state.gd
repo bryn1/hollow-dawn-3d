@@ -20,7 +20,17 @@ var gold := 0
 var kills := 0
 var pending_levels := 0
 var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
-var passives := {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0}
+# The 15 passive STAT ROWS (PARITY-ROADMAP rev3 features 3+7: original five
+# + the ten evolution partners, T-M1h). Seeded here AND in start_run so
+# every pool/read seam indexes a real key; effects ride the existing
+# passive-effect application sites (below) — cracked-heart is applied at
+# the ONE passive pick site (levelup.gd apply_offer), four-leaf-charm is a
+# DECLARED stat row whose consumption site (the chest-roll line) is a
+# STAY-GREEN byte-pin until its own retirement card (capture M1h row).
+var passives := {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0,
+	"cracked-heart": 0, "iron-wrap": 0, "tall-candles": 0, "four-leaf-charm": 0,
+	"knotted-chain": 0, "loadstone": 0, "rotten-plate": 0, "twin-runes": 0,
+	"gall-vial": 0, "gilded-skull": 0}
 var player := {"x": 0.0, "y": 0.0, "dir_x": 1.0, "dir_y": 0.0, "iframes": 0.0}
 var stats: Dictionary = {}
 # Dawn Well meta ranks (T-M1f, roadmap M1 feature 2): the ONE consumption
@@ -45,11 +55,35 @@ func player_speed() -> float:
 
 
 func damage_taken(raw: float) -> float:
-	return maxf(0.0, raw - passives.ward)
+	# Rotten Plate (feature-6 partner, T-M1h): stacks as ARMOR in the SAME
+	# intake seam as ward — one subtraction site, our values (1 per stack).
+	return maxf(0.0, raw - passives.ward - float(passives["rotten-plate"]))
 
 
 func damage_multiplier() -> float:
-	return 1.0 + 0.1 * passives.ferocity
+	# Gall Vial (partner): +8% weapon damage per stack in the SAME multiplier
+	# seam as ferocity (its +10% row unchanged; values ours).
+	return 1.0 + 0.1 * passives.ferocity + 0.08 * float(passives["gall-vial"])
+
+
+# Roster-passive multipliers (T-M1h partners, OUR values): consumed by the
+# NEW weapon fire branches (the six v1-era weapons' numbers are S4
+# byte-pins — STAY-GREEN, so the partners read at the new weapons' spawn
+# math + these shared seams; mapping table in the M1h capture).
+func proj_speed_mult() -> float:
+	return 1.0 + 0.06 * float(passives["iron-wrap"])
+
+
+func duration_mult() -> float:
+	return 1.0 + 0.08 * float(passives["knotted-chain"])
+
+
+func area_mult() -> float:
+	return 1.0 + 0.06 * float(passives["tall-candles"])
+
+
+func extra_projectiles() -> int:
+	return int(passives["twin-runes"])
 
 
 func start_run() -> void:
@@ -71,7 +105,10 @@ func start_run() -> void:
 	kills = 0
 	pending_levels = 0
 	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]
-	passives = {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0}
+	passives = {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0,
+		"cracked-heart": 0, "iron-wrap": 0, "tall-candles": 0, "four-leaf-charm": 0,
+		"knotted-chain": 0, "loadstone": 0, "rotten-plate": 0, "twin-runes": 0,
+		"gall-vial": 0, "gilded-skull": 0}
 	player = {"x": 0.0, "y": 0.0, "dir_x": 1.0, "dir_y": 0.0, "iframes": 0.0}
 	stats = {}
 
@@ -96,6 +133,10 @@ func end_run(result: String) -> void:
 # — the IEEE product is unchanged for every pre-shop run.
 func add_xp(amount: float) -> void:
 	xp += amount * (1.0 + 0.15 * passives.insight) * meta_xp_mult
+	# Gilded Skull (partner, T-M1h): +8% xp per stack as its OWN additive
+	# term in this ONE xp seam (the insight line is a byte-pin — replace-
+	# not-touch; 0 stacks adds exactly 0.0, every pre-M1h dump byte-equal).
+	xp += amount * 0.08 * float(passives["gilded-skull"]) * meta_xp_mult
 	while xp >= float(xp_need(level)):
 		xp -= float(xp_need(level))
 		level += 1

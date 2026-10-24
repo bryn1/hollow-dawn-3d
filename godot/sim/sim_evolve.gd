@@ -1,11 +1,18 @@
 # Chest-open + evolution legs for M1 feature 5 (MC 11209, T-M1e; PARITY-
 # ROADMAP rev3 feature 5 ACCEPT rows). Same headless funnel as sim_caps/
 # sim_boss: the REAL Main.tscn, screens stubbed, the run started through the
-# real _start_game. Loadouts are DECLARED-PIN constructed (the sim_boss.gd:215
-# channel sim_caps names verbatim) — the 10 base weapons + 10 partner
-# passives land with feature 6/7, so until then a table weapon/partner can
-# only exist as a pinned loadout entry (stated: without the pin the rule
-# could not fire and the legs could not go RED).
+# real _start_game. Loadouts ride the DECLARED-PIN construction channel
+# (the sim_boss.gd:215 channel sim_caps names verbatim) — since T-M1h
+# (MC 11220) the 10 base weapons + 10 partner passives are REAL roster
+# entries (weapons.gd IDS / levelup.gd PASSIVES); the pins stay for
+# DETERMINISM, not for reachability (brief: DECLARED-pin channel per
+# sim_boss:215). Two M1h legs: evo_pool_reachability proves the ONE pool
+# source (LevelUpDeck.build_pool) now offers every table base AND its
+# partner (the "sim can now acquire both parts" row — pool read, zero RNG);
+# evo_full_evolve lands 3 FULL evolutions end-to-end through the REAL
+# offer funnel (every weapon/passive/upgrade entry taken by a real _pick —
+# no id pinned at all — bone-whip, rot-water, doom-sigil; all ten rows
+# were runtime-dead before T-M1h), then the real chest-open evolution.
 # Chests are PLACED THROUGH THE REAL DROP FUNNEL: a synthetic boss-flagged
 # kill dict (xp 0, real flag shape — the sim_boss chest-roll-leg shape) dies
 # by world.kill_enemy next to the pawn; CHEST_CHANCE_BOSS 1.0 short-circuits
@@ -101,6 +108,10 @@ func _run() -> void:
 	_leg_all_ten()
 	_leg_one_per_chest()
 	_leg_card_seam()
+	_leg_pool_reachability()
+	_leg_full_evolve("bone-whip")
+	_leg_full_evolve("rot-water")
+	_leg_full_evolve("doom-sigil")
 	_emit({"ev": "evolve_verdict", "ok": _ok})
 	for r in _rows:
 		_out.store_line(JSON.stringify(r))
@@ -237,7 +248,7 @@ func _leg_card_seam() -> void:
 	checks["back_to_playing"] = game.phase == "playing"
 	checks["pending_spent"] = game.pending_levels == int(before["pending0"])
 	checks["evo_survives_pick"] = _evo_entry_kept(game, PIN_T_EVO,
-		WeaponSystem.MAX_LEVEL) # a pick may upgrade OTHER slots; the evolved
+		WeaponSystem.MAX_LEVEL, 1) # a pick may upgrade OTHER slots; the evolved
 	# entry itself must be untouched by the seam (in-slot, cd reset kept)
 	_gate("evo_card_seam", before, after, GATE_OK_T, checks,
 		"real _enter_levelup/_pick seam (levelup fallback = gold rides the "
@@ -248,6 +259,111 @@ func _drop_chest(game) -> void:
 	var p: Dictionary = game.player
 	_main.world.kill_enemy(game, {"x": p.x + 8.0, "y": p.y + 8.0,
 		"xp": 0.0, "boss": true, "miniboss": false})
+
+
+# --- M1h legs (MC 11220): pool reachability + FULL end-to-end evolutions ---
+
+func _leg_pool_reachability() -> void:
+	# The ONE pool source read directly (zero RNG, zero pin beyond the
+	# canonical run state): every TABLE base weapon is offerable as a NEW
+	# kind and every partner passive as a NEW KIND (slots/kinds wide open).
+	_leg_base("evo_pool_reachability", "", 0, "", 0, GATE_OK_T)
+	var game = _main.game
+	game.start_run()
+	var checks := {}
+	var lines: Array = []
+	for base in EvolutionSystem.TABLE:
+		var partner: String = EvolutionSystem.TABLE[base].partner
+		var pool: Array = LevelUpDeck.build_pool(game) # canonical 1/15 state
+		var got_w := false
+		var got_p := false
+		for card in pool:
+			if card.kind == "weapon" and card.id == base:
+				got_w = true
+			if card.kind == "passive" and card.key == partner:
+				got_p = true
+		checks[base] = got_w and got_p
+		lines.append("%s+%s offered=%s" % [base, partner, str(got_w and got_p)])
+	_gate("evo_pool_reachability", {"before": "canonical run"}, lines,
+		GATE_OK_T, checks, "build_pool offers every table base + partner")
+
+
+# Every part ACQUIRED through the real offer funnel (real make_offer cards,
+# real _pick), then the real chest evolves it. The pinned weapon is NEVER
+# written into game.weapons by this leg — that is what FULL means.
+func _leg_full_evolve(base: String) -> void:
+	_leg_base("evo_full_" + base, base, WeaponSystem.MAX_LEVEL,
+		EvolutionSystem.TABLE[base].partner, 1, GATE_OK_T)
+	var game = _main.game
+	game.start_run()
+	_main.world.reset()
+	var partner: String = EvolutionSystem.TABLE[base].partner
+	var before := _line(game)
+	var rank_at_acquire := 0
+	var slot_idx := -1
+	for i in 800: # seed-pinned RNG: terminates on this seed; else leg REDs
+		var lv := -1
+		for w in game.weapons:
+			if w.id == base:
+				lv = w.level
+				break
+		rank_at_acquire = int(game.passives[partner])
+		if lv >= WeaponSystem.MAX_LEVEL and rank_at_acquire >= 1:
+			for j in game.weapons.size():
+				if game.weapons[j].id == base:
+					slot_idx = j
+			break
+		game.pending_levels = 1
+		_main._enter_levelup()
+		var pick := -1
+		for c in _main._current_offer.size():
+			var card: Dictionary = _main._current_offer[c]
+			var k: String = card.kind
+			if (k == "weapon" and card.id == base) \
+					or (k == "passive" and card.key == partner) \
+					or (k == "upgrade" and card.id == base):
+				pick = c
+				break
+		if pick < 0:
+			# decline the off-target offer (sim_boss._decline pattern) — the
+			# funnel must not dilute the loadout with unrelated cards.
+			game.pending_levels = 0
+			game.set_phase("playing")
+		else:
+			_main._pick(pick)
+	var acquired := _line(game)
+	game.time = GATE_OK_T
+	_drop_chest(game)
+	var after := _open()
+	var evo: String = EvolutionSystem.TABLE[base].evo
+	_gate("evo_full_" + base, {"before": before, "acquired": acquired},
+		after, GATE_OK_T, {
+			"weapon_acquired_by_pick": _owned_from_line(acquired, base) \
+					>= WeaponSystem.MAX_LEVEL, # entry exists (level MAX)
+			"partner_acquired_by_pick": rank_at_acquire >= 1,
+			"evolved": _has_id(game, evo),
+			"base_gone": not _has_id(game, base),
+			"in_slot": slot_idx >= 0 \
+					and _evo_entry_kept(game, evo, WeaponSystem.MAX_LEVEL,
+							slot_idx),
+			"slot_cap_kept": game.weapons.size() \
+					<= LevelUpDeck.MAX_WEAPON_SLOTS,
+		}, "FULL: every entry acquired by real _pick (no id pinned); " +
+				"off-target offers DECLINED (sim_boss._decline pattern)")
+
+
+func _owned(game, id: String) -> int:
+	for w in game.weapons:
+		if w.id == id:
+			return w.level
+	return -1
+
+
+func _owned_from_line(line: String, id: String) -> int:
+	for part in line.split(" "):
+		if part.begins_with(id + "-"):
+			return int(part.split("-")[id.split("-").size()])
+	return -1
 
 
 func _leg_base(leg_name: String, base: String, level: int, partner: String,
@@ -279,15 +395,18 @@ func _has_id(game, id: String) -> bool:
 func _slot_kept(game, evo: String, evolved: bool, level: int) -> bool:
 	if not (evolved and evo != ""):
 		return true
-	return _evo_entry_kept(game, evo, level)
+	return _evo_entry_kept(game, evo, level, 1)
 
 
-func _evo_entry_kept(game, evo: String, level: int) -> bool:
+func _evo_entry_kept(game, evo: String, level: int, idx: int = -1) -> bool:
 	for i in game.weapons.size():
 		if game.weapons[i].id == evo:
-			# the pinned weapon sat at slot index 1 (talon first) and the
-			# replacement is IN-SLOT; level kept, cooldown reset (doc).
-			return i == 1 and game.weapons[i].level == level \
+			# the replacement is IN-SLOT (the base's index), level kept,
+			# cooldown reset (doc). idx -1 = pinned-leg default (base sat at
+			# slot index 1, talon first); the full legs pass the real index.
+			if idx >= 0 and i != idx:
+				return false
+			return game.weapons[i].level == level \
 					and float(game.weapons[i].cd) == 0.0
 	return false
 

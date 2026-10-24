@@ -134,6 +134,9 @@ func update_entities(dt: float, game: GameState) -> void:
 		if e.hit_cd > 0.0:
 			e.hit_cd -= dt
 	var magnet: float = 60.0 * (1.0 + 0.25 * game.passives.grip)
+	# Loadstone (feature-6 partner, T-M1h): +25% of the base magnet per
+	# stack, OWN term on the SAME magnet seam (the grip line is a byte-pin).
+	magnet += 15.0 * float(game.passives["loadstone"])
 	_magnetize(gems, p, magnet, dt)
 	_magnetize(heals, p, magnet, dt)
 	if p.iframes > 0.0:
