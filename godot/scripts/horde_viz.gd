@@ -55,6 +55,10 @@ const GLB_FILES := {
 	# asset row — live heights measured into the art fixture + gated 10 %.
 	"hollow-knight": "hollow-knight.glb",
 	"hollow-deacon": "hollow-deacon.glb",
+	# M3 §3.1 (MC 11284 T-M3b): the two end-boss classes ride the SAME
+	# per-class swap at MODEL_H_BOSS (the T-M3a TRELLIS rows, MC 11285).
+	"cathedral-choir": "cathedral-choir.glb",
+	"ossuary-warden": "ossuary-warden.glb",
 }
 
 # §c gait constants (dump acceptance rows: freq <= 2.2 Hz, scale range <= 0.24).
@@ -211,9 +215,31 @@ func _write_blobs() -> void:
 
 
 # §b draw tally of this node: class MMs + HP-bar MM + blob MM. The ground
-# quad and the pawn are the caller's rows (ground 1 + pawn 1).
+# quad and the pawn are the caller's rows (ground 1 + pawn 1). M3 §7 C-E4
+# (MC 11284): a SCHEDULED class (boss or miniboss flag) counts only where
+# the run's stage row can put instances on it — a stage spawns ONLY its own
+# named classes (the plate-billboard law, pickup_viz: a node a stage never
+# uses is not that stage's draw). Stage 1 keeps the byte-pinned 13 (its
+# bosses row IS the shipped schedule); stages 2/3 replace the three stage-1
+# named classes with their ONE end-boss.
 func draw_count() -> int:
-	return _mms.size() + 2
+	var n := 2 # HP-bar + blob MMs, always live rows
+	for key in _mms:
+		var def: Dictionary = GameWorld.ENEMY_TYPES[key]
+		if (def.get("boss", false) or def.get("miniboss", false)) \
+				and not _sched_on_stage(key):
+			continue
+		n += 1
+	return n
+
+
+func _sched_on_stage(key: String) -> bool:
+	if game == null:
+		return true # no run wired yet: the plan tally counts every class
+	for b in GameRenderer.stage_bosses(game.stage):
+		if String(b[1]) == key:
+			return true
+	return false
 
 
 func attack_probe() -> Dictionary:
@@ -225,6 +251,15 @@ func attack_probe() -> Dictionary:
 func gait_probe() -> Dictionary:
 	var out := {}
 	for key in _freqs:
+		# T-M3b (MC 11284) stage law, same as draw_count: a class the run's
+		# stage can never put instances on is not that stage's row — the
+		# journey probe leg runs stage 1, whose scheduled set is EXACTLY the
+		# shipped 11 classes, so the byte-anchored dump line stays byte-
+		# identical while the two new stage-2/3 end-boss classes exist.
+		if (GameWorld.ENEMY_TYPES[key].get("boss", false)
+				or GameWorld.ENEMY_TYPES[key].get("miniboss", false)) \
+				and not _sched_on_stage(key):
+			continue
 		out[key] = {"freq": _freqs[key], "range": [SCISSOR_MIN, SCISSOR_MAX],
 			"last": _scales.get(key, {})}
 	return out

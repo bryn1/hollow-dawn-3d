@@ -80,10 +80,15 @@ def test_glb_per_class_exists_and_wired():
     # classes joined the map deliberately riding boss-warden.glb (height-
     # normalised mini-bosses) until the M1 asset batch lands their meshes —
     # the file-exists loop below still requires a real committed glb.
+    # Coverage row RE-PINNED AGAIN by T-M3b (MC 11284, spec §3.1; the T-M3a
+    # TRELLIS asset rows, MC 11285): the two end-boss classes joined at
+    # their OWN committed meshes (cathedral-choir.glb / ossuary-warden.glb)
+    # — the file-exists loop covers them like every class before them.
     assert sorted(mapping) == sorted(
-        CLASS_KEYS + ["warden", "hollow-knight", "hollow-deacon"]), (
+        CLASS_KEYS + ["warden", "hollow-knight", "hollow-deacon",
+                      "cathedral-choir", "ossuary-warden"]), (
         "GLB_FILES must cover exactly the 8 swarm classes + the warden + the "
-        "2 miniboss classes")
+        "2 miniboss classes + the 2 end-boss classes")
     for key, fname in mapping.items():
         assert os.path.isfile(os.path.join(GLB_DIR, fname)), (
             "class %s has no committed glb at godot/assets/glb/%s" % (key, fname))
@@ -102,11 +107,18 @@ def test_height_table_within_spec():
     # the two miniboss classes joined the measured table when T-M1c2's real
     # meshes swapped in at the named horde_viz seam — both measure 1.42 m at
     # the §a enemy row (rel_err 0.0), gate unchanged at 10 %.
+    # Coverage row EXTENDED by T-M3b (MC 11284): the two end-boss classes
+    # joined the measured table at the BOSS height row (5.33 m, the same
+    # MODEL_H_BOSS law the warden rides), rel_err 0.0 — gate unchanged.
     assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player",
                                                     "hollow-knight",
-                                                    "hollow-deacon"])
+                                                    "hollow-deacon",
+                                                    "cathedral-choir",
+                                                    "ossuary-warden"])
     for key, row in by_class.items():
         spec = {"warden": SPEC_H_BOSS,
+                "cathedral-choir": SPEC_H_BOSS,
+                "ossuary-warden": SPEC_H_BOSS,
                 "player": SPEC_H_PLAYER}.get(key, SPEC_H_ENEMY)
         assert row["mesh"] == "ArrayMesh", (
             "%s: live unit must render an imported ArrayMesh" % key)

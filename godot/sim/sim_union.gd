@@ -126,7 +126,10 @@ func _fresh_pair(uid: String, la: int, lb: int, rank: int,
 	game.time = t
 	var p: Dictionary = game.player
 	_main.world.kill_enemy(game, {"x": p.x + 8.0, "y": p.y + 8.0,
-		"xp": 0.0, "boss": true, "miniboss": false})
+		"xp": 0.0, "boss": true, "miniboss": false,
+		# T-M3b keyed drop (strict map law): a synth boss kill fields its
+		# TYPE — the warden's map row is what this synth class means.
+		"type": "warden"})
 	assert(_main.world.chests.size() == 1)
 	return {"before": _line(game), "pending0": game.pending_levels}
 
@@ -145,7 +148,10 @@ func _open() -> String:
 func _drop_chest(game) -> void:
 	var p: Dictionary = game.player
 	_main.world.kill_enemy(game, {"x": p.x + 8.0, "y": p.y + 8.0,
-		"xp": 0.0, "boss": true, "miniboss": false})
+		"xp": 0.0, "boss": true, "miniboss": false,
+		# T-M3b keyed drop (strict map law): a synth boss kill fields its
+		# TYPE — the warden's map row is what this synth class means.
+		"type": "warden"})
 
 
 func _line(game) -> String:

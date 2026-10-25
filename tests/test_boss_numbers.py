@@ -104,10 +104,84 @@ def test_boss_hp_3000_and_boss_flag():
 # ---- name bar: the A5 literal, EXACT -----------------------------------------
 
 def test_boss_name_bar_text_is_exact():
-    assert HUD.count('"THE HOLLOW WARDEN"') == 1, \
-        "the pinned A5 name (v1 render.gd:206) must appear exactly once"
-    assert re.search(r"const BOSS_NAME := \"THE HOLLOW WARDEN\"", HUD)
-    assert re.search(r"\.text = BOSS_NAME", HUD), "the name must be on a live label"
+    # LATCH-SHAPE RETIRED AT T-M3b (MC 11284, rev-3 §3.1; replace-not-delete,
+    # LEDGER row): the HUD const BOSS_NAME and its `.text = BOSS_NAME` build-
+    # time assignment cannot survive a SECOND boss — the A5 string moves to
+    # the warden's ENEMY_TYPES row (world.gd, where it appears EXACTLY ONCE),
+    # and the bar reads the LIVE boss's row name (the one bar seam, C-E3).
+    # The stage-1 bar still paints the exact pinned string: the warden row
+    # carries it VERBATIM, so the A5 literal's bytes live on, keyed.
+    assert WORLD.count('"THE HOLLOW WARDEN"') == 1, \
+        "the pinned A5 name (v1 render.gd:206) lives in the warden's row, once"
+    assert '"name": "THE HOLLOW WARDEN"' in WORLD, \
+        "the warden ENEMY_TYPES row fields the A5 name"
+    assert "const BOSS_NAME" not in HUD, "the HUD const is retired, not kept"
+    assert re.search(r"_boss_name\.text = String\(GameWorld\.ENEMY_TYPES\["
+                     r"boss\.type\]\.get\(\"name\", \"\"\)\)", HUD), \
+        "the bar label is the live boss's row name (keyed readout)"
+    assert re.search(r"\"name\": _boss_name\.text", HUD), \
+        "the sim probe reads the LIVE label back (no second name source)"
+    # C-E3 readouts from the seeded dump (the ONE bar seam, per stage):
+    assert conftest.stages_row("stage2_schedule")["bar"]["name"] \
+        == "THE CATHEDRAL CHOIR"
+    assert conftest.stages_row("stage3_schedule")["bar"]["name"] \
+        == "THE OSSUARY WARDEN"
+
+
+# ---- T-M3b end-boss rows: the numbers + the keyed drop (C-E1/C-E2/C-E5) ------
+
+def test_end_boss_enemy_rows_are_the_spec_numbers():
+    # M3-SPEC rev-3 §3.1 stat rows (4200/42/13 and 5600/38/14, both @540 of
+    # their stage's own schedule — OUR ladder rows, pinned against silent
+    # retune like every other number in this suite). Both field the BOSS
+    # flag (never the miniboss flag) and their own name.
+    types_block = WORLD[WORLD.index("const ENEMY_TYPES"):]
+    for key, (stats, nm) in {
+            "cathedral-choir": ((4200.0, 42.0, 13.0, 0.0),
+                                "THE CATHEDRAL CHOIR"),
+            "ossuary-warden": ((5600.0, 38.0, 14.0, 0.0),
+                               "THE OSSUARY WARDEN")}.items():
+        row = re.search(r"\"%s\":\s*\{\"hp\":\s*([\d.]+),\s*\"spd\":\s*([\d.]+),"
+                        r"\s*\"dmg\":\s*([\d.]+),\s*\"xp\":\s*([\d.]+)" % key,
+                        types_block)
+        assert row, "ENEMY_TYPES end-boss row %s missing/wrong shape" % key
+        assert (float(row.group(1)), float(row.group(2)), float(row.group(3)),
+                float(row.group(4))) == stats
+        tail = types_block[row.start(): row.end() + 200]
+        assert '"boss": true' in tail and '"miniboss"' not in tail, \
+            "end bosses field the boss flag, never the miniboss flag"
+        assert '"name": "%s"' % nm in tail, "%s must field its bar name" % key
+
+
+def test_end_bosses_fire_once_and_drop_their_own_tier():
+    # C-E1 + C-E2 verdicts read through the ONE fixture readers (the stage
+    # legs live in sim_bosses.gd, the drop leg in sim_chest_tiers.gd — the
+    # both-side negative pair: stage 2/3 never field a stage-1 class AND
+    # the shipped stage1_schedule latch-3 row (pinned above) is the proof
+    # stage 1 never fields choir/ossuary: its first_seen set carries no
+    # foreign boss entry and its latch stays 3).
+    s1 = conftest.stages_row("stage1_schedule")
+    assert not {"cathedral-choir", "ossuary-warden"} & \
+        set(s1["first_seen"]), "stage 1 never fields an end boss (§7 both side)"
+    for ev in ("stage2_schedule", "stage3_schedule"):
+        leg = conftest.stages_row(ev)
+        assert leg["checks"]["boss_spawns_once"], "a boss cannot spawn TWICE"
+        assert leg["checks"]["no_foreign_bosses"] and leg["foreign_seen"] == []
+        assert leg["checks"]["schedule_latch_1"]
+    # C-E2: the keyed drop site — tiers from THEIR map rows (the fixture is
+    # the truth channel; test_chests_tiers re-pins SPEC_MAP to the same 7).
+    # Reader idiom: the ONE committed chests fixture, opened like the A-E1
+    # carve opens it (test_stages.py), never a second loader class.
+    import json as _json
+    with open(os.path.join(conftest.REPO, "tests", "fixtures",
+                           "chests-tiers-m2.jsonl"), encoding="utf-8") as fh:
+        drop = [r for r in map(_json.loads, filter(str.strip, fh))
+                if r.get("ev") == "chest_tier_bosses"][0]
+    assert drop["ok"] and all(drop["checks"].values())
+    # C-E5: the P3-1 clamp re-derivation through main.gd's own contact line.
+    clamp = conftest.stages_row("boss_contact_clamp")
+    assert clamp["ok"] and all(clamp["checks"].values()), \
+        "14 x dmg_cyc(3) = 22.4 reads as the clamped 20.0; 12 binds at cycle 4"
 
 
 def test_boss_bar_geometry_and_fill_rule_ported():

@@ -1,5 +1,8 @@
 # CHEST-TIER legs for M2 pillar B (MC 11239, T-M2t; M2-SPEC rev-2 §B.3
 # ACCEPT rows B-T1..B-T5 — B-T5 is the pixel row, tools/chest_pixel_gate.py).
+# reason: >400 lines — the ONE chest-tier leg file: B-T1..B-T4 + the C-E2
+# boss rows ride one drop funnel and one _check harness; splitting would
+# fork the harness beside the existing one (replace-not-delete law).
 # Same headless funnel as sim_endless/sim_evolve: the REAL Main.tscn, screens
 # stubbed (SimStubScreens), every run started through the real _start_game.
 # Construction channel: the DECLARED-PIN pattern (sim_boss/sim_evolve precedent
@@ -8,7 +11,8 @@
 # tests/fixtures/chests-tiers-m2.jsonl gates tests/test_chests_tiers.py.
 # ROWS (row-id -> the ACCEPT row it pins):
 #   chest_tier_drop            B-T1: REAL kill_enemy drop funnel — boss kill ->
-#       tier == CHEST_TIER_BY_SOURCE["warden"], 200 synthetic miniboss kills ->
+#       tier == the keyed map row (the warden lands map["warden"] BY KEY since
+#       T-M3b), 200 synthetic miniboss kills ->
 #       EVERY dropped chest == map["miniboss"] with 0 < count < kills (the
 #       pinned 0.6 roll shape, the sim_boss chest-roll leg), and the real
 #       world.cycle_clear drop == map["endless-cycle"] == "dawn" — the SAME
@@ -36,6 +40,14 @@
 #       in-slot/level-kept/cd-reset per the M1e rule. (Union precedence: the
 #       try_union-else-try_evolve slot at the ONE open funnel is reserved in
 #       world.gd for T-M2u; nothing fires it before that card.)
+#   chest_tier_bosses          C-E2 (MC 11284 T-M3b): the SAME single-source
+#       assertion EXTENDED to the two new end-boss rows — real kill_enemy
+#       synth kills for cathedral-choir + ossuary-warden, each ONE chest at
+#       the boss guarantee, tiers read from THEIR OWN keyed map rows (the
+#       checks compare the dumped map values; a keyed-site bypass reddens
+#       both). A new row, appended after every prior leg (forward-lock law:
+#       the existing rows keep their bytes; the verdict count 14 -> 15 and
+#       the ONE embedded map row are the declared §3.1 7-row re-mint).
 extends SceneTree
 
 const SEED_DEFAULT := 11239
@@ -99,11 +111,14 @@ func _check(leg: String, checks: Dictionary, extra: Dictionary) -> void:
 	_rows.append(row)
 
 
-func _synth_kill(run: Node, boss: bool, mb: bool) -> void:
-	# the sim_boss chest-roll-leg shape: xp 0, real flag shape, next to pawn
+func _synth_kill(run: Node, boss: bool, mb: bool, type_id := "warden") -> void:
+	# the sim_boss chest-roll-leg shape: xp 0, real flag shape, next to pawn.
+	# M3 §3.1 P2-1 (MC 11284): the real kill dict ALWAYS fields a type (the
+	# keyed boss drop site reads it), so the synth carries one too — zero
+	# RNG difference (dict keys consume nothing from the stream).
 	var p: Dictionary = run.game.player
 	run.world.kill_enemy(run.game, {"x": p.x + 8.0, "y": p.y + 8.0,
-		"xp": 0.0, "boss": boss, "miniboss": mb})
+		"xp": 0.0, "boss": boss, "miniboss": mb, "type": type_id})
 
 
 func _isolate(run: Node) -> void:
@@ -342,6 +357,35 @@ func _has_id(game, id: String) -> bool:
 	return false
 
 
+# C-E2 (MC 11284): the two NEW end-boss classes drop through the SAME keyed
+# site — one chest each (CHEST_CHANCE_BOSS 1.0) with the tier read from
+# THEIR OWN map rows (the checks compare the DUMPED map values, never a
+# second literal: a keyed-site bypass reddens both new legs; the warden
+# byte-identity leg is the chest_tier_drop row above, now keyed BY KEY).
+func _leg_boss_tiers() -> void:
+	var run := _fresh_run()
+	var map: Dictionary = GameWorld.CHEST_TIER_BY_SOURCE
+	var tiers := {}
+	var one_each := true
+	for boss_id in ["cathedral-choir", "ossuary-warden"]:
+		run.world.reset()
+		_synth_kill(run, true, false, boss_id)
+		if run.world.chests.size() != 1:
+			one_each = false
+		tiers[boss_id] = String(run.world.chests[0]["tier"]) \
+			if run.world.chests.size() > 0 else ""
+	_check("chest_tier_bosses", {
+		"choir_tier_is_map_row": tiers["cathedral-choir"] \
+			== String(map["cathedral-choir"]),
+		"ossuary_tier_is_map_row": tiers["ossuary-warden"] \
+			== String(map["ossuary-warden"]),
+		"tiers_differ_II_vs_III": tiers["cathedral-choir"] \
+			!= tiers["ossuary-warden"], # tier II vs tier III, §B.1 rows
+		"chest_each_1of1": one_each, # CHEST_CHANCE_BOSS short-circuits
+	}, {"tiers": tiers, "map": map})
+	run.queue_free()
+
+
 func _run_legs() -> void:
 	_leg_drop_map()
 	_leg_grant("ember")
@@ -357,4 +401,7 @@ func _run_legs() -> void:
 	_leg_filter_probe("passive")
 	_leg_filter_probe("gold")
 	_leg_precedence()
+	_leg_boss_tiers() # C-E2 (MC 11284) — appended AFTER every existing leg
+	# (the forward-lock law: prior rows keep their bytes; the embedded map
+	# row re-mints as the DECLARED §3.1 7-row growth; verdict rows 14 -> 15)
 	_rows.append({"ev": "chest_tiers_verdict", "ok": _ok, "rows": _rows.size()})

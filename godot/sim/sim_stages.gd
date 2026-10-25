@@ -1,7 +1,7 @@
 # STAGES legs for M3 pillars A+B (MC 11282, T-M3s; M3-SPEC rev-3 §1.4
 # reason: >400 lines — one leg-driver per pillar batch is the sim convention
-#   (sim_endless 350 / sim_chest_tiers 400): the ROWS table in this header is
-#   the row-id -> ACCEPT-row map the suite reads; splitting hides the map.
+#   (sim_endless 350 / sim_chest_tiers 400): this header's ROWS table is the
+#   row-id -> ACCEPT-row map the suite reads; splitting hides the map).
 # ACCEPT rows A-E1..A-E8 + §2's overlay/persistence legs). Same headless
 # funnel as sim_endless/sim_chest_tiers: the REAL Main.tscn, screens stubbed
 # (SimStubScreens), every run started through the real _start_game.
@@ -11,8 +11,8 @@
 # balance claim). Seed-pinned (HD3D_SEED, default 11282) so the dump is
 # byte-stable; the committed copy tests/fixtures/stages-m3.jsonl gates
 # tests/test_stages.py (the A-E1 stage-1 byte corpus rides the FOUR EXISTING
-# fixtures + the journey re-run, NOT this file). DawnWell wiped at start +
-# pytest/capture run under a throwaway XDG_DATA_HOME (save_probe isolation).
+# fixtures + the journey re-run, NOT this file). DawnWell wiped at start,
+# save_probe isolation under a throwaway XDG_DATA_HOME.
 # ROWS (row-id -> the ACCEPT row it pins):
 #   stages_table               A-E2: STAGES table read through the RENDERER
 #       (id/name/limit/unlock/bands/bosses per stage) + the band_at equality
@@ -21,12 +21,10 @@
 #       stage-1 bosses row == the shipped BOSS_AT/MINIBOSS_AT schedule
 #       (const + concatenation evaluated by the engine, byte-equal).
 #   stage1_schedule            A-E2 + the REPLACEMENT legs for the retired
-#       test_boss_numbers latch pins (P1-1 fold): warden first-seen 540.017,
-#       knight 600.017, deacon 780.017, each exactly once, exactly 3
-#       schedule spawns in 0..782, no second warden anywhere.
-#   schedule_rearm             A-E2 + the retired pins' reset() re-arm claim,
-#       through world.reset() (same world, F-5 wording): a second pass warps
-#       past 540 again and the warden fires ONCE more.
+#       test_boss_numbers latch pins (P1-1 fold): warden 540.017, knight
+#       600.017, deacon 780.017, each once, exactly 3 schedule spawns 0..782.
+#   schedule_rearm             A-E2 + the retired pins' reset() re-arm claim:
+#       a second pass warps past 540 again and the warden fires ONCE more.
 #   cairns                     A-E3: stage-2 run seeds the two FIXED cairn
 #       coords as chests with tier == CHEST_TIER_BY_SOURCE["stage-item"]
 #       (dumped map value, never a second literal — the tier-from-map law);
@@ -42,9 +40,8 @@
 #       (within acc-carry tolerance); dwell consumes no RNG (flare pins
 #       exactly FLARE_SHIFT).
 #   plates_cap                 A-E4: the cap rows — minf(12.0) STILL binds at
-#       minute 9 with the surge applied (12.0 == 12.0), and a dwelling late
-#       run never breaches ALIVE_CAP (alive max <= 400, the surge sits under
-#       the untouched early-return).
+#       minute 9 with the surge applied (12.0 == 12.0); the late run fields
+#       its own end-boss since T-M3b — HORDE <= 400 + once-each NAMED (§7).
 #   plates_flare               A-E2/§1.2: dwelling at t=380 -> flare 150 and
 #       the band NAME reads THE FROZEN WASTE (base DEAD TUNDRA, shift 150 ->
 #       530 >= 450); 30 s off-plate decays flare to exactly 0.0 and the name
@@ -52,9 +49,10 @@
 #   plates_saturation          A-E4 (T-M3g, MC 11283): minute-9 twins on
 #       the clamp (12.7 -> 12.0), plate-less vs dwelling: minf_clamps_surge
 #       REDs a surge outside the ceiling (18/s); dwell_zero_rng REDs RNG.
-#   draw_tally                 §7 row: pickup_viz draw tally stage 1 == 5,
-#       stage 2 == 5, stage 3 == 6 (the plate MM draws ONLY where its stage
-#       row fields plates) — the C-E4 re-tally keeps DRAWS_PLANNED 40.
+#       T-M3b RE-MINT (the 540 tick now latches): both twins fire their OWN
+#       boss, clear it, digests judge the HORDE stream; checks stand.
+#   draw_tally                 §7 row: pickup_viz draw tally 5/5/6 (the plate
+#       MM draws ONLY on its stage row) — C-E4 keeps DRAWS_PLANNED 40.
 #   unlock_chain               A-E5: level-9 stage-1 run end sets NOTHING;
 #       level-10 sets flags.stage2=1 on DISK (one funnel); a later stage-2
 #       death at level 3 does NOT unset it and sets no stage3; a level-14
@@ -212,10 +210,11 @@ func _leg_schedule() -> void:
 			if e.type == "warden":
 				w_now += 1
 		if w_now > warden_prev:
-			warden_appearances += 1
+			warden_appearances += w_now - warden_prev # CUMULATIVE spawns
+			# (T-M3b planted-RED lesson: a same-tick 0->2 jump is TWO spawns)
 		warden_prev = w_now
 		sched_steps += 1
-	# appearance events, not survival: the retired pins proved the warden
+	# cumulative spawns, not survival: the retired pins proved the warden
 	# spawns EXACTLY ONCE (a later kill is Pillar C's business).
 	var wardens_alive := 0
 	for e in run.world.enemies:
@@ -370,18 +369,28 @@ func _leg_plates_cap() -> void:
 	run.game.time = 540.0 # DECLARED pin; the boss row also fires here
 	run.game.player.x = float(row.plates[0][0])
 	run.game.player.y = float(row.plates[0][1])
+	# C-E4 RE-PIN (MC 11284, §7 named-spawn row): this run now fields its own
+	# ossuary-warden at 540 — HORDE <= ALIVE_CAP + the once-each NAMED spawn.
 	var max_alive := 0
+	var max_horde := 0
+	var max_named := 0
 	for i in 3600:
 		_decline(run)
 		run.game.hp = run.game.max_hp
 		if run.game.phase != "playing":
 			break
 		run._step(DT)
+		var horde_n: int = run.world.enemies.filter(
+			func(e): return not e.boss and not e.miniboss).size()
+		max_horde = maxi(max_horde, horde_n)
+		max_named = maxi(max_named, run.world.enemies.size() - horde_n)
 		max_alive = maxi(max_alive, run.world.enemies.size())
 	_check("plates_cap", {
 		"minf_binds_both": plain == 12.0 and surged == 12.0,
-		"alive_cap_holds": max_alive <= GameWorld.ALIVE_CAP,
-	}, {"plain_rate": plain, "surged_rate": surged, "max_alive": max_alive})
+		"horde_cap_holds": max_horde <= GameWorld.ALIVE_CAP,
+		"named_spawns_once": max_named == 1,
+	}, {"plain_rate": plain, "surged_rate": surged, "max_alive": max_alive,
+	"max_horde": max_horde, "max_named": max_named})
 	run.queue_free()
 
 
@@ -437,13 +446,21 @@ func _leg_plates_saturation() -> void:
 
 # One window: re-seeded, DECLARED t=540, player at plate[0] (stage 3 only
 # dwells), enemies cleared, 1800 hp-pinned steps (the endless pattern).
+# T-M3b RE-MINT: the 540 tick now LATCHES — both twins fire their OWN boss
+# on the pre-window tick (the same ONE randf each), then it is CLEARED: the
+# digests judge the HORDE stream, as A-E4 wrote them. Checks stand.
 func _sat_window(stage_idx: int, row: Dictionary) -> Dictionary:
 	seed(SEED_DEFAULT)
 	var run := _fresh_run(stage_idx)
 	run.game.time = 540.0
 	run.game.player.x = float(row.plates[0][0]) # mutate IN the one dict
 	run.game.player.y = float(row.plates[0][1]) # (hero_pawn holds the ref)
+	_decline(run)
+	run.game.hp = run.game.max_hp
+	run._step(DT) # the 540 tick fires the stage's own boss row here
+	var fired: int = run.world.enemies.filter(func(e): return e.boss).size()
 	run.world.enemies.clear()
+	assert(fired == 1) # both twins fire EXACTLY once, or the twins fork
 	var k0: int = run.game.kills
 	for i in 1800: # 30 s hp-pinned (the endless survival pattern)
 		_decline(run)
@@ -563,28 +580,11 @@ func _leg_snapshot() -> void:
 	}, {"keys": keys, "count": keys.size()})
 
 
-# §3.1 spine law: an unshipped boss id DEFERS the schedule (no crash on a
-# mid-spine stage-2 run past t=540; T-M3b's enemy rows make it fire).
-func _leg_defer_guard() -> void:
-	var run := _fresh_run(2)
-	run.game.time = 540.0 - DT # DECLARED pin past the choir's row time
-	_decline(run)
-	run.game.hp = run.game.max_hp
-	run._step(DT)
-	var bosses_alive := 0
-	for e in run.world.enemies:
-		if e.get("boss", false) or e.get("miniboss", false):
-			bosses_alive += 1
-	_check("defer_guard", {
-		"no_crash_no_boss_no_latch": run.game.phase != "gameover" \
-			and bosses_alive == 0 and run.world.schedule_spawned == 0,
-	}, {"phase": run.game.phase, "bosses": bosses_alive})
-	run.queue_free()
-
-
+# M3 §3.1 (MC 11284): defer-guard retired WITH ITS GUARD (rows landed;
+# replace-not-delete, LEDGER T-M3b) — sim_bosses.gd carries the replacements
+# (stage2_schedule, stage3_schedule, boss_contact_clamp), appended at END.
 func _run_legs() -> void:
 	_leg_table()
-	_leg_defer_guard()
 	_leg_schedule()
 	_leg_cairns()
 	_leg_rng_stream()
@@ -596,4 +596,5 @@ func _run_legs() -> void:
 	_leg_unlock()
 	_leg_handin()
 	_leg_snapshot()
+	SimBosses.new().run_boss_legs(self) # rows after snapshot_m3 (see above)
 	_rows.append({"ev": "stages_verdict", "ok": _ok, "rows": _rows.size()})

@@ -103,8 +103,15 @@ SPEC_TABLE = {
 # judged ONLY on its stage-1 OBSERVABLE rows — the embedded map line of the
 # chest_tier_drop row re-minted with this growth (verified: observable fields
 # and the other 14 rows stayed byte-identical, capture .tmp/m3s-stages.txt).
+# STAGE 2/2 of the declared two-stage re-pin lands at T-M3b (MC 11284,
+# rev-3 §3.1 F-1/DA-c3): the two end-boss classes joined as their own keys
+# (choir -> warden tier II, ossuary-warden -> dawn tier III; the warden row
+# survives BY KEY, its drop leg byte-identical). The same carve holds: the
+# observable rows stayed byte-identical, the map line re-minted to 7 rows
+# (capture .tmp/m3b-bosses.txt); the verdict row counts the new C-E2 leg.
 SPEC_MAP = {"miniboss": "ember", "warden": "warden",
-            "endless-cycle": "dawn", "event": "dawn", "stage-item": "ember"}
+            "endless-cycle": "dawn", "event": "dawn", "stage-item": "ember",
+            "cathedral-choir": "warden", "ossuary-warden": "dawn"}
 
 
 def rows_of(ev, fixture=FIXTURE):
@@ -147,8 +154,15 @@ def test_source_tier_map_is_the_single_source():
 
 def test_drop_sites_stamp_tier_from_the_map():
     # boss + miniboss sites read CHEST_TIER_BY_SOURCE (no literals: the
-    # map-bypass planted-red breaks exactly these regexes)
-    assert re.search(r'"tier": CHEST_TIER_BY_SOURCE\["warden"\]', WORLD)
+    # map-bypass planted-red breaks exactly these regexes). T-M3b (MC 11284,
+    # §3.1 P2-1, replace-not-delete — LEDGER): the boss site is keyed BY THE
+    # KILLED TYPE (String(enemy.type)) — the one "warden" literal site is
+    # retired; a hard-coded tier at the site breaks this row (the keyed-drop
+    # planted-red) and every boss tier leg reads its OWN map row.
+    assert re.search(r'"tier": CHEST_TIER_BY_SOURCE\[String\(enemy\.type\)\]',
+                     WORLD)
+    assert '"tier": CHEST_TIER_BY_SOURCE["warden"]' not in WORLD, \
+        "the boss drop site is keyed by the killed type since T-M3b"
     assert re.search(r'"tier": CHEST_TIER_BY_SOURCE\["miniboss"\]', WORLD)
     # the cycle-clear site (T-M2e) stays on the map too (A-E4 byte-pin too)
     assert re.search(r'"tier": CHEST_TIER_BY_SOURCE\["endless-cycle"\]',
@@ -261,9 +275,25 @@ def test_bt4_precedence_row():
 
 def test_dump_verdict_green():
     v = rows_of("chest_tiers_verdict")[0]
-    # 14 evidence rows precede the verdict (drop 1 + grant 3 + weights 3 +
-    # zero-instruments 3 + filter-probes 3 + precedence 1); file = 15 lines
-    assert v["ok"] is True and v["rows"] == 14
+    # 15 evidence rows precede the verdict (drop 1 + grant 3 + weights 3 +
+    # zero-instruments 3 + filter-probes 3 + precedence 1 + the T-M3b C-E2
+    # boss-tier row 1); file = 16 lines (the declared re-mint, see SPEC_MAP)
+    assert v["ok"] is True and v["rows"] == 15
+
+
+# C-E2 (MC 11284 T-M3b): the two end-boss classes drop THEIR OWN map rows
+# through the keyed site — one chest each at the boss guarantee, the tier
+# compared to the spec-side SPEC_MAP values (tier II choir, tier III ossuary;
+# the tiers MUST differ — a wrong-tier drop site reddens this row, the
+# planted-red pair in the capture).
+def test_ce2_end_boss_drops_read_their_own_map_rows():
+    r = rows_of("chest_tier_bosses")[0]
+    assert r["ok"] and all(r["checks"].values())
+    assert r["tiers"] == {"cathedral-choir": SPEC_MAP["cathedral-choir"],
+                          "ossuary-warden": SPEC_MAP["ossuary-warden"]}
+    assert r["tiers"]["cathedral-choir"] == "warden"  # tier II (spec §3.1)
+    assert r["tiers"]["ossuary-warden"] == "dawn"     # tier III (spec §3.1)
+    assert r["map"] == SPEC_MAP
 
 
 # ---- the UNIFIED-TIER law (rev-2 P1): A-E4 and B-T1 read ONE map row --------

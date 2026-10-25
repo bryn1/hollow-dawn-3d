@@ -136,7 +136,10 @@ func _fresh(base_id: String, level: int, partner: String, rank: int,
 	# to the pawn; the pinned 1.0 chance guarantees the drop (declared).
 	var p: Dictionary = game.player
 	_main.world.kill_enemy(game, {"x": p.x + 8.0, "y": p.y + 8.0,
-		"xp": 0.0, "boss": true, "miniboss": false})
+		"xp": 0.0, "boss": true, "miniboss": false,
+		# T-M3b keyed drop (strict map law): a synth boss kill fields its
+		# TYPE — the warden's map row is what this synth class means.
+		"type": "warden"})
 	assert(_main.world.chests.size() == 1)
 	return {"before": _line(game), "pending0": game.pending_levels}
 
@@ -272,7 +275,10 @@ func _leg_card_seam() -> void:
 func _drop_chest(game) -> void:
 	var p: Dictionary = game.player
 	_main.world.kill_enemy(game, {"x": p.x + 8.0, "y": p.y + 8.0,
-		"xp": 0.0, "boss": true, "miniboss": false})
+		"xp": 0.0, "boss": true, "miniboss": false,
+		# T-M3b keyed drop (strict map law): a synth boss kill fields its
+		# TYPE — the warden's map row is what this synth class means.
+		"type": "warden"})
 
 
 # --- M1h legs (MC 11220): pool reachability + FULL end-to-end evolutions ---

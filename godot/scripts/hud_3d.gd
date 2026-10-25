@@ -26,11 +26,14 @@ const BIOME_FLASH := 3.0 # seconds the biome-name banner stays up, fading last 1
 
 # §d boss-bar port (render.gd:194-207): 420x10 frame at y 12 centred on VIEW,
 # INK under EMBER fill w * clampf(hp / max_hp, 0, 1), name centred at the v1
-# baseline y 36 in size 12 BONE. The name string is the pinned A5 literal.
+# baseline y 36 in size 12 BONE. M3 §3.1 (MC 11284): the A5 const BOSS_NAME
+# is RETIRED (replace-not-delete, LEDGER T-M3b) — the name is the live boss's
+# ENEMY_TYPES row `name` readout, so every stage's end-boss names its own
+# bar (the warden row carries the retired const's string verbatim, so the
+# stage-1 bar paints byte-identically; C-E3).
 const BOSS_BAR_W := 420.0
 const BOSS_BAR_H := 10.0
 const BOSS_BAR_Y := 12.0
-const BOSS_NAME := "THE HOLLOW WARDEN"
 
 var game: GameState
 var world: GameWorld # boss scan source (main.gd wires it, mirrors _viz)
@@ -51,6 +54,7 @@ var _biome_left := 0.0
 var _row_sig := ""
 var _boss_root: Control
 var _boss_fill: ColorRect
+var _boss_name: Label
 
 
 func _ready() -> void:
@@ -166,14 +170,13 @@ func _build_boss_bar() -> void:
 	_boss_fill.position = Vector2(x, BOSS_BAR_Y)
 	_boss_fill.size = Vector2(BOSS_BAR_W, BOSS_BAR_H)
 	_boss_root.add_child(_boss_fill)
-	var name_label := Label.new()
-	name_label.text = BOSS_NAME
-	name_label.add_theme_font_size_override("font_size", 12)
-	name_label.add_theme_color_override("font_color", BONE)
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.position = Vector2(0, 24) # v1 baseline y 36 (draw_string)
-	name_label.size = Vector2(GameRenderer.VIEW.x, 16)
-	_boss_root.add_child(name_label)
+	_boss_name = Label.new() # live text per boss tick (_update_boss_bar)
+	_boss_name.add_theme_font_size_override("font_size", 12)
+	_boss_name.add_theme_color_override("font_color", BONE)
+	_boss_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_boss_name.position = Vector2(0, 24) # v1 baseline y 36 (draw_string)
+	_boss_name.size = Vector2(GameRenderer.VIEW.x, 16)
+	_boss_root.add_child(_boss_name)
 
 
 # v1 boss scan, verbatim shape (render.gd:195-200): first boss in the live
@@ -189,6 +192,9 @@ func _update_boss_bar() -> void:
 	_boss_root.visible = not boss.is_empty()
 	if boss.is_empty():
 		return
+	# C-E3: the row `name` is the bar's label — every stage's end-boss names
+	# its own bar; no boss is no bar, exactly as shipped (one bar seam).
+	_boss_name.text = String(GameWorld.ENEMY_TYPES[boss.type].get("name", ""))
 	_boss_fill.size = Vector2(
 		BOSS_BAR_W * clampf(boss.hp / boss.max_hp, 0.0, 1.0), BOSS_BAR_H)
 
@@ -266,9 +272,10 @@ func _fmt_time(t: float) -> String:
 
 
 # Runtime probe for the sim dump (A5 row: bar + name visible while the boss
-# lives). Geometry read back from the live fill rect, not recomputed here.
+# lives). Geometry read back from the live fill rect, not recomputed here;
+# the name reads back the LIVE label (M3 C-E3 per-boss readout).
 func boss_bar_state() -> Dictionary:
-	return {"visible": _boss_root.visible, "name": BOSS_NAME,
+	return {"visible": _boss_root.visible, "name": _boss_name.text,
 		"fill_w": roundf(_boss_fill.size.x * 1000.0) / 1000.0,
 		"max_w": BOSS_BAR_W, "h": BOSS_BAR_H, "y": BOSS_BAR_Y}
 

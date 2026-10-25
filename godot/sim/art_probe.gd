@@ -77,7 +77,12 @@ func _dump_heights() -> void:
 	for key in HordeViz.GLB_FILES:
 		var mmim: MultiMeshInstance3D = _main._viz._mms[key]
 		var mesh: Mesh = mmim.multimesh.mesh
-		var target: float = HordeViz.MODEL_H_BOSS if key == "warden" \
+		# T-M3b (MC 11284): the boss row rides the ENEMY_TYPES boss FLAG, not
+		# the one "warden" literal — the warden row's bytes are unchanged (the
+		# flag lookup yields the SAME MODEL_H_BOSS); the new classes join at
+		# the boss height law (§3.1, replace-not-retire of the literal arm).
+		var target: float = HordeViz.MODEL_H_BOSS \
+			if GameWorld.ENEMY_TYPES[key].get("boss", false) \
 			else HordeViz.MODEL_H_ENEMY
 		var measured: float = mesh.get_aabb().size.y
 		_rows.append({"ev": "height", "class": key,

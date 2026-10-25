@@ -223,3 +223,37 @@ ref (solid urn + one welded planet-ring) decodes solid. Both shipped meshes carr
 VISUAL 2/2 PASS, aspect_gate 2/2 PASS @1.42 (GREEN_RC=0). GPU windows: 2 imagegen +
 2 TRELLIS (single-row per the §M1c2 accumulation lesson), all CLOSED rc=0, llama-swap
 serving at every close. NO code/wiring/tests touched (pytest 163 green, additive card).
+
+## M3a boss asset batch (T-M3a, MC 11285, 2026-10-25) — provenance rows landed by T-M3b (MC 11284)
+
+The §6 asset batch for M3 (docs/M3-SPEC.md rev-3): **4 icons + 2 end-boss meshes**,
+icons via the imagegen MCP, meshes via TRELLIS.2 (batch_trellis.py, quality gate ON,
+3-seed policy). Icons (manifest `tools/vm100/icons-batch-m3.tsv`, seeds 501-505):
+`godot/assets/icons/icon-stage-{moor-vigil,sunken-chapel,ossuary-stair}.png` +
+`icon-plate.png` (pressure-stair billboard; drowned-cairns REUSE the shipped chest
+icons — zero rows, §6); 512 RGBA transparent, tEXt impeccable:prompt, byte-identical
+copies in `assets/icons/new/`; icon_gate 4/4 PASS, planted-red PROV + TRANSP/FILL legs
+RED same run (ossuary-stair: seed 503 mechanical-PASS, EYEBALL-REJECTED framed-card,
+seed 505 island ACCEPTED — the +1 reserve burned).
+
+| asset | source ref | seed | tris / budget | inflation / aspect | sha256[:16] | render |
+|---|---|---|---|---|---|---|
+| cathedral-choir | art-src/cathedral-choir-ref-v2.png | 522 (ref v1 seed 521 REJECTED) | 3923 / 4000 | 1.46 / 0.55 | 53069083535b7558 | concepts/cathedral-choir-render.png |
+| ossuary-warden | art-src/ossuary-warden-ref-v3.png | 531 FIRST SEED | 3865 / 4000 | 1.42 / 0.67 | 9437f6b44fe99df9 | concepts/ossuary-warden-render.png |
+
+Both ride @1.42 height-class gates like the stand-in boss-warden.glb, i.e. drop-in for
+the 5.33 m MODEL_H_BOSS ClassMesh seam (wired by T-M3b GLB_FILES rows). Refs manifest
+`tools/vm100/art-src-m3.tsv` (5 rows), specs `tools/vm100/art-batch-m3.tsv` +
+`-regen.tsv`. **Pose-class lessons APPLIED:** choir seed 521 passed ALL automated gates
+yet side/back yaws showed open-gap hem ribbons — REJECTED (the §M1c2 binding eyeball
+gate FIRED; +1 mesh reserve burned on welded-hem ref v2); warden pose refs v1/v2
+(separated fingers = shatter signature) REJECTED pre-commit, v3 carved-block ACCEPTED
+— rejected refs stay committed. validate_glb VISUAL 2/2, aspect_gate 2/2 GREEN; bpy
+turntable-solid eyeball yaws 0/90/180/270 PASS both. Hero renders
+`assets/concepts/{cathedral-choir,ossuary-warden}-render.png`; contact sheet
+`assets/screens/m3a-art-sheet.png`. Declared §6 divergences: 0 tiles, 0 miniboss/prop
+meshes, 3 boss meshes -> 2 (Warden shipped). GPU windows: 6 (2 imagegen + 4 TRELLIS
+single-row incl. re-rolls), all CLOSED rc=0, llama-swap serving at every close.
+(T-M3b note: these two rows are the A8 provenance doc-sync — T-M3a shipped asset-
+additive; the rows land where the meshes become LOAD-BEARING code rows, per the
+retired-claim grep-to-zero doctrine, capture `.tmp/m3b-bosses.txt`.)

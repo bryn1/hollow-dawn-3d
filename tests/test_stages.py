@@ -174,9 +174,22 @@ def test_a_e2_schedule_is_the_single_latched_walk():
     reset = block(WORLD, "func reset", "func _types_open")
     assert re.search(r"schedule_spawned = 0", reset), \
         "the ONE latch re-arms for the next run"
-    # the mid-spine defer leg: a stage-2 run past 540 before T-M3b's enemy
-    # rows land must not crash and must not latch
-    leg("defer_guard")
+    # FALSIFIED-BY-DESIGN AND REPLACED at T-M3b (MC 11284, LEDGER row): the
+    # mid-spine defer_guard leg (a stage-2 run past 540 NOT latching while
+    # the enemy rows were unshipped) was retired WITH ITS GUARD CONDITION —
+    # the choir/ossuary ENEMY_TYPES rows landed, the 540 tick LATCHES, and
+    # what stands in its place are the FIRED stage legs (sim_bosses.gd):
+    # every stage now walks its own end-boss exactly once (C-E1) and the
+    # guard code above stays as the spine-law fallback (never removed).
+    s2 = leg("stage2_schedule")
+    assert s2["ok"] and all(s2["checks"].values()), \
+        "stage 2: choir at 540.017, exactly once, latch 1, no stage-1 boss"
+    s3 = leg("stage3_schedule")
+    assert s3["ok"] and all(s3["checks"].values()), \
+        "stage 3: ossuary at 540.017, exactly once, latch 1, no stage-1 boss"
+    assert s2["bar"]["name"] == "THE CATHEDRAL CHOIR" \
+        and s3["bar"]["name"] == "THE OSSUARY WARDEN", \
+        "C-E3: each stage's bar NAMES its own end-boss (one bar seam)"
 
 
 # ---- A-E3: drowned cairns ------------------------------------------------------
@@ -220,7 +233,14 @@ def test_a_e4_surge_dwell_cap_and_flare_legs():
     assert rate["checks"]["dwell_pins_flare"] and rate["checks"]["off_flare_zero"]
     cap = leg("plates_cap")
     assert cap["checks"]["minf_binds_both"], "the 12/s ceiling binds WITH the surge"
-    assert cap["checks"]["alive_cap_holds"] and cap["max_alive"] <= 400
+    # C-E4 RE-PIN (T-M3b, MC 11284, §7 named-spawn row): the late stage-3
+    # run now fields its OWN end-boss at 540 (the rows landed) — the cap law
+    # is HORDE <= 400 (the early-return counts every unit, the horde shares
+    # it) PLUS the once-each NAMED spawn: max_named == 1, total <= 401 (§7's
+    # stage-3 reading; budget_900's 400+3 row is the stage-1 twin).
+    assert cap["checks"]["horde_cap_holds"] and cap["max_horde"] <= 400
+    assert cap["checks"]["named_spawns_once"] and cap["max_named"] == 1
+    assert cap["max_alive"] <= 401
     flare = leg("plates_flare")
     assert flare["checks"]["dwell_shifts_band"], \
         "t 380 + flare 150 crosses the stage-3 450 row: the NAME moves"
@@ -372,4 +392,8 @@ def test_a_e1_chests_fixture_carve_is_the_map_row_only():
                               "mb_ok": True, "unified_ok": True}
     assert drop["map"]["stage-item"] == "ember", \
         "the ONE embedded map row carries the declared §3.1 growth"
-    assert len(rows) == 15 and any(r["ev"] == "chest_tiers_verdict" for r in rows)
+    # T-M3b (MC 11284, stage 2/2 of the declared re-pin): the map row grew
+    # to 7 rows (both end-boss classes keyed) and the C-E2 boss-drop leg
+    # joined the file as a NEW observable row — the four checks above still
+    # pin the stage-1 half byte-for-byte (capture .tmp/m3b-bosses.txt).
+    assert len(rows) == 16 and any(r["ev"] == "chest_tiers_verdict" for r in rows)

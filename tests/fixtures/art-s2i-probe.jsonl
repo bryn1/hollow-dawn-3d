@@ -9,5 +9,7 @@
 {"class":"warden","ev":"height","glb":"boss-warden.glb","measured_m":5.33,"mesh":"ArrayMesh","rel_err":0.0,"target_m":5.33}
 {"class":"hollow-knight","ev":"height","glb":"hollow-knight.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
 {"class":"hollow-deacon","ev":"height","glb":"hollow-deacon.glb","measured_m":1.42,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.42}
+{"class":"cathedral-choir","ev":"height","glb":"cathedral-choir.glb","measured_m":5.33,"mesh":"ArrayMesh","rel_err":0.0,"target_m":5.33}
+{"class":"ossuary-warden","ev":"height","glb":"ossuary-warden.glb","measured_m":5.33,"mesh":"ArrayMesh","rel_err":0.0,"target_m":5.33}
 {"alive":400,"ev":"draws","fx_worst":7,"ground":1,"hard_cap":60,"horde":13,"ok":true,"pawn":1,"planned":40,"total":22}
 {"class":"player","ev":"height","glb":"player.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}

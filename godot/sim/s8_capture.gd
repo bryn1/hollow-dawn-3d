@@ -23,6 +23,12 @@ const WARP_BOSS := 541.0 # S6 spawn-leg reading: past BOSS_AT 540.0
 var _main: Node
 var _stage := 0
 var _wait := 0
+var _run_stage := 1 # T-M3b (MC 11284) DECLARED variant: HD3D_STAGE picks
+# which stage row the run walks (the dawnwell select seam, main.gd:282 —
+# the same wiring sim_budget's stage-3 leg uses). Default stays the shipped
+# stage 1, so the byte-anchored stage-1 shots are untouched; the capture
+# re-run at HD3D_STAGE=2 is the C-E3 pixel proof that the boss bar paints
+# the STAGE's own end-boss name from the live row.
 
 
 func _out_dir() -> String:
@@ -34,6 +40,9 @@ func _initialize() -> void:
 	print("CAPTURE_START")
 	var s := OS.get_environment("HD3D_SEED")
 	seed(s.to_int() if s != "" else 11148) # per-run seed, S2h convention
+	var st := OS.get_environment("HD3D_STAGE")
+	_run_stage = st.to_int() if st != "" else 1
+	assert(_run_stage >= 1 and _run_stage <= 3)
 	assert(DirAccess.make_dir_recursive_absolute(_out_dir()) == OK)
 	_main = load("res://Main.tscn").instantiate()
 	root.add_child(_main) # _ready lands on the first tree iteration, NOT
@@ -55,6 +64,7 @@ func _on_frame() -> void:
 		1:  # EMPTY baseline shot
 			_save("baseline")
 			_main._hud.visible = true
+			_main._dawnwell.stage = _run_stage # declared select seam (above)
 			_main._start_game()
 			_stage = 2
 		2:  # HUD shot: declared warp past 10 s, live spawns + live HUD

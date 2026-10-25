@@ -184,10 +184,16 @@ def test_chest_tier_by_source_map_rows():
     # FALSIFIED AND REPLACED by T-M3s (M3-SPEC §3.1 map growth, LEDGER row +
     # the A-E1 declared re-pin): the cairn source row "stage-item" joined the
     # map, so the exact-text pin re-pins the FIVE rows, not the old four.
+    # FALSIFIED AND REPLACED AGAIN by T-M3b (MC 11284, rev-3 §3.1 stage 2/2,
+    # LEDGER row): the two end-boss classes joined as their OWN keys (the
+    # keyed boss drop site reads String(enemy.type)) — the pin re-pins the
+    # SEVEN rows in the shipped order: one map, one truth.
     m = re.search(r"const CHEST_TIER_BY_SOURCE := \{\"miniboss\": \"ember\", "
                   r"\"warden\": \"warden\",\s*\n?\t*\"endless-cycle\": \"dawn\", "
-                  r"\"event\": \"dawn\",\s*\n?\t*\"stage-item\": \"ember\"\}", WORLD)
-    assert m, "CHEST_TIER_BY_SOURCE must be the §B.1 map + §1.2 stage-item row"
+                  r"\"event\": \"dawn\",\s*\n?\t*\"stage-item\": \"ember\",\s*\n"
+                  r"\t*\"cathedral-choir\": \"warden\", \"ossuary-warden\": "
+                  r"\"dawn\"\}", WORLD)
+    assert m, "CHEST_TIER_BY_SOURCE must be the §B.1 map + stage-item + the 2 end-boss keys"
 
 
 # ---- §A.3 persistence (save side detail rows ride test_save.py) --------------

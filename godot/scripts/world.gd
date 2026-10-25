@@ -1,4 +1,7 @@
 # World entities + edge-spawn scaling + drops (plan §5 numbers).
+# reason: >400 lines — the ONE world module: M1-M3 law keeps the single
+#   spawn latch, the single kill funnel and the ONE tier map in one file
+#   (splitting them would put drop rules beside a second spawn site).
 class_name GameWorld
 extends RefCounted
 
@@ -66,8 +69,13 @@ static func cycle_minute(game: GameState) -> float:
 # ACCEPT rows assert the SAME tier from the SAME row (the DA-P1 law). The
 # event row stays the §B.1 P4-1 forward-declared reservation (event-waves
 # are an excluded pillar — the source cannot fire yet). OUR mapping.
+# M3 §3.1 (MC 11284 T-M3b) stage 2/2 of the DECLARED two-stage map re-pin
+# (rev-3 F-1/DA-c3): the two end-boss classes join as their own KEYS (the
+# boss drop site keys on String(enemy.type)) — choir -> warden tier II,
+# ossuary-warden -> dawn tier III; the warden keeps its row BY KEY.
 const CHEST_TIER_BY_SOURCE := {"miniboss": "ember", "warden": "warden",
-	"endless-cycle": "dawn", "event": "dawn", "stage-item": "ember"}
+	"endless-cycle": "dawn", "event": "dawn", "stage-item": "ember",
+	"cathedral-choir": "warden", "ossuary-warden": "dawn"}
 
 # M3 §1.2 (MC 11282 T-M3s) PRESSURE STAIR consts (ossuary-stair row, OUR
 # numbers): dwelling inside a plate's radius bumps the EXISTING spawn-rate
@@ -98,13 +106,22 @@ const ENEMY_TYPES := {
 	"dune-scarab": {"hp": 5.0, "spd": 105.0, "dmg": 2.0, "xp": 1.0, "sprite": "enemies/dune-scarab"},
 	"rime-ghoul": {"hp": 18.0, "spd": 60.0, "dmg": 5.0, "xp": 3.0, "sprite": "enemies/rime-ghoul"},
 	"pale-wight": {"hp": 45.0, "spd": 52.0, "dmg": 9.0, "xp": 4.0, "sprite": "enemies/pale-wight"},
-	"warden": {"hp": 3000.0, "spd": 45.0, "dmg": 12.0, "xp": 0.0, "sprite": "boss-warden", "boss": true},
+	# M3 §3.1 (MC 11284 T-M3b): the boss rows field a `name` — the ONE boss-
+	# bar readout (hud_3d.gd, retired const); the warden's row carries the
+	# old const string VERBATIM so the stage-1 bar paints byte-identically.
+	"warden": {"hp": 3000.0, "spd": 45.0, "dmg": 12.0, "xp": 0.0, "sprite": "boss-warden", "boss": true, "name": "THE HOLLOW WARDEN"},
 	# Minibosses (M1 feature 4 schedule above): OUR stat rows (the roadmap
 	# names the schedule, not the numbers); xp 0 like the Warden — no gem
 	# rain off a single kill. Sprites + meshes deliberately reuse the Warden
 	# art until the M1 asset batch lands their two static meshes.
 	"hollow-knight": {"hp": 900.0, "spd": 50.0, "dmg": 10.0, "xp": 0.0, "sprite": "boss-warden", "miniboss": true},
 	"hollow-deacon": {"hp": 1400.0, "spd": 40.0, "dmg": 11.0, "xp": 0.0, "sprite": "boss-warden", "miniboss": true},
+	# M3 §3.1 end-bosses (MC 11284, OUR ladder: hp x1.4 -> x1.33, dmg stays
+	# below MAX_CONTACT_DMG at cycle 0, spd drops with size — warden 45 /
+	# deacon 40 precedent; xp 0 = the boss no-gem-rain rule). Spawn t=540 is
+	# the STAGES bosses column (render.gd), not a row field: one timing.
+	"cathedral-choir": {"hp": 4200.0, "spd": 42.0, "dmg": 13.0, "xp": 0.0, "sprite": "cathedral-choir", "boss": true, "name": "THE CATHEDRAL CHOIR"},
+	"ossuary-warden": {"hp": 5600.0, "spd": 38.0, "dmg": 14.0, "xp": 0.0, "sprite": "ossuary-warden", "boss": true, "name": "THE OSSUARY WARDEN"},
 }
 
 # Minute gates at which a swarm type joins the rotation.
@@ -339,10 +356,13 @@ func kill_enemy(game: GameState, enemy: Dictionary) -> void:
 	# (kill_enemy = the boss/miniboss sources; cycle_clear above = endless-
 	# cycle; the event row stays the §B.1 P4-1 forward-declared reservation).
 	# Strict map lookup: a bypassed source crashes at the drop, never silently
-	# de-tiered (the map-bypass planted-red rides this).
+	# de-tiered (the map-bypass planted-red rides this). M3 §3.1 P2-1: the
+	# boss line is keyed BY THE KILLED TYPE (String(enemy.type)) — the one
+	# literal "warden" site is retired, every boss class reads its own map
+	# row (the warden lands on the same "warden" row BY KEY, byte-identical).
 	if enemy.boss and randf() < CHEST_CHANCE_BOSS:
 		chests.append({"x": enemy.x, "y": enemy.y,
-			"tier": CHEST_TIER_BY_SOURCE["warden"]})
+			"tier": CHEST_TIER_BY_SOURCE[String(enemy.type)]})
 	elif enemy.miniboss and randf() < CHEST_CHANCE_MINIBOSS:
 		chests.append({"x": enemy.x, "y": enemy.y,
 			"tier": CHEST_TIER_BY_SOURCE["miniboss"]})

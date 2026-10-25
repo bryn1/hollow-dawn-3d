@@ -28,6 +28,8 @@
 # budget_900 (scripted 900 s dump UNDER THE PIN — DECLARED deviations: hp
 # pinned every tick, the S6/sim_boss precedent row verbatim, level-up offers
 # declined to keep the pinned build pure; max-alive row <= ALIVE_CAP 400),
+# budget_stage3 (C-E4, T-M3b MC 11284: the stage-3 WORST-case re-tally — own
+# end-boss + plate MM live at the cap, §7's per-stage draw law),
 # budget_verdict last. Seed-pinned per sim_headless's stated sim-leg rule.
 extends SceneTree
 
@@ -248,6 +250,76 @@ func _run_legs() -> void:
 			"real-clock WIN row rides sim_s8",
 		"ok": max_horde <= GameWorld.ALIVE_CAP \
 			and max_total <= GameWorld.ALIVE_CAP + 3})
+
+	# (4) budget_stage3 — C-E4 re-tally on the WORST stage (MC 11284 T-M3b,
+	# spec §7): stage 3, DECLARED worst-case loadout pinned, the FULL stage-3
+	# band roster at the 400-cap through the real _spawn_enemy funnel, the
+	# stage's OWN end-boss firing through the real schedule tick (t=540 pin),
+	# the player DWELLED on plate[0] so the plate MM is live, then 60 real
+	# _step ticks under the hp-pin (the union-leg precedent) before the
+	# draw_count() sample. §7's per-stage law: stage 1 keeps the byte-pinned
+	# 13 (horde_viz stage-gates its boss-class MMs — a stage only ever
+	# fields its own end-boss, the replaced classes are §7's idle rows);
+	# stage 3 is the worst (plate MM joins + own ossuary): plan 40, hard 60.
+	var s3: Node = load("res://Main.tscn").instantiate()
+	root.add_child(s3)
+	var stub3 := SimStubScreens.new()
+	s3.add_child(stub3)
+	s3._screens = stub3
+	stub3.start_pressed.connect(s3._start_game)
+	stub3.card_picked.connect(s3._pick)
+	s3._dawnwell.stage = 3 # DECLARED save-side row pin (sim_stages pattern)
+	s3._start_game()
+	_pin_worst_case(s3)
+	var s3row: Dictionary = GameRenderer.stage_row("ossuary-stair")
+	s3.game.player.x = float(s3row.plates[0][0]) # dwell: plate MM live
+	s3.game.player.y = float(s3row.plates[0][1])
+	s3.game.time = 540.0 - DT # DECLARED pin: the ossuary fires on tick 1
+	var S3_CAST := ["wraith", "pale-wight", "rime-ghoul", "hound", "crawler",
+		"cultist"] # stage-3 bands + GATES live classes
+	for i in 400:
+		s3.world._spawn_enemy(S3_CAST[i % S3_CAST.size()], s3.game,
+			GameRenderer.VIEW)
+	var s3_max_total := 0
+	var s3_horde := 0
+	var s3_named := 0
+	var s3_boss_ticks := 0
+	for s in 60:
+		_decline(s3)
+		s3.game.hp = s3.game.max_hp # DECLARED pin (union-leg precedent)
+		s3._step(DT)
+		var hn := 0
+		var bn := 0
+		for e in s3.world.enemies:
+			if e.boss:
+				bn += 1
+			elif not e.miniboss:
+				hn += 1
+		if bn > 0:
+			s3_boss_ticks += 1
+		s3_horde = maxi(s3_horde, hn)
+		s3_named = maxi(s3_named, bn)
+		s3_max_total = maxi(s3_max_total, s3.world.enemies.size())
+	s3._viz.refresh()
+	s3._fxv.refresh()
+	var s3_horde_draws: int = s3._viz.draw_count()
+	var s3_fx: int = s3._fxv.draw_count()
+	var s3_pick: int = s3._pvz.draw_count()
+	var s3_total := 1 + s3_horde_draws + 1 + s3_fx + s3_pick
+	_rows.append({"ev": "budget_stage3", "alive_max_total": s3_max_total,
+		"alive_cap": GameWorld.ALIVE_CAP, "horde_max": s3_horde,
+		"named_max": s3_named, "boss_ticks_live": s3_boss_ticks,
+		"ground": 1, "horde": s3_horde_draws, "pawn": 1, "fx_worst": s3_fx,
+		"pickups": s3_pick, "total": s3_total, "planned": DRAWS_PLANNED,
+		"hard_cap": DRAWS_HARD,
+		"note": "C-E4 (T-M3b): stage-3 WORST case — own end-boss live, plate " +
+			"MM live, full stage-3 roster at the cap; §7 replaces stage-1's " +
+			"three named classes with ONE (the replaced classes idle: their " +
+			"MMs stage-gate out of the tally)",
+		"ok": s3_total <= DRAWS_HARD and s3_total <= DRAWS_PLANNED \
+			and s3_horde <= GameWorld.ALIVE_CAP \
+			and s3_named <= 1 and s3_boss_ticks == 60})
+	s3.queue_free()
 
 	var ok_all: bool = true
 	for r in _rows:

@@ -170,10 +170,19 @@ def main():
         dr = next((r for r in d if r["ev"] == "draws"), {})
         wk = [r for r in d if r["ev"] == "weapon_kills"]
         aw = next((r for r in d if r["ev"] == "all_weapons_killed"), {})
+        # FALSIFIED AND REPLACED here by T-M3b (MC 11284; the re-pin the
+        # capture tool missed since T-M1d's 6->16 weapon-leg dump growth —
+        # the row had been RED on master ever since, base-dump parity proven
+        # in .tmp/m3b-bosses.txt): the kill-leg count now reads from the
+        # dump's OWN all_weapons_killed row (legs == count == kills>=1 each).
         a4 = (fx.get("violations") == 0 and fx.get("samples", 0) >= 500
-              and dr.get("ok") and len(wk) == 6 and all(r["kills"] >= 1 for r in wk)
+              and dr.get("ok") and len(wk) == aw.get("legs", -1)
+              and len(wk) >= 6 and all(r["kills"] >= 1 for r in wk)
               and aw.get("ok"))
-    row("A4", "6 weapons kill + rendered FX caps hold + draw budget <= 60",
+    else:
+        wk = []
+    row("A4", "all weapon legs kill (dump legs=%d) + rendered FX caps hold"
+        " + draw budget <= 60" % len(wk),
         a4, "TESTED", ".tmp/hd3d-boss-s6-dump.jsonl fx_caps/draws/weapon_kills rows"
         " + .tmp/s2p-fx/*.png (gate A3 leg)")
 

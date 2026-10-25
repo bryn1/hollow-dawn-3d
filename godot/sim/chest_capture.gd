@@ -202,7 +202,10 @@ func _drop_chest() -> void:
 	# the hero — too far to be collected, inside the frame.
 	var p: Dictionary = _main.game.player
 	_main.world.kill_enemy(_main.game, {"x": p.x + DROP_OFFSET_PX, "y": p.y,
-		"xp": 0.0, "boss": true, "miniboss": false})
+		"xp": 0.0, "boss": true, "miniboss": false,
+		# T-M3b keyed drop (strict map law): a synth boss kill fields its
+		# TYPE — the warden's map row is what this synth class means.
+		"type": "warden"})
 	assert(_main.world.chests.size() == 1)
 
 
