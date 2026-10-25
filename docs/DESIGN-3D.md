@@ -218,6 +218,27 @@ Pinned by `test_endless.py` / `test_gem_merge.py` / `test_chests_tiers.py` /
 `test_unions.py` + the committed `endless-m2` / `gem-merge-m2g` / `chests-tiers-m2` /
 `unions-m2u` dumps.
 
+**M3-era additions (not v1 pins, T-M3s/T-M3g/T-M3b, MC 11282-11284):** stages are the ONE
+`STAGES` table (`render.gd:104`, placed BELOW `biome_at` — the slice law) read through the
+ONE band mechanism `band_at(stage, t)` (`:169`); `biome_at` stays the stage-1 wrapper
+(row identity at 0/150/300/450/900 byte-pinned). Stage + flare are run vars OUTSIDE the
+frozen 12-field snapshot (Contract B zero-delta kept, A-E8 leg); the boss schedule is the
+unified `schedule_spawned` latch (retire-and-replace of the two per-name latches) and the
+drop site reads `CHEST_TIER_BY_SOURCE[String(enemy.type)]` — keyed, strict. Gimmicks
+compose INSIDE existing ceilings: cairns ARE chests (stage-item map row, fixed coords,
+zero RNG — identical-stream leg); the pressure-plate surge multiplies the spawn rate
+BEFORE `minf(12.0)` so the clamp still binds (saturation leg), the flare shifts band
+NAMES only. §b draw budget: **0 new draw classes in all of M3** — the plate billboard
+rides the pickup MM row (MEASURED DOWN to 40 px after the 96 px first build RED the
+readability block-knee), scheduled classes count in the horde draw/gait tally ONLY on the
+run's stage row (stage 1 keeps the byte-pinned 13; stages 2/3 run 11); the worst-case
+re-tally stays 25-27 / plan 40 / hard 60 with the stage boss + horde 400 + named 1
+(`sim_budget` budget_draws + budget_stage3 legs, C-E4). Contract B (12 fields) untouched
+(A-E8, stage+flare SET ⇒ snapshot absent). Pinned by `test_stages.py` /
+`test_boss_numbers.py` / `test_chests_tiers.py` + the committed `stages-m3` dump (seed
+11284, twice-cmp) and the byte-anchored M2 corpus (journey 5020 rows + the four M2
+fixtures, A-E1 carve judged on observable rows, map row the declared re-pin).
+
 ## (e) SERVER / LEADERBOARD — reuse v1 verbatim
 v1's server is **stdlib-only Python, language-agnostic** (`ARCHITECTURE.md:168` @ `5dc7679`;
 `server.py:1-6`); `/api/health` + `/api/highscores` (`ARCHITECTURE.md:37-42` @ `5dc7679`) are

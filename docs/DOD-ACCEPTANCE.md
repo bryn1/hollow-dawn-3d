@@ -24,7 +24,7 @@ Every screenshot artifact lands `.audits/<run>/out/` (never authored here).
 | A2 | animated player character | walk at full speed, attack; capture 3-frame strip of the player bbox | scene dump (`AnimationPlayer` clip list / transform dump) + 3-frame PNG strip | player is one of the TWO skinned UniRig classes (D§c): ≥1 walk clip in AnimationPlayer dump + rest/walk/attack frame-diff ≥ 2 px per pair (pose contract). Rig-failure fallback = transform gait: bbox-WIDTH p2p ≥ 2 px with instance translation normalized out (scissor FULL RANGE 1.00↔1.24; D§c convention, quoted: *p2p := (max − min) of the measured series over ≥ 1 full animation cycle — an amplitude is NEVER doubled* ⇒ width p2p = 0.24·min(w,d)·24 = 2.88 px at the floor min-extent 0.5 m under the ONE convention; the withdrawn 0.045 m bob is NOT the contract — vertical bob is decoration only). At rest the strip is pixel-stable (scale-constant) |
 | A3 | enemies | run t=0→600 (the S-era capture length; the run is 900 s since T-M1d — the gates this row checks all fire ≤ 300 s, so the strip window stands); strip-record the nearest unit of each type id; scripted level-up picks so the build owns Ward or Halo by t ≤ 120 s | 8 per-class PNG strips + per-instance transform dumps + snapshot kill-log per type (owning Ward/Halo level recorded in the snapshot row) | all 8 non-boss types spawn — GATES = [0 wraith, 2 hound, 4 crawler, 6 cultist] (`world.gd:28`; wraith IS a gate type) + the 4 band signatures; see gap note under (c). Per-class Route-A acceptance (D§c, ONE p2p convention — `(max − min)` over ≥ 1 full cycle, amplitudes NEVER doubled): rest stable; walk = DUAL-CHANNEL gate (i) dump scale-range ≥ 0.24 (wight ≥ 0.22 — drift-float REPLACES gait, its breathe IS rest) AND (ii) projected bbox-WIDTH p2p ≥ 2 px translation-normalized (0.24·min(w,d)·24 = 2.88 px at floor 0.5 m; wight breathe 2.64 px) — a frozen slide fails both; attack = transform-signature lunge on the `e.hit_cd` rising edge, **RUN-CONDITIONED** (D§c:127 — without a ticked source the edge set is EMPTY and the rows pass vacuously; hence the t ≤ 120 s ownership precondition): ≥ 5 px forward excursion outside the walk envelope + footprint scale RANGE ≥ 15 % — NO distinct-pose claim for pose-less classes; dump rows: gait freq ≤ 2.2 Hz, gait scale range ≤ 0.24 |
 | A4 | weapon effects | pick a 6-slot carry build (drive levelup picks via keys 1-3; the pool carries 16 weapon IDS since T-M1h — the 6-slot cap is what A4 exercises; the six v1 FX families below stay the FX contract, roster-wide attribution rides `test_roster_m1h.py` + `sim_combat` 16 legs), screenshot mid-fire of each | 6 FX PNGs + snapshot `weapons[]` row per weapon | each FX visibly painted (non-background pixels in FX area of PNG); live-count caps per the current D§i table: ember ≤ 1+⌊(L−1)/3⌋ (= 3 at L8) straight-flight bolts, cleaver ≤ 1+⌊(L−1)/4⌋ (= 2), halo count 1+⌈L/3⌉ ≤ 4, FX draws ≤ 7 batched; frame draws planned worst case 40 / hard cap 60 (plan raised 33→40 by the M1 re-tally, T-M1g, D§b; Godot profiler dump row ≤ 60, D§b) |
-| A5 | boss | survive to t=540 (or fast-forward the clock in a test build) | boss-bar PNG + snapshot enemy-count step + kill screenshot | boss spawns exactly once at time ≥ 540.0 (`world.gd:5,84`); hp 3000 (`world.gd:24`); name bar "THE HOLLOW WARDEN" visible (v1 `render.gd:206`); boss death drops ≥1 Dawnlight guaranteed (`world.gd:137`) + 50 gold (`world.gd:132`); boss mesh ≤15000 tris (bpy dump), 5.33 m (D§a); boss is skinned (D§c): rest/walk/attack frame-diff ≥ 2 px + attack clip fires on the same `e.hit_cd` rising-edge trigger as the horde |
+| A5 | boss | survive to t=540 (or fast-forward the clock in a test build) | boss-bar PNG + snapshot enemy-count step + kill screenshot | boss spawns exactly once at time ≥ 540.0 of ITS stage (`BOSS_AT world.gd:8` + the unified schedule latch `:225-237` — since T-M3b the stage rows own the schedule, ONE boss per stage; the stage-1 warden legs stay byte-anchored, A-E1/C-E1); hp 3000 (`world.gd:112`); name bar = the boss's OWN keyed row name — stage 1 "THE HOLLOW WARDEN" (`ENEMY_TYPES world.gd:112`, readout `hud_3d.gd`; M3 re-pin of the retired const shape); boss death drops ≥1 Dawnlight guaranteed (`world.gd:354`) + 50 gold (`world.gd:348`) + its OWN chest tier via the keyed map (`world.gd:365`, C-E2); boss mesh ≤15000 tris (bpy dump), 5.33 m (D§a); boss is skinned (D§c): rest/walk/attack frame-diff ≥ 2 px + attack clip fires on the same `e.hit_cd` rising-edge trigger as the horde (the WARDEN rig — the two M3 stage bosses ship Route-A gait like the horde, their skinned pass is not this row's claim) |
 | A6 | environment | watch t=149→151, 299→301, 449→451; screenshot before/after each | 4 ground PNGs + banner PNG per band | ground albedo texture differs per band (pixel-mean ΔE measurable between PNGs); banner text = BIOMES name, alpha-up 3.0 s (`hud.gd:12`); band switch at t 0/150/300/450 exactly (`render.gd:68-77`) |
 | A7 | upgrade cards w/ images per skill | force levelups until all pool kinds offered (12 kinds at this row's S-cut; **32 kinds since T-M1h — 16 weapons + 15 passives + gold-bonus**, re-pinned by `test_card_icons.py`); screenshot each card | card PNGs + `make_offer` dump + icon byte-list (12/12 at the S-cut; 32/32 today) | every pool kind renders a NON-BLANK icon TextureRect (7 reused v1 PNGs + 5 new at the S-cut; +10 weapon +10 passive icons T-M1h, chest-tier/union/bulk-gem icons T-M2a — union/evolved ids ride the `icon-<id>.png` HUD fallback, never META); every new icon is 512×512 RGBA PNG with embedded prompt provenance (`impeccable embed-prompt` output row); no card shows the blank-icon path (`levelup.gd:35` gap closed) |
 | A8 | rulings: top-down / 3090-only / repo+release | scene dump; provenance grep; `gh release view` | camera dump, PERMANENCE.md provenance table, release page text | camera = Camera3D, `projection = Camera3D.PROJECTION_ORTHOGONAL`, `size = 30.0`, pitch 20° off straight-down, offset (0, 37.6, 13.7), near 0.5 / far 90 — names VERIFIED on pinned Godot_v4.7.2 (D§a; `orthographic_size` withdrawn); every GLB/icon in `assets/` has a generation log naming the vm100 3090 tool (TRELLIS.2/imagegen) — 0 assets without provenance; repo `bryn1/hollow-dawn-3d` has a release with web zip + `static/index.*` + `.exe` attached (`gh release view` output) |
@@ -38,50 +38,50 @@ runs the suite VERBATIM. "v1-suite" = existing test; "biome-new" = row added to
 
 | # | Number | Source file:line | Proven by |
 |---|---|---|---|
-| N1 | BOSS_AT = 540.0 | world.gd:5 | v1-suite `test_boss_at_540` |
+| N1 | BOSS_AT = 540.0 | world.gd:8 (was :5; v2.0.0-cut re-grep, M3-era edits) | v1-suite `test_boss_at_540` |
 | N2 | WIN_TIME = 900.0 (600.0 RE-PINNED by T-M1d, roadmap M1 feature 4) | game_state.gd:7 | v1-suite row RETIRED+REPLACED: `test_win_threshold_900` |
-| N3 | win gate reads shared WIN_TIME | main.gd:134 | v1-suite regex kept (now in `test_win_threshold_900`, test_game_numbers.py) |
-| N4 | boss gate compares BOSS_AT | world.gd:84 | v1-suite `test_boss_gate_wired` (:47-48) |
-| N5 | HEAL_DROP_CHANCE = 0.015 | world.gd:6 | v1-suite `test_heal_drop_chance` |
-| N6 | HEAL_AMOUNT = 8.0 | world.gd:7 | v1-suite `test_heal_amount` |
-| N7 | heal clamp `minf(max_hp, hp+HEAL_AMOUNT)` | world.gd:158 | v1-suite `test_heal_clamp_path_exists` |
-| N8 | GATES 0/2/4/6 min → wraith/hound/crawler/cultist | world.gd:28 | v1-suite `test_gates_minutes` |
-| N9 | spawn rate min(12, 1+1.3·minute) | world.gd:88 | v1-suite `test_spawn_rate_capped_12` |
-| N10 | wraith 8/55/2/1 | world.gd:14 | v1-suite `test_enemy_base_stats_per_plan` |
-| N11 | hound 6/95/3/1 | world.gd:15 | v1-suite same |
-| N12 | crawler 30/35/5/3 | world.gd:16 | v1-suite same |
-| N13 | cultist 18/60/6/4 | world.gd:17 | v1-suite same |
-| N14 | moor-brute 26/32/4/2 | world.gd:20 | biome-new |
-| N15 | dune-scarab 5/105/2/1 | world.gd:21 | biome-new |
-| N16 | rime-ghoul 18/60/5/3 | world.gd:22 | biome-new |
-| N17 | pale-wight 45/52/9/4 | world.gd:23 | biome-new |
-| N18 | warden 3000/45/12/0 boss | world.gd:24 | v1-suite same |
-| N19 | xp_need = 5+4L+L² | game_state.gd:29 | v1-suite `test_xp_curve` |
-| N20 | ENEMY_TINTS exactly the 5 classic keys | render.gd:22-28 | v1-suite `test_five_enemy_tints_present` |
+| N3 | win gate reads shared WIN_TIME | main.gd:228 (was :134; v2.0.0-cut re-grep) | v1-suite regex kept (now in `test_win_threshold_900`, test_game_numbers.py) |
+| N4 | boss gate compares BOSS_AT — since T-M3b through the ONE schedule latch (retire-and-replace, row kept) | world.gd:225-237 (was :84) | v1-suite `test_boss_gate_wired` (:47-48) |
+| N5 | HEAL_DROP_CHANCE = 0.015 | world.gd:13 (was :6; v2.0.0-cut re-grep) | v1-suite `test_heal_drop_chance` |
+| N6 | HEAL_AMOUNT = 8.0 | world.gd:14 (was :7; v2.0.0-cut re-grep) | v1-suite `test_heal_amount` |
+| N7 | heal clamp `minf(max_hp, hp+HEAL_AMOUNT)` | world.gd:388 (was :158; v2.0.0-cut re-grep) | v1-suite `test_heal_clamp_path_exists` |
+| N8 | GATES 0/2/4/6 min → wraith/hound/crawler/cultist | world.gd:128 (was :28; v2.0.0-cut re-grep) | v1-suite `test_gates_minutes` |
+| N9 | spawn rate min(12, 1+1.3·minute) — the stage-3 surge multiplies INSIDE the clamp (T-M3s), cap untouched | world.gd:259 (was :88) | v1-suite `test_spawn_rate_capped_12` (re-pinned around the surge factor) |
+| N10 | wraith 8/55/2/1 | world.gd:99 (was :14; v2.0.0-cut re-grep) | v1-suite `test_enemy_base_stats_per_plan` |
+| N11 | hound 6/95/3/1 | world.gd:100 (was :15) | v1-suite same |
+| N12 | crawler 30/35/5/3 | world.gd:101 (was :16) | v1-suite same |
+| N13 | cultist 18/60/6/4 | world.gd:102 (was :17) | v1-suite same |
+| N14 | moor-brute 26/32/4/2 | world.gd:105 (was :20) | biome-new |
+| N15 | dune-scarab 5/105/2/1 | world.gd:106 (was :21) | biome-new |
+| N16 | rime-ghoul 18/60/5/3 | world.gd:107 (was :22) | biome-new |
+| N17 | pale-wight 45/52/9/4 | world.gd:108 (was :23) | biome-new |
+| N18 | warden 3000/45/12/0 boss | world.gd:112 (was :24; v2.0.0-cut re-grep) | v1-suite same |
+| N19 | xp_need = 5+4L+L² | game_state.gd:76-77 (was :29; v2.0.0-cut re-grep) | v1-suite `test_xp_curve` |
+| N20 | ENEMY_TINTS exactly the 5 classic keys | render.gd:26 (was :22-28; v2.0.0-cut re-grep) | v1-suite `test_five_enemy_tints_present` |
 | N21 | BIOMES t_starts 0/150/300/450 + rosters | render.gd:68-77 | biome-new |
-| N22 | BIOME_FLASH = 3.0 s | hud.gd:12 | biome-new |
-| N23 | score = time·10 + kills·5 + level·25 + gold | main.gd:193-194 | biome-new |
+| N22 | BIOME_FLASH = 3.0 s | hud_3d.gd:25 (v1 cite was hud.gd:12; band read is `band_at(stage, time+flare)` since T-M3s — re-pinned) | biome-new |
+| N23 | score = time·10 + kills·5 + level·25 + gold | main.gd:359-360 (was :193-194; v2.0.0-cut re-grep) | biome-new |
 | N24 | MAX_HP = 100.0 | game_state.gd:8 | biome-new |
 | N25 | BASE_SPEED = 140.0 | game_state.gd:5 | biome-new |
 | N26 | IFRAMES = 0.5 | game_state.gd:6 | biome-new |
-| N27 | pickup radius 16 px | world.gd:146 | biome-new |
-| N28 | contact radii 17 / boss 55, + player 16 | main.gd:122,125 | biome-new |
-| N29 | boss Dawnlight guaranteed on death | world.gd:137 | biome-new |
-| N30 | gem drop 70% / coin drop 6% (1–3 g) | world.gd:133,135-136 | biome-new |
-| N31 | boss death +50 gold | world.gd:132 | biome-new |
-| N32 | enemy HP scaling ×(1+0.22·min) | world.gd:67 | biome-new |
-| N33 | magnet base 60 px, +25%/Grip stack; pull 220 px/s | world.gd:106,120 | biome-new |
-| N34 | BOLT_SPEED 300 / THROW_SPEED 260 | weapons.gd:18-19 | biome-new |
-| N35 | weapon MAX_LEVEL 8; fire rate base·0.96^(L−1) | weapons.gd:7,48 | biome-new |
-| N36 | talon range 90+4L, half 0.62, cd 0.55, dmg 6+3L | weapons.gd:109-114 | biome-new |
-| N37 | ward r 80, cd 0.45, dmg 4+2L, ring life 0.12 | weapons.gd:145-148 | biome-new |
-| N38 | spike r 56, cd 2.6, dmg 18+7L, burst 0.25 s | weapons.gd:150,164-166 | biome-new |
-| N39 | halo radius 52+3L, count 1+⌈L/3⌉, orbit hit r 17 | weapons.gd:175-176,188 | biome-new |
-| N40 | passive stacks cap 5; Coin Cache +25g/+10hp | levelup.gd:6,41,65-66 | biome-new |
-| N41 | VIEW 1280×720 | main.gd:5; project.godot:14-15 | biome-new |
-| N42 | draw sizes player 40 / enemy 34 / boss 128 / coin·gem 14 | render.gd:10 | biome-new (3D parity check: size_px/S ≈ v1 px at S=24, D§a) |
-| N43 | hit radius er 17/boss 55 in weapon `_hit` | weapons.gd:82 | biome-new |
-| N44 | halo tick immunity 0.3 s (hit_cd) | weapons.gd:95 | biome-new |
+| N27 | pickup radius 16 px | world.gd:376 (was :146; the ONE 16 px funnel now 4 kinds incl. stage-item cairns) | biome-new |
+| N28 | contact radii 17 / boss 55, + player 16 | main.gd:211,214 (was :122,125; v2.0.0-cut re-grep) | biome-new |
+| N29 | boss Dawnlight guaranteed on death | world.gd:340,354 (was :137; v2.0.0-cut re-grep) | biome-new |
+| N30 | gem drop 70% / coin drop 6% (1–3 g) | world.gd:349,351-352 (was :133,135-136) | biome-new |
+| N31 | boss death +50 gold | world.gd:348 (was :132; v2.0.0-cut re-grep) | biome-new |
+| N32 | enemy HP scaling ×(1+0.22·min) | world.gd:200 (was :67) | biome-new |
+| N33 | magnet base 60 px, +25%/Grip stack; pull 220 px/s | world.gd:277,300 (was :106,120) | biome-new |
+| N34 | BOLT_SPEED 300 / THROW_SPEED 260 | weapons.gd:43-44 (was :18-19) | biome-new |
+| N35 | weapon MAX_LEVEL 8; fire rate base·0.96^(L−1) | weapons.gd:22,77 (was :7,48) | biome-new |
+| N36 | talon range 90+4L, half 0.62, cd 0.55, dmg 6+3L | weapons.gd:145-150 (was :109-114) | biome-new |
+| N37 | ward r 80, cd 0.45, dmg 4+2L, ring life 0.12 | weapons.gd:182-184 (was :145-148) | biome-new |
+| N38 | spike r 56, cd 2.6, dmg 18+7L, burst 0.25 s | weapons.gd:186,200-202 (was :150,164-166) | biome-new |
+| N39 | halo radius 52+3L, count 1+⌈L/3⌉, orbit hit r 17 | weapons.gd:353,405 (was :175-176,188; orbit class shared with unions since T-M2u) | biome-new |
+| N40 | passive stacks cap 5; Coin Cache +25g/+10hp | levelup.gd:7,71,110-112 (was :6,41,65-66) | biome-new |
+| N41 | VIEW 1280×720 | main.gd:12 (was :5); project.godot:14-15 | biome-new |
+| N42 | draw sizes player 40 / enemy 34 / boss 128 / coin·gem 14 | render.gd:14 (was :10; v2.0.0-cut re-grep) | biome-new (3D parity check: size_px/S ≈ v1 px at S=24, D§a) |
+| N43 | hit radius er 17/boss 55 in weapon `_hit` | weapons.gd:118 (was :82; v2.0.0-cut re-grep) | biome-new |
+| N44 | halo tick immunity 0.3 s (hit_cd) | weapons.gd:129-131 (was :95) | biome-new |
 | N45 | weapon IDS + META names/icons table — 6 IDS at the S-cut, RE-PINNED to 16 IDS (`weapons.gd:19`) by T-M1h; icons + union rows extend the same table | weapons.gd:19 (was :6 at this row's S-cut) | biome-new + A7 icon test + `test_card_icons.py` (32-kind count, T-M1h) |
 
 ## (c) ART-ASSET MANIFEST
