@@ -1,4 +1,8 @@
 # The sixteen auto-fire weapons (plan §5 six + PARITY-ROADMAP rev3 feature 6
+# reason: >400 lines — 474 measured at MC 11316 §1.1: ONE _fire dispatch is
+#   the ONE fire seam of the kill funnel (every weapon fires through _fire/
+#   _hit below); the split alternative would fork the projectile seam
+#   beside the fire dispatch and rides the RNG path — audit verdict: header.
 # ten, T-M1h): talon, ember, cleaver, halo, ward, spike + bone-whip,
 # dart-loop, hewn-axe, pilgrim-cross, censer-of-hours, rot-water, spectral-
 # disc, storm-peal, fire-lash, doom-sigil. All fire without player input;
