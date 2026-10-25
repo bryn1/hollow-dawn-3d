@@ -78,6 +78,14 @@ func tick(batch: int, cam: Camera3D) -> void:
 func _pick() -> void:
 	# sim_headless.gd's ward-first ranking, verbatim: new weapon first, then
 	# ward/ferocity/haste/grip/insight — ward is the ticked source sought.
+	# T-M3z (MC 11286) DECLARED leg-local re-pin (capture driver only, product
+	# untouched): DOD A3's precondition is the SCRIPT itself — "scripted
+	# level-up picks so the build owns Ward or Halo by t ≤ 120 s" — so the
+	# TICKED weapons rank ABOVE any other new weapon on THIS leg. Since
+	# T-M1h's 16-weapon pool the verbatim ranking can spend all in-window
+	# level-ups on unticked weapons (first rank-0 card wins), which is what
+	# falsified F-2 on the T-M3b tree. Nothing measured is relaxed; the pick
+	# is just the DOD row's own contract. Other legs do not use this file.
 	var idx := 0
 	var pick_rank := 9
 	for i in main._current_offer.size():
@@ -85,6 +93,9 @@ func _pick() -> void:
 		var rank := 8
 		if card.kind == "weapon":
 			rank = 0
+			var wid: String = card.get("id", "")
+			if wid == "ward" or wid == "halo":
+				rank = -1 # the ticked source sought by F-2
 		elif card.kind == "upgrade":
 			rank = [1, 2, 3, 4, 5].find(["ward", "ferocity", "haste", "grip",
 				"insight"].find(card.get("key", card.get("id", ""))))

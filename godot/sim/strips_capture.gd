@@ -97,6 +97,20 @@ func _dir(env: String, fallback: String) -> String:
 	return d if d != "" else fallback
 
 
+func _atk_seed() -> int:
+	# T-M3z (MC 11286) DECLARED harness re-pin, capture tool only (product
+	# untouched): the F-2 precondition (own Ward or Halo by t<=120) rides the
+	# level-up OFFER stream; the unified T-M3b schedule latch changed global
+	# RNG consumption, so the stream seeded by 11112 no longer surfaces a
+	# ticked source inside the window on the M3 tree. This env override lets
+	# the runner pick a seed where the SAME precondition holds — nothing
+	# measured is relaxed, only the seed is RE-SELECTED (the s8 A1 gameover-
+	# seed precedent). Unset = the shipped 11112; the walk/FX legs keep 11112
+	# unconditionally, their outputs stay byte-anchored.
+	var s := OS.get_environment("HD3D_ATK_SEED")
+	return int(s) if s != "" else 11112
+
+
 func _initialize() -> void:
 	print("S2H_CAPTURE_START")
 	_out = FileAccess.open(_dir("HD3D_DUMP", "/tmp/hd3d-strips-s2h-dump.jsonl"),
@@ -250,7 +264,7 @@ func _next_leg() -> void:
 				Image.FORMAT_RGBA8)
 		"attack":
 			_main._start_game() # real build: talon@1 grant, real spawn loop
-			seed(11112) # DECLARED (see _fresh_fx)
+			seed(_atk_seed()) # T-M3z: env RE-SELECT sees _atk_seed(); unset = 11112
 			_main.game.paused = true
 			_atk.setup(_main)
 			_prev_img = null
