@@ -69,9 +69,9 @@ release law (one major per milestone).
 
 | file | sha256 |
 |---|---|
-| `HollowDawn3D-win-x64.zip` | `6a267669275030ce090058039d2d4a59c6d226bd2fb41b70754fba99dde542fa` |
-| `HollowDawn3D-web.zip` | `a4963eb0226a21b1957bcbfea9e0798b9e6d1c40c8bd56c55b387a2e8ca7e930` |
-| `HollowDawn3D.exe` (inside the win zip) | `3bb960fb20d8f5202f26a58dff5151e7816ba77fccf924a1a651a68169bb6cc5` |
+| `HollowDawn3D-win-x64.zip` | `bae7c5433221dbdb9a7fff8a6cc4e9cca967c6b4ef6d3ea18c7293d640e70305` |
+| `HollowDawn3D-web.zip` | `ca1a573573e962fbe1ba551ba88440688fb8b5365d6566cf3d4962c946b2371d` |
+| `HollowDawn3D.exe` (inside the win zip) | `54b7f5c3192a320349283d118c71b8739418a6fac19ec102c6efcdc3d940a495` |
 
 Win: extract, run `HollowDawn3D.exe` (Windows x64). Web: unzip, serve the directory over
 HTTP and open `index.html` (a file:// double-click will not load the .pck).
