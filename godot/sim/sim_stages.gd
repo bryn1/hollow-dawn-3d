@@ -49,6 +49,9 @@
 #       the band NAME reads THE FROZEN WASTE (base DEAD TUNDRA, shift 150 ->
 #       530 >= 450); 30 s off-plate decays flare to exactly 0.0 and the name
 #       back to the base band.
+#   plates_saturation          A-E4 (T-M3g, MC 11283): minute-9 twins on
+#       the clamp (12.7 -> 12.0), plate-less vs dwelling: minf_clamps_surge
+#       REDs a surge outside the ceiling (18/s); dwell_zero_rng REDs RNG.
 #   draw_tally                 §7 row: pickup_viz draw tally stage 1 == 5,
 #       stage 2 == 5, stage 3 == 6 (the plate MM draws ONLY where its stage
 #       row fields plates) — the C-E4 re-tally keeps DRAWS_PLANNED 40.
@@ -418,6 +421,42 @@ func _leg_plates_flare() -> void:
 	run.queue_free()
 
 
+# A-E4 (T-M3g): twins at minute 9 (base 12.7 clamps to exact 12.0): stage 2
+# plate-less vs stage 3 DWELLING plate[0], ONE position (an off-position
+# twin forks kill timing -> the levelup offers' RNG: measured 185/178).
+func _leg_plates_saturation() -> void:
+	var row: Dictionary = GameRenderer.stage_row("ossuary-stair")
+	var no_plate := _sat_window(2, row)
+	var dwell := _sat_window(3, row)
+	_check("plates_saturation", {
+		"minf_clamps_surge": dwell.spawns == no_plate.spawns,
+		"dwell_zero_rng": str(dwell) == str(no_plate),
+	}, {"stage2": no_plate, "stage3_dwell": dwell, "minute": 9.0,
+		"t": 540.0, "x": row.plates[0][0]})
+
+
+# One window: re-seeded, DECLARED t=540, player at plate[0] (stage 3 only
+# dwells), enemies cleared, 1800 hp-pinned steps (the endless pattern).
+func _sat_window(stage_idx: int, row: Dictionary) -> Dictionary:
+	seed(SEED_DEFAULT)
+	var run := _fresh_run(stage_idx)
+	run.game.time = 540.0
+	run.game.player.x = float(row.plates[0][0]) # mutate IN the one dict
+	run.game.player.y = float(row.plates[0][1]) # (hero_pawn holds the ref)
+	run.world.enemies.clear()
+	var k0: int = run.game.kills
+	for i in 1800: # 30 s hp-pinned (the endless survival pattern)
+		_decline(run)
+		run.game.hp = run.game.max_hp
+		if run.game.phase != "playing": break
+		run._step(DT)
+	var d := {"spawns": run.world.enemies.size() + (run.game.kills - k0),
+		"alive": run.world.enemies.size(), "kills": run.game.kills - k0,
+		"types": run.world.enemies.map(func(e): return e.type)}
+	run.queue_free()
+	return d
+
+
 # §7 draw-tally row: the plate MM only joins the tally where it draws.
 func _leg_draw_tally() -> void:
 	var tally := {}
@@ -552,6 +591,7 @@ func _run_legs() -> void:
 	_leg_plates_rate()
 	_leg_plates_cap()
 	_leg_plates_flare()
+	_leg_plates_saturation()
 	_leg_draw_tally()
 	_leg_unlock()
 	_leg_handin()

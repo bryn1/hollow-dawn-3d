@@ -13,6 +13,9 @@ DA SHIP law). Rows A-E1..A-E8, as written:
   regex pins (this repo's idiom) + behaviour verdicts read through the ONE
   loader of the seeded stages-m3.jsonl dump (seed 11282, generated twice,
   cmp-identical — sim_stages pattern).
+* T-M3g (MC 11283) adds the two A-E4 RED columns the T-M3s legs could not
+  reach (saturation surge + dwell zero-RNG, leg plates_saturation) — a
+  REPLACE-NOTHING addition: no existing row was edited or deleted.
 
 Honest-count note (capture .tmp/m3s-stages.txt): the brief expected "NONE
 expected beyond placement notes" for falsified pins; the actual replaced-pin
@@ -228,6 +231,32 @@ def test_a_e4_surge_dwell_cap_and_flare_legs():
     assert gate.index("PLATE_RADIUS") < gate.index("ALIVE_CAP")
     assert re.search(r"game\.flare = maxf\(0\.0, game\.flare - FLARE_SHIFT / "
                      r"FLARE_DECAY \* dt\)", gate), "decay row 150/30 = 5 per s"
+
+
+def test_a_e4_surge_saturates_and_dwell_draws_no_rng():
+    # The A-E4 RED columns AS WRITTEN (T-M3g, MC 11283): "surge that
+    # bypasses minf (13/s) => RED; a dwell that draws RNG => RNG-stream
+    # RED". At minute 9 the BASE rate (1 + 1.3*9 = 12.7) already saturates
+    # minf(12.0), so the stage-2 twin at the SAME position (plate-less row:
+    # surge the exact 1.0 identity) and the stage-3 dweller (1.5) sit on
+    # the same clamped 12.0/s over the same re-seeded stream. A surge
+    # outside the ceiling runs the dweller ~1.5x (spawn counts diverge); a
+    # randf/randi inside the dwell branch reorders the type picks. (The
+    # same-position twin is the fair comparison — an off-position twin
+    # forks KILLS legitimately; the sim note carries the measurement.)
+    row = leg("plates_saturation")
+    assert row["checks"]["minf_clamps_surge"], \
+        "the surge multiplies INSIDE minf(12.0): at the saturating clock " \
+        "the dweller spawns at the plate-less twin's rate, not 1.5x"
+    assert row["checks"]["dwell_zero_rng"], \
+        "the dwell is a pure position test — zero randf/randi"
+    # the source-side twin of the zero-RNG row (the repo's source-truth
+    # idiom): the plate block between the flare decay and the untouched
+    # ALIVE_CAP early-return reads no RNG at all
+    gate = block(WORLD, "func update_spawns", "func update_entities")
+    plate_blk = gate[gate.index("game.flare = maxf"):
+                     gate.index("if enemies.size() >= ALIVE_CAP")]
+    assert "randf" not in plate_blk and "randi" not in plate_blk
 
 
 # ---- A-E5: the unlock chain ----------------------------------------------------
