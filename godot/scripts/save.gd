@@ -1,8 +1,9 @@
 # Dawn Well meta-progression save (M1 W-P persistence work package, MC 11205).
 # Format per PARITY-ROADMAP.md M1 feature 1 rev 3: user://dawnwell.json =
 # {version:int, gold:int, ranks:{powerup_id:rank}, flags:{unlock_id:1}} +
-# M2 §A.3's best_cycle:int (T-M2e, MC 11237) — a field-by-field ADDED row,
-# VERSION unchanged (1) exactly as §A.3 pins it.
+# M2 §A.3's best_cycle:int (T-M2e, MC 11237) + M3 §1.4's stage:int (T-M3s,
+# MC 11282) — field-by-field ADDED rows, VERSION unchanged (1) exactly as
+# each spec pins it.
 # Recovery rules (all observables, roadmap reset table): missing file -> fresh
 # defaults; undecodable -> quarantine (rename to dawnwell.corrupt.json kept +
 # stderr `SAVE_LOAD_FAIL path=...`) + defaults; version newer than this code
@@ -32,6 +33,13 @@ var flags: Dictionary = {} # unlock_id -> 1
 # above defaults a missing field, so an older save keeps working and a fresh
 # one reads 0 (A-E5).
 var best_cycle := 0
+# M3 §1.4 (T-M3s, MC 11282): the chosen stage, 1-based (STAGES index + 1).
+# Another field-by-field ADDED row, VERSION unchanged — the version-bump law
+# (M3-SPEC §7 persistence row, §1.4 A-E5): a bump exists to quarantine a
+# shape a loader can't MIGRATE; every M3 field is an additive default (the
+# best_cycle proof), and a HIGHER-version save still quarantines (existing
+# rule, untouched). An older save without the field reads 1 = moor-vigil.
+var stage := 1
 
 
 # Boot load: missing file is NOT a failure — fresh defaults, silent.
@@ -58,6 +66,7 @@ static func load_save() -> DawnWell:
 	well.ranks = _int_dict(data.get("ranks", {}))
 	well.flags = _int_dict(data.get("flags", {}))
 	well.best_cycle = int(data.get("best_cycle", 0)) # §A.3: older saves -> 0
+	well.stage = int(data.get("stage", 1)) # §1.4 M3: older saves -> 1 (moor-vigil)
 	return well
 
 
@@ -87,6 +96,7 @@ func reset() -> void:
 	ranks = {}
 	flags = {}
 	best_cycle = 0
+	stage = 1
 	var dir := DirAccess.open("user://")
 	if dir != null and dir.file_exists(SAVE_PATH.trim_prefix("user://")):
 		dir.remove(SAVE_PATH.trim_prefix("user://"))
@@ -107,7 +117,7 @@ static func quarantine(reason: String) -> void:
 
 func as_data() -> Dictionary:
 	return {"version": version, "gold": gold, "ranks": ranks, "flags": flags,
-		"best_cycle": best_cycle}
+		"best_cycle": best_cycle, "stage": stage}
 
 
 static func _int_dict(src: Variant) -> Dictionary:

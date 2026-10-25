@@ -4,7 +4,8 @@
 # (1) SPAWN LEG — one deviation, the CLOCK WARP (the same reading the S3 WIN
 #     row carries: "warps the CLOCK (the single stated deviation)"): a fresh
 #     sparse run is warped to 539.0 s and ticked in, so world.gd's own gate
-#     `if not boss_spawned and game.time >= BOSS_AT` fires in real play. Rows:
+#     stage-1 schedule row fires in real play (M3 T-M3s: the ONE latch-index
+#     loop replaced the boss_spawned bool; schedule_spawned >= 1 is its equal). Rows:
 #     boss_spawn (t ~540.0, exactly once, base hp 3000 = world.gd:24 scaled by
 #     the v1-verbatim time ramp world.gd:67 — the boss is NOT special-cased)
 #     and boss_viz: the warden MultiMesh instance count 1 + the class's scale
@@ -75,7 +76,7 @@ func run_spawn_leg(root: Window) -> Array:
 		"hp_scale_formula": "1 + 0.22 * (time / 60) — world.gd:67, v1 verbatim",
 		"spd": boss.spd, "dmg": boss.dmg, "xp": boss.xp, "boss": boss.boss,
 		"bosses_alive": _count_wardens(run),
-		"spawned_flag": run.world.boss_spawned})
+		"spawned_flag": run.world.schedule_spawned >= 1}) # M3 T-M3s latch index
 	rows.append({"ev": "boss_viz", "t": _r3(run.game.time),
 		"instances": run._viz._mms.warden.multimesh.instance_count,
 		"model_h_m": HordeViz.MODEL_H_BOSS, "size_px": GameRenderer.SIZES.boss,
@@ -143,9 +144,9 @@ func run_kill_leg(root: Window) -> Array:
 		run._step(DT)
 		max_after = maxi(max_after, _count_wardens(run))
 	rows.append({"ev": "boss_once", "t": _r3(run.game.time),
-		"boss_spawned_flag": run.world.boss_spawned,
+		"boss_spawned_flag": run.world.schedule_spawned >= 1,
 		"wardens_alive_after_kill": max_after, "hp": run.game.hp,
-		"ok": max_after == 0 and run.world.boss_spawned})
+		"ok": max_after == 0 and run.world.schedule_spawned >= 1})
 	run.queue_free()
 	return rows
 

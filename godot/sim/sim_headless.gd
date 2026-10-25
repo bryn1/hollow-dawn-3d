@@ -270,7 +270,8 @@ func _observe(n: int) -> void:
 		_main._viz.refresh()
 		_emit({"ev": "gait", "t": roundi(t * 1000.0) / 1000.0,
 			"probe": _main._viz.gait_probe()})
-	for key in _main.world._types_open(t):
+	for key in _main.world._types_open(game.stage, t): # M3 T-M3s: stage-keyed
+		# band read (journey runs stage 1 — the shipped walk, rows unchanged)
 		if not _open_seen.has(key):
 			_open_seen[key] = true
 			_emit({"ev": "type_open", "t": roundi(t * 1000.0) / 1000.0,
@@ -290,7 +291,9 @@ func _observe(n: int) -> void:
 			"wpns": _build_line(game),
 			"kills": game.kills, "gold": game.gold,
 			"enemies": _main.world.enemies.size()})
-	if _main.world.boss_spawned and not _boss_dumped:
+	# M3 T-M3s: the warden IS the stage-1 schedule's first row — the latch
+	# index >= 1 replaces the retired boss_spawned bool (rows unchanged).
+	if _main.world.schedule_spawned >= 1 and not _boss_dumped:
 		_boss_dumped = true
 		for e in _main.world.enemies:
 			if e.boss:

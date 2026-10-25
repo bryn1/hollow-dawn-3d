@@ -30,3 +30,8 @@ func show_end(_win: bool, _lines: Array) -> void:
 # the sim runs play straight through).
 func shop_visible() -> bool:
 	return false
+
+
+# M3 T-M3s surface parity: the menu Enter guard also asks the stage select.
+func stages_visible() -> bool:
+	return false

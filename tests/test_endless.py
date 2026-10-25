@@ -108,8 +108,14 @@ def test_cycle_minute_is_the_single_ramp_term():
     # read by BOTH ramp sites (spawn hp + spawn rate) — one formula, no copy
     assert len(re.findall(r"cycle_minute\(game\)", WORLD)) == 2
     # the untouched ceilings (rev-2 P2-3): rate 12/s + ALIVE_CAP stay in place
+    # FALSIFIED AND REPLACED by T-M3s (M3-SPEC §1.2, LEDGER row): the ONE
+    # rate term gained the plate-surge multiplier INSIDE minf() — the surge
+    # is a factor of the same single term (no second ramp may exist beside
+    # it), and the 12/s ceiling is the row this pin was for, so it re-pins
+    # around the new factor instead of vanishing.
     assert re.search(r"minf\(12\.0,\s*\(1\.0 \+ 1\.3 \* minute\) \* "
-                     r"qty_cyc\(game\.cycle\)\)", WORLD)
+                     r"qty_cyc\(game\.cycle\) \* surge\)", WORLD), \
+        "the rate stays the ONE term, surge included under the 12/s ceiling"
     assert const("ALIVE_CAP", WORLD) == 400.0
 
 
@@ -175,10 +181,13 @@ def test_world_cycle_clear_rides_the_single_drop_array():
 # ---- §B.1 the source->tier map (A-E4 == B-T1 single source, rev-2 P1) --------
 
 def test_chest_tier_by_source_map_rows():
+    # FALSIFIED AND REPLACED by T-M3s (M3-SPEC §3.1 map growth, LEDGER row +
+    # the A-E1 declared re-pin): the cairn source row "stage-item" joined the
+    # map, so the exact-text pin re-pins the FIVE rows, not the old four.
     m = re.search(r"const CHEST_TIER_BY_SOURCE := \{\"miniboss\": \"ember\", "
                   r"\"warden\": \"warden\",\s*\n?\t*\"endless-cycle\": \"dawn\", "
-                  r"\"event\": \"dawn\"\}", WORLD)
-    assert m, "CHEST_TIER_BY_SOURCE must be the §B.1 map (cycle-clear -> dawn)"
+                  r"\"event\": \"dawn\",\s*\n?\t*\"stage-item\": \"ember\"\}", WORLD)
+    assert m, "CHEST_TIER_BY_SOURCE must be the §B.1 map + §1.2 stage-item row"
 
 
 # ---- §A.3 persistence (save side detail rows ride test_save.py) --------------

@@ -136,3 +136,18 @@ def clean_leaderboard(request):
     finally:
         conn.close()
     yield
+
+
+def stages_row(ev):
+    """The ONE reader of the committed stages-m3.jsonl dump (T-M3s, seed
+    11282): rows are read through here by every file that judges a replaced
+    latch pin, never a second loader."""
+    import json
+    with open(os.path.join(REPO, "tests", "fixtures", "stages-m3.jsonl"),
+              encoding="utf-8") as fh:
+        for line in fh:
+            if line.strip():
+                r = json.loads(line)
+                if r.get("ev") == ev:
+                    return r
+    raise AssertionError("stages fixture row %r missing" % ev)

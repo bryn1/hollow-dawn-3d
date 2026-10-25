@@ -101,10 +101,14 @@ def test_format_keys_pinned():
     # FALSIFIED BY DESIGN when §A.3 landed the fifth field and REPLACED
     # (LEDGER T-M2e row), not deleted: the exactness of the key set is
     # exactly what pins the format.
+    # FALSIFIED-BY-DESIGN AND REPLACED at T-M3s (M3-SPEC §1.4, LEDGER row):
+    # the key set gained the stage row — again WITHOUT a version bump (§1.4:
+    # the field-by-field defaults rule IS the migration). Exactness remains
+    # the pin; the T-M2e wording precedent holds.
     m = re.search(r'"version":\s*version,\s*"gold":\s*gold,\s*'
                   r'"ranks":\s*ranks,\s*"flags":\s*flags,\s*'
-                  r'"best_cycle":\s*best_cycle', SAVE)
-    assert m, "as_data() must serialize exactly the four roadmap keys + best_cycle"
+                  r'"best_cycle":\s*best_cycle,\s*"stage":\s*stage', SAVE)
+    assert m, "as_data() must serialize exactly the roadmap keys + best_cycle + stage"
 
 
 def test_write_path_is_temp_plus_rename():
@@ -179,14 +183,16 @@ def test_valid_roundtrip(probe):
     rows, json_text, _ = probe
     assert rows["roundtrip"] == {"ok": 1, "file": 1, "temp_gone": 1}
     disk = json.loads(json_text)
-    # FALSIFIED-BY-DESIGN + REPLACED at T-M2e (MC 11237, LEDGER row): the
-    # key set gained §A.3's best_cycle; exactness of the NEW set is the pin.
-    assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle"}, \
-        "on-disk keys must be exactly the roadmap's four + best_cycle (§A.3)"
+    # FALSIFIED-BY-DESIGN + REPLACED twice, honestly: T-M2e (§A.3 best_cycle)
+    # then T-M3s (§1.4 stage, LEDGER row); exactness of the CURRENT set is
+    # the pin, and the reload row now reads the stage back off the disk.
+    assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle",
+                         "stage"}, \
+        "on-disk keys must be exactly the roadmap's four + best_cycle + stage"
     assert disk == {"version": 1, "gold": 123, "ranks": {"might": 2},
-                    "flags": {"stage2": 1}, "best_cycle": 3}
+                    "flags": {"stage2": 1}, "best_cycle": 3, "stage": 3}
     assert rows["reload"] == {"gold": 123, "ranks": 2, "flags": 1,
-                              "version": 1, "best_cycle": 3}
+                              "version": 1, "best_cycle": 3, "stage": 3}
     # a stale torn temp must not block the atomic rename (recreate from garbage)
     assert re.search(r'"version":\s*1', json_text), "version must serialize as an int"
 
@@ -221,10 +227,12 @@ def test_version_skew_quarantines(probe):
 def test_older_version_migrates_field_by_field(probe):
     rows, _, stderr = probe
     # best_cycle_default=1: A-E5's older-save leg (field absent -> 0, §A.3
-    # field-by-field migration, no VERSION bump) — row EXTENDED at T-M2e.
+    # field-by-field migration, no VERSION bump) — row EXTENDED at T-M2e,
+    # and again at T-M3s: stage_default=1 is §1.4's old-save leg (field
+    # absent -> the default stage 1, the same no-version-bump rule).
     assert rows["migrate"] == {"gold": 5, "ranks_default": 1,
                                "flags_default": 1, "quarantined": 0,
-                               "best_cycle_default": 1}
+                               "best_cycle_default": 1, "stage_default": 1}
     assert not any("reason=migrate" in ln for ln in stderr.splitlines())
 
 

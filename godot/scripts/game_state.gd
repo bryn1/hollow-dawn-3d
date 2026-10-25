@@ -35,6 +35,17 @@ var reward_kinds: Array = []
 # (the meta_ranks pattern: empty input = every pre-endless byte unchanged).
 var endless := false
 var cycle := 0
+# M3 pillar A (MC 11282 T-M3s, M3-SPEC §1.1): stage is the run's STAGE
+# hand-in (the stage-select overlay's choice, §2) and flare the Pressure-
+# Stair VISUAL band shift (§1.2, decayed by world.gd's plate logic). Like
+# endless/cycle both ride OUTSIDE the 12-field Contract B snapshot (F-3,
+# frozen) and are reset in start_run() below; main.gd hands the stage in
+# through the ONE _dawnwell -> start seam AFTER start_run (the endless
+# pattern — unset/older saves read the stage-1 id). The sim difficulty key
+# stays the pure clock: flare moves the band NAME the ground/HUD read,
+# never spawn stats or rates (F-4 byte corpus).
+var stage := "moor-vigil"
+var flare := 0.0
 var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
 # The 15 passive STAT ROWS (PARITY-ROADMAP rev3 features 3+7: original five
 # + the ten evolution partners, T-M1h). Seeded here AND in start_run so
@@ -123,6 +134,8 @@ func start_run() -> void:
 	reward_kinds = []
 	endless = false # §A.2: fresh-run reset; the flag is re-handed by main._start_game
 	cycle = 0     # after start_run (hand-in seam, never a start_run default)
+	stage = "moor-vigil" # §1.1 M3: fresh-run reset to the stage-1 id; re-handed
+	flare = 0.0          # by main._start_game after this call (plate logic owns decay)
 	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]
 	passives = {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0,
 		"cracked-heart": 0, "iron-wrap": 0, "tall-candles": 0, "four-leaf-charm": 0,

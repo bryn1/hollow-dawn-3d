@@ -20,6 +20,15 @@
 #                             every non-equal pixel IS the shop's draw).
 # Opening rides main._open_shop() — the SAME verb the menu button's signal
 # calls (the click itself is mouse input this stage cannot press; declared).
+# M3 A-E6 (MC 11282 T-M3s): one extra window on the SAME machine —
+#   m3-stage-select.png       the stage select opened through main's REAL
+#                             _open_stages verb on the (never-unlocked)
+#                             well, so the shot carries the three rows AND
+#                             the two sealed lock lines + disabled Selects
+#                             (roadmap :279 wants the lock row ON screen).
+#                             The gate reuses the SAME hidden-UI baseline
+#                             (the T-M2t per-window precedent, not a new
+#                             capture mechanism).
 extends SceneTree
 
 const OUT_ENV := "HD3D_SHOP_SHOTS_DIR"
@@ -76,6 +85,16 @@ func _on_frame() -> void:
 	if _stage == 2:
 		assert(not _main._screens.shop_visible())
 		_save_png("m1-dawnwell-baseline.png", false)
+		# A-E6: open the stage select through the REAL verb (the menu seam
+		# the button's signal calls), on the well NO run ever unlocked — the
+		# shot must carry both lock lines.
+		_main._open_stages()
+		_wait = SETTLE_FRAMES
+		_advance(3)
+		return
+	if _stage == 3:
+		assert(_main._screens.stages_visible())
+		_save_png("m3-stage-select.png", true)
 		_write_rows()
 		print("CAPTURE_OK")
 		quit()
@@ -90,6 +109,20 @@ func _advance(next_stage: int) -> void:
 
 
 func _save_png(png: String, with_state: bool) -> void:
+	if png == "m3-stage-select.png":
+		_rows.append({"leg": "stage_select_shot",
+			"cx": int(VIEW_HALF.x), "cy": int(VIEW_HALF.y),
+			"hw": int(PANEL_HALF.x), "hh": int(PANEL_HALF.y),
+			"rows": GameRenderer.STAGES.size(),
+			"sealed": GameRenderer.STAGES.size() - 1 - int(
+				_main._dawnwell.flags.get("stage2", 0)) - int(
+				_main._dawnwell.flags.get("stage3", 0)),
+			"chosen": int(_main._dawnwell.stage)})
+		var img2: Image = root.get_texture().get_image()
+		assert(img2.save_png(_out_dir() + "/" + png) == OK)
+		print("SAVED %s %dx%d" % [_out_dir() + "/" + png,
+			img2.get_width(), img2.get_height()])
+		return
 	if with_state:
 		print("STATE gold=%d ranks=%d" % [_main._dawnwell.gold,
 			_main._dawnwell.ranks.size()])

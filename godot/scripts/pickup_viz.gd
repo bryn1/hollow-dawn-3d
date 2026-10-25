@@ -65,6 +65,22 @@ const CHEST_TIER_ICON := {
 	"dawn": "res://assets/icons/icon-chest-dawn.png",
 }
 const CHEST_TIER_SCALE := {"ember": 1.0, "warden": 1.35, "dawn": 1.7}
+# M3 §1.2 (MC 11282 T-M3s): the PRESSURE PLATE billboard — the ONE new MM
+# slot of M3 (§7), drawn ONLY on a stage whose STAGES row fields plates
+# (ossuary-stair); every other stage keeps 5 draws byte-identically. Flat
+# ground rows (not billboards — plates lie on the ground, above the blob
+# shadows and ground decals of the Z-fight note above). PLATE_PX is OUR
+# row (shape ref S4 ~386 "circular pressure plates", the larger ground
+# feature between the 28 px chest and the field). The icon is T-M3a's
+# declared batch row (icon-plate.png): until it lands, a plain EMBER tinted
+# quad draws in its place (declared stand-in, same pattern as the Warden
+# art reuse rows in world.gd).
+const PLATE_PX := 40.0 # MEASURED at the A-E7 gate cycle 1: a 96 px flat
+	# decal IS painted ground detail — the block-knee went to 96 (RED) on
+	# both stage-3 windows; 40 px sits under the owner's 48 px block law,
+	# still the larger feature between the 28 px chest row and the field
+const PLATE_Y := 0.04
+const PLATE_ICON := "res://assets/icons/icon-plate.png"
 const DRAWS := 5 # gem + coin + cross + dawn-glow (§b's planned rows) +
 	# chests 1 (M1 f5). The §b planned note stays 33 on purpose: the roadmap
 	# re-tallies the WORST-CASE LOADOUT draws to planned 40 on the feature-6
@@ -79,6 +95,8 @@ var _coin: MultiMeshInstance3D
 var _cross: MultiMeshInstance3D
 var _glow: MultiMeshInstance3D
 var _chest: MultiMeshInstance3D
+var _plate: MultiMeshInstance3D
+var _plate_stage := "" # stage whose rows are written into _plate now
 var _counts := {}
 var _tier_tint := {} # tier -> Color multiplier, sampled at _ready (header)
 
@@ -105,6 +123,8 @@ func _ready() -> void:
 	# M1 chest pixels keep byte-stability up to the tier the drop now carries.
 	_tier_tint = _sample_tier_tints()
 	_chest = _mm(_quad(), _icon_mat(CHEST_TIER_ICON["ember"]), true)
+	_plate = _mm(_quad(), _icon_mat(PLATE_ICON) if ResourceLoader.exists(PLATE_ICON)
+		else _mat(GameRenderer.EMBER, 0.35))
 
 
 func _process(_delta: float) -> void:
@@ -140,6 +160,20 @@ func refresh() -> void:
 			_bb(basis, ARM_PX * s, BAR_PX * s, s), o))
 		mm.set_instance_transform(i * 2 + 1, Transform3D(
 			_bb(basis, BAR_PX * s, ARM_PX * s, s), o))
+	# M3 §1.2: the plate slot (see the consts). Static rows from the stage
+	# table, written once per stage — reads GameRenderer.STAGES + game.stage
+	# only, never writes sim state. instance_count 0 everywhere else, and
+	# the draw TALLY below only counts it when a stage actually draws one.
+	if game.stage != _plate_stage:
+		_plate_stage = game.stage
+		var plates: Array = GameRenderer.stage_row(game.stage).plates
+		var mm_p: MultiMesh = _plate.multimesh
+		mm_p.instance_count = plates.size()
+		var flat := Basis(Vector3(1.0, 0.0, 0.0), deg_to_rad(-90.0))
+		for i in plates.size():
+			mm_p.set_instance_transform(i, Transform3D(
+				_bb(flat, PLATE_PX * s, PLATE_PX * s, s),
+				Vector3(plates[i][0] * s, PLATE_Y, plates[i][1] * s)))
 	_counts.gems = world.gems.size()
 	_counts.coins = world.coins.size()
 	_counts.heals = world.heals.size()
@@ -154,7 +188,12 @@ func pickup_counts() -> Dictionary:
 # §b rows: the four MultiMeshInstance3D draws of this node (worst case;
 # empty slots cost no draw call at runtime).
 func draw_count() -> int:
-	return DRAWS
+	# §b rows: the five MultiMeshInstance3D draws of this node (worst case;
+	# empty slots cost no draw call at runtime). M3 §7 (T-M3s): the plate
+	# slot joins the tally ONLY on a stage that actually draws it — stage 1
+	# stays the shipped 5 (byte corpus); ossuary-stair worst case is 6.
+	return DRAWS + (1 if _plate_stage != "" and _plate != null \
+		and _plate.multimesh.instance_count > 0 else 0)
 
 
 # Local-space w x h billboard transform. NOT Basis.scaled() — measured on

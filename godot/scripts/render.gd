@@ -78,8 +78,105 @@ const BIOMES := [
 
 
 static func biome_at(t: float) -> Dictionary:
-	var pick: Dictionary = BIOMES[0]
-	for b in BIOMES:
-		if t >= b.t_start:
-			pick = b
+	# M3 §1.1 (T-M3s): the stage-1 WRAPPER, kept verbatim in name + return —
+	# the four committed capture readers (sim_headless x2, art_capture, the
+	# readability gate's base windows) stay on it, and every pre-M3 dump
+	# reads the same BIOMES row. band_at("moor-vigil", t) IS the shipped
+	# walk below (A-E2 pins the equality; the walk lives there now).
+	return band_at("moor-vigil", t)
+
+
+# ============================================================================
+# STAGES (M3 pillar A, MC 11282 T-M3s, M3-SPEC §1.1) — THE stage table:
+# id / display name / gimmick / bands / per-stage bosses (the SCHEDULE the
+# one world.gd loop iterates, §3.1) / limit / unlock. OUR numbers, all of
+# them. Stage-1 rows reference the SHIPPED consts verbatim (F-4, the
+# byte-stability anchor: GameWorld.BOSS_AT + the MINIBOSS_AT pair, and the
+# four shipped BIOMES rows re-keyed at the shipped t_starts) — the whole
+# committed sim corpus runs these rows as today. bands re-key the shipped
+# BIOMES rows BY NAME; band_at() resolves identity back to them, so roster
+# + tile stay the ONE table (§1.1). Unlock chain (§1.1 + §2): sunken-chapel
+# opens at level >= 10 in a moor-vigil run, ossuary-stair at level >= 14 in
+# a sunken-chapel run — the flags ride the EXISTING DawnWell.flags dict,
+# SET (never unset) by main._end_run through the ONE _meta_changed funnel.
+# cairns/plates are §1.2 gimmick data (fixed px coords; our radii/surge/
+# flare consts live at their named sites in world.gd); stage 1 fields NONE.
+const STAGES := [
+	{"id": "moor-vigil", "name": "MOOR VIGIL", "gimmick": "none",
+		"bands": [["MOORLAND", 0.0], ["BURNING DUNES", 150.0],
+			["THE FROZEN WASTE", 300.0], ["DEAD TUNDRA", 450.0]],
+		"bosses": [[GameWorld.BOSS_AT, "warden"]] + GameWorld.MINIBOSS_AT,
+		"cairns": [], "plates": [],
+		"limit": 900.0, "unlock_level": 0, "unlock_stage": "", "unlock_flag": ""},
+	{"id": "sunken-chapel", "name": "SUNKEN CHAPEL", "gimmick": "drowned-cairns",
+		"bands": [["MOORLAND", 0.0], ["THE FROZEN WASTE", 300.0],
+			["DEAD TUNDRA", 600.0]],
+		"bosses": [[540.0, "cathedral-choir"]],
+		"cairns": [[260.0, 150.0], [-260.0, -150.0]], "plates": [],
+		"limit": 900.0, "unlock_level": 10, "unlock_stage": "moor-vigil",
+		"unlock_flag": "stage2"},
+	{"id": "ossuary-stair", "name": "OSSUARY STAIR", "gimmick": "pressure-stair",
+		"bands": [["DEAD TUNDRA", 0.0], ["THE FROZEN WASTE", 450.0]],
+		"bosses": [[540.0, "ossuary-warden"]],
+		"cairns": [], "plates": [[-220.0, 0.0], [220.0, 0.0]],
+		"limit": 900.0, "unlock_level": 14, "unlock_stage": "sunken-chapel",
+		"unlock_flag": "stage3"},
+]
+
+
+# Unset / unknown / out-of-range ids read STAGES[0] — moor-vigil is the
+# default case (A-E5's old-save reading is the same law, save side).
+static func stage_row(stage_id: String) -> Dictionary:
+	for s in STAGES:
+		if s.id == stage_id:
+			return s
+	return STAGES[0]
+
+
+# save.gd fields stage as an int (1-based, §1.4 persistence row); out-of-
+# range reads stage 1 — never a crash, the field-by-field default law.
+static func stage_id_for_index(idx: int) -> String:
+	if idx < 1 or idx > STAGES.size():
+		return String(STAGES[0].id) # unknown reads the default, never a crash
+	return String(STAGES[idx - 1].id)
+
+
+static func stage_index_for(stage_id: String) -> int:
+	for i in STAGES.size():
+		if STAGES[i].id == stage_id:
+			return i + 1
+	return 1
+
+
+static func stage_bosses(stage_id: String) -> Array:
+	return stage_row(stage_id).bosses
+
+
+# The row the chain OPENS when a run of stage_id ends ({} ends the chain).
+static func stage_unlock_after(stage_id: String) -> Dictionary:
+	for s in STAGES:
+		if s.unlock_stage == stage_id:
+			return s
+	return {}
+
+
+# The ONE stage-keyed band mechanism (M3 §1.1): the same saturating walk
+# biome_at shipped, over the stage's own band rows, resolving each row back
+# to the shipped BIOMES entry (identity — roster + tile never duplicate).
+# PLACEMENT LAW (rev-3 P3-3): this table and band_at live BELOW biome_at —
+# test_biome_numbers slices BIOMES to biome_at, so a band row above it
+# would leak into that stage-1 pin (the A-E2 placement RED leg).
+static func band_at(stage_id: String, t: float) -> Dictionary:
+	var bands: Array = stage_row(stage_id).bands
+	var pick: Dictionary = _biome_named(String(bands[0][0]))
+	for b in bands:
+		if t >= b[1]:
+			pick = _biome_named(String(b[0]))
 	return pick
+
+
+static func _biome_named(band_name: String) -> Dictionary:
+	for b in BIOMES:
+		if b.name == band_name:
+			return b
+	return BIOMES[0]

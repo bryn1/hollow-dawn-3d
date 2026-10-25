@@ -124,7 +124,9 @@ func _update_biome_flash(delta: float) -> void:
 	if game.phase != "playing":
 		_biome_name = "" # re-arm: the next run flashes its first band
 	else:
-		var band: Dictionary = GameRenderer.biome_at(game.time)
+		# M3 §1.1/§1.2 (T-M3s): the stage-keyed, flare-aware banner read
+		# (the ONE band mechanism; stage 1 + flare 0 == the shipped walk).
+		var band: Dictionary = GameRenderer.band_at(game.stage, game.time + game.flare)
 		if band.name != _biome_name:
 			_biome_name = band.name
 			_biome.text = _biome_name

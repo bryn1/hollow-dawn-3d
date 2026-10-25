@@ -44,14 +44,15 @@ func _leg_roundtrip() -> void:
 	w.ranks = {"might": 2}
 	w.flags = {"stage2": 1}
 	w.best_cycle = 3 # M2 §A.3 (T-M2e): the new row roundtrips on the same path
+	w.stage = 3 # M3 §1.4 (T-M3s): the stage row roundtrips on the same path
 	var ok := w.save()
 	print("LEG roundtrip ok=%d file=%d temp_gone=%d" % [
 		int(ok), int(_exists(SAVE)), int(not _exists(TEMP))])
 	print("JSON " + _read(SAVE))
 	var r: DawnWell = DawnWell.load_save()
-	print("LEG reload gold=%d ranks=%d flags=%d version=%d best_cycle=%d" % [
+	print("LEG reload gold=%d ranks=%d flags=%d version=%d best_cycle=%d stage=%d" % [
 		r.gold, int(r.ranks.get("might", -1)), int(r.flags.get("stage2", -1)),
-		r.version, r.best_cycle])
+		r.version, r.best_cycle, r.stage])
 
 
 func _leg_corrupt() -> void:
@@ -78,9 +79,11 @@ func _leg_migrate() -> void:
 	_wipe()
 	_write(SAVE, JSON.stringify({"version": 0, "gold": 5})) # older save, new fields absent
 	var w: DawnWell = DawnWell.load_save()
-	print("LEG migrate gold=%d ranks_default=%d flags_default=%d quarantined=%d best_cycle_default=%d" % [
+	print("LEG migrate gold=%d ranks_default=%d flags_default=%d quarantined=%d best_cycle_default=%d stage_default=%d" % [
 		w.gold, int(w.ranks.is_empty()), int(w.flags.is_empty()),
-		int(_exists(CORRUPT)), int(w.best_cycle == 0)]) # A-E5: no field -> 0
+		int(_exists(CORRUPT)), int(w.best_cycle == 0), int(w.stage == 1)])
+	# M3 §1.4 (T-M3s): an old save carries no stage -> 1, the default stage,
+	# the field-by-field defaults rule again (no version bump).
 
 
 func _leg_bestcycle() -> void:

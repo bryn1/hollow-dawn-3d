@@ -1,6 +1,8 @@
 # Entry point: 3D scene wiring (orthographic camera rig, biome ground, per-
 # class horde viz, hero pawn), JS bridge registration, fixed-step simulation,
 # phase routing (menu/playing/levelup/end) and the Contract B snapshot eval.
+# reason: >400 lines — the ONE fixed-step sim loop + phase router of the
+#   whole game (DESIGN-3D §d v1-verbatim); splitting it would fork the loop.
 # The simulation loop below is v1 main.gd VERBATIM (DESIGN-3D §d): same
 # constants, same WIN_TIME gate, same score formula; only the visible layer
 # wiring is 3D (the v1 Node2D renderer body is deleted, §f — render.gd
@@ -116,6 +118,11 @@ func _ready() -> void:
 	_screens.shop_buy.connect(_shop_buy)
 	_screens.shop_refund.connect(_shop_refund)
 	_screens.shop_refund_all.connect(_shop_refund_all)
+	# Stage select (M3 §2, T-M3s): fifth overlay, same verb contract as the
+	# shop — the panel emits, main mutates _dawnwell + persists via the ONE
+	# _meta_changed funnel and refreshes.
+	_screens.stages_requested.connect(_open_stages)
+	_screens.stage_selected.connect(_stage_chosen)
 
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
@@ -168,9 +175,11 @@ func _handle_presses() -> void:
 			game.muted = not game.muted # internal flag; this build ships no audio
 		elif code == "Escape" and game.phase == "playing":
 			game.paused = not game.paused
-		# The shop is menu-phase UI: while it is open the Enter that would
-		# start a run is inert (the panel's own mouse buttons own input).
-		elif game.phase == "menu" and bridge.is_enter(code) and not _screens.shop_visible():
+		# The shop and the stage select are menu-phase UI: while either is
+		# open the Enter that would start a run is inert (the panel's own
+		# mouse buttons own input — A-E8, shop-guard parity, MC 11282).
+		elif game.phase == "menu" and bridge.is_enter(code) and not _screens.shop_visible() \
+				and not _screens.stages_visible():
 			_start_game()
 		elif game.phase == "levelup":
 			if code == "Digit1":
@@ -265,6 +274,13 @@ func _start_game() -> void:
 	# start seam, AFTER start_run (which resets the run-mode vars, §A.2).
 	# No flag row = endless false = every M1 byte unchanged.
 	game.endless = int(_dawnwell.flags.get("endless", 0)) == 1
+	# The stage hand-in (M3 §1.1, T-M3s): the SAME _dawnwell -> start seam,
+	# the endless pattern — AFTER start_run (which resets stage to the
+	# stage-1 id). An unset/older save reads index 1 = "moor-vigil", so
+	# every committed dump is the stage-1 default case (F-4). The stage's
+	# props seed right after the hand-in (static rows, ZERO RNG — A-E3).
+	game.stage = GameRenderer.stage_id_for_index(_dawnwell.stage)
+	world.seed_stage_props(game)
 	_current_offer = []
 	_screens.hide_all()
 
@@ -313,6 +329,14 @@ func _end_run(result: String) -> void:
 	# the field-by-field save migration keeps older files at 0 (§A.3).
 	if game.cycle > _dawnwell.best_cycle:
 		_dawnwell.best_cycle = game.cycle
+	# M3 §1.1/§2 unlock chain (T-M3s): riding the EXISTING flags dict — a
+	# run of stage S at level >= the next row's unlock_level SETS that row's
+	# flag (SET only; death never unset anything, the flag dict is write-1
+	# law). ONE funnel below persists it — this adds NO second _meta_changed
+	# call site (A-E5's red instrument: funnel call count per end stays 1).
+	var next_stage: Dictionary = GameRenderer.stage_unlock_after(game.stage)
+	if not next_stage.is_empty() and game.level >= int(next_stage.unlock_level):
+		_dawnwell.flags[String(next_stage.unlock_flag)] = 1
 	_dawnwell.gold += game.stats.gold
 	_meta_changed()
 	_screens.show_end(result == "win", [
@@ -378,3 +402,25 @@ func _shop_refund_all() -> void:
 	if PowerUps.refund_all(_dawnwell) > 0:
 		_meta_changed()
 	_screens.refresh_shop()
+
+
+# --- Stage select verbs (M3 §2, T-M3s) ----------------------------------------
+# Same contract as the shop verbs: the panel only displays the well +
+# emits the verb; main owns the mutation + the ONE funnel. A locked choice
+# cannot happen through the UI (its Select is DISABLED — S7 disable-not-
+# hide precedent), but the verb re-checks the chain so a stale panel click
+# can never chain-unlock (§2). A no-op selection does NOT write (shop
+# precedent: the funnel fires only on real change).
+
+func _open_stages() -> void:
+	_screens.show_stages(_dawnwell)
+
+
+func _stage_chosen(stage_id: String) -> void:
+	var idx := GameRenderer.stage_index_for(stage_id)
+	if idx == 1 or int(_dawnwell.flags.get(
+			String(GameRenderer.stage_row(stage_id).unlock_flag), 0)) == 1:
+		if _dawnwell.stage != idx:
+			_dawnwell.stage = idx
+			_meta_changed()
+	_screens.refresh_stages()

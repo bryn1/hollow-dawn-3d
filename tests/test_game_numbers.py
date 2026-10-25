@@ -46,7 +46,18 @@ def test_win_threshold_900():
 
 
 def test_boss_gate_wired():
-    assert re.search(r"time\s*>=\s*BOSS_AT", WORLD), "boss spawn must compare the clock to BOSS_AT"
+    # FALSIFIED AND REPLACED by T-M3s (M3-SPEC §1.3 P1-1 + A-E2, LEDGER row):
+    # the per-clock boss gate became the unified per-stage schedule walk —
+    # world.gd no longer carries a bare `time >= BOSS_AT` comparison, and
+    # replace-not-delete redirects this pin rather than dropping it. The
+    # wiring is now proven twice: BOSS_AT still FEEDS the stage-1 boss row
+    # (the engine-evaluated stages_table leg), and the dump leg shows the
+    # Warden walking at 540.017 on a real run.
+    assert const("BOSS_AT", WORLD) == 540.0
+    assert conftest.stages_row("stages_table")["checks"][
+        "boss_row_is_shipped_schedule"], "stage-1 boss row must BE the shipped schedule"
+    assert conftest.stages_row("stage1_schedule")["checks"][
+        "warden_first_seen_540"], "the schedule must walk the warden onto the field"
 
 
 # ---- heal drop ---------------------------------------------------------------
@@ -83,9 +94,12 @@ def test_spawn_rate_capped_12():
     # pins here — the term inside it now rides the cycle-local minute (IS
     # game.time/60.0 at cycle 0) times QTY_CYC (1.0 at cycle 0), so flag-off
     # byte-stability holds while quantity growth saturates against this cap.
+    # REPLACED again at T-M3s (M3-SPEC §1.2, LEDGER row): the CEILING is
+    # still the untouched pin — the single term inside it now also carries
+    # the plate surge factor (1.0 off a plate: byte-stability).
     assert re.search(r"minf\(\s*12\.0\s*,\s*\(1\.0 \+ 1\.3 \* minute\) \* "
-                     r"qty_cyc\(game\.cycle\)\s*\)", WORLD), \
-        "spawn rate must stay min(12, (1 + 1.3*minute) * QTY_CYC) — §5 cap + §A.1"
+                     r"qty_cyc\(game\.cycle\)\s*\*\s*surge\s*\)", WORLD), \
+        "spawn rate must stay min(12, (1 + 1.3*minute) * QTY_CYC * surge)"
 
 
 def test_alive_cap_400_pauses_the_single_spawn_loop():

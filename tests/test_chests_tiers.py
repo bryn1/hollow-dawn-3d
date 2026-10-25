@@ -97,8 +97,14 @@ SPEC_TABLE = {
     "dawn": {"item_count": 3, "weapon": 35, "passive": 45, "gold": 20,
              "gold_lo": 40, "gold_hi": 90},
 }
+# FALSIFIED-BY-DESIGN AND REPLACED at T-M3s (M3-SPEC §3.1, LEDGER row): the
+# map grew the cairn source row "stage-item" -> ember. This map is the ONE
+# spec-side row; the A-E1 byte-anchor carve says the chests-tiers fixture is
+# judged ONLY on its stage-1 OBSERVABLE rows — the embedded map line of the
+# chest_tier_drop row re-minted with this growth (verified: observable fields
+# and the other 14 rows stayed byte-identical, capture .tmp/m3s-stages.txt).
 SPEC_MAP = {"miniboss": "ember", "warden": "warden",
-            "endless-cycle": "dawn", "event": "dawn"}
+            "endless-cycle": "dawn", "event": "dawn", "stage-item": "ember"}
 
 
 def rows_of(ev, fixture=FIXTURE):

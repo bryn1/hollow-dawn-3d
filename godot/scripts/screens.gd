@@ -1,8 +1,13 @@
-# Screens layer: menu, level-up cards, the end screen and the Dawn Well
-# meta shop (T-M1f — the shop is a FOURTH overlay in this ONE panel style:
-# same _overlay/_center_box/_label/_button idiom, zero new UI mechanism).
-# Mouse works for real users; keyboard picking is routed by main from the
-# bridge press queue (Contract B), never from here.
+# Screens layer: menu, level-up cards, the end screen, the Dawn Well
+# reason: >400 lines — one overlay idiom per file IS the concern (the §j
+#   no-blank guarantee + the 5-panel parity are enforced against THIS file);
+#   splitting it would fork the idiom the acceptance suite pins.
+# meta shop (T-M1f — FOURTH overlay) and the stage select (M3 §2, T-M3s —
+# FIFTH overlay; the select surface is what earns v2.0.0, SEL-A §2). Every
+# one rides this ONE panel style: same _overlay/_center_box/_label/_button
+# idiom, zero new UI mechanism. Mouse works for real users; keyboard
+# picking is routed by main from the bridge press queue (Contract B), never
+# from here.
 # §j (MC 11103): every card kind resolves to an icon file. v1's blank-icon
 # path (passives shipped icon: "", levelup.gd:35) is closed structurally:
 # _card() has NO conditional around the icon TextureRect, icon_path() is
@@ -19,6 +24,8 @@ signal shop_requested
 signal shop_buy(id: String)
 signal shop_refund(id: String)
 signal shop_refund_all
+signal stages_requested
+signal stage_selected(stage_id: String)
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -77,6 +84,13 @@ var _shop: Control
 var _well: DawnWell
 var _shop_gold: Label
 var _shop_rows: VBoxContainer
+# Stage select (M3 §2, T-M3s): DISPLAY of the passed-in DawnWell + the ONE
+# STAGES table only — main.gd's _stage_chosen verb owns the mutation, the
+# ONE _meta_changed funnel persists, refresh_stages() rebuilds (shop law,
+# same contract). Rows rebuild per open/refresh; the locked row is DISABLED,
+# never hidden (S7 ~610 precedent).
+var _stages: Control
+var _stages_rows: VBoxContainer
 
 
 func _ready() -> void:
@@ -87,8 +101,10 @@ func _ready() -> void:
 	_build_levelup()
 	_end = _overlay()
 	_build_end()
-	_shop = _overlay() # on top of _end (added last): the shop dims all
+	_shop = _overlay()
 	_build_shop()
+	_stages = _overlay() # on top of the shop (added last): the select dims all
+	_build_stages()
 	show_menu()
 
 
@@ -96,6 +112,7 @@ func show_menu() -> void:
 	_end.visible = false
 	_levelup.visible = false
 	_shop.visible = false
+	_stages.visible = false
 	_menu.visible = true
 
 
@@ -104,6 +121,7 @@ func hide_all() -> void:
 	_levelup.visible = false
 	_end.visible = false
 	_shop.visible = false
+	_stages.visible = false
 
 
 func show_levelup(offer: Array) -> void:
@@ -159,6 +177,8 @@ func _build_menu() -> void:
 		13, MOON))
 	box.add_child(_button("Enter the night", _on_start))
 	box.add_child(_button("The Dawn Well", _on_shop))
+	# M3 §2: the select seam sits NEXT TO those (same _button idiom).
+	box.add_child(_button("Choose your night", _on_stages))
 
 
 func _build_levelup() -> void:
@@ -232,6 +252,10 @@ func _on_start() -> void:
 
 func _on_shop() -> void:
 	shop_requested.emit()
+
+
+func _on_stages() -> void:
+	stages_requested.emit()
 
 
 # --- Dawn Well shop (T-M1f): the fourth overlay in the ONE panel style ----
@@ -342,3 +366,80 @@ func _label(text: String, size: int, color: Color) -> Label:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
+
+
+# --- Stage select (M3 §2, T-M3s): the fifth overlay in the ONE panel style --
+# The roadmap's "stage-select overlay" (:279): 3 rows from the ONE STAGES
+# table — name, band preview, gimmick line, boss, limit — plus the LOCKED
+# row visibly sealed (unlock chain is part of the screen, roadmap requires
+# the stage-2 lock row ON screen). The panel displays + emits; main mutates
+# + persists through the ONE funnel, then calls refresh_stages(). The boss
+# name reads the FUTURE ENEMY_TYPES `name` row with a declared fallback to
+# the id until T-M3b lands the boss name rows (§3.1: ONE name source for
+# HUD bar + this overlay).
+
+func show_stages(well: DawnWell) -> void:
+	_well = well
+	_menu.visible = false
+	_stages.visible = true
+	refresh_stages()
+
+
+func stages_visible() -> bool:
+	return _stages.visible
+
+
+func close_stages() -> void:
+	_stages.visible = false
+	show_menu()
+
+
+func _build_stages() -> void:
+	var box := _center_box(_stages)
+	box.add_child(_label("Choose your night", 24, BONE))
+	_stages_rows = VBoxContainer.new()
+	_stages_rows.add_theme_constant_override("separation", 10)
+	box.add_child(_stages_rows)
+	box.add_child(_button("Back to the menu", close_stages))
+
+
+func refresh_stages() -> void:
+	# Rebuilds the three rows from the ONE STAGES table (M3 §1.1 is its
+	# single source). Chosen row titles in EMBER; locked rows carry the
+	# unlock line + a DISABLED Select (disable-when-locked: S7 ~610).
+	for child in _stages_rows.get_children():
+		child.queue_free()
+	for row in GameRenderer.STAGES:
+		var idx := GameRenderer.stage_index_for(String(row.id))
+		var unlocked := idx == 1 \
+			or int(_well.flags.get(String(row.unlock_flag), 0)) == 1
+		var title := _label(row.name + (" (chosen)" if _well.stage == idx else ""),
+			16, EMBER_TINT if _well.stage == idx else BONE)
+		title.autowrap_mode = TextServer.AUTOWRAP_OFF
+		_stages_rows.add_child(title)
+		var band_names: Array = []
+		for b in row.bands:
+			band_names.append(String(b[0])) # shipped banner names, as the HUD shows them
+		var boss_id: String = String(row.bosses[row.bosses.size() - 1][1])
+		var boss_name: String = String(
+			GameWorld.ENEMY_TYPES.get(boss_id, {}).get("name", boss_id))
+		var limit_s := int(row.limit)
+		var info := _label("%s — %s — %s — %02d:%02d" % [
+			" -> ".join(band_names), String(row.gimmick).replace("-", " "),
+			boss_name, int(limit_s / 60.0), limit_s % 60], 12, MOON)
+		info.autowrap_mode = TextServer.AUTOWRAP_OFF
+		_stages_rows.add_child(info)
+		var select := Button.new()
+		if unlocked:
+			select.text = "Night %d — %s" % [idx, "Select" if _well.stage != idx else "Chosen"]
+			select.disabled = _well.stage == idx # a no-op verb cannot fire
+			var sid: String = String(row.id)
+			select.pressed.connect(func(): stage_selected.emit(sid))
+		else:
+			# The chain line the roadmap wants on screen (:279): which run
+			# unlocks this stage, OUR numbers from the table.
+			select.text = "Sealed — reach level %d in %s" % [
+				int(row.unlock_level), String(GameRenderer.stage_row(
+					String(row.unlock_stage)).name)]
+			select.disabled = true
+		_stages_rows.add_child(select)

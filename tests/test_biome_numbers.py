@@ -56,8 +56,13 @@ def test_band_t_starts_names_and_rosters():
 def test_biome_flash_3s_on_the_band_banner():
     # N22: banner text = BIOMES name, alpha-up 3.0 s, via the ONE biome_at.
     assert const("BIOME_FLASH", HUD3D) == 3.0
-    assert re.search(r"GameRenderer\.biome_at\(game\.time\)", HUD3D), \
-        "the banner must read bands through GameRenderer.biome_at"
+    # FALSIFIED AND REPLACED by T-M3s (M3-SPEC §1.1/§1.2, LEDGER row): the
+    # banner now reads the ONE band mechanism stage-keyed and flare-aware —
+    # band_at(game.stage, game.time + game.flare) is the supershape, and
+    # biome_at survives as the stage-1 wrapper. The flash const pin stands.
+    assert re.search(r"GameRenderer\.band_at\(game\.stage,\s*game\.time \+ "
+                     r"game\.flare\)", HUD3D), \
+        "the banner must read bands through the ONE band_at mechanism"
 
 
 # ---- run numbers (N23 / N24 / N25 / N26 / N2) ----------------------------------

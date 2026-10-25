@@ -40,6 +40,11 @@ SHOP_PNG = "m1-dawnwell.png"
 BASE_PNG = "m1-dawnwell-baseline.png"
 DELTA = 12   # per-pixel max-channel delta that counts as a drawn px
 PX_MIN = 200  # roadmap floor, verbatim
+# M3 A-E6 (MC 11282 T-M3s): rows.json now carries one leg PER OVERLAY
+# window (the T-M2t per-tier-window precedent: gate loops rows, not rows[0])
+# — the stage select crops its _center_box rect against the SAME hidden-UI
+# baseline; its row also carries the state truth the shot must show: 3
+# stage rows, 2 sealed lock lines on a never-unlocked well, chosen == 1.
 
 
 def capture():
@@ -58,32 +63,43 @@ def capture():
 
 def gate(dir_path):
     rows = json.load(open(os.path.join(dir_path, "rows.json")))
-    row = rows[0]
-    assert row["leg"] == "shop_shot"
-    ok = True
-    if not (row["gold"] == 3000 - (40 + 80) - 55 - 60 - 100 and row["ranks"] == 4):
-        print("FAIL seeded shop state wrong: %s" % row)
-        ok = False
-    shop = np.asarray(Image.open(
-        os.path.join(dir_path, SHOP_PNG)).convert("RGB"), dtype=np.int16)
     base = np.asarray(Image.open(
         os.path.join(dir_path, BASE_PNG)).convert("RGB"), dtype=np.int16)
-    if shop.shape != base.shape:
-        print("FAIL shot/baseline shape mismatch %s vs %s"
-              % (shop.shape, base.shape))
-        sys.exit(1)
-    cx, cy, hw, hh = row["cx"], row["cy"], row["hw"], row["hh"]
-    x0, x1 = max(cx - hw, 0), min(cx + hw, shop.shape[1])
-    y0, y1 = max(cy - hh, 0), min(cy + hh, shop.shape[0])
-    diff = np.abs(shop - base).max(axis=2)
-    win_px = int((diff[y0:y1, x0:x1] > DELTA).sum())
-    total_px = int((diff > DELTA).sum())
-    state_ok = win_px >= PX_MIN
-    print("SHOP-PANEL leg=%s cx=%d cy=%d crop=[%d:%d,%d:%d] "
-          "non-bg_px=%d (floor %d) frame-wide_diff=%d %s" % (
-              row["leg"], cx, cy, x0, x1, y0, y1, win_px, PX_MIN, total_px,
-              "PASS" if state_ok else "FAIL"))
-    return ok and state_ok
+    ok = True
+    for row in rows:
+        img_path = os.path.join(dir_path, {"shop_shot": SHOP_PNG,
+                                           "stage_select_shot":
+                                           "m3-stage-select.png"}[row["leg"]])
+        shot = np.asarray(Image.open(img_path).convert("RGB"), dtype=np.int16)
+        if shot.shape != base.shape:
+            print("FAIL shot/baseline shape mismatch %s vs %s"
+                  % (shot.shape, base.shape))
+            sys.exit(1)
+        if row["leg"] == "shop_shot":
+            if not (row["gold"] == 3000 - (40 + 80) - 55 - 60 - 100
+                    and row["ranks"] == 4):
+                print("FAIL seeded shop state wrong: %s" % row)
+                ok = False
+        elif row["leg"] == "stage_select_shot":
+            # the state the shot must paint (A-E6 + roadmap :279): three
+            # stage rows, two locked with their Sealed lines, stage 1 chosen
+            if not (row["rows"] == 3 and row["sealed"] == 2
+                    and row["chosen"] == 1):
+                print("FAIL stage-select state wrong: %s" % row)
+                ok = False
+        cx, cy, hw, hh = row["cx"], row["cy"], row["hw"], row["hh"]
+        x0, x1 = max(cx - hw, 0), min(cx + hw, shot.shape[1])
+        y0, y1 = max(cy - hh, 0), min(cy + hh, shot.shape[0])
+        diff = np.abs(shot - base).max(axis=2)
+        win_px = int((diff[y0:y1, x0:x1] > DELTA).sum())
+        total_px = int((diff > DELTA).sum())
+        state_ok = win_px >= PX_MIN
+        ok = ok and state_ok
+        print("OVERLAY leg=%s cx=%d cy=%d crop=[%d:%d,%d:%d] "
+              "non-bg_px=%d (floor %d) frame-wide_diff=%d %s" % (
+                  row["leg"], cx, cy, x0, x1, y0, y1, win_px, PX_MIN, total_px,
+                  "PASS" if state_ok else "FAIL"))
+    return ok
 
 
 def main():

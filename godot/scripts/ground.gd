@@ -32,7 +32,9 @@ func _ready() -> void:
 		var img: Image = load(b.tex).get_image()
 		img.generate_mipmaps()
 		_texs[b.name] = ImageTexture.create_from_image(img)
-	_set_band(GameRenderer.biome_at(0.0).name)
+	# M3 §1.1 (T-M3s): the stage-keyed read — boot/menu runs the stage-1
+	# default id, so this is the shipped MOORLAND byte-for-byte.
+	_set_band(GameRenderer.band_at(game.stage, game.time + game.flare).name)
 
 
 func _process(_delta: float) -> void:
@@ -40,7 +42,9 @@ func _process(_delta: float) -> void:
 		return
 	position = Vector3(game.player.x / CameraRig.PX_PER_M, 0.0,
 		game.player.y / CameraRig.PX_PER_M)
-	var band: Dictionary = GameRenderer.biome_at(game.time)
+	# M3 §1.1/§1.2: band_at(stage, t + flare) — stage 1 + no flare is the
+	# shipped walk exactly; the flare term only moves the NAME (§1.2, visual).
+	var band: Dictionary = GameRenderer.band_at(game.stage, game.time + game.flare)
 	if band.name != _band_name:
 		_set_band(band.name)
 

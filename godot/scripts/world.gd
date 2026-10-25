@@ -67,7 +67,21 @@ static func cycle_minute(game: GameState) -> float:
 # event row stays the §B.1 P4-1 forward-declared reservation (event-waves
 # are an excluded pillar — the source cannot fire yet). OUR mapping.
 const CHEST_TIER_BY_SOURCE := {"miniboss": "ember", "warden": "warden",
-	"endless-cycle": "dawn", "event": "dawn"}
+	"endless-cycle": "dawn", "event": "dawn", "stage-item": "ember"}
+
+# M3 §1.2 (MC 11282 T-M3s) PRESSURE STAIR consts (ossuary-stair row, OUR
+# numbers): dwelling inside a plate's radius bumps the EXISTING spawn-rate
+# term by SPAWN_SURGE (INSIDE the untouched minf(12.0) ceiling, and below
+# the ALIVE_CAP early-return above it — structurally cannot explode, §7)
+# and pins the VISUAL band shift to FLARE_SHIFT s, decaying linearly to the
+# base band over FLARE_DECAY s. The dwell is a pure position test on the
+# existing _dist pattern — it consumes ZERO randf/randi (A-E4's RNG-stream
+# row). Stage rows without plates: surge is the exact 1.0 identity and
+# flare stays 0.0 (byte-identical corpus, F-4).
+const SPAWN_SURGE := 1.5
+const PLATE_RADIUS := 120.0 # px, the shape ref S4 ~386 (our N)
+const FLARE_SHIFT := 150.0 # s the band NAME runs ahead (visual only — the
+const FLARE_DECAY := 30.0  # sim difficulty key stays the pure clock, F-4)
 
 # Stats + sprite per enemy id (plan §5 classics pinned by the acceptance
 # suite; biome signature creatures MC 11082 — sprites mirrored from
@@ -102,8 +116,13 @@ var coins: Array = []
 var heals: Array = [] # Dawnlight pickups; +HEAL_AMOUNT hp, clamped to max_hp
 var chests: Array = [] # chest DROPS (M1 f4); opening rides collect_pickups (M1 f5)
 var spawn_acc := 0.0
-var boss_spawned := false
-var minibosses_spawned := 0 # latches MINIBOSS_AT in schedule order, once each
+# M3 §3.1 (T-M3s): ONE latch index latches the stage row's bosses list in
+# schedule order (the STAGES column is the schedule's single source). This
+# REPLACES the warden `boss_spawned` bool + the `minibosses_spawned` index
+# (same commit, replace-not-delete: the claims those regex pins proved move
+# to the sim_stages stage1_schedule dump legs + the journey's boss_once
+# rows — see tests/test_boss_numbers.py's retired-and-replaced row notes).
+var schedule_spawned := 0
 
 
 func reset() -> void:
@@ -113,16 +132,35 @@ func reset() -> void:
 	heals.clear()
 	chests.clear()
 	spawn_acc = 0.0
-	boss_spawned = false
-	minibosses_spawned = 0
+	schedule_spawned = 0
 
 
-# Enemy set open at time t (MC 11082): the biome band's own roster
-# (BIOMES.enemies via the one biome_at() helper — wraith in every band + the
-# band's signature creature) plus the classic gate rotation (GATES, minutes).
+# M3 §1.2 (T-M3s) DROWNED CAIRNS (sunken-chapel row): static seeding of the
+# stage row's cairn coords onto the ONE existing chest array — the chest
+# viz, touch-open and reward funnel all ride unchanged (no 5th pickup kind,
+# no second drop funnel). The tier stamps from THE MAP, the new
+# "stage-item" row (the A-E3 tier-from-map law, single source; value ember,
+# the same value the select card promises — §6 promise==deliver). Zero RNG:
+# fixed table coords, no rolls (A-E3's RNG-stream row). Plates are NOT
+# seeded here — they are static GROUND rows read by the plate logic below.
+# §1.2 (T-M3s): the cairns are literally chests (the spec's own words) —
+# the table's coord rows ride the SAME comparison space the shipped funnel
+# already uses (the spec calls that funnel "16 px", world.gd:355 — the spec
+# "px" IS world.gd's numeric space, no second unit convention; the camera
+# divides world units by PX_PER_M at draw time exactly as it does for every
+# other position, so no conversion exists HERE either).
+func seed_stage_props(game: GameState) -> void:
+	for c in GameRenderer.stage_row(game.stage).cairns:
+		chests.append({"x": c[0], "y": c[1],
+			"tier": CHEST_TIER_BY_SOURCE["stage-item"]})
+
+
+# Enemy set open at time t (MC 11082): the STAGE's band roster at t
+# (M3 §1.1: band_at(stage, t) — stage 1 reads the shipped BIOMES walk
+# byte-identically) plus the classic gate rotation (GATES, minutes).
 # One merged set; the single spawn loop in update_spawns draws from it.
-func _types_open(t: float) -> Array:
-	var open: Array = GameRenderer.biome_at(t).enemies.duplicate()
+func _types_open(stage_id: String, t: float) -> Array:
+	var open: Array = GameRenderer.band_at(stage_id, t).enemies.duplicate()
 	for gate in GATES:
 		if t >= gate[0] * 60.0 and not open.has(gate[1]):
 			open.append(gate[1])
@@ -161,24 +199,48 @@ func _spawn_enemy(type_key: String, game: GameState, view: Vector2) -> void:
 
 
 func update_spawns(dt: float, game: GameState, view: Vector2) -> void:
-	if not boss_spawned and game.time >= BOSS_AT:
-		boss_spawned = true
-		_spawn_enemy("warden", game, view)
-	while minibosses_spawned < MINIBOSS_AT.size() \
-			and game.time >= MINIBOSS_AT[minibosses_spawned][0]:
-		var mb: Array = MINIBOSS_AT[minibosses_spawned]
-		minibosses_spawned += 1 # latch first: the schedule fires once each
-		_spawn_enemy(mb[1], game, view)
+	# M3 §3.1 (T-M3s): the ONE latch-index loop over the stage row's bosses
+	# list. The stage-1 row IS the shipped BOSS_AT/MINIBOSS_AT schedule
+	# (§1.1), so the spawn order/RNG stream is byte-identical: same tick,
+	# same entry, latch first. The warden/miniboss latches this retires are
+	# the declared replace-not-delete pair (see schedule_spawned's header).
+	var sched: Array = GameRenderer.stage_bosses(game.stage)
+	while schedule_spawned < sched.size() \
+			and game.time >= sched[schedule_spawned][0]:
+		var b: Array = sched[schedule_spawned]
+		# A stage's boss row IS the boss: the id lands in ENEMY_TYPES with
+		# its own card (M3-SPEC §3.1 — T-M3b fields cathedral-choir +
+		# ossuary-warden). While a row's id has no stats row the schedule
+		# DEFERS (no latch, no crash, no silent no-op): stages 2/3 are
+		# unlockable mid-spine, and master must stay runnable between the
+		# serial spine's cards. Stage 1's rows are all shipped ids — the
+		# has() test consumes zero RNG and never holds (byte corpus).
+		if not ENEMY_TYPES.has(String(b[1])):
+			break
+		schedule_spawned += 1 # latch first: the schedule fires each once
+		_spawn_enemy(b[1], game, view)
+	# M3 §1.2 plate logic (see the consts): decay first, dwell re-sets the
+	# shift -> inside a plate flare pins at exactly FLARE_SHIFT; zero RNG.
+	# Stage 1 / plate-less rows: flare stays the exact 0.0 it was, surge the
+	# exact 1.0 identity (byte corpus, F-4).
+	game.flare = maxf(0.0, game.flare - FLARE_SHIFT / FLARE_DECAY * dt)
+	var surge := 1.0
+	for pl in GameRenderer.stage_row(game.stage).plates:
+		if _dist({"x": pl[0], "y": pl[1]}, game.player) < PLATE_RADIUS:
+			surge = SPAWN_SURGE
+			game.flare = FLARE_SHIFT
 	if enemies.size() >= ALIVE_CAP:
 		return # M1 hard rule: PAUSE the horde loop at the cap — no rate
 		# accumulation either, so kills never burst-refill the queue
 	# §A.1: cycle-local minute + QTY_CYC on the existing rate term; the
 	# minf(12.0, …) ceiling stays UNTOUCHED (§A.1 "cannot explode": quantity
 	# growth saturates against it + ALIVE_CAP above). cycle 0: qty_cyc = 1.0
-	# exact and m_c = game.time/60 — flag-off byte-stable.
+	# exact and m_c = game.time/60 — flag-off byte-stable. M3 §1.2: the
+	# plate surge multiplies the SAME term INSIDE the ceiling (1.0 identity
+	# everywhere else — IEEE-exact, the endless fixture stays byte-equal).
 	var minute := cycle_minute(game)
-	spawn_acc += minf(12.0, (1.0 + 1.3 * minute) * qty_cyc(game.cycle)) * dt
-	var open := _types_open(game.time)
+	spawn_acc += minf(12.0, (1.0 + 1.3 * minute) * qty_cyc(game.cycle) * surge) * dt
+	var open := _types_open(game.stage, game.time)
 	while spawn_acc >= 1.0:
 		spawn_acc -= 1.0
 		_spawn_enemy(open[randi() % open.size()], game, view)

@@ -3,9 +3,14 @@ rows N1/N4/N18/N29/N31/N42). Same source-text style as the v1 suite: the
 client is Godot WASM, so the gate is source-truth. Readings stated where the
 brief left them open:
 
-* "spawn t >= 540 exactly once": v1's mechanism is the `boss_spawned` latch in
-  GameWorld.update_spawns (world.gd:84-86); this file pins the latch, the
-  comparison and the reset, so a re-armed run still spawns one Warden.
+* "spawn t >= 540 exactly once": v1's boolean latch FALSIFIED under M3
+  (T-M3s, M3-SPEC §1.3 P1-1 — one latch for one question): the boss +
+  miniboss latches folded into the unified per-stage schedule latch
+  `schedule_spawned`, read from the ONE stage row. The two pins below were
+  REPLACED (not deleted, LEDGER T-M3s): they now judge the seeded
+  stages-m3.jsonl dump legs (first-seen times, spawn-once, run-2 re-arm
+  through world.reset()) plus the single-spawn-site source count.
+  BOSS_AT / MINIBOSS_AT const pins stand untouched.
 * "hp 3000" (A5) is the PINNED BASE stat (world.gd:24). The spawn-time hp rides
   the v1-verbatim time ramp `1 + 0.22 * (time / 60)` (world.gd:67) that every
   enemy takes — the boss is deliberately NOT special-cased; the sim dump names
@@ -62,19 +67,23 @@ def block(source, start_marker, end_marker):
 # ---- spawn: t >= 540, exactly once -------------------------------------------
 
 def test_boss_spawns_exactly_once_at_540():
-    # N1/N4 + the A5 "exactly once": the clock comparison rides BOSS_AT and
-    # the boss_spawned latch, and nothing else may append a warden.
+    # N1/N4 + A5 "exactly once" — REPLACED pin (T-M3s, see header): the
+    # `boss_spawned` boolean folded into the unified schedule latch. The
+    # claim moved from source-regex to the seeded dump legs, and the
+    # source side now pins the SINGLE parameterized spawn site instead.
     assert const("BOSS_AT", WORLD) == 540.0
-    assert re.search(r"var boss_spawned := false", WORLD), "latch must exist"
-    gate = block(WORLD, "func update_spawns", "func update_entities")
-    assert re.search(r"if not boss_spawned and game\.time >= BOSS_AT:", gate), \
-        "boss gate must be the v1 latch: not boss_spawned and time >= BOSS_AT"
-    assert re.search(r"boss_spawned = true\s*\n\s*_spawn_enemy\(\"warden\", game, view\)", gate), \
-        "the latch must be set before the single warden spawn, verbatim v1 order"
-    assert gate.count("_spawn_enemy(\"warden\"") == 1, "one spawn site only"
-    assert WORLD.count("_spawn_enemy(\"warden\"") == 1, "no other warden spawn anywhere"
-    assert re.search(r"boss_spawned = false", block(WORLD, "func reset", "func _types_open")), \
-        "reset() re-arms the latch so the NEXT run gets its one Warden"
+    leg = conftest.stages_row("stage1_schedule")
+    assert leg["checks"]["warden_first_seen_540"], "warden walks the field at 540.017"
+    assert leg["checks"]["warden_spawns_once"], "exactly one warden appearance, whole run"
+    assert leg["checks"]["schedule_latch_3"], "latch-first: 3 schedule spawns to t=782"
+    rearm = conftest.stages_row("schedule_rearm")
+    assert rearm["checks"]["reset_clears_latch"] and \
+        rearm["checks"]["second_pass_fires_once"], \
+        "world.reset() re-arms the schedule: the NEXT run gets its one Warden"
+    assert WORLD.count("_spawn_enemy(b[1], game, view)") == 1, \
+        "the schedule loop is the one boss spawn site"
+    assert '_spawn_enemy("warden"' not in WORLD, \
+        "no literal warden spawn survives beside the schedule (replace-not-add)"
 
 
 # ---- hp 3000 + the boss flag --------------------------------------------------
@@ -199,26 +208,24 @@ def test_boss_rides_the_one_gait_mechanism_placeholder_note():
 # ADDS — never a re-pin of the boss itself.
 
 def test_miniboss_schedule_600_780_exactly_once_each():
-    # Roadmap M1 feature 4 verbatim: "2 minibosses @ t=600, 780", each
-    # spawning exactly once through its own latch, same mechanism as the
-    # v1 BOSS_AT gate — and inside the SAME single spawn loop.
+    # Roadmap M1 feature 4 verbatim "2 minibosses @ t=600, 780", each once —
+    # REPLACED pin (T-M3s): the second latch folded into the SAME unified
+    # schedule (P1-1). MINIBOSS_AT stays the doc schedule (const pin reads
+    # the source directly); the once-each claim rides the dump legs, which
+    # saw knight at 600.017 and deacon at 780.017 inside one latch walk.
     pairs = re.findall(r"\[([\d.]+),\s*\"([\w-]+)\"\]",
                        WORLD[WORLD.index("const MINIBOSS_AT"):
                              WORLD.index("const HEAL_DROP_CHANCE")])
     assert [(float(t), k) for t, k in pairs] == [
         (600.0, "hollow-knight"), (780.0, "hollow-deacon")], \
         "MINIBOSS_AT must be the doc schedule, in order"
-    gate = block(WORLD, "func update_spawns", "func update_entities")
-    assert re.search(r"minibosses_spawned < MINIBOSS_AT\.size\(\)", gate), \
-        "schedule must be read from the ONE constant"
-    assert re.search(r"minibosses_spawned \+= 1\s*\n\s*_spawn_enemy\(mb\[1\], game, view\)", gate), \
-        "the latch must advance before the single spawn, verbatim v1 order"
-    assert gate.count("_spawn_enemy(mb[1]") == 1 and \
-        WORLD.count("_spawn_enemy(mb[1]") == 1, "one miniboss spawn site only"
-    assert re.search(r"var minibosses_spawned := 0", WORLD), "latch var must exist"
-    reset = block(WORLD, "func reset", "func _types_open")
-    assert re.search(r"minibosses_spawned = 0", reset), \
-        "the latch must reset for a re-armed run"
+    leg = conftest.stages_row("stage1_schedule")
+    assert leg["checks"]["knight_first_seen_600"], "knight walks at 600.017"
+    assert leg["checks"]["deacon_first_seen_780"], "deacon walks at 780.017"
+    assert leg["checks"]["schedule_latch_3"], \
+        "one latch, one spawn per row — boss and minibosses share the walk"
+    assert "minibosses_spawned" not in WORLD and "boss_spawned" not in WORLD, \
+        "the two v1 latches are retired, not kept beside the unified one"
 
 
 def test_miniboss_enemy_rows():

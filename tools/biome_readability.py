@@ -63,13 +63,22 @@ GODOT = os.environ.get(
 SHOTS_DIR = os.path.join(REPO, ".tmp", "biome-readability-shots")
 SCRIPT = "res://sim/biome_readability_capture.gd"
 
-# (key, png, expected BIOMES band name, warp time — the clock then advances
-# only through the capture's fixed SETTLE_TICKS budget, never wall clock)
+# (key, png, expected band name, stage, warp time — the clock then advances
+# only through the capture's fixed SETTLE_TICKS budget, never wall clock).
+# M3 A-E7 (MC 11282 T-M3s): the gate per STAGE band window — stage 1 keeps
+# the shipped four rows; stages 2/3 add §1.1's band windows through the
+# stage-keyed STATE rows ("STATE <stage>:<BAND>"). Same three owner gates on
+# every window: floor_lum <= 34 / block_px <= 48 / hero ratio >= 2.0.
 SHOTS = [
-    ("grass", "readability-grass.png", "MOORLAND", 5.0),
-    ("desert", "readability-desert.png", "BURNING DUNES", 200.0),
-    ("frozen", "readability-frozen.png", "THE FROZEN WASTE", 350.0),
-    ("tundra", "readability-tundra.png", "DEAD TUNDRA", 500.0),
+    ("grass", "readability-grass.png", "MOORLAND", 1, 5.0),
+    ("desert", "readability-desert.png", "BURNING DUNES", 1, 200.0),
+    ("frozen", "readability-frozen.png", "THE FROZEN WASTE", 1, 350.0),
+    ("tundra", "readability-tundra.png", "DEAD TUNDRA", 1, 500.0),
+    ("s2-moor", "readability-s2-moor.png", "MOORLAND", 2, 150.0),
+    ("s2-frozen", "readability-s2-frozen.png", "THE FROZEN WASTE", 2, 450.0),
+    ("s2-tundra", "readability-s2-tundra.png", "DEAD TUNDRA", 2, 750.0),
+    ("s3-tundra", "readability-s3-tundra.png", "DEAD TUNDRA", 3, 225.0),
+    ("s3-frozen", "readability-s3-frozen.png", "THE FROZEN WASTE", 3, 675.0),
 ]
 SETTLE_TICKS = 60   # must match SETTLE_TICKS in the capture script (1.0 s)
 LUM_MAX = 34.0      # owner brief: floor mean lum <= 34
@@ -97,15 +106,16 @@ def capture(shots_dir):
     if "CAPTURE_OK" not in out:
         print(out[-3000:])
         sys.exit("CAPTURE FAILED (no CAPTURE_OK from %s)" % SCRIPT)
-    for key, png, band, t in SHOTS:
+    for key, png, band, stage, t in SHOTS:
         # t is printed at SAVE time, after the FIXED tick budget has
-        # advanced the clock — assert band + png, and that the clock moved
-        # by at most the fixed budget (warp .. warp + SETTLE_TICKS/60);
-        # _pick() consumes budget iterations, so it may advance LESS.
-        if (f"STATE {band} " not in out) or (f"shot={png}" not in out):
-            sys.exit("STATE row mismatch for %s: expected band '%s' + "
-                     "shot=%s in dump:\n%s" % (png, band, png, out))
-        m = re.search(r"STATE %s t=([\d.]+)" % re.escape(band), out)
+        # advanced the clock — assert stage-qualified band + png, and that
+        # the clock moved by at most the fixed budget (warp .. warp +
+        # SETTLE_TICKS/60); _pick() consumes budget iterations, so it may
+        # advance LESS.
+        if (f"STATE {stage}:{band} " not in out) or (f"shot={png}" not in out):
+            sys.exit("STATE row mismatch for %s: expected stage %d band '%s' + "
+                     "shot=%s in dump:\n%s" % (png, stage, band, png, out))
+        m = re.search(r"STATE %d:%s t=([\d.]+)" % (stage, re.escape(band)), out)
         if m is None:
             sys.exit("no parseable t= on the %s STATE row:\n%s" % (png, out))
         shot_t = float(m.group(1))
@@ -189,7 +199,7 @@ def main():
                                                      RATIO_MIN))
     print("%-9s %9s %11s %13s  verdict" % ("biome", "floor_lum", "block_px",
                                            "hero/floor"))
-    for key, png, band, _t in SHOTS:
+    for key, png, band, _stage, _t in SHOTS:
         path = os.path.join(shots, png)
         if not os.path.exists(path):
             print("%-9s MISSING SHOT %s" % (key, path))

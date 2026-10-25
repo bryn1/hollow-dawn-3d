@@ -31,12 +31,27 @@ extends SceneTree
 
 const OUT_ENV := "HD3D_BIOME_SHOTS_DIR"
 # Band times from the T-S10 brief: 5 mid-moor, 200 mid-dunes, 350 mid-frozen,
-# 500 mid-tundra (all strictly inside their BIOMES t_start bands).
+# 500 mid-tundra (all strictly inside their BIOMES t_start bands). M3 A-E7
+# (MC 11282 T-M3s) extends the SAME mechanism per stage: each row carries
+# its DawnWell stage index, the horde roster and the STATE band NAME read
+# the stage-keyed band_at walk (§1.1's ONE band mechanism), and the stage
+# hand-in rides the real _dawnwell.stage -> _start_game seam (the save-side
+# pattern, sim_endless:154). Stage-1 rows (index 1) are the shipped four:
+# same t, same roster identity (band_at("moor-vigil", t) IS biome_at(t)),
+# same seed — byte-stable windows. The stage-2/3 windows sit strictly
+# inside §1.1's band t_starts; a stage-3 warp past 540 proves the §3.1
+# defer (the ossuary boss row has no enemy row until T-M3b — the schedule
+# holds, the shot fires, master stays runnable mid-spine, defer_guard leg).
 const SHOTS := [
-	{"t": 5.0, "png": "readability-grass.png"},
-	{"t": 200.0, "png": "readability-desert.png"},
-	{"t": 350.0, "png": "readability-frozen.png"},
-	{"t": 500.0, "png": "readability-tundra.png"},
+	{"t": 5.0, "png": "readability-grass.png", "stage": 1},
+	{"t": 200.0, "png": "readability-desert.png", "stage": 1},
+	{"t": 350.0, "png": "readability-frozen.png", "stage": 1},
+	{"t": 500.0, "png": "readability-tundra.png", "stage": 1},
+	{"t": 150.0, "png": "readability-s2-moor.png", "stage": 2},
+	{"t": 450.0, "png": "readability-s2-frozen.png", "stage": 2},
+	{"t": 750.0, "png": "readability-s2-tundra.png", "stage": 2},
+	{"t": 225.0, "png": "readability-s3-tundra.png", "stage": 3},
+	{"t": 675.0, "png": "readability-s3-frozen.png", "stage": 3},
 ]
 const CAST_N := 14 # round-robin over the band's own roster (art_capture scale)
 const DT := 1.0 / 60.0 # the engine's own fixed physics step, verbatim
@@ -103,6 +118,11 @@ func _on_frame() -> void:
 		# detail, and the pawn buried under it (cycle-2 honest RED).
 		# Declared deviation: every shot shows a fresh Lv1 hero + its own
 		# band's horde; comparability across biomes is the point.
+		# M3 A-E7: the DECLARED save-side stage row before the real funnel
+		# (unset stage 1 == the shipped walk byte-for-byte; 2/3 hand in the
+		# spec's stage ids through stage_id_for_index, the same seam a real
+		# menu choice uses).
+		_main._dawnwell.stage = int(SHOTS[_stage - 1].stage)
 		_main._start_game()
 		_main.game.time = float(SHOTS[_stage - 1].t)
 		_cast(_stage - 1)
@@ -123,7 +143,13 @@ func _advance(next_stage: int) -> void:
 # POSE rides into the shot (declared deviation). Then the FIXED tick budget
 # runs synchronously (spawns/chase/FX live), then a fixed frame settle.
 func _cast(shot: int) -> void:
-	var roster: Array = GameRenderer.BIOMES[shot].enemies
+	# A-E7: the roster comes off the STAGE's band walk (band_at) — for
+	# stage 1 this resolves to the shipped BIOMES row identity, so the four
+	# original windows cast exactly the old horde.
+	var shot_row: Dictionary = SHOTS[shot]
+	var roster: Array = GameRenderer.band_at(
+		GameRenderer.stage_id_for_index(int(shot_row.stage)),
+		float(shot_row.t)).enemies
 	for i in range(CAST_N):
 		_main.world._spawn_enemy(roster[i % roster.size()], _main.game,
 			GameRenderer.VIEW)
@@ -159,9 +185,16 @@ func _tick(n: int) -> void:
 
 
 func _save(index: int) -> void:
-	var band: Dictionary = GameRenderer.biome_at(_main.game.time)
-	print("STATE %s t=%.1f shot=%s alive=%d ticks=%d player_hp=%.0f"
-		% [String(band.name), _main.game.time, String(SHOTS[index].png),
+	# stage-qualified STATE row (the tool parses "STATE <stage>:<BAND>"): the
+	# line names the stage AND the band the stage-keyed, flare-aware read
+	# actually reports at shot time — the gate reads a state, not a still.
+	var stage_id: String = GameRenderer.stage_id_for_index(
+		int(SHOTS[index].stage))
+	var band: Dictionary = GameRenderer.band_at(stage_id,
+		_main.game.time + _main.game.flare)
+	print("STATE %d:%s t=%.1f shot=%s alive=%d ticks=%d player_hp=%.0f"
+		% [int(SHOTS[index].stage), String(band.name), _main.game.time,
+			String(SHOTS[index].png),
 			_main.world.enemies.size(), _ticks_this_shot, _main.game.hp])
 	var img: Image = root.get_texture().get_image()
 	var path: String = _out_dir() + "/" + String(SHOTS[index].png)
