@@ -1,5 +1,21 @@
 # M3-SPEC — hollow-dawn-3d "Stages" (v2.0.0) — spec for the DA gate
 
+- **REV 3, 2026-10-25, after DA cycle 2** (`docs/M3-SPEC-DA-c2.md` @ `c9dd4cb`, MC 11273,
+  immutable; the c1 doc `docs/M3-SPEC-DA.md` @ `ecfd70c` remains likewise). c2 verified the rev-2
+  adoption 9/9 with fresh greps at `446c065` and opened one new finding from the INTERACTION of
+  two independently-true rev-2 folds + 2 P3s + 2 P4s — **adopted 5/5, REBUTTAL: none** (every row
+  re-grepped THIS session at `c9dd4cb` and found TRUE). **F-1 (P2, the collision):** the P2-3
+  re-anchor lists `chests-tiers-m2.jsonl` as a never-re-minted byte anchor, but its row 1 EMBEDS
+  the 4-row chest-tier map and §3.1's declared re-pin re-mints that row in-M3 — now scoped: the
+  chest-file anchor covers its stage-1 OBSERVABLE rows; its `map` row is the declared §3.1
+  in-M3 re-pin (the exact carve sentence lives in §1.4 A-E1 and §9.7; the other three anchor
+  fixtures + the journey are grep-map-free, verified 0 hits). F-2 the duplicated Enemy-rows
+  bullet is deleted; F-3 the call-site claim is restated honestly (grep: **4 game + 4 capture**
+  `biome_at` reads — the capture readers STAY on the stage-1 wrapper, A-E1 depends on it) and the
+  readability pair (`tools/biome_readability.py` + `godot/sim/biome_readability_capture.gd`
+  stage-keying) joins the T-M3s file set for A-E7; F-4 the A-E2 red cell gains the placement RED
+  the §10 ledger claimed; F-5 the scalars/re-arm wording is made exact. SEL-A ⇒ **v2.0.0** again
+  survived (c2 PASS 3 re-grepped every quoted law row verbatim).
 - **REV 2, 2026-10-25, after DA cycle 1** (`docs/M3-SPEC-DA.md` @ `ecfd70c`, MC 11271, immutable).
   The reviewer's fix list is **adopted in full** — P1-1 (the §1.2 byte-pin promise vs §3.1's
   schedule generalization: the `test_boss_numbers.py:64-77` shape pin regexes the literal warden
@@ -118,7 +134,10 @@ on the ground, which upon being stepped on trigger an unavoidable event" (Dairy 
 
 **Reuse (zero new subsystem).** The whole band mechanism today is: `render.gd BIOMES` (the ONE
 band table) + `biome_at(t)` (`render.gd:80-85`, saturates on the last band) read by exactly three
-call sites — the ground swap (`ground.gd:43-49` `_set_band`), the HUD banner (`hud_3d.gd`
+GAME consumers (rev-3, DA c2 F-3: a tree-wide grep finds **4 game call sites + 4 capture-channel
+reads** — the three consumers named below plus `ground.gd:35`'s init read; capture readers
+`sim_headless.gd:118/:257`, `biome_readability_capture.gd:162`, `art_capture.gd:116`) — the
+ground swap (`ground.gd:43-49` `_set_band`), the HUD banner (`hud_3d.gd`
 `BIOME_FLASH` row), and the roster merge (`world.gd:124-129 _types_open` = band roster + the minute
 `GATES` rotation). The gimmicks compose ONLY from: that band seam, the ONE spawn loop with its
 UNTOUCHED ceilings (`minf(12.0, …)` rate + `ALIVE_CAP 400`, `world.gd:172-180`), the ONE chests
@@ -154,7 +173,10 @@ call site keeps a total function). Each row:
 - **The generalized lookup, byte-true:** `band_at(stage_id, t)` walks the stage's band list with
   the same saturating loop (`render.gd:80-85` verbatim shape). Stage 1's list IS the current
   `BIOMES` array, so `band_at("moor-vigil", t) == biome_at(t)` for all t — pinned (A-E2). The
-  three call sites take the stage-keyed form; `test_biome_numbers.py::test_band_t_starts_names_and_rosters`
+  the three GAME call sites take the stage-keyed form while the capture-channel reads stay on the
+  stage-1 wrapper (`biome_at` remains live, pinned to the moor-vigil bands — A-E1's byte anchor
+  depends on it; the one declared exception is the A-E7 readability capture, stage-keyed, T-M3s);
+  `test_biome_numbers.py::test_band_t_starts_names_and_rosters`
   (:41) stays green — **with a declared placement constraint (P3-3 fold):** that pin SLICES
   `render.gd` from `const BIOMES` to `static func biome_at` and regexes `t_start` inside the slice
   (`test_biome_numbers.py:41-45`, position-sensitive), so **`const STAGES` + `band_at` land AFTER
@@ -212,8 +234,8 @@ corpus, P2-3).
 
 | # | observable | seam (the ONE existing channel) | red |
 |---|---|---|---|
-| A-E1 | stage-1 **byte-stability** — **REV-2 re-anchor (P2-3: rev-1 asserted against `stages-m3.jsonl`, a fixture MINTED inside M3 — circular at gate time; a stage-1 leak introduced BY M3 bakes into its own anchor).** The anchor is the **EXISTING committed corpus re-run on the stage-1 default**: `tests/fixtures/endless-m2.jsonl` (`test_endless.py` legs), `gem-merge-m2g.jsonl` (`test_gems.py`), `chests-tiers-m2.jsonl` (`test_chests_tiers.py`), `unions-m2u.jsonl` (`test_unions.py`) + the `sim_headless` journey re-run byte-identity (the 5020-row capture pattern, LEDGER TQ-01/T-M2z rows) — the exact M2 precedent (`test_endless.py:26,42` + the v1.3.0 "fixture endless-m2 cmp-IDENTICAL" re-runs). `stages-m3.jsonl` is demoted to the **forward lock only** (it detects leaks added AFTER M3), never the gate anchor. | the existing fixture-judged legs of the four pytest files + the `sim_headless` capture re-run | any of the FOUR existing fixtures flips on a stage-1 default run ⇒ RED (a leak vs PRE-M3 truth, not vs M3's own capture) |
-| A-E2 | STAGES table pytest pin: ids/names/band `t_start`s/boss rows/limits/unlock levels regex-pinned (OUR numbers); `band_at("moor-vigil", t) == biome_at(t)` at t = 0/150/300/450/900 | the existing table-pin pattern (`test_biome_numbers.py::test_band_t_starts…` :41) | a re-keyed band order ⇒ pin RED |
+| A-E1 | stage-1 **byte-stability** — **REV-2 re-anchor (P2-3: rev-1 asserted against `stages-m3.jsonl`, a fixture MINTED inside M3 — circular at gate time; a stage-1 leak introduced BY M3 bakes into its own anchor).** The anchor is the **EXISTING committed corpus re-run on the stage-1 default**: `tests/fixtures/endless-m2.jsonl` (`test_endless.py` legs), `gem-merge-m2g.jsonl` (`test_gems.py`), `chests-tiers-m2.jsonl` (`test_chests_tiers.py`), `unions-m2u.jsonl` (`test_unions.py`) + the `sim_headless` journey re-run byte-identity (the 5020-row capture pattern, LEDGER TQ-01/T-M2z rows) — the exact M2 precedent (`test_endless.py:26,42` + the v1.3.0 "fixture endless-m2 cmp-IDENTICAL" re-runs). **REV-3 anchor carve (DA c2 F-1): the `chests-tiers-m2` anchor is scoped to that file's stage-1 OBSERVABLE rows — `boss_tier`/`mb_tiers`/`cycle_tier`/`checks`, which keep their bytes under §3.1's keyed site + map growth — while its embedded `map` row (row 1; `_leg_drop_map` dumps the GLOBAL `CHEST_TIER_BY_SOURCE`, `sim_chest_tiers.gd:120-123`, and `test_chests_tiers.py:201` asserts fixture-`map` == SPEC_MAP) is the ONE declared in-M3 re-pin row per §3.1: that row re-mints with the map-growth commit and is NEVER counted as an anchor flip — the only in-M3 rewrite permitted inside the anchor corpus; the other three anchor fixtures + the journey are grep-map-free (`"map"` = 0 hits, verified at `c9dd4cb`).** `stages-m3.jsonl` is demoted to the **forward lock only** (it detects leaks added AFTER M3), never the gate anchor. | the existing fixture-judged legs of the four pytest files + the `sim_headless` capture re-run | any of the FOUR existing fixtures flips on a stage-1 default run — chest file judged on its OBSERVABLE rows, its `map` row re-mints by design per the §3.1 carve ⇒ RED (a leak vs PRE-M3 truth, not vs M3's own capture) |
+| A-E2 | STAGES table pytest pin: ids/names/band `t_start`s/boss rows/limits/unlock levels regex-pinned (OUR numbers); `band_at("moor-vigil", t) == biome_at(t)` at t = 0/150/300/450/900; placement leg (rev-3, F-4): the `test_biome_numbers.py:41-45` slice re-run stays byte | the existing table-pin pattern (`test_biome_numbers.py::test_band_t_starts…` :41) | a re-keyed band order ⇒ pin RED; **`STAGES`/`band_at` placed BEFORE `biome_at` in render.gd ⇒ the slice swallows the new table's `t_start`s ⇒ RED (P3-3 placement, §1.1)** |
 | A-E3 | stage 2 cairns: 2 ember chests live at t≈0 from the FIXED coords (no RNG — position rows), one walked-into ⇒ open rides the funnel (`pending_levels` +1, weighted pick, gold in tier range); tier byte == the `stage-item` map row (the A-E4/B-T1 single-source law, M2 rev-2 P1) | real drop→`collect_pickups` funnel dump (`sim_chest_tiers` B-T1/B-T2 leg shape) | cairn tier ≠ map row, or a cairn that never opens ⇒ RED |
 | A-E4 | stage 3 plate legs (DECLARED-PIN walk, the `sim_budget.gd:92`/`sim_boss.gd:292` pin pattern — rev-1's `sim_caps.gd:88` cite was that leg's print line, P4-1 fold): inside ⇒ rate row ×1.5 AND the `minf(12.0)` cap row still binding; outside ⇒ baseline byte; flare: banner/ground band name = shifted band, decays to base; **RNG-stream row: dwell consumes zero `randf`/`randi`** | `sim_stages` dump (same `HD3D_SEED` + per-leg env channel) | surge that bypasses `minf` (13/s) ⇒ RED; a dwell that draws RNG ⇒ RNG-stream RED |
 | A-E5 | persistence: `stage` roundtrip on disk; OLD save (no field) ⇒ 1/`moor-vigil`; fresh save ⇒ `flags["stage2"]` ABSENT (roadmap's "stage-unchained leg"); a stage-1 run ending at level ≥ 10 ⇒ flag written ONCE through the ONE funnel; never unset by a later death | `save_probe.gd` legs + `tests/test_save.py` roundtrip (the `best_cycle` row :231 precedent) | level-9 run setting the flag, or funnel call-count > 1 ⇒ RED |
@@ -303,13 +325,14 @@ roadmap gap row `:42` ("boss chest-drop rule (S5 ~419)" — OUR owned numbers: `
   `def.hp × 18`), exactly the shipped law stated at `test_boss_numbers.py:82-83` ("the spawn-time hp
   rides the verbatim time ramp, the boss is not special"). `HP_CYC`/the 18× clamp structurally CANNOT touch a
   boss: the schedule latch is cycle-0-only (`world.gd:164-171`) and `cycle_clear` never re-arms it
-  (`world.gd:255-257`, `main.gd:243-248`) — at cycle ≥ 1 no boss exists to scale. At t=540 (m_c=9,
+  (`world.gd:255-257`, `main.gd:243-248`) — the schedule never fires again after 540, so the cycle
+  HP-ramp never re-scales a boss (HP is stamped ONCE at spawn — the claim's exactness stands, DA c2
+  F-5: an UNCLEARED boss does persist across the cycle boundary, and its contact dmg scales LIVE
+  per hit at `main.gd:210` — what C-E5 pins). At t=540 (m_c=9,
   factor ×2.98) the **effective spawn HPs are: warden 8,940 / cathedral-choir 12,516 / ossuary-warden
   16,688** — the C-E1/C-E2 kill legs budget against these, not the def values.
-- **Enemy rows:** two `ENEMY_TYPES` rows with `"boss": true` + a `name` row (the boss-bar label —
-  `hud_3d.gd:33`'s `BOSS_NAME` const becomes a per-boss readout of the row, the ONE bar seam
-  unchanged; the bar hides exactly as shipped when no boss exists).
-- **Enemy rows:** two `ENEMY_TYPES` rows with `"boss": true` + a `name` row (the boss-bar label —
+- **Enemy rows (one bullet — rev-2 shipped this as a duplicated pair by fold-append; DA c2 F-2
+  de-dup):** two `ENEMY_TYPES` rows with `"boss": true` + a `name` row (the boss-bar label —
   `hud_3d.gd:33`'s `BOSS_NAME` const becomes a per-boss readout of the row, the ONE bar seam
   unchanged; the bar hides exactly as shipped when no boss exists). Rows ride the shipped entry
   shape (`"hp"/"spd"/"dmg"/"xp"/"boss"` — the warden's regex-pin `test_boss_numbers.py:84-89` reads
@@ -336,7 +359,10 @@ roadmap gap row `:42` ("boss chest-drop rule (S5 ~419)" — OUR owned numbers: `
   (byte/dump pins, which pin BEHAVIOR not code shape — the stronger form the M1-era dump suite was
   built for);
   *"reset() re-arms the latch so the NEXT run gets its one Warden"* → the C-E1 run-2 re-arm leg
-  (fresh sim over the same latch var ⇒ first-seen row again exactly once). The dump corpus itself
+  (the SAME world through `reset()` ⇒ the first-seen row again exactly once — the real
+  `_start_game` funnel every `sim_boss` leg runs, per
+  that file's header; a fresh process would prove nothing about the re-arm — F-5 wording). The dump
+  corpus itself
   (first-seen/boss_once rows, T-M1d leg shapes) is UNTOUCHED green — it is only the regex-shape row
   that retires.
 - **Boss death → reward law (rev-1's "ALL shipped seams, zero new code paths" was false at the tier
@@ -421,7 +447,7 @@ parallel ONLY where file-sets are provably disjoint).
 
 | card | one-line scope | files touched | depends on | can run parallel with |
 |---|---|---|---|---|
-| `T-M3s-STAGES` | STAGES + `band_at` + run vars + hand-in + persistence + select overlay + unlock check + all Pillar A/B ACCEPT rows | render.gd, game_state.gd, main.gd, save.gd, screens.gd, world.gd (band key + schedule-loop generalization), ground.gd, hud_3d.gd, sim_stages.gd, test_stages.py, test_save.py | — | **asset batch ONLY** |
+| `T-M3s-STAGES` | STAGES + `band_at` + run vars + hand-in + persistence + select overlay + unlock check + all Pillar A/B ACCEPT rows + A-E7 readability stage-keying (rev-3, F-3) | render.gd, game_state.gd, main.gd, save.gd, screens.gd, world.gd (band key + schedule-loop generalization), ground.gd, hud_3d.gd, sim_stages.gd, test_stages.py, test_save.py, **tools/biome_readability.py + godot/sim/biome_readability_capture.gd (per-stage windows: stage-key the band read at `:162`; other capture readers stay on the wrapper)** | — | **asset batch ONLY** |
 | `T-M3g-GIMMICKS` | drowned-cairns (stage-item map row + seeding) + pressure-stair (surge/flare/plate billboard) + Pillar A gimmick ACCEPT rows | world.gd, render.gd (STAGES rows fill), pickup_viz.gd, sim_stages.gd, test_stages.py, **test_chests_tiers.py (`SPEC_MAP` re-pin for the added `stage-item` row — the exact-equality law dies on ANY added row, P2-1)** | `T-M3s-STAGES` (needs the table + run vars) | asset batch ONLY |
 | `T-M3b-BOSSES` | 2 ENEMY_TYPES boss rows + boss-name HUD readout + drop-site keying + kill-map rows + GLB_FILES +2 + Pillar C ACCEPT rows | world.gd (incl. the §3.1 drop-site keying + the schedule-loop retire-and-replace), render.gd (STAGES boss rows fill), hud_3d.gd, horde_viz.gd, sim_boss.gd, sim_stages.gd, test_boss_numbers.py (the P1-1 retire-and-replace), test_chests_tiers.py (SPEC_MAP 7-row re-pin + drop-site re-pin), test_art_integration.py (coverage re-pin) | `T-M3s-STAGES` (table/loop); **`T-M3a-ASSETS` — the 2 committed boss-mesh rows (P2-2 fold: `test_art_integration.py:83-88`'s file-exists loop requires a real committed `.glb` for every `GLB_FILES` key, so the +2 cannot close green before the meshes land; spine order keeps the asset track first in its windows)** | asset batch ONLY (file-sets disjoint; the ARTIFACT coupling is a real dependency — stated) |
 | `T-M3a-ASSETS` | the 3090 batch (§6): icons + 2 boss meshes, manifests + gates only | assets/, tools/vm100/*.tsv | — | **everything** |
@@ -557,7 +583,11 @@ explicitly NOT claimed there). **Measured-now values this session: draws 27 / pl
 7. **Byte-stability (F-4, re-anchored rev-2):** stage 1 references the shipped consts
    (`BOSS_AT`/`MINIBOSS_AT`/BIOMES rows); the anchor is the **EXISTING committed corpus**
    (`endless-m2`/`gem-merge-m2g`/`chests-tiers-m2`/`unions-m2u` + the journey re-run), never an
-   M3-minted fixture (P2-3); the schedule-loop generalization is the riskiest line — verify its
+   M3-minted fixture (P2-3) — **with the DA c2 F-1 carve, same wording as §1.4 A-E1: the chest-file
+   anchor is scoped to its stage-1 OBSERVABLE rows (`boss_tier`/`mb_tiers`/`cycle_tier`/`checks`),
+   its embedded `map` row is §3.1's declared in-M3 re-pin (re-mints with the map-growth commit,
+   never an anchor flip), and the other three fixtures + journey are grep-map-free**; the
+   schedule-loop generalization is the riskiest line — verify its
    stage-1 dump legs AND the declared retire-and-replace ledger of
    `test_boss_numbers.py::test_boss_spawns_exactly_once_at_540` (§3.1/P1-1: replace-not-delete,
    same commit), not its prose.
@@ -609,5 +639,29 @@ explicitly NOT claimed there). **Measured-now values this session: draws 27 / pl
   and found TRUE at the cited file:line; nothing in the fix list is contradicted by the tree. The
   A1/A5/A6/A9/A10 survivals (version law, gimmick composition, deferral, budget, Contract-B) are
   carried unchanged per the DA's own record.
+
+**REV-3 folds (DA c2, MC 11273, `docs/M3-SPEC-DA-c2.md` @ `c9dd4cb`; each re-grepped THIS session
+at `c9dd4cb` before adoption — c2's adoption audit held, all five new rows TRUE):**
+
+- **F-1 (P2, the fold collision):** §1.4 A-E1 + §9.7 carry the anchor carve sentence — the
+  `chests-tiers-m2` byte-anchor claim is scoped to its stage-1 OBSERVABLE rows
+  (`boss_tier`/`mb_tiers`/`cycle_tier`/`checks`, grepped in the fixture: they keep their bytes
+  under the keyed site + map growth); the fixture's embedded `map` row (`test_chests_tiers.py:201`
+  asserts it == SPEC_MAP; `_leg_drop_map` dumps the global map) is the ONE declared §3.1 in-M3
+  re-pin and is excluded from the anchor claim — the only permitted in-M3 rewrite inside the
+  corpus. The other three fixtures + journey are grep-map-free (verified 0 `"map"` hits). No
+  anchor is silently re-minted; T-M3g/T-M3b can close green.
+- **F-2 (P3):** §3.1's duplicated Enemy-rows bullet de-duped (rev-2's fold-append shipped a copy
+  pair).
+- **F-3 (P3):** §1.1's call-site claim restated to the grep truth (4 game + 4 capture reads); the
+  capture readers stay on the stage-1 wrapper (A-E1 depends on it); the A-E7 stage-keying exception
+  + `tools/biome_readability.py` + `biome_readability_capture.gd` added to the T-M3s file set.
+- **F-4 (P4):** A-E2's red cell now carries the placement RED the §10 P3-3 line claimed (the
+  ledger claim is true as written after this fold).
+- **F-5 (P4):** scalars bullet made exact (schedule never fires after 540; uncleared boss persists,
+  contact dmg scales live at `main.gd:210` — C-E5's subject; HP-stamped-once claim stands); the
+  re-arm leg is now "the SAME world through `reset()`" (a fresh process would prove nothing).
+- **REBUTTAL: none (c2).** c2's regression scan also confirms the surviving core (SEL-A law rows,
+  gimmick seams, deferral, budget, Contract-B, hygiene note) unchanged — nothing here reopens it.
 
 --- END M3-SPEC ---
