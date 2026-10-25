@@ -1,0 +1,17 @@
+# M3a icon batch MC 11285 (4 rows) — variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha256[:16] (icons-batch-m1c/m2.tsv convention)
+# §6 count: n=4 — stage-select thumbnails ×3 (stage ids moor-vigil / sunken-chapel / ossuary-stair, M3-SPEC rev-3 §1.1)
+# + icon-plate (the ossuary-stair pressure-stair billboard; the drowned-cairns REUSE the shipped chest icons — zero rows, §6).
+# 512x512 RGBA transparent, imagegen MCP (windows 2026-10-25 12:12->12:29:47Z + 13:10->13:13:55Z, both closed rc=0,
+# llama-swap serving at every close), tEXt impeccable:prompt = tool-reported prompt_sent (§j family verbatim + the ONE
+# studio-background tail the tool appends itself — a first render of moor-vigil drawn with a doubled tail was REPLACED
+# in-window at the SAME seed 501 before any gate, honest row). Byte-identical copies in assets/icons/new/ (the M2
+# one-copy convention). Gate tools/vm100/icon_gate.py 4/4 PASS on the SHIPPED files + planted-red PROV + TRANSP/FILL
+# legs RED RC=1 same session (.tmp/m3a-art.txt).
+# Re-roll reserve (§6 +2 icons): 1/2 BURNED — ossuary-stair seed 503 passed the mechanical gate but was EYEYEBALL-
+# REJECTED as a FRAMED CARD (rectangular plaque border baked into the art — the icon-era defect class the gate
+# docstring names, the legibility eyeball binding); seed 505 free-standing scene-island ACCEPTED. moor-vigil/
+# sunken-chapel/plate first-seed accepted (2/2 reserve rows unburned).
+icon-stage-moor-vigil	godot/assets/icons/icon-stage-moor-vigil.png	501	30d793b02933e0ec
+icon-stage-sunken-chapel	godot/assets/icons/icon-stage-sunken-chapel.png	502	d8ed0fe3b398b9e9
+icon-stage-ossuary-stair	godot/assets/icons/icon-stage-ossuary-stair.png	505	2187e68e38d6b5ab
+icon-plate	godot/assets/icons/icon-plate.png	504	265473b030fb460d

@@ -1,0 +1,24 @@
+# MC 11285 T-M3a mesh spec — name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+# 2 rows (§6 n=2 end-boss meshes, stage 2/3; §3.1 boss rows), ONE row per window (the §M1c2
+# in-session VRAM accumulation lesson — single-row specs staged as spec-row1/row2.tsv),
+# runid mc11285, 3-distinct-seed fail policy (driver-internal):
+#   Budget 4000 = the §6 character row (the §M1c2 miniboss precedent: knight 3830/4000,
+#   deacon 3960/4000); these ride the boss CLASS height-normalisation (MODEL_H_BOSS 5.33 m
+#   at the ClassMesh seam, §3.2), height class gated at @1.42 like the shipped stand-in
+#   boss-warden.glb (INFLATION<=2.0 AND ASPECT<=2.0 => drop-in swap-in law, §M1c2 rows).
+#   Inputs = three-quarter volumetric refs (the §M1c flat-card lesson; icon renders are NOT
+#   valid mesh inputs). Pose classes from the §M1c2 accepted map: choir = solid bell-hem robe
+#   FUSED to an altar base block (solid-body class); ossuary = ONE carved bone block, fists
+#   welded to the thighs (NO open hands — the §M1c2 shatter signature of separated thin
+#   tubes; ref v1 claw-claws + v2 claw-grip REJECTED pre-commit, v3 accepted — manifest
+#   tools/vm100/art-src-m3.tsv).
+#   5th col quality = extent+fill gate (player_attempts.quality) INSIDE the seed loop.
+# OUTCOMES: row 2 ACCEPTED FIRST SEED (531, 3865/4000, aspect INFLATION 1.42 / ASPECT 0.67,
+#   turntable-solid PASS yaws 0/90/180/270). Row 1 seed 521 passed the AUTOMATED gates
+#   (521, 3862/4000, INFLATION 1.48 / ASPECT 0.62) but was REJECTED on the BINDING turntable
+#   eyeball: side/back yaws show the robe hem decoded into ribbon strips with open gaps =
+#   the §M1c2 shatter class — the recorded blind spot firing exactly as documented. Re-roll
+#   reserve (+1 mesh, §6) burned on this row: art-batch-m3-regen.tsv (ref v2 welded hem,
+#   seed 522) ACCEPTED, turntable solid at all four yaws.
+cathedral-choir	/opt/imagegen/tmp/mc11285/refs/cathedral-choir-ref.png	4000	521	quality
+ossuary-warden	/opt/imagegen/tmp/mc11285/refs/ossuary-warden-ref-v3.png	4000	531	quality

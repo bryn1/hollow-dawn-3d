@@ -1,0 +1,13 @@
+# MC 11285 T-M3a REGEN spec — the FINAL accepted row for the cathedral-choir boss mesh.
+# Original batch art-batch-m3.tsv seed 521 passed extent+fill quality + aspect (INFLATION
+# 1.48 / ASPECT 0.62) but was REJECTED on the bpy turntable solid eyeball: the robe hem
+# decoded into ribbon strips with open gaps at yaws 90/180/270 (the §M1c2 shatter class;
+# fill gate no-ops non-watertight by design, a documented blind spot). Ref fix per the
+# §M1c2 ref-journey lesson: v2 ref states the hem WELDED SOLID into the altar block
+# (NO trailing drapery) — solid-body class, manifest tools/vm100/art-src-m3.tsv.
+# §6 re-roll reserve (+1 mesh) burned on this row. Fresh single-row window (the §M1c2
+# in-session VRAM accumulation lesson).
+# ACCEPTED: seed 522, 3923/4000 tris, ext 0.534,0.972,0.485, aspect INFLATION 1.46 /
+# ASPECT 0.55, VISUAL PASS, turntable solid at yaws 0/90/180/270.
+# name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+cathedral-choir	/opt/imagegen/tmp/mc11285/refs/cathedral-choir-ref-v2.png	4000	522	quality

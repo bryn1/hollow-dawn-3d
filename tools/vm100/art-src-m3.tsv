@@ -1,0 +1,9 @@
+# M3a mesh-ref batch MC 11285 (5 rows) — variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha16
+# Three-quarter volumetric boss refs for the two end-boss meshes (icons-batch-m1c/m2 convention
+# reused; imagegen MCP, windows 2026-10-25 12:12->12:29:47Z + 12:54->12:56:34Z, opaque
+# black-background renders — NOT icon renders, the §M1c2 mesh-input rule).
+cathedral-choir	assets/art-src/cathedral-choir-ref.png	511	a75768873ff7e9ef	# tall drowned cantor, bell-hem robe on altar block — mesh input seed 521; mesh REJECTED on turntable (hem decoded to ribbons, §M1c2 shatter class); kept with the failed mesh documented
+cathedral-choir-v2	assets/art-src/cathedral-choir-ref-v2.png	515	e00cbc8aebaf7cc0	# same cantor, hem WELDED SOLID into the altar block, NO trailing drapery (solid-body class) — ACCEPTED mesh input seed 522
+ossuary-warden-v1	assets/art-src/ossuary-warden-ref-v1.png	512	afa199402d22241e	# REJECTED pre-commit: open claw hands + forearm bone shards + rib-cage with see-through gaps = the §M1c2 shatter signature; kept as the documented failed variant, NOT fed to TRELLIS
+ossuary-warden-v2	assets/art-src/ossuary-warden-ref-v2.png	513	f040bce266641df4	# REJECTED: fused torso but the model still drew skeletal claw-grips (separated fingers) — same signature; kept documented, NOT fed to TRELLIS
+ossuary-warden	assets/art-src/ossuary-warden-ref-v3.png	514	c1600e8c69cfc744	# ONE carved bone block: fists welded to thighs, skull-dome pauldrons, no spikes — ACCEPTED mesh input seed 531 (solid-body class)
