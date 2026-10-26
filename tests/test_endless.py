@@ -136,16 +136,28 @@ def test_endless_handin_is_the_one_meta_seam():
 
 
 def test_win_branch_latched_cycle_clear_flag_off_wins():
+    # FALSIFIED AND REPLACED by T-M4r (MC 11364, M4-SPEC §7.2 R9, SAME
+    # commit as the cap-fork arm itself — replace-not-delete): the branch
+    # gained the reaper arm between the endless block and the win leg, so
+    # the verbatim row that pinned `else:` directly after `_cycle_clear()`
+    # could not survive. The replacement is EQUAL-OR-STRONGER: it pins the
+    # endless block byte-for-byte, pins the `else:` win leg byte-for-byte,
+    # AND pins the new endless->reaper elif ORDER — the "unless Endless"
+    # precedence law (VS-FEATURES:423) is now SOURCE-PINNED, which the
+    # retired row never claimed (a swap of the two arms reddens this row
+    # even with all literals present). Comment lines are the allowed zone.
     m = re.search(r"if game\.time >= GameState\.WIN_TIME:\s*\n"
-                  r"(?:\t*//[^\n]*\n)*"
                   r"\t*if game\.endless:\s*\n"
                   r"\t*var next_cycle := int\(game\.time / GameState\.WIN_TIME\)\s*\n"
                   r"\t*if next_cycle > game\.cycle:\s*\n"
                   r"\t*game\.cycle = next_cycle\s*\n"
-                  r"\t*_cycle_clear\(\)\s*\n"
+                  r"\t*_cycle_clear\(\)\s*\n\s*"
+                  r"\t*elif game\.reaper:\s*\n\s*"
+                  r"\t*pass\s*\n"
                   r"\t*else:\s*\n"
                   r"\t*_end_run\(\"win\"\)\s*\n\t*return", MAIN)
-    assert m, "the win branch is the latched crossing; flag OFF keeps _end_run"
+    assert m, ("the win branch is the latched crossing with the reaper arm "
+               "AFTER endless (R9 order law); flag OFF keeps _end_run(\"win\")")
 
 
 def test_cycle_clear_funnel_lines():

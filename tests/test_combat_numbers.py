@@ -105,12 +105,24 @@ def test_contact_damage():
     # rides §1.2's own ladder step (13, one below the ossuary 14); every
     # entry stays below MAX_CONTACT_DMG 20, so the clamp stays VACUOUS at
     # cycle 0 across the whole column (M4 spec F-6).
+    # Column RE-PINNED AGAIN by T-M4r (MC 11364, M4 rev-3 §2.1; falsified-
+    # by-design, LEDGER row): THE REAPER appends 30 at the column's tail —
+    # the ONE base AT or above MAX_CONTACT_DMG, and the clamp NEVER READS
+    # IT: the reaper contact ENDS the run FIRST inside the same radius
+    # test (main.gd's END LAW, F-6 — the branch source-pinned ONCE in
+    # tests/test_reaper.py, one home per claim; the sim_reaper
+    # ends_by_contact leg is its executed twin). The VACUOUS row moves to
+    # its true, equal-or-stronger scope: EVERY NON-REAPER base stays
+    # below 20 (the flag-off spawnable column verbatim at cycle 0), the
+    # reaper row is the named, end-law-pinned exclusion.
     assert dmg == [2.0, 3.0, 5.0, 6.0, 4.0, 2.0, 5.0, 9.0, 12.0, 10.0, 11.0,
-                   12.0, 13.0, 13.0, 14.0], \
+                   12.0, 13.0, 13.0, 14.0, 30.0], \
         "contact dmg column must stay 2/3/5/6/4/2/5/9/12 + 10/11 + 12/13 " \
-        "+ 13/14"
-    assert all(d < const("MAX_CONTACT_DMG", MAIN) for d in dmg), \
-        "the clamp stays VACUOUS at cycle 0 for every base (rev-3 P3-1)"
+        "+ 13/14 + the-reaper 30 (T-M4r)"
+    assert all(d < const("MAX_CONTACT_DMG", MAIN) for d in dmg[:-1]), \
+        "the clamp stays VACUOUS at cycle 0 for every NON-REAPER base " \
+        "(rev-3 P3-1 scope moved by T-M4r); the reaper's contact ends " \
+        "the run before any damage read (F-6)"
 
 
 # ---- drop probabilities from the N-table (N5/N6/N29/N30) -----------------------

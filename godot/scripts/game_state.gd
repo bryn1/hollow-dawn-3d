@@ -46,6 +46,15 @@ var cycle := 0
 # never spawn stats or rates (F-4 byte corpus).
 var stage := "moor-vigil"
 var flare := 0.0
+# M4 pillar B (MC 11364 T-M4r, M4-SPEC §2.1): reaper is the night-flag RUN
+# MODE hand-in (DawnWell.flags["reaper"], the endless pattern verbatim —
+# hidden well flag, NO UI row, F-7). Like endless/cycle/stage it rides
+# OUTSIDE the 12-field Contract B snapshot (F-3, frozen; the B-E5 red
+# column "a 13th snapshot field" fires the test_endless exact-12 pin) and
+# is reset in start_run() below; main.gd hands it in at the ONE
+# _dawnwell -> start seam AFTER start_run. Unset = false = every
+# committed byte unchanged (B-E1).
+var reaper := false
 var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
 # The 15 passive STAT ROWS (PARITY-ROADMAP rev3 features 3+7: original five
 # + the ten evolution partners, T-M1h). Seeded here AND in start_run so
@@ -134,6 +143,9 @@ func start_run() -> void:
 	reward_kinds = []
 	endless = false # §A.2: fresh-run reset; the flag is re-handed by main._start_game
 	cycle = 0     # after start_run (hand-in seam, never a start_run default)
+	reaper = false # M4 §2.1 T-M4r: fresh-run reset, the endless pattern; the
+	#   night flag is re-handed by main._start_game (hand-in seam, never a
+	#   start_run default — B-E1's planted red "default the flag true" here)
 	stage = "moor-vigil" # §1.1 M3: fresh-run reset to the stage-1 id; re-handed
 	flare = 0.0          # by main._start_game after this call (plate logic owns decay)
 	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]

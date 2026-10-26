@@ -104,6 +104,13 @@ const EVENT_SURGE := 2.0
 # 0.0 + x*TAU == x*TAU for every randf() sample (TAU - 0.0 == TAU, +0.0).
 const CONE_ALL := [0.0, TAU]
 
+# M4 §2.1 (T-M4r): THE REAPER cadence, OUR value — their per-minute shape
+# (VS-FEATURES:423 "one Reaper will arrive every minute ... unless Endless
+# is enabled"), OUR number. One named const feeding the arrival latch
+# below; the latch gate is a CLOCK COMPARISON that consumes ZERO randf/
+# randi with the flag off (the byte law).
+const REAPER_PERIOD := 60.0
+
 # Stats + sprite per enemy id (plan §5 classics pinned by the acceptance
 # suite; biome signature creatures MC 11082 — sprites mirrored from
 # static/assets/enemies/ under res://assets/enemies/). Which ids spawn when:
@@ -148,6 +155,28 @@ const ENEMY_TYPES := {
 	# the STAGES bosses column (render.gd), not a row field: one timing.
 	"cathedral-choir": {"hp": 4200.0, "spd": 42.0, "dmg": 13.0, "xp": 0.0, "sprite": "cathedral-choir", "boss": true, "name": "THE CATHEDRAL CHOIR"},
 	"ossuary-warden": {"hp": 5600.0, "spd": 38.0, "dmg": 14.0, "xp": 0.0, "sprite": "ossuary-warden", "boss": true, "name": "THE OSSUARY WARDEN"},
+	# M4 §2.1 THE REAPER (MC 11364 T-M4r, the night-flag pursuer): OUR row —
+	# the archetype (limit-pursuer), not a clone (roadmap §3). spd 200 > the
+	# shipped 196 passive cap (BASE_SPEED 140 x the 5-stack haste,
+	# game_state.gd:5/:81), so the flag-ON pursuer is un-outrunnable at the
+	# cap; the honest deep-LIMIT bound (c2 F-2: LIMIT·HASTE repeats) is
+	# MULTI-reaper pressure + the spawn stamp, not a speed delta — no ACCEPT
+	# row claims outrunnability. hp rides the SHIPPED ramp at the arrival
+	# tick (the first arrival at 900.017 stamps roundf(50000·(1+0.22·15)·
+	# hp_cyc(0)) — "unkillable within the night" reads against the STAMP,
+	# not the 50000 def, P4-2). xp 0 = the boss no-gem-rain rule; dmg 30 is
+	# never read (F-6: the contact law ENDS the run at main.gd before the
+	# damage line, so the 20-clamp never sees it — the test_combat_numbers
+	# column re-pin names this row as the clamp's one EXCLUSION, end-law
+	# pinned). boss:true buys the 55 px contact radius + the boss bar (the
+	# live ENEMY_TYPES name readout paints THE REAPER, M3's hud law); the
+	# reaper:true dict flag is the END LAW, read FIRST in the contact loop.
+	# The ONLY construction site is the flag-gated arrival latch below — the
+	# row can never spawn without the well flag. The sprite reuses the
+	# warden art (M1 miniboss precedent) while the MESH rides the T-M4a
+	# TRELLIS row: horde_viz GLB_FILES names the-reaper.glb at the ONE
+	# per-class seam (heights 5.33 m boss class, the R4 art-fixture row).
+	"the-reaper": {"hp": 50000.0, "spd": 200.0, "dmg": 30.0, "xp": 0.0, "sprite": "boss-warden", "boss": true, "reaper": true, "name": "THE REAPER"},
 }
 
 # Minute gates at which a swarm type joins the rotation.
@@ -173,6 +202,15 @@ var schedule_spawned := 0
 # render.gd stays the ONE data source, read at run start exactly like the
 # schedule column; stage 1 copies the empty row (F-1: the vigil is inert).
 var event_windows: Array = []
+# M4 §2.1 (T-M4r): the WORLD-side reaper arrival latch — a reaper count
+# reset in reset() below, checked in update_spawns BESIDE the schedule
+# latch (the same above-cap placement every named schedule spawn holds:
+# no new cap exception, no second loop). n-th arrival gate: game.time >=
+# WIN_TIME + REAPER_PERIOD * reaper_spawned (the B-E3 row: 900.017, then
+# 960.017, one more per period). Flag off: the gate short-circuits on
+# game.reaper before any spawn — the RNG stream of every committed dump
+# is byte-unchanged (B-E1).
+var reaper_spawned := 0
 
 
 func reset() -> void:
@@ -183,6 +221,7 @@ func reset() -> void:
 	chests.clear()
 	spawn_acc = 0.0
 	schedule_spawned = 0
+	reaper_spawned = 0
 
 
 # M3 §1.2 (T-M3s) DROWNED CAIRNS (sunken-chapel row): static seeding of the
@@ -253,6 +292,9 @@ func _spawn_enemy(type_key: String, game: GameState, view: Vector2,
 		"xp": def.xp,
 		"boss": def.get("boss", false),
 		"miniboss": def.get("miniboss", false),
+		# M4 §2.1 (T-M4r): the END-LAW flag the contact loop reads FIRST
+		# (main.gd) — the same def.get idiom as the boss/miniboss flags.
+		"reaper": def.get("reaper", false),
 		"sprite": def.sprite,
 		"hit_cd": 0.0, # per-enemy cooldown for lingering damage sources
 	})
@@ -279,6 +321,22 @@ func update_spawns(dt: float, game: GameState, view: Vector2) -> void:
 			break
 		schedule_spawned += 1 # latch first: the schedule fires each once
 		_spawn_enemy(b[1], game, view)
+	# M4 §2.1 REAPER ARRIVAL (T-M4r): BESIDE the schedule latch above and
+	# therefore ABOVE the cap early-return BY POSITION — the same above-cap
+	# placement every named schedule spawn already holds (no new cap
+	# exception, no second loop; the pursuer must not stall behind a full
+	# field — it IS the run's end law, main.gd's contact arm). Gate:
+	# game.reaper and not game.endless (the VS-FEATURES:423 "unless
+	# Endless" precedence, mirrored by the endless-first elif ORDER of the
+	# cap fork in main.gd — B-E4) + the clock n-th-arrival comparison
+	# (ZERO randf/randi at the gate itself, the A-E5 idiom; the spawn
+	# below rides the SAME _spawn_enemy funnel, full circle, default cone
+	# CONE_ALL — no cone for the pursuer). Flag off: short-circuit, the
+	# RNG stream of every committed dump is byte-unchanged (B-E1).
+	while game.reaper and not game.endless \
+			and game.time >= GameState.WIN_TIME + REAPER_PERIOD * reaper_spawned:
+		reaper_spawned += 1 # latch first: one arrival per period
+		_spawn_enemy("the-reaper", game, view)
 	# M3 §1.2 plate logic (see the consts): decay first, dwell re-sets the
 	# shift -> inside a plate flare pins at exactly FLARE_SHIFT; zero RNG.
 	# Stage 1 / plate-less rows: flare stays the exact 0.0 it was, surge the
@@ -405,6 +463,16 @@ func kill_enemy(game: GameState, enemy: Dictionary) -> void:
 	if i >= 0:
 		enemies.remove_at(i)
 	game.kills += 1
+	# M4 §2.1 DEATH GUARD (T-M4r, B-E6): a reaper death pays NOTHING — no
+	# chest roll (the ONE CHEST_TIER_BY_SOURCE stays 7 rows, F-3: a keyed
+	# read of "the-reaper" would be the missing-key SOFT-null that appends
+	# a phantom null-tier chest — the map-bypass law, first EXECUTED
+	# evidence rides the sim_reaper zero-drop-array-delta leg), no +50
+	# boss bounty at :347, no coin/heal rolls; `xp: 0` already means no
+	# gem. The kill counts; the drop arrays stay untouched. Planted
+	# removal RED-proves the delta leg (capture .tmp/m4r-reaper.txt).
+	if enemy.get("reaper", false):
+		return
 	if enemy.boss:
 		game.gold += 50
 	if enemy.xp > 0.0 and randf() < 0.7:

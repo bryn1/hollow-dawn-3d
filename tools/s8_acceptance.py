@@ -208,6 +208,25 @@ def main():
         " +50g, Dawnlight guaranteed, once" % n_bar, a5, "Pixel",
         ".tmp/s8-bossbar.png + .tmp/s8-shots/ + boss rows of .tmp/hd3d-boss-s6-dump.jsonl")
 
+    # ---- REAPER-BAR row (T-M4r B-E2, MC 11364; R6 ADDITIVE — the A5 warden
+    # bar row byte-untouched, this table gains its own reaper-variant row):
+    # the night capture (s8_capture.gd HD3D_REAPER=1, own shots dir) paints
+    # "THE REAPER" in the bar crop (same A5 window), counted against the
+    # empty baseline frame. The name READ itself is the capture's own STATE
+    # line (bar=... JSON) plus the executed runtime twin: the reaper_limit
+    # leg's bar_reads_reaper check in tests/fixtures/reaper-m4.jsonl.
+    # Planted red = feed the baseline against itself -> 0 px -> this row
+    # FAILs, exit 1 (the table's mutation convention; both runs in the
+    # T-M4r capture .tmp/m4r-reaper.txt).
+    reaper_png = os.path.join(REPO, ".tmp", "s8-shots-reaper", "bossbar.png")
+    n_reaper = crop_nonbg(reaper_png, base_png, (400, 0, 880, 44)) \
+        if os.path.exists(reaper_png) and os.path.exists(base_png) else -1
+    row("REAPER-BAR", "night-variant bar 'THE REAPER' painted over the live"
+        " 3D scene (name read: capture STATE line + reaper_limit leg)",
+        n_reaper >= NON_BG_MIN, "Pixel", "%s vs %s crop(400,0,880,44) n=%d px"
+        % (reaper_png.replace(REPO + "/", ""), base_png.replace(REPO + "/", ""),
+           n_reaper))
+
     # ---- A6: band switches at 0/150/300/450 + banner rule pinned
     a6 = None
     if d and os.path.exists(os.path.join(REPO, "godot", "scripts", "hud_3d.gd")):

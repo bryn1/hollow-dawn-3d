@@ -67,6 +67,12 @@ const GLB_FILES := {
 	# each, the art-fixture forward-lock grows 15 -> 17).
 	"sunken-prelate": "sunken-prelate.glb",
 	"stair-acolyte": "stair-acolyte.glb",
+	# M4 §2.1 (MC 11364 T-M4r): THE REAPER rides the SAME per-class swap at
+	# MODEL_H_BOSS (boss:true row) on the T-M4a TRELLIS mesh (MC 11361,
+	# the-reaper.glb) — the same commit as its ENEMY_TYPES row and the
+	# test_art_integration coverage/heights re-pin (R4: one row, the art-
+	# fixture forward-lock grows 17 -> 18, prior rows byte-preserved).
+	"the-reaper": "the-reaper.glb",
 }
 
 # §c gait constants (dump acceptance rows: freq <= 2.2 Hz, scale range <= 0.24).

@@ -84,13 +84,17 @@ def test_glb_per_class_exists_and_wired():
     # TRELLIS asset rows, MC 11361): the two EVENT-miniboss classes joined
     # at their OWN committed meshes (sunken-prelate.glb / stair-acolyte.glb)
     # in the same commit as their ENEMY_TYPES rows (R4's forward-lock pair).
+    # Coverage row RE-PINNED AGAIN by T-M4r (MC 11364, spec §2.1): THE
+    # REAPER joined at its OWN T-M4a mesh (the-reaper.glb), same-commit
+    # forward-lock pair with its ENEMY_TYPES row (R4 again).
     assert sorted(mapping) == sorted(
         CLASS_KEYS + ["warden", "hollow-knight", "hollow-deacon",
                       "cathedral-choir", "ossuary-warden",
-                      "sunken-prelate", "stair-acolyte"]), (
+                      "sunken-prelate", "stair-acolyte",
+                      "the-reaper"]), (
         "GLB_FILES must cover exactly the 8 swarm classes + the warden + the "
         "2 miniboss classes + the 2 end-boss classes + the 2 event-miniboss "
-        "classes")
+        "classes + the reaper")
     for key, fname in mapping.items():
         assert os.path.isfile(os.path.join(GLB_DIR, fname)), (
             "class %s has no committed glb at godot/assets/glb/%s" % (key, fname))
@@ -116,17 +120,25 @@ def test_height_table_within_spec():
     # classes join at the ENEMY height row (1.42 m, the miniboss law the
     # knight/deacon rows ride), rel_err 0.0 — gate unchanged, the fixture
     # grows 15 -> 17 rows with every prior row byte-preserved (R4).
+    # Coverage row EXTENDED by T-M4r (MC 11364): THE REAPER joins at the
+    # BOSS height row (5.33 m, MODEL_H_BOSS — the law the warden/choir/
+    # ossuary rows ride; its row is boss:true), rel_err 0.0 — gate
+    # unchanged, the fixture grows 17 -> 18 rows with every prior row
+    # byte-preserved (R4's forward lock again).
     assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player",
                                                     "hollow-knight",
                                                     "hollow-deacon",
                                                     "cathedral-choir",
                                                     "ossuary-warden",
                                                     "sunken-prelate",
-                                                    "stair-acolyte"])
+                                                    "stair-acolyte",
+                                                    "the-reaper"])
     for key, row in by_class.items():
         spec = {"warden": SPEC_H_BOSS,
                 "cathedral-choir": SPEC_H_BOSS,
                 "ossuary-warden": SPEC_H_BOSS,
+                # T-M4r (MC 11364): boss:true row → MODEL_H_BOSS law.
+                "the-reaper": SPEC_H_BOSS,
                 "player": SPEC_H_PLAYER}.get(key, SPEC_H_ENEMY)
         assert row["mesh"] == "ArrayMesh", (
             "%s: live unit must render an imported ArrayMesh" % key)

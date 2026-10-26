@@ -29,6 +29,7 @@ data/
 !.tmp/s5-cards/
 !.tmp/s8-gameover.jsonl
 !.tmp/s8-shots/
+!.tmp/s8-shots-reaper/
 !.tmp/s8-win.jsonl
 !.tmp/stack-install-p2-1.txt
 !.tmp/tq01-redcontrol.txt

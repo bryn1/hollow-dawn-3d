@@ -211,15 +211,33 @@ func _step(dt: float) -> void:
 		var er: float = 55.0 if e.boss else 17.0
 		var dx: float = e.x - p.x
 		var dy: float = e.y - p.y
-		if dx * dx + dy * dy < (er + 16.0) * (er + 16.0) and p.iframes <= 0.0:
-			# §A.1: cycle-scaled contact damage, ONE clamped read before
-			# damage_taken. cycle 0: dmg_cyc = 1.0 exact and every base dmg
-			# (max 12) < MAX_CONTACT_DMG, so the raw read is the verbatim
-			# e.dmg — flag-off byte-stable (F-4).
-			var raw: float = minf(e.dmg * GameWorld.dmg_cyc(game.cycle), MAX_CONTACT_DMG)
-			game.hp -= game.damage_taken(raw)
-			p.iframes = GameState.IFRAMES
-			break
+		if dx * dx + dy * dy < (er + 16.0) * (er + 16.0):
+			# M4 §2.1 END LAW (T-M4r, F-6): the reaper row's dict flag is
+			# read FIRST inside the existing boss-radius test — contact is
+			# the RUN-END, NOT damage: no damage, no clamp, the phase enum
+			# untouched (gameover is shipped). The end law is NOT behind
+			# the iframes gate: a stationary surrounded runner refills
+			# iframes from the horde on EVERY cleared window (shipped array
+			# order + break), so an iframes-gated reaper could never end
+			# such a run — B-E2's window (900,930) as WRITTEN names it.
+			# Flag off: e.get("reaper") is false for every shipped row, so
+			# the branch is a pure fallthrough — same checks, same order,
+			# zero RNG, byte-identical (B-E1). The row's dmg 30 never
+			# reaches the clamp below (the test_combat_numbers column
+			# re-pin names this exclusion; the B-E2 planted "damage 20
+			# instead of ending" RED-proves the law from the other side).
+			if e.get("reaper", false):
+				_end_run("gameover")
+				return
+			if p.iframes <= 0.0:
+				# §A.1: cycle-scaled contact damage, ONE clamped read before
+				# damage_taken. cycle 0: dmg_cyc = 1.0 exact and every base dmg
+				# (max 12) < MAX_CONTACT_DMG, so the raw read is the verbatim
+				# e.dmg — flag-off byte-stable (F-4).
+				var raw: float = minf(e.dmg * GameWorld.dmg_cyc(game.cycle), MAX_CONTACT_DMG)
+				game.hp -= game.damage_taken(raw)
+				p.iframes = GameState.IFRAMES
+				break
 	game.gold += world.collect_pickups(game)
 	if game.hp <= 0.0:
 		game.hp = 0.0
@@ -235,6 +253,18 @@ func _step(dt: float) -> void:
 			if next_cycle > game.cycle:
 				game.cycle = next_cycle
 				_cycle_clear()
+		# M4 §2.1 REAPER NIGHT (T-M4r, MC 11364): with the night flag ON and
+		# Endless OFF the limit does NOT end the run — the run CONTINUES,
+		# hunted: the world-side arrival latch (world.gd, beside the
+		# schedule latch) walks one the-reaper per REAPER_PERIOD past the
+		# limit and THIS step's contact arm ends the run on touch (F-6: no
+		# damage, no clamp, the phase enum untouched). The ORDER is law:
+		# endless is checked FIRST (VS-FEATURES:423 "unless Endless mode is
+		# enabled") — the R9 re-pin (tests/test_endless.py, same commit as
+		# this arm) source-pins this endless->reaper elif order, making the
+		# precedence equal-or-stronger pinned than the retired verbatim row.
+		elif game.reaper:
+			pass # the hunted night: no win, no clear; the reaper is the end
 		else:
 			_end_run("win")
 			return
@@ -274,6 +304,11 @@ func _start_game() -> void:
 	# start seam, AFTER start_run (which resets the run-mode vars, §A.2).
 	# No flag row = endless false = every M1 byte unchanged.
 	game.endless = int(_dawnwell.flags.get("endless", 0)) == 1
+	# The reaper hand-in (M4 §2.1, T-M4r): the SAME _dawnwell -> start seam,
+	# the endless pattern verbatim — a hidden well flag (no UI row, F-7),
+	# AFTER start_run (which reset it). No flag row = false = every
+	# committed byte unchanged (B-E1).
+	game.reaper = int(_dawnwell.flags.get("reaper", 0)) == 1
 	# The stage hand-in (M3 §1.1, T-M3s): the SAME _dawnwell -> start seam,
 	# the endless pattern — AFTER start_run (which resets stage to the
 	# stage-1 id). An unset/older save reads index 1 = "moor-vigil", so
@@ -339,13 +374,24 @@ func _end_run(result: String) -> void:
 		_dawnwell.flags[String(next_stage.unlock_flag)] = 1
 	_dawnwell.gold += game.stats.gold
 	_meta_changed()
-	_screens.show_end(result == "win", [
+	# M4 §2.1 END SCREEN (T-M4r, no new surface): with a reaper having been
+	# LIVE this run (the flag handed in AND the world-side arrival latch
+	# fired) the panel PREPENDS ONE line — the same panel, the same
+	# show_end(win=false, lines) call, the five shipped rows verbatim after
+	# it, the score/time/level/gold rows and the leaderboard JS payload
+	# unchanged. Stats read time > 900 naturally: "stage complete, then
+	# hunted" is what the numbers say.
+	var end_lines: Array = [
 		"Survived " + _fmt_time(game.stats.time),
 		"Kills %d" % game.stats.kills,
 		"Level %d" % game.stats.level,
 		"Gold %d" % game.stats.gold,
 		"Score %d" % _score(game.stats),
-	])
+	]
+	if game.reaper and world.reaper_spawned > 0:
+		end_lines.push_front("The Reaper took you at %s"
+				% _fmt_time(game.stats.time))
+	_screens.show_end(result == "win", end_lines)
 	# The JS-side existence check keeps this a no-op even when the bridge is
 	# active but the DOM submit panel was never installed (head_include absent).
 	_js_eval("if (window.vsShowSubmit) vsShowSubmit(" + JSON.stringify({

@@ -29,6 +29,23 @@ var _run_stage := 1 # T-M3b (MC 11284) DECLARED variant: HD3D_STAGE picks
 # stage 1, so the byte-anchored stage-1 shots are untouched; the capture
 # re-run at HD3D_STAGE=2 is the C-E3 pixel proof that the boss bar paints
 # the STAGE's own end-boss name from the live row.
+var _run_reaper := false # T-M4r (MC 11364) DECLARED variant: HD3D_REAPER=1
+# walks THE REAPER night instead of the 540 boss bar (M4 §2.2, the
+# HD3D_STAGE pattern verbatim): the night flag rides the ONE well-flag seam
+# at stage 1 (the select-seam site above), the run warps past the LIMIT to
+# WARP_REAPER, and the bar shot carries the first ARRIVED reaper. Declared
+# capture pins (named at the shot, the CYCLE-HUD row's pattern): the freeze
+# lands on the first frame the reaper is on the field (200 px/s × one frame
+# of llvmpipe draw gap stays far short of the ring walk — the pursuer
+# cannot end the run before its own portrait is taken), and the earlier
+# schedule bosses are funnel-killed through the REAL kill_enemy seam so the
+# shipped first-boss bar law reads THE REAPER (their drops are artifacts of
+# the pin, not claims — the reaper drop law is sim_reaper's B-E6 leg). The
+# variant is a SEPARATE run writing to its own HD3D_SHOTS_DIR; default
+# shots byte-untouched.
+
+
+const WARP_REAPER := 901.0 # past WIN_TIME: the arrival latch has fired
 
 
 func _out_dir() -> String:
@@ -43,6 +60,8 @@ func _initialize() -> void:
 	var st := OS.get_environment("HD3D_STAGE")
 	_run_stage = st.to_int() if st != "" else 1
 	assert(_run_stage >= 1 and _run_stage <= 3)
+	var rp := OS.get_environment("HD3D_REAPER") # T-M4r variant switch (declared)
+	_run_reaper = rp == "1"
 	assert(DirAccess.make_dir_recursive_absolute(_out_dir()) == OK)
 	_main = load("res://Main.tscn").instantiate()
 	root.add_child(_main) # _ready lands on the first tree iteration, NOT
@@ -65,6 +84,8 @@ func _on_frame() -> void:
 			_save("baseline")
 			_main._hud.visible = true
 			_main._dawnwell.stage = _run_stage # declared select seam (above)
+			if _run_reaper:
+				_main._dawnwell.flags["reaper"] = 1 # declared night-flag seam
 			_main._start_game()
 			_stage = 2
 		2:  # HUD shot: declared warp past 10 s, live spawns + live HUD
@@ -75,9 +96,19 @@ func _on_frame() -> void:
 			# the real gate — the boss gate is world.gd's, not injected
 			_freeze_cast()
 			_save("hud")
-			_main.game.time = WARP_BOSS
+			_main.game.time = WARP_REAPER if _run_reaper else WARP_BOSS
 			_stage = 4
 		4:
+			if _run_reaper:
+				if _reapers() == 0:
+					return # the real arrival latch owns the gate, not injected
+				_freeze_cast() # first-frame freeze (declared, header note)
+				for e in _main.world.enemies.duplicate():
+					if e.boss and not e.get("reaper", false):
+						_main.world.kill_enemy(_main.game, e) # declared pin
+				_wait = SETTLE
+				_stage = 5
+				return
 			if _boss().is_empty():
 				return
 			_freeze_cast()
@@ -85,6 +116,9 @@ func _on_frame() -> void:
 			_stage = 5
 		5:
 			_save("bossbar")
+			if _run_reaper:
+				print("CAPTURE_OK") # variant ends at the reaper bar shot
+				quit()
 			# M2 T-M2e A-E7 stage: the cycle HUD row. DECLARED pins (the
 			# stated capture reading this harness already carries — HUD text
 			# reads game state, the world stays live, chase stays frozen):
@@ -114,6 +148,16 @@ func _boss() -> Dictionary:
 		if e.boss:
 			return e
 	return {}
+
+
+# T-M4r: reapers on the field (the dict-flag read — the same law main.gd's
+# contact loop makes; the variant's gate is the REAL arrival latch).
+func _reapers() -> int:
+	var n := 0
+	for e in _main.world.enemies:
+		if e.get("reaper", false):
+			n += 1
+	return n
 
 
 func _save(kind: String) -> void:

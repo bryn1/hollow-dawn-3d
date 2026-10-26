@@ -390,6 +390,79 @@ func _run_legs() -> void:
 			and s4_named <= 2 and s4_boss_ticks == 60})
 	s4.queue_free()
 
+	# (6) budget_reaper — B-E5 (MC 11364 T-M4r): the NIGHT-flag worst case on
+	# the SAME construction channel (no second budget harness): stage-1
+	# default build, night flag ON through the ONE seam (fresh_run opts —
+	# the endless flag pattern), DECLARED t=960-DT clock pin so tick 1
+	# catches BOTH reaper arrivals (900 + 60, the catch-up shape s4's 660-DT
+	# pin rides) while the three stage-1 schedule classes latch too; the
+	# 400-cap horde through the real _spawn_enemy funnel; 60 hp-pinned ticks
+	# (reapers walk, never reach: 1 s of sim time). §9 reading: 3 named
+	# schedule + 2 reapers = 5 named ABOVE the guard, horde 400, draws
+	# <= 40 <= 60 (the reaper MM is one ClassMesh instance per arrival at
+	# MODEL_H_BOSS — two more horde draws inside the plan line).
+	var s5: Node = SimFunnel.fresh_run(root, {"wipe_well": true,
+			"wire_pick": true, "flags": {"reaper": 1}})
+	_pin_worst_case(s5)
+	s5.game.time = 960.0 - DT # DECLARED: both arrivals + the schedule latch
+	var CAST5: Array = s5.world._types_open("moor-vigil", 960.0)
+	for i in 400:
+		s5.world._spawn_enemy(String(CAST5[i % CAST5.size()]), s5.game,
+			GameRenderer.VIEW)
+	var s5_max_total := 0
+	var s5_horde := 0
+	var s5_named := 0
+	var s5_reapers := 0
+	var s5_reaper_ticks := 0
+	for s in 60:
+		_decline(s5)
+		s5.game.hp = s5.game.max_hp # DECLARED pin (union-leg precedent)
+		s5._step(DT)
+		var hn5 := 0
+		var bn5 := 0
+		var mn5 := 0
+		var rn5 := 0
+		for e in s5.world.enemies:
+			if e.get("reaper", false):
+				rn5 += 1
+			elif e.boss:
+				bn5 += 1
+			elif e.miniboss:
+				mn5 += 1
+			else:
+				hn5 += 1
+		if rn5 > 0:
+			s5_reaper_ticks += 1
+		s5_horde = maxi(s5_horde, hn5)
+		s5_named = maxi(s5_named, bn5 + mn5 + rn5)
+		s5_reapers = maxi(s5_reapers, rn5)
+		s5_max_total = maxi(s5_max_total, s5.world.enemies.size())
+	s5._viz.refresh()
+	s5._fxv.refresh()
+	s5._pvz.refresh()
+	var s5_horde_draws: int = s5._viz.draw_count()
+	var s5_fx: int = s5._fxv.draw_count()
+	var s5_pick: int = s5._pvz.draw_count()
+	var s5_total := 1 + s5_horde_draws + 1 + s5_fx + s5_pick
+	_rows.append({"ev": "budget_reaper", "alive_max_total": s5_max_total,
+		"alive_cap": GameWorld.ALIVE_CAP, "horde_max": s5_horde,
+		"named_max": s5_named, "reapers_max": s5_reapers,
+		"reaper_ticks_live": s5_reaper_ticks,
+		"ground": 1, "horde": s5_horde_draws, "pawn": 1, "fx_worst": s5_fx,
+		"pickups": s5_pick, "total": s5_total, "planned": DRAWS_PLANNED,
+		"hard_cap": DRAWS_HARD,
+		"note": "B-E5 (T-M4r): night-flag worst case — 3 schedule named + 2 " +
+			"reapers above the cap guard (latches are above the cap BY " +
+			"POSITION, §2.1 — no new cap exception), stage-1 horde 400, " +
+			"the reaper MM joins the horde draw tally at the ONE per-class " +
+			"seam (the-reaper.glb); snapshot exact-12 rides " +
+			"tests/fixtures/reaper-m4.jsonl reaper_snapshot",
+		"ok": s5_total <= DRAWS_HARD and s5_total <= DRAWS_PLANNED \
+			and s5_horde <= GameWorld.ALIVE_CAP \
+			and s5_named <= 5 and s5_reapers == 2 \
+			and s5_reaper_ticks == 60})
+	s5.queue_free()
+
 	var ok_all: bool = true
 	for r in _rows:
 		if r.has("ok") and not r["ok"]:
