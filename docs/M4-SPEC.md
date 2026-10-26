@@ -1,5 +1,14 @@
 # M4-SPEC — hollow-dawn-3d "Nightfall & Legacy" (v2.1.0) — spec for the DA gate
 
+- **REV 3, 2026-10-26, after DA cycle 2** (`docs/M4-SPEC-DA-c2.md` @ `bd4a825`, VERDICT FIX,
+  0P1/1P2/1P3/3P4 — both DA docs immutable; final producer cycle, cap 3). All FIVE c2 rows
+  ADOPTED, each re-grepped at `bd4a825` before adoption, 0 rejects — dispositions in §14.
+  The gate's c2 audit re-grepped the whole c1 ledger, confirmed both §13.1 rebuttals and R9's
+  honesty, and re-measured F-5's means itself; those confirmations ride unchanged, as do the
+  PASS rows (the design core c1 upheld is unchanged; **SEL-A v2.1.0 untouched**). The one
+  gate-biter (F-1, the M3-c2 F-1 class — two independently-true adopted fixes colliding) is
+  folded in BOTH places the digest-twin clause lives, identity-cone route, carve stated like
+  M3 rev-3 stated its own.
 - **REV 2, 2026-10-26, after DA cycle 1** (`docs/M4-SPEC-DA.md` @ `5695244`, VERDICT FIX,
   2P1/2P2/6P3/4P4 — the DA doc is immutable; THIS doc is revised in place, M3-SPEC rev-2/3
   precedent). 13 of the 14 fix-list findings ADOPTED, each re-grepped against the tree at
@@ -41,7 +50,7 @@
   rows :117-118, end-boss rows :123-124) / schedule_spawned:142 / seed_stage_props:169 /
   _types_open:179 / _spawn_enemy:191-215 (angle :193, hp-ramp stamp :200-201, ring :187) /
   update_spawns:218-263 (latch
-  :225-240, flare-decay+plate-surge :245-250, cap early-return :249-250, rate term :259, pick
+  :225-238, flare-decay+plate-surge :243-248, cap early-return :249-250, rate term :259, pick
   :260-263) / cycle_clear:334 / kill_enemy:342-368 (keyed boss site :363-365, miniboss literal
   :366-368)`; `main.gd MAX_CONTACT_DMG:20 / _step contact loop :210-222 (clamp :219) / win branch
   :228-240 (the else leg `_end_run("win")` :239-240, regex-pinned by test_endless.py:147) /
@@ -176,14 +185,14 @@ literally: ONE cone per event, the cap untouched (F-4).
 
 **Reuse (zero new subsystem).** The event window touches only the ONE spawn loop
 (`update_spawns:218-263`): while `t ∈ [t0, t1)` on a stage-row `events` entry, (a) the rate term's
-`surge` (already a live variable from the plate law, `world.gd:245-250`) takes
+`surge` (already a live variable from the plate law, `world.gd:243-248`) takes
 `maxf(surge, ev.surge)` — INSIDE the untouched `minf(12.0)` ceiling (`:259`), below the untouched
 ALIVE_CAP early-return (`:249-250`); (b) `_spawn_enemy` gains an optional cone parameter —
 default `[0.0, TAU]` so the shipped call `angle := randf() * TAU` becomes
 `cone[0] + randf() * (cone[1] - cone[0])`, IEEE-exact at the default (0.0 + x ≡ x; TAU − 0.0 ≡
 TAU; the RNG consumption COUNT and order are unchanged — the pinned-stream law). Spawn TYPES keep
 drawing from the ONE `_types_open` set (`:260-263`) — no swarm-only enemy, no second pool. The
-event minibosses ride the ONE schedule latch (`schedule_spawned:225-240` + the defer guard) as
+event minibosses ride the ONE schedule latch (`schedule_spawned:225-238` + the defer guard) as
 new 660.0 entries on the stage-2/3 `bosses` rows. The ONE chest map is untouched (F-3).
 
 ### 1.1 The event rows (OUR numbers, STAGES-table data)
@@ -197,7 +206,11 @@ new 660.0 entries on the stage-2/3 `bosses` rows. The ONE chest map is untouched
 - `EVENT_SURGE := 2.0` (`world.gd`, next to `SPAWN_SURGE:89`, OUR value: the event is the bigger
   moment of the night than a plate's 1.5). Windows 60 s, fixed cones — the table row is the whole
   mechanism (fixed geometry = **ZERO new RNG consumption**: cone angle still costs exactly one
-  `randf()` per spawn; cone selection is a clock comparison, like the plate dwell).
+  `randf()` per spawn; cone selection is a clock comparison, like the plate dwell). Digest-twin
+  corollary (c2 F-1, stated here as well as at A-E5): the zero-RNG fact is proven by a twin that
+  pins the cone to the table's IDENTITY default `[0.0, TAU]` — a LIVE cone changes spawn GEOMETRY
+  (kill timing ⇒ the kill-time `randf`s at `kill_enemy :349/:351/:353/:363` consume at different
+  positions), so geometry divergence is A-E3's instrument, never a digest claim.
 - The row shape extends the STAGES dict exactly as cairns/plates did (`"events": [[t0, t1,
   center_deg, width_deg], …]`); `render.gd` stays the ONE data module, and the slice law
   (STAGES/band_at BELOW `biome_at`; the BIOMES-block slice ends at `biome_at`,
@@ -246,8 +259,8 @@ F-9) + `art-s2i-probe.jsonl` (forward-lock growth per R4) — all per §7.2.
 | A-E1 | **byte corpus untouched on the stage-1 default** (P2-2 scope fold): the strict corpus EXCLUDING this milestone's declared re-mints — the journey re-dump + every committed fixture NOT touched by R2/R4 (`endless-m2`, `gem-merge-m2g`, `unions-m2u`, `chests-tiers-m2`, `chests-evolve-m1e`, `carry-caps-m1b`, `skinned-clips-s2r-framediff.csv`) PLUS the 14 PRESERVED stages-m3 rows R2 names — byte-identical on the T-M4e tree; the three MOVED stages-m3 rows and the art-s2i growth are asserted under R2/R4 (declared re-mints), never under this row — the stage-1 `events` row is `[]` and the cone default is the IEEE identity | the existing re-run pattern (fresh dump vs committed corpus, `cmp`; the T-C3 gate idiom) | ANY event-window leak into stage 1 flips the journey's spawn digest ⇒ RED (planted: an event row on the moor-vigil table row) |
 | A-E2 | STAGES table pin: `events` rows verbatim (stage 1 `[]`; windows/cones per §1.1), the stage-2/3 `bosses` rows RE-PINNED with their 660 entries, stage-1 bosses row STAYS byte-equal to `[[BOSS_AT,"warden"]]+MINIBOSS_AT` | the existing table-pin pattern (`tests/test_stages.py:79-97`) | a re-keyed window/cone value ⇒ pin RED; a stage-1 bosses/`events` edit ⇒ STAY rows RED |
 | A-E3 | cone truth: on a stage-2 leg, EVERY spawn during [660,720) has an angle inside the cone (position rows vs the player, same numeric space as the shipped funnel — no px/m bridge, T-M3g law), and OUTSIDE the window spawns return to full circle | new `sim_events.gd` dump (seeded channel, per-leg env), position rows | planted cone `[0, TAU]` in the table ⇒ inside-cone share ≈25 % not 100 % ⇒ RED (named check `cone_share`) |
-| A-E4 | surge truth, THREE legs mirroring the shipped `minf_clamps_surge` split (P1-2 fold): **(cap leg, shipped shape)** during the window at minute 11+ BOTH twins run 12/s (ceiling binding, ALIVE_CAP pause intact); **(mechanism leg, UNCAPTED zone — DECLARED-PIN window [180,210], minute 3.0–3.5, base 4.90–5.55 so ×2 = 9.80–11.10 < 12.0 ⇒ inside and outside the `minf` COINCIDE and the factor is purely observable)** ⇒ observed twin ratio == 2.0 ±acc-tolerance; **(saturation leg, CLAMP zone — window [480,510], minute 8.0–8.5, base 11.40–12.05)** ⇒ green: the in-`minf` event twin converges to the flag-off twin at ≤ 12.0/s (the shipped `minf_binds_both` arithmetic-row shape) | the same `sim_events.gd` channel (DECLARED-PIN leg idiom + arithmetic rows) | mechanism leg: planted surge value 1.5 (plate const bleed) ⇒ ratio 1.5 ⇒ RED (`surge_ratio` check); saturation leg: surge applied OUTSIDE the `minf` ⇒ 22.80–24.10/s against the 12.0 ceiling ⇒ RED (`surge_capped` check). REV-1's single mechanism leg at [180,210] could not fire that red (9.8–11.1 coincide clamped or not; ratio-2.0 and cap-violation are mutually exclusive in one leg) — split per P1-2, the exact M3 `minf_clamps_surge` precedent |
-| A-E5 | zero-RNG law: cone selection consumes ZERO `randf`/`randi` beyond the shipped per-spawn one — twin runs (event window vs the same run pre-window) digest the RNG stream identically through t=720 and to run-end (P4-4 wording: the whole run is compared, not a t=660 cut) | dump rows on the same channel (digest rows per the `dwell_zero_rng` idiom) | a `randi()` planted for cone choice ⇒ digests fork at 660 while rates stay identical ⇒ RED (`rng_stream` check), the independent-attribution pattern from T-M3g |
+| A-E4 | surge truth, THREE legs mirroring the shipped `minf_clamps_surge` split (P1-2 fold): **(cap leg, shipped shape)** during the window at minute 11+ BOTH twins run 12/s (ceiling binding, ALIVE_CAP pause intact); **(mechanism leg, UNCAPTED zone — DECLARED-PIN window [180,210], minute 3.0–3.5, base 4.90–5.55 so ×2 = 9.80–11.10 < 12.0 ⇒ inside and outside the `minf` COINCIDE and the factor is purely observable)** ⇒ observed twin ratio == 2.0 ±acc-tolerance; **(saturation leg, CLAMP zone — window [480,510], minute 8.0–8.5, base 11.40–12.05)** ⇒ green: the in-`minf` event twin converges to the flag-off twin at ≤ 12.0/s (the shipped `minf_binds_both` arithmetic-row shape). c2 F-4 measurement disclosure: the observable is the SUB-WINDOW mean from window start (pool cleared at start, the shipped windows' own shape) until the ALIVE_CAP hit — planted outside-minf twin ≈ 17 s at 22.80–24.10/s vs green < 12.0/s; the FULL-window mean carries a clamp tail (both twins ~12/s after the cap fires, ~t≈497 planted) and could false-green — same fork-twins shape as the shipped `minf_clamps_surge` | the same `sim_events.gd` channel (DECLARED-PIN leg idiom + arithmetic rows) | mechanism leg: planted surge value 1.5 (plate const bleed) ⇒ ratio 1.5 ⇒ RED (`surge_ratio` check); saturation leg: surge applied OUTSIDE the `minf` ⇒ 22.80–24.10/s against the 12.0 ceiling ⇒ RED (`surge_capped` check). REV-1's single mechanism leg at [180,210] could not fire that red (9.8–11.1 coincide clamped or not; ratio-2.0 and cap-violation are mutually exclusive in one leg) — split per P1-2, the exact M3 `minf_clamps_surge` precedent |
+| A-E5 | zero-RNG law (c2 F-1 identity-cone scoping — the row's OWN subject is the default path): the digest twin pins the cone to the table's IDENTITY default `[0.0, TAU]` (`0.0 + randf()·TAU ≡ randf()·TAU`), keeping spawn geometry inert so kill-timing and the kill-time rolls (`kill_enemy :349/:351/:353/:363`) consume the SAME stream at the SAME positions ⇒ twin digests equal **through t=720 and to run-end, GREEN on correct code** (P4-4's whole-run comparison stands ONLY under this carve — a live-cone twin would fork on correct code and MASK the planted red; the exact M3-c2 F-1 class, stated as M3 rev-3 stated its `dwell_zero_rng` carve — that twin is valid because the plate touches no geometry, `sim_stages.gd:428`); the LIVE cone's geometry truth stays A-E3's, never a digest claim | dump rows on the same channel (digest rows per the `dwell_zero_rng` idiom, identity-cone leg named `rng_twin_identity`) | a `randi()` planted for cone choice consumes per-spawn REGARDLESS of cone values ⇒ digests fork at 660 on the identity twin while rates stay identical ⇒ RED (`rng_stream` check), the independent-attribution pattern from T-M3g — distinguishable precisely because geometry was pinned out |
 | A-E6 | event-miniboss schedule: sunken-prelate first-seen 660.017 on stage 2 (and stair-acolyte on stage 3), ONCE (latch), NEVER on the other stage and NEVER on stage 1; run-2 `reset()` re-arm leg; chest leg: kill roll rides `0.6` and the tier byte == the MAP's `miniboss` row dumped, not a literal | `sim_events.gd` legs (the `sim_bosses` first-seen/boss_once leg shapes through SimFunnel) + the `sim_chest_tiers` drop-map leg shape | a cross-stage spawn ⇒ both-side leg RED; a tier literal bypass ⇒ map-compare RED (T-M2t planted law re-used) |
 | A-E7 | budget: `budget_stage4` leg (the §2 construction channel, DECLARED pins) — stage-2/3 event runs: draws ≤ plan 40 ≤ hard 60, horde ≤ 400 with the named-count reading 402 re-asserted (cap + 2 named once-each) | `sim_budget.gd` WORST-CASE-LOADOUT leg, extended in place (no second budget harness) | a new MM class un-retallied ⇒ the coverage/draws pin RED (standing DA-c1 A-1 same-commit rule) |
 
@@ -272,7 +285,7 @@ mesh — the archetype (limit-pursuer), not a clone (roadmap §3 discipline).
   endless→reaper elif ORDER, making the "unless Endless" precedence law source-pinned (equal-or-
   stronger; the runtime rows `:114-118`/`:130-135`/`:244` are untouched and stay green). The
   ARRIVAL latch is WORLD-side: a `reaper_spawned` int on `GameWorld` (reset in `world.reset()`),
-  checked in `update_spawns` BESIDE the schedule latch (`:225-240`) and therefore ABOVE the cap
+  checked in `update_spawns` BESIDE the schedule latch (`:225-238`) and therefore ABOVE the cap
   early-return (`:249-250`) BY POSITION — the same above-cap placement every named schedule spawn
   already holds; no new cap exception, no second loop. Gate: `game.reaper and not game.endless`
   + `game.time >= WIN_TIME + REAPER_PERIOD·n`; spawns through the SAME `_spawn_enemy` (full
@@ -283,8 +296,14 @@ mesh — the archetype (limit-pursuer), not a clone (roadmap §3 discipline).
   flags, `:211-212` idiom): inside the existing boss-radius test ⇒ `_end_run("gameover")` +
   return — no damage, no clamp, the phase enum untouched.
 - **Enemy row:** `"the-reaper": {hp 50000, spd 200, dmg 30, xp 0, boss: true, reaper: true,
-  name "THE REAPER"}` (spd 200 > BASE_SPEED 140 + every measured haste build at the 5-stack cap
-  (140·1.4 = 196) — the pursuer CANNOT be outrun forever, OUR pin, checked by test. Spawn-stamp
+  name "THE REAPER"}` (spd 200 > 196 = BASE_SPEED 140 (`game_state.gd:5`) × 1.4, the 5-stack haste
+  cap (`:81`) — the pursuer is UN-outrunnable by speed for every run at or below the shipped
+  passive cap. Honest bound (c2 F-2): LIMIT·HASTE repeats forever, so a DEEP-LIMIT run outruns on
+  speed alone at m ≥ 2 (`196·(1+0.03m) = 207.84`); there the end-law is MULTI-REAPER pressure
+  (one arrival per period, the latch leg B-E3) plus the spawn stamp, not the speed delta. No
+  ACCEPT row tests outrunnability and none claims it; deep-limit state is unreachable inside any
+  flag-off 900 s run (§9 hedge, rewritten c2 F-2) — the named interaction is reaper-ON +
+  all-maxed, an emergent late-night case, not a balance claim. Spawn-stamp
   truth (P4-2): hp rides the shipped ramp (`_spawn_enemy :200-201`), so the FIRST arrival at
   900.017 stamps `roundf(50000 · (1 + 0.22·15) · hp_cyc(0)) = 215 000` — "unkillable within the
   night" reads against the STAMP, not the 50 000 def (no dps ceiling in the budget doc kills
@@ -338,7 +357,7 @@ already ships).
 | B-E3 | arrival law: every 60 s one more reaper — DECLARED-PIN leg (reaper spd pinned 1.0 so the run lives past 960): rows show spawns at 900.017 AND 960.017, count 2 | the same channel, DECLARED-PIN idiom | latch planted once-only ⇒ the 960 row missing ⇒ RED |
 | B-E4 | endless precedence: flags endless+reaper ON ⇒ cycle clear at 900/1800 fires, ZERO `the-reaper` spawn rows, kind never gameover-by-reaper | the existing `sim_endless` flag-channel pattern extended (`fresh_run` opts `flags`, both keys) | reaper arriving in endless (planted: check reaper before endless in the cap fork) ⇒ RED — the `:423` "unless Endless" law |
 | B-E5 | budget + contract: `budget_reaper` leg (flag-ON stage-1 construction run, `sim_budget.gd` extended in place): draws ≤ 40 ≤ 60, horde ≤ 400, named-above-guard 3 schedule + reapers stated; snapshot exact-12 with `reaper` ABSENT | `sim_budget.gd` leg + the frozen exact-12 pin | a 13th snapshot field ⇒ RED; a new MM class un-retallied ⇒ coverage RED |
-| B-E6 | reaper-death law (P2-1): a DECLARED-PIN leg (hp→0 mutation, the `sim_bosses` pin idiom) KILLS a reaper: kills +1, alive −1, and the chests/gems/coins/heals arrays show ZERO new entries (no chest roll, no +50 bounty, no coin/heal drops); the 7-row `CHEST_TIER_BY_SOURCE` untouched, `SPEC_MAP` green | the `sim_reaper.gd` channel (drop-array delta rows, the `sim_chest_tiers` drop-observation shape) | planted: remove the death guard ⇒ the boss-chance roll reads `CHEST_TIER_BY_SOURCE["the-reaper"]` ⇒ null-key crash errors the leg ⇒ RED — the shipped strict-map law as the instrument |
+| B-E6 | reaper-death law (P2-1): a DECLARED-PIN leg (hp→0 mutation, the `sim_bosses` pin idiom) KILLS a reaper: kills +1, alive −1, and the chests/gems/coins/heals arrays show ZERO new entries (no chest roll, no +50 bounty, no coin/heal drops); the 7-row `CHEST_TIER_BY_SOURCE` untouched, `SPEC_MAP` green | the `sim_reaper.gd` channel (drop-array delta rows, the `sim_chest_tiers` drop-observation shape) | planted: remove the death guard ⇒ the boss-chance roll reads `CHEST_TIER_BY_SOURCE["the-reaper"]`; Godot's missing-key read is SOFT (error printed, evaluation continues, null returns — no abort, c2 F-3 re-grepped), so the observable is a phantom chest entry with a null tier — caught by the leg's ZERO-DROP-ARRAY-DELTA check, the SAME value-compare red shape the repo already executes for the map-bypass law (`sim_chest_tiers.gd:20-24` compares the DUMPED map value, never a literal; `test_chests_tiers.py:144-158`), NOT crash-detection. The leg's green first run is stated as the FIRST executed evidence of the map-bypass law at `world.gd:358` (every earlier record is the regex pin alone) |
 
 ## 3. PILLAR C — LIMIT-BREAK-LITE (roadmap M4 item 3)
 
@@ -601,8 +620,10 @@ Measured-now truth (T-M3b/T-C3): draws **27** ≤ plan **40** (`test_art_integra
   named once-each spawns: stage 1 = 3 (403 reading), stages 2/3 = **2** (402 readings — R5's
   re-pin), reaper runs: 3 + one reaper per 60 s above the guard **BY DESIGN** while flag ON (the
   pursuer is the design; budget leg states both readings).
-- **Limit-break deep growth:** endless-only reachable (the pool cannot exhaust before ~54 picks;
-  the journey legs exhaust nothing — zero-identity proof C-E3's twin); stat growth is additive
+- **Limit-break deep growth:** NEVER reachable inside a flag-off 900 s run (pool exhaustion needs
+  ~54 picks; the journey legs exhaust nothing — zero-identity proof C-E3's twin); reachable ONLY
+  past 900 s, i.e. endless and reaper-ON deep runs — §2.1's outrun bound lands HERE as its scope
+  (the +3% repeatable HASTE passing 200 spd at m ≥ 2 is a reaper-ON interaction by construction); stat growth is additive
   and small (4%/3%/−1), NOT a second scaling ramp beside the cycle scalars — it is their lite
   shape and it lives INSIDE the run-state the caps govern.
 - **Contract-B snapshot 12-field impact row: ZERO delta.** `reaper`/`limit` ride outside
@@ -714,7 +735,7 @@ where; every adopted row was RE-GREPPED against the tree at `5695244` before ado
 | P1-2 A-E4 mechanism leg unreachable at [180,210] | ADOPTED — re-derived: minute 3.0–3.5 ⇒ base 4.90–5.55, ×2 = 9.80–11.10 < 12.0 ⇒ inside/outside `minf` coincide; ratio-2.0 and cap-violation mutually exclusive in one leg. Split: mechanism leg stays [180,210] (uncapped, ratio observable, planted-red = wrong factor 1.5); saturation leg NEW at [480,510] (minute 8.0–8.5, base 11.40–12.05; planted-outside-minf ⇒ 22.80–24.10/s ⇒ RED), mirroring the shipped `minf_binds_both`/`minf_clamps_surge` shapes | §1.4 A-E4 (now THREE legs) |
 | P2-1 reaper boss:true death vs strict map | ADOPTED (drop-guard route) — verified `kill_enemy:363-365` strict keyed lookup would crash on `CHEST_TIER_BY_SOURCE["the-reaper"]`; map protected (F-3/SPEC_MAP) ⇒ ONE named guard site skips ALL drops on reaper death; map stays 7 rows; named as the third §12.4 exception | §2.1 Death guard, B-E6, §12.4 |
 | P2-2 A-E1 demanded byte-identity on rows R2/R4 move | ADOPTED (M3 carve lesson) — A-E1 now scoped to the UNMOVED corpus; the 3 moved stages-m3 rows + art-s2i growth asserted under R2/R4, not under A-E1 | §1.4 A-E1, §7.2 |
-| P3-1 arrival-latch placement ambiguity | ADOPTED — ONE placement: world-side, beside the schedule latch (`update_spawns :225-240`), ABOVE the cap return (`:249-250`) by position; main keeps only the no-end `elif` arm | §2.1, §2.2, §6 T-M4r row |
+| P3-1 arrival-latch placement ambiguity | ADOPTED — ONE placement: world-side, beside the schedule latch (`update_spawns :225-238`), ABOVE the cap return (`:249-250`) by position; main keeps only the no-end `elif` arm | §2.1, §2.2, §6 T-M4r row |
 | P3-2 A7 "32 pool kinds" text falsified at T-M4l | ADOPTED — text claim re-grepped at `tools/s8_acceptance.py:230/:238`; replace-not-delete doc-sync update into R7 | §7.2 R7 |
 | P3-3 R2 partition incomplete | ADOPTED + SELF-CORRECTED — full 17-row partition in R2 (moved 3 / preserved 14, all named with window/shape reasons); REV 1's `plates_cap`-moves claim RETRACTED (window [540,600] < 660) and `stages_table` named as the row that DOES move (embeds `bosses:`) — R3 kept as a dated retraction row | §7.2 R2/R3, §1.3 |
 | P3-4 file-set gaps | ADOPTED — `sim_budget.gd` joins T-M4r (B-E5 leg); T-M4e `depends-on` now names the T-M4a mesh rows | §6 table, §2.2 |
@@ -738,5 +759,24 @@ where; every adopted row was RE-GREPPED against the tree at `5695244` before ado
    godot/scripts/levelup.gd` ⇒ **`32`**; `:31` is blank. Spec cite stands.
    Neither rebuttal changes any design row; both are the same discipline the gate itself applies
    (re-grep before adopting) applied in the other direction.
+
+## 14. REV-3 FOLD LEDGER (DA cycle 2 @ `bd4a825`, 0P1/1P2/1P3/3P4 — 5-row fix list; ALL adopted,
+each re-grepped at `bd4a825` before adoption; 0 rejects. The gate's c2 PASS 1 re-grepped the whole
+c1 ledger at `60d9811` and confirmed both §13.1 rebuttals and R9's honesty verdict; those ride
+unchanged. c2 PASS 4/5 non-findings ride as written.)
+
+| c2 row | disposition | landed where |
+|---|---|---|
+| F-1 P2 digest-twin × live-cone collision (the M3-c2 F-1 class — two independently-true adopted fixes colliding: P4-4's "to run-end" × §1.1's cone geometry) | ADOPTED — re-grepped: kill-time `randf` sites REAL (`kill_enemy :349` gem `<0.7`, `:351` coin `<0.06`, `:353` heal, `:363` boss chest) ⇒ a live cone forks geometry ⇒ kill timing ⇒ the stream; the twin clause would go RED on correct code and mask its own planted `randi` red. Gate option (a) chosen: twin pins the cone to the table's identity default `[0.0, TAU]` — the row's own subject (the default path IS the identity) — live-cone geometry stays A-E3's; carve stated exactly as M3 rev-3 stated the `dwell_zero_rng` validity carve (`sim_stages.gd:428` twin holds because the plate touches no geometry) | §1.4 A-E5 + §1.1 zero-RNG bullet (BOTH places the clause lives, c2 §6 row 1) |
+| F-2 P3 outrun-claim vs same-milestone repeatable LIMIT·HASTE | ADOPTED — re-grepped: `BASE_SPEED 140` (`game_state.gd:5`), ×1.4 passive cap = 196 (`:81`), `+0.03` repeats forever ⇒ m ≥ 2 gives 207.84 > 200. Claim bounded to ≤196 runs; the deep-limit multi-reaper end-law stated; "checked by test" removed (no ACCEPT row tests outrunnability, so none needs re-pinning); §9 hedge rewritten to the gate's own honest wording ("NEVER reachable inside a flag-off 900 s run") | §2.1, §9 |
+| F-3 P4 B-E6 instrument | ADOPTED — re-grepped: missing-key is soft-error+null (c2 executed the behavior; matches repo practice — every shipped map-bypass red is value-compare: `sim_chest_tiers.gd:20-24`, `test_chests_tiers.py:144-158`); instrument re-named to the ZERO-DROP-ARRAY-DELTA check catching the phantom null-tier entry; the green-first-run evidence note for `world.gd:358` added | §2.3 B-E6 |
+| F-4 P4 saturation-window dilution | ADOPTED — re-grepped: ALIVE_CAP return at `:249` ⇒ planted 22.8–24.1/s twin hits 400 ≈ t≈497, clamp tail pulls the full-window mean toward the green value (false-green risk); the row now names the pre-cap sub-window (window start, cleared — the shipped windows' own shape — until the cap hit; planted ≈ 17 s) | §1.4 A-E4 saturation leg |
+| F-5 P4 two header cites | ADOPTED — re-grepped: latch block ENDS `:238` (`schedule_spawned += 1` `:237`, `_spawn_enemy` `:238`); flare-decay line is `:243` (plate-surge region ends `:248`); corrected the header + the three in-text cites that inherited the mis-slice (§1, §2.1, §13 P3-1 row). c2 independently CONFIRMED cap-return `:249-250`, rate term `:259`, contact loop `:210-223` — those needed no change | header :44, :179/:186 region, §2.1, §13 |
+
+**Count: 5/5 adopted, 0 rejects, 0 new rebuttals; ACCEPT rows stay 20; retire ledger stays
+R1–R9 (c2 filed no new pin moves; the c2 §5 spot-check list rides).** The c2 close's own rule —
+cycle-3 re-check is row 1's scoping text + its non-regression (A-E3 keeps the live-cone share
+check; §7.1/§7.2 byte-corpus rows untouched) — is satisfied by the A-E5 rewrite and the untouched
+byte sections.
 
 --- END M4-SPEC ---
