@@ -1,0 +1,1 @@
+SUPERSEDED — DO NOT USE — desert v2 (T-S15 retone) replaced 2026-10-26 by MC 11361 (T-M4a) desert v3 retone at the same res://assets/biomes/desert.png path. The other v2 tiles (grass/snow/tundra) remain live at their paths; this dir archives ONLY the desert v2 body of work.

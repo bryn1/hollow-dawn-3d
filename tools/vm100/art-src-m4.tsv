@@ -1,0 +1,25 @@
+# MC 11361 T-M4a mesh-ref + tile-raw batch (14 rows) — variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha16<TAB># note
+# Three-quarter volumetric refs for the three M4 meshes + the two desert-retone raws
+# (icons-batch-m1c/m2 + art-src-m3 convention reused; imagegen MCP local Qwen-Image on vm100,
+# ONE gpu-window 2026-10-26 12:36->13:04:35Z, opaque 1024x1536 refs / 1024x1024 tiles, seeds
+# 612-624 + one seedless first draw recorded verbatim). Every raw carries its EXACT prompt in
+# tEXt impeccable:prompt; sha16 = sha256(prompt) hex[:16] of that embedded text (manifest sha16
+# == embedded == tool prompt_sent — the icon_gate PROV check shape). NOTE (tooling deviation,
+# honestly recorded): the impeccable embed-prompt CLI re-encodes non-ASCII argv as latin-1
+# mojibake (em-dash -> U+00E2 U+0080 U+0094, 2 extra bytes); exact-prompt embedding for those
+# prompts used the PIL tEXt chunk writer directly (tools/vm100/tile_post.py-adjacent tooling,
+# verification rows in the card capture: got==prompt for all 14 files).
+sunken-prelate	assets/art-src/sunken-prelate-ref.png	1162818097	2ace64e8c313729b	# REJECTED pre-commit: hanging chains + open fingers + protruding coral clusters = the §M1c2 shatter signature (tool returned this seedless-draw seed verbatim); kept as the documented failed variant, NOT fed to TRELLIS
+sunken-prelate-v2	assets/art-src/sunken-prelate-ref-v2.png	614	adc5ac44a9f272b4	# REJECTED pre-commit: chains gone, fists welded — but a coral branch still protrudes off the right pauldron and kelp ribbon strips hang at the belt; kept documented, NOT fed to TRELLIS
+sunken-prelate-v3	assets/art-src/sunken-prelate-ref-v3.png	619	f9a1c3fbeb9e7003	# ONE sealed carved block: bell-robe fused to plinth, arms one welded bar, skull-dome pauldrons flush barnacle relief, sword slab welded front to plinth — ACCEPTED mesh input seed 641 (solid-body class)
+stair-acolyte	assets/art-src/stair-acolyte-ref.png	612	ad7ab327dc268f23	# REJECTED pre-commit: separated praying fingers + thin candle pillar = the §M1c2 shatter signature; kept documented, NOT fed to TRELLIS
+stair-acolyte-v2	assets/art-src/stair-acolyte-ref-v2.png	615	78df46d22f04d130	# REJECTED: step base fused, candle gone — praying hands STILL show individual fingers + a belt cord hangs off the right hip; kept documented, NOT fed to TRELLIS
+stair-acolyte-v3	assets/art-src/stair-acolyte-ref-v3.png	620	7ef3829ac4e65c3f	# REJECTED: mass good but a rope belt with two hanging tassels (thin tubes) + crossed arms with open separated hands; kept documented, NOT fed to TRELLIS
+stair-acolyte-v4	assets/art-src/stair-acolyte-ref-v4.png	622	259f3cf1abf56cd8	# REJECTED: slab-hands FIXED (welded prayer block) but the rope cincture + tassels persisted through the NO-rope prompt clause; kept documented, NOT fed to TRELLIS
+stair-acolyte-v5	assets/art-src/stair-acolyte-ref-v5.png	623	9fc3a02be6287e93	# ACCEPTED mesh input seed 651 (solid-body class): fused step-plinth statue, sleeve slab welded at the face, waistband plain smooth relief, rope reads fused flush against the skirt — no free thin parts
+the-reaper	assets/art-src/the-reaper-ref.png	613	ad4971a9aa7058d2	# REJECTED pre-commit: see-through ribcage + thin staff + separated bony fingers — exactly the M3 warden-v1 reject class; kept documented, NOT fed to TRELLIS
+the-reaper-v2	assets/art-src/the-reaper-ref-v2.png	616	29926b7a288fc713	# REJECTED: open rib gaps still read see-through + thin pole haft + bare skeletal feet; kept documented, NOT fed to TRELLIS
+the-reaper-v3	assets/art-src/the-reaper-ref-v3.png	621	87c563060f6fd35b	# REJECTED: sealed statue mass but the crescent blade tapers to a thin free point away from the body (cantilever shatter risk); kept documented, NOT fed to TRELLIS
+the-reaper-v4	assets/art-src/the-reaper-ref-v4.png	624	354f74cd54fd350e	# ACCEPTED mesh input seed 661 (solid-body class): carved statue, scythe one thick slab haft welded diagonally base-to-head, broad blade at head height, arms hidden under cloak
+dune-m4-a	assets/art-src/dune-m4-a.png	617	f93433eeffdce686	# desert retone raw 1 (n=1 §4): post-chain gate-RED on the EVEN leg (band delta 9.48 > 8.0, banding in the ripple relief); the tile re-roll reserve (+1, §4) BURNED on this row; raw kept committed for reproducibility
+dune-m4-b	assets/art-src/dune-m4-b.png	618	53a947c1e85f939a	# desert retone raw 2 = the re-roll, ACCEPTED: post chain -> LUM 32.9 [26..36], WRAP X 0.86/1.04 [<=1.6], EVEN 3.24 [<=8] GATE PASS; shipped as godot/assets/biomes/desert.png (v3 retone); raw kept committed so the tile is reproducible from manifest + tile_post.py

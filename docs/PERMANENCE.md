@@ -258,6 +258,44 @@ single-row incl. re-rolls), all CLOSED rc=0, llama-swap serving at every close.
 additive; the rows land where the meshes become LOAD-BEARING code rows, per the
 retired-claim grep-to-zero doctrine, capture `.tmp/m3b-bosses.txt`.)
 
+## M4a asset batch (T-M4a, MC 11361, 2026-10-26)
+
+The M4-SPEC REV-3 §8/§4 asset batch: **3 TRELLIS meshes + 1 desert-tile retone**, icons n=0
+(reuse stated: the three stage banners + `icon-plate` + shipped limit-card icons cover the
+M4 classes — zero icon rows minted, per the spec's stated reuse). Meshes via TRELLIS.2-4B
+(batch_trellis.py, quality gate ON, 3-seed policy — never reached, all first-seed), ONE row
+per window; refs journeyed through the §M1c2 carved-block wording (12 committed ref variants,
+9 REJECTED documented, 3 accepted — manifest `tools/vm100/art-src-m4.tsv`, 14 rows with the
+2 tile raws).
+
+| asset | source ref | seed | tris / budget | inflation / aspect | sha256[:16] | render |
+|---|---|---|---|---|---|---|
+| sunken-prelate | art-src/sunken-prelate-ref-v3.png | 641 FIRST SEED | 3834 / 4000 | 1.44 / 0.48 | 830d779d8b1df911 | concepts/sunken-prelate-render.png |
+| stair-acolyte | art-src/stair-acolyte-ref-v5.png | 651 FIRST SEED | 3851 / 4000 | 1.43 / 0.78 | bd1b8760b12d0242 | concepts/stair-acolyte-render.png |
+| the-reaper | art-src/the-reaper-ref-v4.png | 661 FIRST SEED | 3866 / 4000 | 1.42 / 0.54 | 8ba952f9173eaf1c | concepts/the-reaper-render.png |
+
+All three gated @1.42 (drop-in swap-in law; the-reaper rides MODEL_H_BOSS 5.33 m at the
+ClassMesh seam exactly like the shipped choir). validate_glb VISUAL 3/3, aspect_gate 3/3
+GREEN; bpy turntable-solid eyeball yaws 0/90/180/270 PASS all three (binding gate; the
++1 mesh re-roll reserve **UNBURNED**, stated). **Tile retone:** `godot/assets/biomes/
+desert.png` v3 — raw seed 618 (`assets/art-src/dune-m4-b.png`, tEXt sha16 53a947c1e85f939a)
+through the committed post chain `tools/vm100/tile_post.py` (T-S15 recipe verbatim: LF
+flatten sigma 96, TARGET 30.5, unsharp k=1.5 s=6, periodic quarter-band blend) ->
+`tools/tile_gate.py` (THE committed tile gate, LANDED by this card per §4: wrap ≤1.6× base,
+luma [26..36], 8-band even ≤8, red-capability proven BOTH ways: planted +20-luma RED
+LUM=52.9 rc=1 + a REAL failing row, raw seed 617 EVEN=9.48 FAIL — the +1 TILE re-roll
+reserve BURNED on that row, raw kept committed). Old v2 body of work archived
+`godot/assets/biomes/superseded-v2/` (SUPERSEDED README, versioned-truth law).
+Readability 9/9 GREEN (desert floor 17.8, ratio 3.93), planted-bright desert shot RED
+(57.8/1.89) then byte-exact restore; strips capture seed 11114 gate 19/19 GREEN and dump
+byte-identical to the committed corpus modulo the declared mechanical norm (`_ms` removed,
+png-dir -> CAPDIR); journey re-dump (seed 11101) 5020 rows BYTE-IDENTICAL. Zero code/tests
+touched (the two tools/ files are the spec-named gate + the recipe the reproducibility
+clause demands), pytest 242 green. Contact sheet `assets/screens/m4a-art-sheet.png`,
+preview `assets/screens/biomes-m4-desert-v3-preview.png`. GPU windows: 4 (1 imagegen +
+3 TRELLIS single-row), all CLOSED rc=0, llama-swap serving at every close. Capture
+`.tmp/m4a-art.txt` (VERIFY_EXIT=0).
+
 ## Driverless vm100 one-shots — DELETED-BY-OWNER-RULING (MC 11333, 2026-10-26)
 
 Audit MC 11316 §3.2 found four GPU-era one-shot tools with ZERO references

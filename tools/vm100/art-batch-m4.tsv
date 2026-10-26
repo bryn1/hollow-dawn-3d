@@ -1,0 +1,31 @@
+# MC 11361 T-M4a mesh spec — name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+# 3 rows (M4-SPEC REV-3 §8/§4: sunken-prelate stage 2, stair-acolyte stage 3, the-reaper
+# boss class), ONE row per window (the §M1c2 in-session VRAM accumulation lesson — single-row
+# specs staged on vm100 as spec-row1/row2/row3.tsv), runid mc11361, driver 3-distinct-seed
+# fail policy (seed, seed+1, seed+2) NOT reached on any row (all first-seed, see OUTCOMES):
+#   Budget 4000 = the §M1c2 character-row precedent (knight 3830, deacon 3960; §6 boss rows
+#   the-reaper 4000); prelate/acolyte ride MODEL_H_ENEMY 1.42 m, the-reaper rides the boss
+#   CLASS MODEL_H_BOSS 5.33 m at the ClassMesh seam — ALL THREE gated at @1.42 like the
+#   shipped stand-in boss-warden.glb (INFLATION<=2.0 AND ASPECT<=2.0 = drop-in swap-in law).
+#   Inputs = three-quarter volumetric refs (the §M1c flat-card lesson). Pose classes per the
+#   §M1c2 accepted map, all refs journeyed to the carved-block wording that survived there:
+#   prelate = sealed bell-robe bishop statue on fused plinth, arms one welded bar, skull-dome
+#   pauldrons with flush barnacle relief (v1 chains/open fingers + v2 protruding coral +
+#   kelp strips REJECTED pre-commit — manifest tools/vm100/art-src-m4.tsv); acolyte = one
+#   carved block into a 3-step plinth, sleeves fused to a slab at the face, no free hands,
+#   plain relief waistband (v1 praying fingers + candle, v2 still fingers + belt cord,
+#   v3 rope tassels + open hands, v4 hands fixed BUT rope tassels — four rejects, v5 accepted);
+#   reaper = solid carved statue (NOT skeleton), scythe one thick slab haft welded diagonally
+#   with a broad blade at head height (v1 see-through ribcage + thin staff + separated fingers,
+#   v2 open ribcage + thin haft, v3 sealed but thin-taper crescent — REJECTED, v4 accepted).
+#   5th col quality = extent+fill gate (player_attempts.quality) INSIDE the seed loop.
+# OUTCOMES: ALL THREE ACCEPTED FIRST SEED — sunken-prelate 641 (3834/4000, INFLATION 1.44 /
+#   ASPECT 0.48, turntable-solid PASS 0/90/180/270, one fused statue, sword welded flush front
+#   to plinth); stair-acolyte 651 (3851/4000, INFLATION 1.43 / ASPECT 0.78, solid all yaws,
+#   fused step plinth, no free fingers); the-reaper 661 (3866/4000, INFLATION 1.42 /
+#   ASPECT 0.54, solid all yaws — blade decoded as one continuous thick slab over a fused
+#   arch, no ribbon gaps of the choir-reject class). The +1 mesh re-roll reserve (§4) is
+#   UNBURNED — no row went gate-RED at any leg; NO regen file for meshes on this card.
+sunken-prelate	/opt/imagegen/tmp/mc11361/refs/sunken-prelate-ref-v3.png	4000	641	quality
+stair-acolyte	/opt/imagegen/tmp/mc11361/refs/stair-acolyte-ref-v5.png	4000	651	quality
+the-reaper	/opt/imagegen/tmp/mc11361/refs/the-reaper-ref-v4.png	4000	661	quality
