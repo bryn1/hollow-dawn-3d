@@ -71,6 +71,27 @@ static func bonus_card() -> Dictionary:
 	return {"kind": "bonus", "name": "Coin Cache", "desc": "+25 gold, +10 hp", "icon": "coin"}
 
 
+# M4 pillar C (MC 11365 T-M4l, M4-SPEC §3.1): the LIMIT-BREAK-LITE rows —
+# pool-exhaustion FALLBACK offers, NOT pool kinds (the §j roster stays 32;
+# the s8 A7 text row names the trio beside them, R7). Reached only when
+# make_offer("", ...) finds the built pool EMPTY (the §2 all-maxed loadout
+# IS the exhaustion state); the tier/gold paths never touch this table and
+# the bonus fill above stays the ONLY fallback for kind != "". Repeatable
+# forever: each pick bumps game.limit[key] (game_state.gd), read at the
+# THREE additive zero-identity seams there. Icons are INLINE names of
+# EXISTING shipped files — the screens.gd icon_path() `_:` catch-all
+# resolves them exactly how the shipped bonus row rides "coin" (P3-5: no
+# LIMIT_ICONS mapping, no screens.gd change, assert-per-file kept armed).
+const LIMIT_CARDS := [
+	{"kind": "limit", "key": "dmg", "name": "LIMIT · FURY",
+		"desc": "+4% weapon damage", "icon": "icon-cleaver"},
+	{"kind": "limit", "key": "spd", "name": "LIMIT · HASTE",
+		"desc": "+3% move speed", "icon": "icon-dart-loop"},
+	{"kind": "limit", "key": "arm", "name": "LIMIT · BULWARK",
+		"desc": "-1 damage taken", "icon": "icon-plate"},
+]
+
+
 # kind (M2 §B.1, MC 11239 T-M2t): the frozen offer seam EXTENDED for tier
 # reward kinds — weapon/passive offers draw the SAME build_pool filtered to
 # their category, a gold offer takes an empty pool so the untouched
@@ -86,6 +107,15 @@ static func make_offer(game: GameState, kind := "") -> Array:
 			pool = pool.filter(func(c): return c.kind == "passive")
 		"gold":
 			pool = []
+	# M4 §3.1 (T-M4l): the pool-exhaustion fallback — ONLY the unkinded
+	# level-up funnel (kind "") and ONLY on an EMPTY pool (the §2 all-maxed
+	# loadout); the tier/gold paths never reach LIMIT_CARDS and the bonus
+	# fill below stays the ONE fallback for kind != "" (C-E4 law: the two
+	# committed bonus rows are the living red probe if this moves).
+	# duplicate(): shuffle() below mutates the array it is handed — the
+	# const is shared and the offer must never alias it.
+	if kind == "" and pool.is_empty():
+		pool = LIMIT_CARDS.duplicate()
 	pool.shuffle()
 	var cards: Array = []
 	for i in 3:
@@ -110,6 +140,12 @@ static func apply_offer(game: GameState, card: Dictionary) -> void:
 				# Coin Cache bonus uses for its +10 hp (M1h partner row).
 				game.max_hp += 10.0
 				game.hp += 10.0
+		"limit":
+			# M4 §3.1 (T-M4l): a LIMIT card pick bumps the run's counter —
+			# repeatable forever (the caps stay untouched; the exhaustion
+			# state IS the loadout, so the pool never re-opens). The three
+			# additive zero-identity seams live in game_state.gd.
+			game.limit[card.key] += 1
 		_:
 			game.gold += 25
 			game.hp = minf(game.max_hp, game.hp + 10.0)

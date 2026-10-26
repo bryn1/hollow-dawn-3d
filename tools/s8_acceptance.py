@@ -247,6 +247,11 @@ def main():
         " + hud_3d.gd")
 
     # ---- A7: all pool kinds with real icons (32 kinds since T-M1h; pytest gate, no capture re-run)
+    # R7 (T-M4l, MC 11365) REPLACE-not-delete text row: the 32-pool-kind
+    # claim STANDS — LIMIT_CARDS are pool-exhaustion FALLBACK offers, not
+    # pool kinds, and ride the icon_path() `_:` catch-all with INLINE icon
+    # names of shipped files (P3-5: no LIMIT_ICONS, screens.gd untouched;
+    # the truth half is the limit_all_maxed icons_resolve leg).
     rc = subprocess.run([sys.executable, "-m", "pytest", "-q",
                          "tests/test_card_icons.py"], cwd=REPO,
                         capture_output=True, text=True).returncode
@@ -254,7 +259,10 @@ def main():
                          ".tmp/s5-cards/cards-passives.png",
                          ".tmp/s5-cards/cards-bonus.png")
              if os.path.exists(os.path.join(REPO, p))]
-    row("A7", "all 32 pool kinds (16 weapons + 15 passives + 1 bonus) resolve a real icon; card shots committed",
+    row("A7", "all 32 pool kinds (16 weapons + 15 passives + 1 bonus) resolve a real"
+        " icon; card shots committed — beside them ride the 3 LIMIT-break fallback"
+        " offers (LIMIT · FURY / HASTE / BULWARK, M4 T-M4l: exhaustion FALLBACKS,"
+        " NOT pool kinds — the pool kinds stay 32)",
         rc == 0 and len(cards) == 3, "TESTED",
         "tests/test_card_icons.py (rerun rc=%d) + .tmp/s5-cards/" % rc)
 

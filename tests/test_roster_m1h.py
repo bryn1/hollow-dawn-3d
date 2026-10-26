@@ -51,8 +51,14 @@ def test_damage_seams_extended_not_duplicated():
     assert re.search(r"return 1\.0 \+ 0\.1 \* passives\.ferocity "
                      r"\+ 0\.08 \* float\(passives\[\"gall-vial\"\]\)",
                      GAME_STATE)
-    assert re.search(r"return maxf\(0\.0, raw - passives\.ward "
-                     r"- float\(passives\[\"rotten-plate\"\]\)\)", GAME_STATE)
+    # T-M4l RE-PIN (R8's RESERVED card-time re-grep FOUND this body-reading
+    # row — the limit-break arm legitimately grew the maxf line): REPLACE-
+    # and-RE-PIN same commit, equal-or-stronger — the ONE-intake-seam claim
+    # now pins the LIMIT · BULWARK term too; the T-M1h byte truth (ward +
+    # rotten-plate first, inside the same maxf) stays pinned verbatim.
+    assert re.search(r"return maxf\(0\.0, raw - passives\.ward\s*\n"
+                     r"\s*- float\(passives\[\"rotten-plate\"\]\) "
+                     r"- 1\.0 \* limit\.arm\)", GAME_STATE)
     # gilded-skull: its OWN additive line in add_xp (the insight pin stays)
     assert re.search(r"xp \+= amount \* 0\.08 \* float\(passives"
                      r"\[\"gilded-skull\"\]\) \* meta_xp_mult", GAME_STATE)

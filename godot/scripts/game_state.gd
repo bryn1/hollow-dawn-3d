@@ -55,6 +55,15 @@ var flare := 0.0
 # _dawnwell -> start seam AFTER start_run. Unset = false = every
 # committed byte unchanged (B-E1).
 var reaper := false
+# M4 pillar C (MC 11365 T-M4l, M4-SPEC §3.1): limit is the run's LIMIT-BREAK
+# counter row — the ONLY state the pool-exhaustion fallback cards touch (one
+# increment per pick, levelup.gd apply_offer; the LIMIT_CARDS table itself is
+# offers, not state). Like endless/cycle/stage/reaper it rides OUTSIDE the
+# 12-field Contract B snapshot (F-3, frozen) and is reset in start_run()
+# below; read at exactly THREE additive zero-identity seams (the T-M1h
+# gilded-skull/rotten-plate precedent — at 0 picks every term adds exactly
+# nothing, so every committed byte of every corpus run is unchanged).
+var limit := {"dmg": 0, "spd": 0, "arm": 0}
 var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
 # The 15 passive STAT ROWS (PARITY-ROADMAP rev3 features 3+7: original five
 # + the ten evolution partners, T-M1h). Seeded here AND in start_run so
@@ -87,19 +96,29 @@ static func xp_need(level: int) -> int:
 
 
 func player_speed() -> float:
-	return BASE_SPEED * (1.0 + 0.08 * passives.haste)
+	# LIMIT · HASTE (M4 §3.1): +3% move speed per pick as a SECOND factor —
+	# 0 picks multiplies by 1.0, the IEEE identity (byte corpus unchanged).
+	return BASE_SPEED * (1.0 + 0.08 * passives.haste) * (1.0 + 0.03 * limit.spd)
 
 
 func damage_taken(raw: float) -> float:
 	# Rotten Plate (feature-6 partner, T-M1h): stacks as ARMOR in the SAME
 	# intake seam as ward — one subtraction site, our values (1 per stack).
-	return maxf(0.0, raw - passives.ward - float(passives["rotten-plate"]))
+	# LIMIT · BULWARK (M4 §3.1): +1 ARMOR per pick inside the EXISTING
+	# maxf — intake stays clamped >= 0, so Bulwark can never heal damage;
+	# 0 picks subtracts 0.0, the IEEE identity.
+	return maxf(0.0, raw - passives.ward
+		- float(passives["rotten-plate"]) - 1.0 * limit.arm)
 
 
 func damage_multiplier() -> float:
 	# Gall Vial (partner): +8% weapon damage per stack in the SAME multiplier
-	# seam as ferocity (its +10% row unchanged; values ours).
-	return 1.0 + 0.1 * passives.ferocity + 0.08 * float(passives["gall-vial"])
+	# seam as ferocity (its +10% row unchanged; values ours). LIMIT · FURY
+	# (M4 §3.1): +4% weapon damage per pick as the same-shape additive term
+	# (0.04 vs the passive's 0.08 — the fallback is WEAKER per pick than the
+	# capped passive it stands behind); 0 picks adds 0.0, the IEEE identity.
+	return 1.0 + 0.1 * passives.ferocity + 0.08 * float(passives["gall-vial"]) \
+		+ 0.04 * limit.dmg
 
 
 # Roster-passive multipliers (T-M1h partners, OUR values): consumed by the
@@ -146,6 +165,9 @@ func start_run() -> void:
 	reaper = false # M4 §2.1 T-M4r: fresh-run reset, the endless pattern; the
 	#   night flag is re-handed by main._start_game (hand-in seam, never a
 	#   start_run default — B-E1's planted red "default the flag true" here)
+	limit = {"dmg": 0, "spd": 0, "arm": 0} # M4 §3.1 T-M4l: fresh-run reset —
+	#   the counter row is RUN state (outside the snapshot; the 13th-field
+	#   instrument is the sim_limit limit_snapshot leg + test_endless's pin)
 	stage = "moor-vigil" # §1.1 M3: fresh-run reset to the stage-1 id; re-handed
 	flare = 0.0          # by main._start_game after this call (plate logic owns decay)
 	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]
