@@ -80,11 +80,17 @@ def test_glb_per_class_exists_and_wired():
     # TRELLIS asset rows, MC 11285): the two end-boss classes joined at
     # their OWN committed meshes (cathedral-choir.glb / ossuary-warden.glb)
     # — the file-exists loop covers them like every class before them.
+    # Coverage row RE-PINNED AGAIN by T-M4e (MC 11362, spec §1.2; the T-M4a
+    # TRELLIS asset rows, MC 11361): the two EVENT-miniboss classes joined
+    # at their OWN committed meshes (sunken-prelate.glb / stair-acolyte.glb)
+    # in the same commit as their ENEMY_TYPES rows (R4's forward-lock pair).
     assert sorted(mapping) == sorted(
         CLASS_KEYS + ["warden", "hollow-knight", "hollow-deacon",
-                      "cathedral-choir", "ossuary-warden"]), (
+                      "cathedral-choir", "ossuary-warden",
+                      "sunken-prelate", "stair-acolyte"]), (
         "GLB_FILES must cover exactly the 8 swarm classes + the warden + the "
-        "2 miniboss classes + the 2 end-boss classes")
+        "2 miniboss classes + the 2 end-boss classes + the 2 event-miniboss "
+        "classes")
     for key, fname in mapping.items():
         assert os.path.isfile(os.path.join(GLB_DIR, fname)), (
             "class %s has no committed glb at godot/assets/glb/%s" % (key, fname))
@@ -106,11 +112,17 @@ def test_height_table_within_spec():
     # Coverage row EXTENDED by T-M3b (MC 11284): the two end-boss classes
     # joined the measured table at the BOSS height row (5.33 m, the same
     # MODEL_H_BOSS law the warden rides), rel_err 0.0 — gate unchanged.
+    # Coverage row EXTENDED by T-M4e (MC 11362): the two event-miniboss
+    # classes join at the ENEMY height row (1.42 m, the miniboss law the
+    # knight/deacon rows ride), rel_err 0.0 — gate unchanged, the fixture
+    # grows 15 -> 17 rows with every prior row byte-preserved (R4).
     assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player",
                                                     "hollow-knight",
                                                     "hollow-deacon",
                                                     "cathedral-choir",
-                                                    "ossuary-warden"])
+                                                    "ossuary-warden",
+                                                    "sunken-prelate",
+                                                    "stair-acolyte"])
     for key, row in by_class.items():
         spec = {"warden": SPEC_H_BOSS,
                 "cathedral-choir": SPEC_H_BOSS,

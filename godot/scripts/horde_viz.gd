@@ -59,6 +59,14 @@ const GLB_FILES := {
 	# per-class swap at MODEL_H_BOSS (the T-M3a TRELLIS rows, MC 11285).
 	"cathedral-choir": "cathedral-choir.glb",
 	"ossuary-warden": "ossuary-warden.glb",
+	# M4 §1.2 (MC 11362 T-M4e): the two EVENT-miniboss classes join the map
+	# with the T-M4a TRELLIS meshes (MC 11361, sunken-prelate.glb /
+	# stair-acolyte.glb) at MODEL_H_ENEMY (the miniboss height law the
+	# knight/deacon rows ride) — the same commit as their ENEMY_TYPES rows
+	# and the test_art_integration coverage/heights re-pin (R4: one row
+	# each, the art-fixture forward-lock grows 15 -> 17).
+	"sunken-prelate": "sunken-prelate.glb",
+	"stair-acolyte": "stair-acolyte.glb",
 }
 
 # §c gait constants (dump acceptance rows: freq <= 2.2 Hz, scale range <= 0.24).

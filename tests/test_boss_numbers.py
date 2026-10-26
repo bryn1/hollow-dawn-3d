@@ -158,7 +158,16 @@ def test_end_bosses_fire_once_and_drop_their_own_tier():
         leg = conftest.stages_row(ev)
         assert leg["checks"]["boss_spawns_once"], "a boss cannot spawn TWICE"
         assert leg["checks"]["no_foreign_bosses"] and leg["foreign_seen"] == []
-        assert leg["checks"]["schedule_latch_1"]
+        # T-M4e R2 RE-PIN (MC 11362, §7.2 R2 — FALSIFIED-AND-REPLACED: the
+        # moved row's `schedule_latch_1` check retires WITH the 660 bosses-
+        # row entries; equal-or-stronger: the latch now pins TWO named
+        # spawns AND each fires exactly once — the end-boss AND the stage's
+        # own event miniboss at its 660 row, first-seen 660.017).
+        assert leg["checks"]["schedule_latch_2"]
+        assert leg["checks"]["event_miniboss_first_seen_660"], \
+            "the event miniboss walks the field at 660.017"
+        assert leg["checks"]["event_miniboss_spawns_once"], \
+            "the latch fires the event row exactly once too"
     # C-E2: the keyed drop site — tiers from THEIR map rows (the fixture is
     # the truth channel; test_chests_tiers re-pins SPEC_MAP to the same 7).
     # Reader idiom: the ONE committed chests fixture, opened like the A-E1

@@ -17,8 +17,16 @@
 #       foreign stage-1 boss class ever fields (both-side negative half 1),
 #       and the boss bar NAMES "THE CATHEDRAL CHOIR" while it lives (C-E3
 #       readout leg — hud.boss_bar_state, the one bar seam).
+#       T-M4e RE-MINT (M4-SPEC §7.2 R2, the declared moved row): the stage-2
+#       row gained its [660.0, "sunken-prelate"] bosses entry, so `first`
+#       tracks EVERY named spawn (the first_seen map gains the 660.017
+#       entry), the latch pin moves 1 -> 2 (named-each count 2) and the
+#       once-each check judges BOTH named classes. Equal-or-stronger: the
+#       C-E1 claims ride unchanged, the event miniboss's own legs live in
+#       sim_events (A-E6).
 #   stage3_schedule            C-E1 same shape for the ossuary-warden,
-#       bar "THE OSSUARY WARDEN" (tier III's own name, C-E3's second read).
+#       bar "THE OSSUARY WARDEN" (tier III's own name, C-E3's second read);
+#       T-M4e re-mint identical ([660.0, "stair-acolyte"] row).
 #   boss_contact_clamp         C-E5: the P3-1 clamp re-derivation through
 #       main.gd's OWN pipeline: DECLARED cycle-3 pin, ossuary teleported
 #       onto the pawn (the endless_caps_cycle5 position pin), ONE real
@@ -39,15 +47,15 @@ const FOREIGN := ["warden", "hollow-knight", "hollow-deacon"] # stage-1-only
 # sim = the sim_stages SceneTree driver (its _fresh_run/_check/_decline are
 # the ONE harness — no second loader, the sim_boss-from-sim_headless shape).
 func run_boss_legs(sim) -> void:
-	_leg_schedule(sim, 2, "cathedral-choir", "THE CATHEDRAL CHOIR",
-		"stage2_schedule")
-	_leg_schedule(sim, 3, "ossuary-warden", "THE OSSUARY WARDEN",
-		"stage3_schedule")
+	_leg_schedule(sim, 2, "cathedral-choir", "sunken-prelate",
+		"THE CATHEDRAL CHOIR", "stage2_schedule")
+	_leg_schedule(sim, 3, "ossuary-warden", "stair-acolyte",
+		"THE OSSUARY WARDEN", "stage3_schedule")
 	_leg_clamp(sim)
 
 
-func _leg_schedule(sim, stage_idx: int, boss_id: String, bar_name: String,
-		leg: String) -> void:
+func _leg_schedule(sim, stage_idx: int, boss_id: String, miniboss_id: String,
+		bar_name: String, leg: String) -> void:
 	seed(CARD_SEED)
 	var dt: float = sim.DT
 	var run: Node = sim._fresh_run(stage_idx)
@@ -68,8 +76,12 @@ func _leg_schedule(sim, stage_idx: int, boss_id: String, bar_name: String,
 			break
 	run._hud.update(dt) # drive the ONE bar readout (C-E3)
 	var bar: Dictionary = run._hud.boss_bar_state()
-	var appearances := 0
-	var prev := 0
+	# T-M4e R2 re-mint: first_seen is a MAP over BOTH named classes (the
+	# end-boss + the stage's own event miniboss — the 660 entry the moved
+	# row names); per-class CUMULATIVE spawn counts, the shipped shape.
+	var first_seen := {boss_id: first_t}
+	var appearances := {} # type -> cumulative spawns (0->2 counts 2)
+	var prev := {} # tick-start counts, the rising-edge carrier
 	var foreign_seen: Array = []
 	while run.game.phase != "gameover" and run.game.time < 782.0:
 		sim._decline(run)
@@ -77,24 +89,33 @@ func _leg_schedule(sim, stage_idx: int, boss_id: String, bar_name: String,
 		if run.game.phase != "playing":
 			break
 		run._step(dt)
-		var now := 0
+		var now := {}
 		for e in run.world.enemies:
-			if e.type == boss_id:
-				now += 1
+			if e.type == boss_id or e.type == miniboss_id:
+				now[e.type] = int(now.get(e.type, 0)) + 1
+				if not first_seen.has(e.type):
+					first_seen[e.type] = roundi(run.game.time * 1000.0) / 1000.0
 			elif e.type in FOREIGN and not foreign_seen.has(e.type):
 				foreign_seen.append(e.type) # the BOTH-SIDE negative
-		if now > prev:
-			appearances += now - prev # CUMULATIVE spawns (a same-tick double
-			# jump 0->2 counts 2 — the planted-RED proof, not an event edge)
+		for k in now:
+			var d: int = int(now[k]) - int(prev.get(k, 0))
+			if d > 0:
+				appearances[k] = int(appearances.get(k, 0)) + d
 		prev = now
 	sim._check(leg, {
 		"boss_first_seen_540": first_t == 540.017,
-		"boss_spawns_once": appearances == 1, # cannot spawn TWICE
-		"schedule_latch_1": run.world.schedule_spawned == 1,
+		"boss_spawns_once": int(appearances.get(boss_id, 0)) == 1, # cannot spawn TWICE
+		# M4 §1.2 (R2): the stage's event miniboss fires ONCE through the
+		# ONE latch at its own 660 row, first-seen 660.017.
+		"event_miniboss_first_seen_660": float(first_seen.get(miniboss_id, -1.0)) \
+			== 660.017,
+		"event_miniboss_spawns_once": int(appearances.get(miniboss_id, 0)) == 1,
+		"schedule_latch_2": run.world.schedule_spawned == 2, # R2: 1 -> 2
 		"no_foreign_bosses": foreign_seen.is_empty(),
 		"bar_names_the_stage_boss": bool(bar.get("visible", false)) \
 			and String(bar.get("name", "")) == bar_name,
-	}, {"boss": boss_id, "first_seen": first_t, "latch": run.world.schedule_spawned,
+	}, {"boss": boss_id, "first_seen": first_seen, "miniboss": miniboss_id,
+		"appearances": appearances, "latch": run.world.schedule_spawned,
 		"foreign_seen": foreign_seen, "bar": bar})
 	run.queue_free()
 

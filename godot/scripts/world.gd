@@ -91,6 +91,19 @@ const PLATE_RADIUS := 120.0 # px, the shape ref S4 ~386 (our N)
 const FLARE_SHIFT := 150.0 # s the band NAME runs ahead (visual only — the
 const FLARE_DECAY := 30.0  # sim difficulty key stays the pure clock, F-4)
 
+# M4 pillar A (MC 11362 T-M4e, M4-SPEC §1.1): the event-window surge, OUR
+# value — the wall is the bigger moment of the night than a plate's 1.5.
+# Same law as SPAWN_SURGE: the event multiplies the EXISTING rate term
+# INSIDE the untouched minf(12.0) ceiling and stays BELOW the ALIVE_CAP
+# early-return (F-4: event spawns do NOT bypass the cap — the declared
+# divergence from THEIRS, VS-FEATURES:421). Fixed windows + fixed cones:
+# the clock comparison below consumes ZERO randf/randi (A-E5).
+const EVENT_SURGE := 2.0
+# The identity spawn cone (F-1, the byte law): the full circle, and the
+# CONE-DEFAULT read below is IEEE-EXACT to the shipped `randf() * TAU` —
+# 0.0 + x*TAU == x*TAU for every randf() sample (TAU - 0.0 == TAU, +0.0).
+const CONE_ALL := [0.0, TAU]
+
 # Stats + sprite per enemy id (plan §5 classics pinned by the acceptance
 # suite; biome signature creatures MC 11082 — sprites mirrored from
 # static/assets/enemies/ under res://assets/enemies/). Which ids spawn when:
@@ -116,6 +129,19 @@ const ENEMY_TYPES := {
 	# art until the M1 asset batch lands their two static meshes.
 	"hollow-knight": {"hp": 900.0, "spd": 50.0, "dmg": 10.0, "xp": 0.0, "sprite": "boss-warden", "miniboss": true},
 	"hollow-deacon": {"hp": 1400.0, "spd": 40.0, "dmg": 11.0, "xp": 0.0, "sprite": "boss-warden", "miniboss": true},
+	# M4 §1.2 EVENT-MINIBOSSES (MC 11362 T-M4e, OUR ladder: bound between
+	# the knight/deacon 900/1400 pair and the choir/ossuary 4200/5600 pair —
+	# 1500 carries the sunken wall (stage 2), 2100 the stair (stage 3, the
+	# harder gate); dmg 12/13 stay AT the warden/choir ceiling (below the
+	# MAX_CONTACT_DMG clamp at cycle 0, F-6); spd drops with size (deacon 40
+	# precedent); xp 0 = the boss no-gem-rain rule; the sprite reuses the
+	# warden art (the M1 miniboss precedent) while the MESH rides the T-M4a
+	# TRELLIS rows: horde_viz GLB_FILES names sunken-prelate.glb /
+	# stair-acolyte.glb at the ONE per-class seam. Drops ride the UNTOUCHED
+	# source-kind "miniboss" branch (F-3: the ONE CHEST_TIER_BY_SOURCE map
+	# stays 7 rows; the §B.1 "event" key stays the reserved forward-decl).
+	"sunken-prelate": {"hp": 1500.0, "spd": 44.0, "dmg": 12.0, "xp": 0.0, "sprite": "boss-warden", "miniboss": true},
+	"stair-acolyte": {"hp": 2100.0, "spd": 42.0, "dmg": 13.0, "xp": 0.0, "sprite": "boss-warden", "miniboss": true},
 	# M3 §3.1 end-bosses (MC 11284, OUR ladder: hp x1.4 -> x1.33, dmg stays
 	# below MAX_CONTACT_DMG at cycle 0, spd drops with size — warden 45 /
 	# deacon 40 precedent; xp 0 = the boss no-gem-rain rule). Spawn t=540 is
@@ -140,6 +166,13 @@ var spawn_acc := 0.0
 # to the sim_stages stage1_schedule dump legs + the journey's boss_once
 # rows — see tests/test_boss_numbers.py's retired-and-replaced row notes).
 var schedule_spawned := 0
+# M4 §1.1 (T-M4e): the stage row's events list, copied per run by
+# seed_stage_props below (the SAME per-run stage-prop seam that lands the
+# cairns). The copy is the DECLARED-PIN seam the A-E5 digest twin uses
+# (window/cone pins, the sim clock/hp-pin precedent) — the table in
+# render.gd stays the ONE data source, read at run start exactly like the
+# schedule column; stage 1 copies the empty row (F-1: the vigil is inert).
+var event_windows: Array = []
 
 
 func reset() -> void:
@@ -170,6 +203,9 @@ func seed_stage_props(game: GameState) -> void:
 	for c in GameRenderer.stage_row(game.stage).cairns:
 		chests.append({"x": c[0], "y": c[1],
 			"tier": CHEST_TIER_BY_SOURCE["stage-item"]})
+	# M4 §1.1 (T-M4e): the events row lands as this run's window list (see
+	# the var note above); a static copy — ZERO RNG (A-E3's stream law).
+	event_windows = GameRenderer.stage_row(game.stage).events
 
 
 # Enemy set open at time t (MC 11082): the STAGE's band roster at t
@@ -188,9 +224,16 @@ func _spawn_ring(view: Vector2) -> float:
 	return view.length() / 2.0 + 40.0
 
 
-func _spawn_enemy(type_key: String, game: GameState, view: Vector2) -> void:
+func _spawn_enemy(type_key: String, game: GameState, view: Vector2,
+		cone: Array = CONE_ALL) -> void:
 	var def: Dictionary = ENEMY_TYPES[type_key]
-	var angle := randf() * TAU
+	# M4 §1.1 (T-M4e): the optional CONE parameter — the default read below
+	# is IEEE-EXACT the shipped `randf() * TAU` (CONE_ALL = [0.0, TAU]:
+	# float(0.0) + randf() * (float(TAU) - float(0.0)) == randf() * TAU:
+	# TAU - 0.0 == TAU, 0.0 + x == x, every sample, F-1 byte law). An event
+	# window narrows the arc; the single randf() per spawn is UNCHANGED —
+	# geometry consumes, never a second draw (A-E5's zero-RNG law).
+	var angle: float = float(cone[0]) + randf() * (float(cone[1]) - float(cone[0]))
 	var r := _spawn_ring(view)
 	# §A.1 cycle scaling on the ONE existing ramp term: cycle-local minute
 	# (m_c) rides the M1 per-minute term verbatim, HP_CYC multiplies it, and
@@ -246,6 +289,22 @@ func update_spawns(dt: float, game: GameState, view: Vector2) -> void:
 		if _dist({"x": pl[0], "y": pl[1]}, game.player) < PLATE_RADIUS:
 			surge = SPAWN_SURGE
 			game.flare = FLARE_SHIFT
+	# M4 §1.1 EVENT WINDOWS (T-M4e, the sunken-tide / stair-wall rows): next
+	# to the plate loop, the SAME shape — fixed geometry read from the run's
+	# copied row, ZERO randf/randi consumed by the selection (the A-E5 law;
+	# a clock comparison only, the plate dwell is the shipped precedent).
+	# Inside t in [t0, t1): surge takes maxf(surge, EVENT_SURGE) (BELOW the
+	# cap return: event spawns do NOT bypass ALIVE_CAP, F-4) and the horde
+	# spawns for the window draw inside the row's cone. Row = [t0, t1,
+	# center_deg, width_deg] -> cone [(c-w/2), (c+w/2)] rad; stage 3's
+	# 0°-centered row reads negative, which sin/cos take unchanged.
+	var cone: Array = CONE_ALL
+	for ev in event_windows:
+		if game.time >= float(ev[0]) and game.time < float(ev[1]):
+			surge = maxf(surge, EVENT_SURGE)
+			var half := float(ev[3]) * 0.5
+			cone = [deg_to_rad(float(ev[2]) - half),
+				deg_to_rad(float(ev[2]) + half)]
 	if enemies.size() >= ALIVE_CAP:
 		return # M1 hard rule: PAUSE the horde loop at the cap — no rate
 		# accumulation either, so kills never burst-refill the queue
@@ -260,7 +319,9 @@ func update_spawns(dt: float, game: GameState, view: Vector2) -> void:
 	var open := _types_open(game.stage, game.time)
 	while spawn_acc >= 1.0:
 		spawn_acc -= 1.0
-		_spawn_enemy(open[randi() % open.size()], game, view)
+		# M4: the horde draw rides the cone above — CONE_ALL outside every
+		# window (stage-1 rows: the loop never runs, identity byte path).
+		_spawn_enemy(open[randi() % open.size()], game, view, cone)
 
 
 # Swarmers home in on the survivor; gems magnet within Grip-scaled radius.

@@ -78,8 +78,20 @@ def test_a_e2_stage_rows_are_the_spec_table():
     assert [row[1] for row in stages[2]["bands"]] == [0.0, 450.0]
     assert stages[0]["bosses"] == [[540.0, "warden"], [600.0, "hollow-knight"],
                                    [780.0, "hollow-deacon"]]
-    assert stages[1]["bosses"] == [[540.0, "cathedral-choir"]]
-    assert stages[2]["bosses"] == [[540.0, "ossuary-warden"]]
+    # T-M4e R1 RE-PIN (M4-SPEC §7.2 R1, same commit as the 660 rows): the
+    # stage-2/3 bosses rows gained their EVENT-MINIBOSS entries; the
+    # stage-1 row above stays pinned BYTE-EQUAL — the STAY probe (F-1).
+    assert stages[1]["bosses"] == [[540.0, "cathedral-choir"],
+                                   [660.0, "sunken-prelate"]]
+    assert stages[2]["bosses"] == [[540.0, "ossuary-warden"],
+                                   [660.0, "stair-acolyte"]]
+    # A-E2 M4 events pins (M4-SPEC §1.1's rows verbatim: [t0, t1,
+    # center_deg, width_deg]): stage 1 carries the EMPTY window row (F-1,
+    # the byte law — the vigil is the whole rule row), stages 2/3 the
+    # sunken-tide / stair-wall windows.
+    assert stages[0]["events"] == []
+    assert stages[1]["events"] == [[660.0, 720.0, 180.0, 90.0]]
+    assert stages[2]["events"] == [[660.0, 720.0, 0.0, 90.0]]
     assert [s["limit"] for s in stages] == [900.0, 900.0, 900.0]
     assert [s["unlock_level"] for s in stages] == [0, 10, 14]
     assert stages[1]["unlock_stage"] == "moor-vigil" and \
@@ -176,10 +188,10 @@ def test_a_e2_schedule_is_the_single_latched_walk():
     # guard code above stays as the spine-law fallback (never removed).
     s2 = leg("stage2_schedule")
     assert s2["ok"] and all(s2["checks"].values()), \
-        "stage 2: choir at 540.017, exactly once, latch 1, no stage-1 boss"
+        "stage 2: choir at 540.017 + prelate at 660.017, each once, latch 2"
     s3 = leg("stage3_schedule")
     assert s3["ok"] and all(s3["checks"].values()), \
-        "stage 3: ossuary at 540.017, exactly once, latch 1, no stage-1 boss"
+        "stage 3: ossuary at 540.017 + acolyte at 660.017, each once, latch 2"
     assert s2["bar"]["name"] == "THE CATHEDRAL CHOIR" \
         and s3["bar"]["name"] == "THE OSSUARY WARDEN", \
         "C-E3: each stage's bar NAMES its own end-boss (one bar seam)"

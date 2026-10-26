@@ -29,7 +29,10 @@
 # pinned every tick, the S6/sim_boss precedent row verbatim, level-up offers
 # declined to keep the pinned build pure; max-alive row <= ALIVE_CAP 400),
 # budget_stage3 (C-E4, T-M3b MC 11284: the stage-3 WORST-case re-tally — own
-# end-boss + plate MM live at the cap, §7's per-stage draw law),
+# end-boss + plate MM live at the cap, §7's per-stage draw law; T-M4e R5
+# RE-PIN: the 660 stair-acolyte joins, named reading 401 -> 402),
+# budget_stage4 (A-E7, T-M4e MC 11362: the STAGE-2 event-window worst case —
+# window live, choir + sunken-prelate at the cap, §9's 2/402 reading),
 # budget_verdict last. Seed-pinned per sim_headless's stated sim-leg rule.
 extends SceneTree
 
@@ -265,7 +268,10 @@ func _run_legs() -> void:
 	var s3row: Dictionary = GameRenderer.stage_row("ossuary-stair")
 	s3.game.player.x = float(s3row.plates[0][0]) # dwell: plate MM live
 	s3.game.player.y = float(s3row.plates[0][1])
-	s3.game.time = 540.0 - DT # DECLARED pin: the ossuary fires on tick 1
+	s3.game.time = 660.0 - DT # M4 §7.2 R5 RE-PIN (was 540.0 - DT): tick 1
+	# latches BOTH stage-3 rows — the 540 ossuary (overdue) AND the 660
+	# stair-acolyte event miniboss — the named reading moves 401 -> 402
+	# (§9's stages-2/3 row: horde 400 + 2 named once-each).
 	var S3_CAST := ["wraith", "pale-wight", "rime-ghoul", "hound", "crawler",
 		"cultist"] # stage-3 bands + GATES live classes
 	for i in 400:
@@ -281,15 +287,18 @@ func _run_legs() -> void:
 		s3._step(DT)
 		var hn := 0
 		var bn := 0
+		var mn := 0 # M4: NAMED counts boss + miniboss (the event row joins)
 		for e in s3.world.enemies:
 			if e.boss:
 				bn += 1
-			elif not e.miniboss:
+			elif e.miniboss:
+				mn += 1
+			else:
 				hn += 1
 		if bn > 0:
 			s3_boss_ticks += 1
 		s3_horde = maxi(s3_horde, hn)
-		s3_named = maxi(s3_named, bn)
+		s3_named = maxi(s3_named, bn + mn)
 		s3_max_total = maxi(s3_max_total, s3.world.enemies.size())
 	s3._viz.refresh()
 	s3._fxv.refresh()
@@ -303,14 +312,83 @@ func _run_legs() -> void:
 		"ground": 1, "horde": s3_horde_draws, "pawn": 1, "fx_worst": s3_fx,
 		"pickups": s3_pick, "total": s3_total, "planned": DRAWS_PLANNED,
 		"hard_cap": DRAWS_HARD,
-		"note": "C-E4 (T-M3b): stage-3 WORST case — own end-boss live, plate " +
-			"MM live, full stage-3 roster at the cap; §7 replaces stage-1's " +
-			"three named classes with ONE (the replaced classes idle: their " +
-			"MMs stage-gate out of the tally)",
+		"note": "C-E4 (T-M3b), R5 RE-PIN (T-M4e): stage-3 WORST case — own " +
+			"end-boss + the 660 stair-acolyte live (named 2 = §9's 402 " +
+			"reading), plate MM live, full stage-3 roster at the cap; §7 " +
+			"replaces stage-1's three named classes (replaced classes idle: " +
+			"their MMs stage-gate out of the tally); the acolyte MM joins " +
+			"the stage-3 horde tally (T-M4a mesh rows)",
 		"ok": s3_total <= DRAWS_HARD and s3_total <= DRAWS_PLANNED \
 			and s3_horde <= GameWorld.ALIVE_CAP \
-			and s3_named <= 1 and s3_boss_ticks == 60})
+			and s3_named <= 2 and s3_boss_ticks == 60})
 	s3.queue_free()
+
+	# (5) budget_stage4 — A-E7 (MC 11362 T-M4e): the STAGE-2 event-window
+	# worst case on the SAME construction channel (no second budget harness,
+	# §1.4): stage-2 live roster at the 400-cap through the real
+	# _spawn_enemy funnel, BOTH stage-2 bosses firing through the real
+	# schedule tick (540 choir + 660 sunken-prelate, DECLARED t=660-DT pin),
+	# the real sunken-tide window OPEN over the 60 hp-pinned ticks (cap
+	# pause holds: F-4), the stage-2 cairn chests live through _start_game's
+	# seed_stage_props. §9 reading: 2 named / 402 total, draws <= 40 <= 60.
+	var s4: Node = load("res://Main.tscn").instantiate()
+	root.add_child(s4)
+	var stub4 := SimStubScreens.new()
+	s4.add_child(stub4)
+	s4._screens = stub4
+	stub4.start_pressed.connect(s4._start_game)
+	stub4.card_picked.connect(s4._pick)
+	s4._dawnwell.stage = 2 # DECLARED save-side row pin
+	s4._start_game()
+	_pin_worst_case(s4)
+	s4.game.time = 660.0 - DT # DECLARED: choir + prelate latch on tick 1
+	var CAST2: Array = s4.world._types_open("sunken-chapel", 660.0)
+	for i in 400:
+		s4.world._spawn_enemy(String(CAST2[i % CAST2.size()]), s4.game,
+			GameRenderer.VIEW)
+	var s4_max_total := 0
+	var s4_horde := 0
+	var s4_named := 0
+	var s4_boss_ticks := 0
+	for s in 60:
+		_decline(s4)
+		s4.game.hp = s4.game.max_hp # DECLARED pin (union-leg precedent)
+		s4._step(DT)
+		var hn := 0
+		var bn := 0
+		var mn := 0
+		for e in s4.world.enemies:
+			if e.boss:
+				bn += 1
+			elif e.miniboss:
+				mn += 1
+			else:
+				hn += 1
+		if bn > 0:
+			s4_boss_ticks += 1
+		s4_horde = maxi(s4_horde, hn)
+		s4_named = maxi(s4_named, bn + mn)
+		s4_max_total = maxi(s4_max_total, s4.world.enemies.size())
+	s4._viz.refresh()
+	s4._fxv.refresh()
+	var s4_horde_draws: int = s4._viz.draw_count()
+	var s4_fx: int = s4._fxv.draw_count()
+	var s4_pick: int = s4._pvz.draw_count()
+	var s4_total := 1 + s4_horde_draws + 1 + s4_fx + s4_pick
+	_rows.append({"ev": "budget_stage4", "alive_max_total": s4_max_total,
+		"alive_cap": GameWorld.ALIVE_CAP, "horde_max": s4_horde,
+		"named_max": s4_named, "boss_ticks_live": s4_boss_ticks,
+		"ground": 1, "horde": s4_horde_draws, "pawn": 1, "fx_worst": s4_fx,
+		"pickups": s4_pick, "total": s4_total, "planned": DRAWS_PLANNED,
+		"hard_cap": DRAWS_HARD, "window_live": [[660.0, 720.0, 180.0, 90.0]],
+		"note": "A-E7 (T-M4e): stage-2 EVENT worst case — sunken-tide window " +
+			"live over the ticks (cap pause intact, F-4), choir + sunken-" +
+			"prelate named 2 = 402 (§9), cairn chests live; the prelate MM " +
+			"joins the stage-2 horde tally with the T-M4a mesh rows",
+		"ok": s4_total <= DRAWS_HARD and s4_total <= DRAWS_PLANNED \
+			and s4_horde <= GameWorld.ALIVE_CAP \
+			and s4_named <= 2 and s4_boss_ticks == 60})
+	s4.queue_free()
 
 	var ok_all: bool = true
 	for r in _rows:

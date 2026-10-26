@@ -125,6 +125,11 @@ func _leg_table() -> void:
 			"limit": s.limit, "unlock_level": s.unlock_level,
 			"unlock_stage": s.unlock_stage, "unlock_flag": s.unlock_flag,
 			"bands": s.bands, "bosses": s.bosses,
+			# M4 §7.2 R2 (declared moved row): the events field joins the
+			# engine-evaluated dump beside bosses — the A-E2 table truth
+			# read through the renderer, no new leg, zero expectations
+			# edited (R3).
+			"events": s.events,
 			"cairns": s.cairns, "plates": s.plates})
 	# stage-1 walk == the shipped biome_at at the pinned samples (A-E2)
 	var eq: Array = []

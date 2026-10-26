@@ -98,9 +98,17 @@ def test_contact_damage():
     # read at cycle 0 is still the verbatim column (the sim_bosses
     # boss_contact_clamp leg re-derives where the clamp BINDS: cycle 4 for
     # base 12, cycle 3 for 13/14 — C-E5, observed 22.4 -> clamped 20.0).
+    # Column RE-PINNED AGAIN by T-M4e (MC 11362, M4 rev-3 §1.2; falsified-
+    # by-design, LEDGER row): the two EVENT-miniboss rows insert 12/13
+    # between the M1 pair (10/11) and the end-boss pair (13/14) — the
+    # sunken-prelate sits AT the warden/choir ceiling, the stair-acolyte
+    # rides §1.2's own ladder step (13, one below the ossuary 14); every
+    # entry stays below MAX_CONTACT_DMG 20, so the clamp stays VACUOUS at
+    # cycle 0 across the whole column (M4 spec F-6).
     assert dmg == [2.0, 3.0, 5.0, 6.0, 4.0, 2.0, 5.0, 9.0, 12.0, 10.0, 11.0,
-                   13.0, 14.0], \
-        "contact dmg column must stay 2/3/5/6/4/2/5/9/12 + 10/11 + 13/14"
+                   12.0, 13.0, 13.0, 14.0], \
+        "contact dmg column must stay 2/3/5/6/4/2/5/9/12 + 10/11 + 12/13 " \
+        "+ 13/14"
     assert all(d < const("MAX_CONTACT_DMG", MAIN) for d in dmg), \
         "the clamp stays VACUOUS at cycle 0 for every base (rev-3 P3-1)"
 

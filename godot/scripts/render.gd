@@ -101,24 +101,43 @@ static func biome_at(t: float) -> Dictionary:
 # SET (never unset) by main._end_run through the ONE _meta_changed funnel.
 # cairns/plates are §1.2 gimmick data (fixed px coords; our radii/surge/
 # flare consts live at their named sites in world.gd); stage 1 fields NONE.
+# M4 §1.1 (MC 11362 T-M4e): the same dict grows the `events` column — the
+# event-wave windows [t0, t1, center_deg, width_deg] the ONE spawn loop
+# reads (world.gd EVENT_SURGE + cone; zero RNG selection). Event minibosses
+# ride the bosses column too — the 660 rows below spawn through the ONE
+# schedule latch (§1.2; the shipped defer-guard holds them until their
+# ENEMY_TYPES rows land with the T-M4a meshes — runnable-tree law).
 const STAGES := [
 	{"id": "moor-vigil", "name": "MOOR VIGIL", "gimmick": "none",
 		"bands": [["MOORLAND", 0.0], ["BURNING DUNES", 150.0],
 			["THE FROZEN WASTE", 300.0], ["DEAD TUNDRA", 450.0]],
 		"bosses": [[GameWorld.BOSS_AT, "warden"]] + GameWorld.MINIBOSS_AT,
 		"cairns": [], "plates": [],
+		# F-1 THE BYTE LAW: stage 1's events row is EMPTY — the warden +
+		# two-miniboss vigil stays the whole rule row; every committed
+		# dump runs an inert window list (the journey re-dump is the anchor).
+		"events": [],
 		"limit": 900.0, "unlock_level": 0, "unlock_stage": "", "unlock_flag": ""},
 	{"id": "sunken-chapel", "name": "SUNKEN CHAPEL", "gimmick": "drowned-cairns",
 		"bands": [["MOORLAND", 0.0], ["THE FROZEN WASTE", 300.0],
 			["DEAD TUNDRA", 600.0]],
-		"bosses": [[540.0, "cathedral-choir"]],
+		# M4 §1.2: the sunken-prelate event-miniboss at 660 (sunken-tide).
+		"bosses": [[540.0, "cathedral-choir"], [660.0, "sunken-prelate"]],
 		"cairns": [[260.0, 150.0], [-260.0, -150.0]], "plates": [],
+		# M4 §1.1 sunken-tide: t0 660, t1 720, WEST cone — §1.1's arc
+		# [135°, 225°] = center 180° width 90° (world.gd reads ±half).
+		"events": [[660.0, 720.0, 180.0, 90.0]],
 		"limit": 900.0, "unlock_level": 10, "unlock_stage": "moor-vigil",
 		"unlock_flag": "stage2"},
 	{"id": "ossuary-stair", "name": "OSSUARY STAIR", "gimmick": "pressure-stair",
 		"bands": [["DEAD TUNDRA", 0.0], ["THE FROZEN WASTE", 450.0]],
-		"bosses": [[540.0, "ossuary-warden"]],
+		# M4 §1.2: the stair-acolyte event-miniboss at 660 (stair-wall).
+		"bosses": [[540.0, "ossuary-warden"], [660.0, "stair-acolyte"]],
 		"cairns": [], "plates": [[-220.0, 0.0], [220.0, 0.0]],
+		# M4 §1.1 stair-wall: t0 660, t1 720, EAST cone — §1.1's arc
+		# [315°, 45°] = center 0° width 90° (reads [-45°, +45°], one arc
+		# across 0°, which sin/cos take unchanged).
+		"events": [[660.0, 720.0, 0.0, 90.0]],
 		"limit": 900.0, "unlock_level": 14, "unlock_stage": "sunken-chapel",
 		"unlock_flag": "stage3"},
 ]
