@@ -53,8 +53,8 @@ var _started := false
 
 
 func _out_path() -> String:
-	var d: String = OS.get_environment("HD3D_BUDGET_DUMP")
-	return d if d != "" else "/tmp/hd3d-budget-m1g.jsonl"
+	return SimFunnel.out_path("HD3D_BUDGET_DUMP",
+		"/tmp/hd3d-budget-m1g.jsonl")
 
 
 func _process(_delta: float) -> bool:
@@ -76,14 +76,7 @@ func _process(_delta: float) -> bool:
 
 
 func _fresh_run() -> Node:
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	run._start_game()
-	return run
+	return SimFunnel.fresh_run(root)
 
 
 # DECLARED pin (sim_boss._pin_full_build channel verbatim): the doc's NAMED
@@ -98,9 +91,7 @@ func _pin_worst_case(run: Node) -> void:
 
 
 func _decline(run: Node) -> void:
-	if run.game.phase == "levelup":
-		run.game.pending_levels = 0
-		run.game.set_phase("playing") # decline: keep the pinned build pure
+	SimFunnel.decline(run) # zero-pending branch (audit S2.1: named fork)
 
 
 func _run_legs() -> void:

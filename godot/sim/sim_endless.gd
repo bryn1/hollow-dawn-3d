@@ -58,15 +58,14 @@ const M_C_BIND := 13.0 # cycle-5 binding point (spec §A.1: m_c >= 12.7)
 const BASE_ID := "pale-wight" # hardest normal row (hp 45, dmg 9)
 const BOSS_ID := "warden" # max base contact dmg 12 (world.gd)
 
-var _rows: Array = []
+var _funnel := SimFunnel.new() # rows/ok/check: the ONE harness (MC 11317 C3)
 var _started := false
 var _frames := 0
-var _ok := true
 
 
 func _out_path() -> String:
-	var d: String = OS.get_environment("HD3D_ENDLESS_DUMP")
-	return d if d != "" else "/tmp/hd3d-endless-m2.jsonl"
+	return SimFunnel.out_path("HD3D_ENDLESS_DUMP",
+		"/tmp/hd3d-endless-m2.jsonl")
 
 
 func _process(_delta: float) -> bool:
@@ -80,35 +79,25 @@ func _process(_delta: float) -> bool:
 		_run_legs()
 		var f := FileAccess.open(_out_path(), FileAccess.WRITE)
 		assert(f != null)
-		for r in _rows:
+		for r in _funnel.rows:
 			f.store_line(JSON.stringify(r))
 		f.close()
-		print("ENDLESS_OK rows=%d ok=%s" % [_rows.size(), str(_ok)])
-		quit(0 if _ok else 3)
+		print("ENDLESS_OK rows=%d ok=%s" % [_funnel.rows.size(), str(_funnel.ok)])
+		quit(0 if _funnel.ok else 3)
 	return false
 
 
-# --- channel helpers (sim_budget/sim_evolve patterns verbatim) ---------------
+# --- channel helpers: the shared SimFunnel seam (MC 11317 C3) ----------------
 
 func _fresh_run(flag_on: bool) -> Node:
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	stub.card_picked.connect(run._pick)
-	if flag_on: # DECLARED: the endless hand-in rides the ONE seam — the
-		# save flag main._start_game consumes (meta_ranks pattern), pinned.
-		run._dawnwell.flags["endless"] = 1
-	run._start_game()
-	return run
+	# DECLARED: the endless hand-in rides the ONE seam — the save flag
+	# main._start_game consumes (meta_ranks pattern), pinned.
+	return SimFunnel.fresh_run(root, {"wire_pick": true,
+		"flags": {"endless": 1} if flag_on else {}})
 
 
 func _decline(run: Node) -> void:
-	if run.game.phase == "levelup":
-		run.game.pending_levels = 0
-		run.game.set_phase("playing") # keep the leg deterministic (budget)
+	SimFunnel.decline(run) # zero-pending branch (audit S2.1: named fork)
 
 
 func _disk_best_cycle() -> int:
@@ -122,20 +111,8 @@ func _disk_best_cycle() -> int:
 	return int(data.get("best_cycle", -1))
 
 
-func _check(leg: String, checks: Dictionary, extra: Dictionary) -> void:
-	var leg_ok := true
-	for k in checks:
-		if not checks[k]:
-			leg_ok = false
-	_ok = _ok and leg_ok
-	var row := {"ev": leg, "checks": checks, "ok": leg_ok}
-	for k in extra:
-		row[k] = extra[k]
-	_rows.append(row)
-
-
 func _r3(v: float) -> float:
-	return roundi(v * 1000.0) / 1000.0
+	return SimFunnel.r3(v) # the first-seen rounding carrier
 
 
 # --- legs ---------------------------------------------------------------------
@@ -158,7 +135,7 @@ func _leg_reach2() -> void:
 		if game.cycle > last_cycle:
 			last_cycle = game.cycle
 			clears += 1
-			_rows.append({"ev": "cycle_clear", "cycle": game.cycle,
+			_funnel.rows.append({"ev": "cycle_clear", "cycle": game.cycle,
 				"t": _r3(game.time), "phase": game.phase,
 				"hp_pinned": true,
 				"ended": game.phase in ["gameover", "win"]})
@@ -169,7 +146,7 @@ func _leg_reach2() -> void:
 				run._step(DT)
 			break
 	var disk := _disk_best_cycle()
-	_check("endless_reach2", {
+	_funnel.check("endless_reach2", {
 		"cycle2": game.cycle >= 2, # A-E8: < 2 here IS the roadmap RED leg
 		"clears2": clears == 2,
 		"clear_rows_at_boundaries": clears == 2 and game.time >= 1800.0,
@@ -201,7 +178,7 @@ func _leg_bestcycle3() -> void:
 	run2.game.hp = -1.0
 	run2._step(DT)
 	var lower := _disk_best_cycle()
-	_check("endless_bestcycle", {
+	_funnel.check("endless_bestcycle", {
 		"run_at_cycle3_lands_3": run.game.phase == "gameover" and after == 3,
 		"never_decreases": lower == 3,
 	}, {"pin_cycle": 3, "disk_after": after, "disk_after_shallower": lower})
@@ -217,7 +194,7 @@ func _leg_cycle_clear_reward() -> void:
 	var chest: Dictionary = run.world.chests[0] if run.world.chests.size() == 1 \
 			else {}
 	var expected_tier: String = GameWorld.CHEST_TIER_BY_SOURCE["endless-cycle"]
-	_check("endless_cycle_clear_reward", {
+	_funnel.check("endless_cycle_clear_reward", {
 		"reward_card_pending_plus1": game.pending_levels == pending0 + 1,
 		"one_drop": run.world.chests.size() == 1,
 		"tier_dawn": chest.get("tier", "") == "dawn",
@@ -255,7 +232,7 @@ func _leg_caps_cycle5() -> void:
 	run._step(DT)
 	var delta: float = game.max_hp - game.hp
 	var raw_contact: float = boss.dmg * GameWorld.dmg_cyc(5)
-	_check("endless_caps_cycle5", {
+	_funnel.check("endless_caps_cycle5", {
 		"hp_clamp_binds": spawned.hp == cap_hp and raw_prod > cap_hp,
 		"contact_clamp_binds": delta == 20.0 and raw_contact > 20.0,
 	}, {"cycle": 5, "m_c": M_C_BIND, "hp_raw_product": _r3(raw_prod),
@@ -279,7 +256,7 @@ func _leg_scaling() -> void:
 				* GameWorld.hp_cyc(k))
 		var cap_hp := base * GameWorld.HP_EFFECTIVE_MULT_CAP
 		var clamped: bool = e.hp == cap_hp and expected > cap_hp
-		_check("endless_scaling", {
+		_funnel.check("endless_scaling", {
 			"hp_matches_formula": e.hp == minf(expected, cap_hp),
 			"not_clamped_k_le_3": not clamped,
 			"qty_mult_row": GameWorld.qty_cyc(k) == minf(1.0 + 0.25 * k, 2.0),
@@ -292,7 +269,7 @@ func _leg_scaling() -> void:
 	# rev-2 P2-2: the 18x bound is the DEEP-cycle guard — cycle 4's worst
 	# product must sit BELOW it (first binds at cycle 5, caps leg above).
 	var prod4: float = (1.0 + 0.22 * M_C_END) * GameWorld.hp_cyc(4)
-	_check("endless_clamp_eval", {
+	_funnel.check("endless_clamp_eval", {
 		"cycle4_never_clamps": prod4 < GameWorld.HP_EFFECTIVE_MULT_CAP,
 	}, {"cycle": 4, "worst_product": _r3(prod4),
 		"cap": GameWorld.HP_EFFECTIVE_MULT_CAP,
@@ -314,7 +291,7 @@ func _leg_flag_off_win() -> void:
 			run._step(DT)
 			if game.phase in ["gameover", "win"]:
 				break
-	_check("endless_off_win", {
+	_funnel.check("endless_off_win", {
 		"win_at_limit": game.phase == "win", # RED if it keeps running
 		"kind_is_win": game.phase == "win",
 	}, {"t": _r3(game.time), "kind": game.phase,
@@ -332,7 +309,7 @@ func _leg_snapshot() -> void:
 	var expected: Array = ["enemies", "gold", "hp", "kills", "level", "maxHp",
 		"phase", "runId", "time", "weapons", "xp", "xpNext"]
 	expected.sort()
-	_check("snapshot_keys", {
+	_funnel.check("snapshot_keys", {
 		"exact_12": keys == expected,
 		"cycle_endless_absent": not keys.has("cycle") and not keys.has("endless"),
 	}, {"keys": keys, "count": keys.size()})
@@ -346,5 +323,5 @@ func _run_legs() -> void:
 	_leg_scaling()
 	_leg_flag_off_win()
 	_leg_snapshot()
-	_rows.append({"ev": "endless_verdict", "ok": _ok,
-		"rows": _rows.size()})
+	_funnel.rows.append({"ev": "endless_verdict", "ok": _funnel.ok,
+		"rows": _funnel.rows.size()})

@@ -28,8 +28,7 @@ var _frames := 0
 
 
 func _out_path() -> String:
-	var d: String = OS.get_environment(OUT_ENV)
-	return d if d != "" else "/tmp/hd3d-art-s2i-dump.jsonl"
+	return SimFunnel.out_path(OUT_ENV, "/tmp/hd3d-art-s2i-dump.jsonl")
 
 
 # Same SceneTree-script contract as sim_headless: real work runs on the

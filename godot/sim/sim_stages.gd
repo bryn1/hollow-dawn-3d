@@ -68,14 +68,13 @@ const DT := 1.0 / 60.0
 const SEED_DEFAULT := 11282
 const T := 1.0 / 60.0 # first-seen rounding carrier (sim_boss _r3 shape)
 
-var _rows: Array = []
+var _funnel := SimFunnel.new() # rows/ok/check: the ONE harness (MC 11317 C3)
 var _started := false
-var _ok := true
 
 
 func _out_path() -> String:
-	var d: String = OS.get_environment("HD3D_STAGES_DUMP")
-	return d if d != "" else "/tmp/hd3d-stages-m3.jsonl"
+	return SimFunnel.out_path("HD3D_STAGES_DUMP",
+		"/tmp/hd3d-stages-m3.jsonl")
 
 
 func _process(_delta: float) -> bool:
@@ -88,45 +87,32 @@ func _process(_delta: float) -> bool:
 		_run_legs()
 		var f := FileAccess.open(_out_path(), FileAccess.WRITE)
 		assert(f != null)
-		for r in _rows:
+		for r in _funnel.rows:
 			f.store_line(JSON.stringify(r))
 		f.close()
-		print("STAGES_OK rows=%d ok=%s" % [_rows.size(), str(_ok)])
-		quit(0 if _ok else 3)
+		print("STAGES_OK rows=%d ok=%s" % [_funnel.rows.size(), str(_funnel.ok)])
+		quit(0 if _funnel.ok else 3)
 	return false
 
 
 func _check(leg: String, checks: Dictionary, extra: Dictionary) -> void:
-	var leg_ok := true
-	for k in checks:
-		if not checks[k]:
-			leg_ok = false
-	_ok = _ok and leg_ok
-	var row := {"ev": leg, "checks": checks, "ok": leg_ok}
-	for k in extra:
-		row[k] = extra[k]
-	_rows.append(row)
+	_funnel.check(leg, checks, extra) # duck-typed surface for sim_bosses.gd's
+	# shared boss legs (sim._check at sim_bosses.gd:90,133) — thin delegator,
+	# the ONE body lives in SimFunnel.
 
 
 func _decline(run: Node) -> void:
-	while run.game.phase == "levelup": # sim_budget/sim_endless pattern
-		run._pick(0)
+	# audit S2.1: this leg ACCEPTS card 0 — the other fork (zero-pending
+	# decline) is the named sibling SimFunnel.decline, NOT this one.
+	SimFunnel.take_first_card(run)
 
 
 func _fresh_run(stage_idx: int) -> Node:
-	DawnWell.new().reset() # each leg owns its well state unless it says otherwise
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	stub.card_picked.connect(run._pick)
+	var opts := {"wipe_well": true, "wire_pick": true}
 	if stage_idx != 1:
-		run._dawnwell.stage = stage_idx # DECLARED: the save-side row the
-		# hand-in seam reads (the endless-flag pattern, sim_endless:154)
-	run._start_game()
-	return run
+		opts["stage"] = stage_idx # DECLARED: the save-side row the hand-in
+		# seam reads (the endless-flag pattern, sim_endless:154)
+	return SimFunnel.fresh_run(root, opts)
 
 
 # --- legs ---------------------------------------------------------------------
@@ -160,7 +146,7 @@ func _leg_table() -> void:
 	var names: Array = []
 	for s in GameRenderer.STAGES:
 		names.append(s.name)
-	_check("stages_table", {
+	_funnel.check("stages_table", {
 		"stage1_walk_equals_biome_at": eq.all(func(e): return e.same_row),
 		"boss_row_is_shipped_schedule": str(s1) == str(shipped),
 		"three_stages": GameRenderer.STAGES.size() == 3,
@@ -220,7 +206,7 @@ func _leg_schedule() -> void:
 	for e in run.world.enemies:
 		if e.type == "warden":
 			wardens_alive += 1
-	_check("stage1_schedule", {
+	_funnel.check("stage1_schedule", {
 		"warden_first_seen_540": warden_t == 540.017,
 		"knight_first_seen_600": float(first.get("hollow-knight", -1.0)) == 600.017,
 		"deacon_first_seen_780": float(first.get("hollow-deacon", -1.0)) == 780.017,
@@ -243,7 +229,7 @@ func _leg_schedule() -> void:
 	for e in run.world.enemies:
 		if e.boss:
 			re_after += 1
-	_check("schedule_rearm", {
+	_funnel.check("schedule_rearm", {
 		"reset_clears_latch": latch_after_reset == 0,
 		"second_pass_relatches": run.world.schedule_spawned == 1,
 		"second_pass_fires_once": re_before == 0 and re_after == 1,
@@ -279,7 +265,7 @@ func _leg_cairns() -> void:
 	run._step(DT)
 	var ember: Dictionary = ChestRewards.TIERS[expected_tier]
 	var dg: int = run.game.gold - gold0
-	_check("cairns", {
+	_funnel.check("cairns", {
 		"seeded_fixed_coords_map_tier": seeded_ok,
 		"open_shrank_array": run.world.chests.size() == row.cairns.size() - 1,
 		"pending_raised_item_count": run.game.pending_levels - pend0 == int(ember.item_count),
@@ -298,7 +284,7 @@ func _leg_cairns() -> void:
 func _leg_rng_stream() -> void:
 	var a := _digest_run(1)
 	var b := _digest_run(2)
-	_check("rng_stream", {
+	_funnel.check("rng_stream", {
 		"stage2_stream_equals_stage1": str(a) == str(b),
 	}, {"digest": a})
 
@@ -324,7 +310,7 @@ func _leg_plates_rate() -> void:
 	var base := _plate_window(row, false)
 	var dwell := _plate_window(row, true)
 	var ratio: float = float(dwell.spawns) / maxf(1.0, float(base.spawns))
-	_check("plates_rate", {
+	_funnel.check("plates_rate", {
 		"ratio_is_surge": ratio >= GameWorld.SPAWN_SURGE - 0.06 \
 			and ratio <= GameWorld.SPAWN_SURGE + 0.06,
 		"dwell_pins_flare": dwell.flare == GameWorld.FLARE_SHIFT,
@@ -385,7 +371,7 @@ func _leg_plates_cap() -> void:
 		max_horde = maxi(max_horde, horde_n)
 		max_named = maxi(max_named, run.world.enemies.size() - horde_n)
 		max_alive = maxi(max_alive, run.world.enemies.size())
-	_check("plates_cap", {
+	_funnel.check("plates_cap", {
 		"minf_binds_both": plain == 12.0 and surged == 12.0,
 		"horde_cap_holds": max_horde <= GameWorld.ALIVE_CAP,
 		"named_spawns_once": max_named == 1,
@@ -420,7 +406,7 @@ func _leg_plates_flare() -> void:
 		run.game.time = 380.0 # DECLARED: hold the clock, isolate the decay
 	var end_band: String = GameRenderer.band_at("ossuary-stair",
 		run.game.time + run.game.flare).name
-	_check("plates_flare", {
+	_funnel.check("plates_flare", {
 		"dwell_shifts_band": base_band == "DEAD TUNDRA" and dwell_band == "THE FROZEN WASTE",
 		# tolerance: the decay is an IEEE accumulation over 1800 dt steps —
 		# exact 0.0 only where maxf clamps; a hair above is the SAME state.
@@ -437,7 +423,7 @@ func _leg_plates_saturation() -> void:
 	var row: Dictionary = GameRenderer.stage_row("ossuary-stair")
 	var no_plate := _sat_window(2, row)
 	var dwell := _sat_window(3, row)
-	_check("plates_saturation", {
+	_funnel.check("plates_saturation", {
 		"minf_clamps_surge": dwell.spawns == no_plate.spawns,
 		"dwell_zero_rng": str(dwell) == str(no_plate),
 	}, {"stage2": no_plate, "stage3_dwell": dwell, "minute": 9.0,
@@ -482,7 +468,7 @@ func _leg_draw_tally() -> void:
 		run._pvz.refresh()
 		tally[run.game.stage] = run._pvz.draw_count()
 		run.queue_free()
-	_check("draw_tally", {
+	_funnel.check("draw_tally", {
 		"stage1_five": tally["moor-vigil"] == 5,
 		"stage2_five": tally["sunken-chapel"] == 5,
 		"stage3_six": tally["ossuary-stair"] == 6,
@@ -515,7 +501,7 @@ func _leg_unlock() -> void:
 	_end_run_at(r4, 14)
 	r4.queue_free()
 	var s2hi: Dictionary = DawnWell.load_save().flags
-	_check("unlock_chain", {
+	_funnel.check("unlock_chain", {
 		"level9_sets_nothing": int(after9.get("stage2", 0)) == 0,
 		"level10_sets_stage2": int(after10.get("stage2", 0)) == 1,
 		"stage3_needs_stage2_run": int(s2low.get("stage3", 0)) == 0 \
@@ -527,16 +513,8 @@ func _leg_unlock() -> void:
 func _fresh_run_no_wipe(stage_idx: int) -> Node:
 	# same as _fresh_run WITHOUT the well wipe — the chain legs share the
 	# persisted well exactly like the real menu does.
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	stub.card_picked.connect(run._pick)
-	run._dawnwell.stage = stage_idx # DECLARED save-side row (endless pattern)
-	run._start_game()
-	return run
+	return SimFunnel.fresh_run(root, {"wire_pick": true,
+		"stage": stage_idx}) # DECLARED save-side row (endless pattern)
 
 
 # §1.1/§1.4 hand-in legs.
@@ -553,7 +531,7 @@ func _leg_handin() -> void:
 	var r3 := _fresh_run_no_wipe(7) # out of range: clamp, never crash
 	var s3: String = r3.game.stage
 	r3.queue_free()
-	_check("handin", {
+	_funnel.check("handin", {
 		"unset_reads_moor_vigil": s1 == "moor-vigil",
 		"stage2_hands_in": s2 == "sunken-chapel",
 		"out_of_range_clamps": s3 == "moor-vigil",
@@ -573,7 +551,7 @@ func _leg_snapshot() -> void:
 	var expected: Array = ["enemies", "gold", "hp", "kills", "level", "maxHp",
 		"phase", "runId", "time", "weapons", "xp", "xpNext"]
 	expected.sort()
-	_check("snapshot_m3", {
+	_funnel.check("snapshot_m3", {
 		"exact_12": keys == expected,
 		"stage_flare_absent": not keys.has("stage") and not keys.has("flare"),
 		"start_run_resets": game.stage == "moor-vigil" and game.flare == 0.0,
@@ -597,4 +575,4 @@ func _run_legs() -> void:
 	_leg_handin()
 	_leg_snapshot()
 	SimBosses.new().run_boss_legs(self) # rows after snapshot_m3 (see above)
-	_rows.append({"ev": "stages_verdict", "ok": _ok, "rows": _rows.size()})
+	_funnel.rows.append({"ev": "stages_verdict", "ok": _funnel.ok, "rows": _funnel.rows.size()})

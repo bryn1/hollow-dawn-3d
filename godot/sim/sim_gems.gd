@@ -46,15 +46,14 @@ const SPAM_POSE := 120.0 # drop pose beyond the 60 px magnet (fresh run) —
 const PIN_X := 300.0 # DECLARED-pinned array pose: outside the 60 px magnet,
 const PIN_Y := 240.0 # so update_entities cannot move the pin (it only pulls)
 
-var _rows: Array = []
+var _funnel := SimFunnel.new() # rows/ok/check: the ONE harness (MC 11317 C3)
 var _started := false
 var _frames := 0
-var _ok := true
 
 
 func _out_path() -> String:
-	var d: String = OS.get_environment("HD3D_GEMS_DUMP")
-	return d if d != "" else "/tmp/hd3d-gems-m2g.jsonl"
+	return SimFunnel.out_path("HD3D_GEMS_DUMP",
+		"/tmp/hd3d-gems-m2g.jsonl")
 
 
 func _process(_delta: float) -> bool:
@@ -68,38 +67,18 @@ func _process(_delta: float) -> bool:
 		_run_legs()
 		var f := FileAccess.open(_out_path(), FileAccess.WRITE)
 		assert(f != null)
-		for r in _rows:
+		for r in _funnel.rows:
 			f.store_line(JSON.stringify(r))
 		f.close()
-		print("GEMS_OK rows=%d ok=%s" % [_rows.size(), str(_ok)])
-		quit(0 if _ok else 3)
+		print("GEMS_OK rows=%d ok=%s" % [_funnel.rows.size(), str(_funnel.ok)])
+		quit(0 if _funnel.ok else 3)
 	return false
 
 
-# --- channel helpers (sim_endless patterns verbatim) --------------------------
+# --- channel helpers: the shared SimFunnel seam (MC 11317 C3) -----------------
 
 func _fresh_run() -> Node:
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	stub.card_picked.connect(run._pick)
-	run._start_game()
-	return run
-
-
-func _check(leg: String, checks: Dictionary, extra: Dictionary) -> void:
-	var leg_ok := true
-	for k in checks:
-		if not checks[k]:
-			leg_ok = false
-	_ok = _ok and leg_ok
-	var row := {"ev": leg, "checks": checks, "ok": leg_ok}
-	for k in extra:
-		row[k] = extra[k]
-	_rows.append(row)
+	return SimFunnel.fresh_run(root, {"wire_pick": true})
 
 
 # DECLARED synthetic drop (the sim_caps synthetic-slot pattern, header): a
@@ -167,7 +146,7 @@ func _leg_boundary() -> void:
 	world.update_entities(DT, game)
 	var bounded201: bool = world.gems.size() == GameWorld.GEM_MERGE_BATCH + 2 \
 			and _has_bulk(world.gems)
-	_check("gem_boundary", {
+	_funnel.check("gem_boundary", {
 		"no_merge_at_199": held,
 		"merge_at_200_count_drops": merged200,
 		"merge_at_201_bounded": bounded201,
@@ -210,7 +189,7 @@ func _leg_conservation() -> void:
 		var post := 0.0
 		for g in world.gems:
 			post += g.xp
-		_check("gem_sum_conserved", {
+		_funnel.check("gem_sum_conserved", {
 			"sum_byte_equal_across_fold": pre == post,
 			"bulk_carries_the_fold_sum": _has_bulk(world.gems),
 		}, {"insight_pinned": pin[0], "meta_xp_mult_pinned": pin[1],
@@ -254,7 +233,7 @@ func _leg_byte_equal() -> void:
 		if g.get("big", false):
 			bulks += 1
 	gon.collect_pickups(on.game)
-	_check("gem_xp_byte_equal", {
+	_funnel.check("gem_xp_byte_equal", {
 		"xp_bytes_equal": off.game.xp == on.game.xp,
 		"level_equal": off.game.level == on.game.level,
 		"pending_equal": off.game.pending_levels == on.game.pending_levels,
@@ -284,7 +263,7 @@ func _leg_bounded_spam() -> void:
 	for g in world.gems:
 		if g.get("big", false):
 			folds += 1
-	_check("gem_bounded_spam", {
+	_funnel.check("gem_bounded_spam", {
 		"never_exceeds_threshold": max_seen <= GameWorld.GEM_MERGE_THRESHOLD,
 		"folds_happened": folds > 0,
 		"array_still_working": world.gems.size() > 0,
@@ -300,4 +279,4 @@ func _run_legs() -> void:
 	_leg_conservation()
 	_leg_byte_equal()
 	_leg_bounded_spam()
-	_rows.append({"ev": "gems_verdict", "ok": _ok, "rows": _rows.size()})
+	_funnel.rows.append({"ev": "gems_verdict", "ok": _funnel.ok, "rows": _funnel.rows.size()})

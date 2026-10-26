@@ -1,7 +1,7 @@
 # CHEST-TIER legs for M2 pillar B (MC 11239, T-M2t; M2-SPEC rev-2 §B.3
 # ACCEPT rows B-T1..B-T5 — B-T5 is the pixel row, tools/chest_pixel_gate.py).
 # reason: >400 lines — the ONE chest-tier leg file: B-T1..B-T4 + the C-E2
-# boss rows ride one drop funnel and one _check harness; splitting would
+# boss rows ride one drop funnel and one _funnel.check harness; splitting would
 # fork the harness beside the existing one (replace-not-delete law).
 # Same headless funnel as sim_endless/sim_evolve: the REAL Main.tscn, screens
 # stubbed (SimStubScreens), every run started through the real _start_game.
@@ -55,15 +55,14 @@ const DT := 1.0 / 60.0
 const GATE_OK_T := 601.0 # strictly past the 600 evolution gate (sim_evolve)
 const MB_KILLS := 200 # the pinned-0.6 miniboss roll sample (chest-roll shape)
 
-var _rows: Array = []
+var _funnel := SimFunnel.new() # rows/ok/check: the ONE harness (MC 11317 C3)
 var _started := false
 var _frames := 0
-var _ok := true
 
 
 func _out_path() -> String:
-	var d: String = OS.get_environment("HD3D_CHEST_TIERS_DUMP")
-	return d if d != "" else "/tmp/hd3d-chests-tiers-m2.jsonl"
+	return SimFunnel.out_path("HD3D_CHEST_TIERS_DUMP",
+		"/tmp/hd3d-chests-tiers-m2.jsonl")
 
 
 func _process(_delta: float) -> bool:
@@ -77,38 +76,18 @@ func _process(_delta: float) -> bool:
 		_run_legs()
 		var f := FileAccess.open(_out_path(), FileAccess.WRITE)
 		assert(f != null)
-		for r in _rows:
+		for r in _funnel.rows:
 			f.store_line(JSON.stringify(r))
 		f.close()
-		print("CHEST_TIERS_OK rows=%d ok=%s" % [_rows.size(), str(_ok)])
-		quit(0 if _ok else 3)
+		print("CHEST_TIERS_OK rows=%d ok=%s" % [_funnel.rows.size(), str(_funnel.ok)])
+		quit(0 if _funnel.ok else 3)
 	return false
 
 
-# --- channel helpers (sim_endless/sim_evolve patterns verbatim) ---------------
+# --- channel helpers: the shared SimFunnel seam (MC 11317 C3) ----------------
 
 func _fresh_run() -> Node:
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	stub.card_picked.connect(run._pick)
-	run._start_game()
-	return run
-
-
-func _check(leg: String, checks: Dictionary, extra: Dictionary) -> void:
-	var leg_ok := true
-	for k in checks:
-		if not checks[k]:
-			leg_ok = false
-	_ok = _ok and leg_ok
-	var row := {"ev": leg, "checks": checks, "ok": leg_ok}
-	for k in extra:
-		row[k] = extra[k]
-	_rows.append(row)
+	return SimFunnel.fresh_run(root, {"wire_pick": true})
 
 
 func _synth_kill(run: Node, boss: bool, mb: bool, type_id := "warden") -> void:
@@ -151,7 +130,7 @@ func _leg_drop_map() -> void:
 	run.world.cycle_clear(game) # the real cycle-clear drop funnel (T-M2e)
 	var cycle_tier: String = String(run.world.chests[0]["tier"])
 	var map_row: String = String(map["endless-cycle"])
-	_check("chest_tier_drop", {
+	_funnel.check("chest_tier_drop", {
 		# the checks compare the DUMPED map value — a drop site bypassing the
 		# map (the planted-red) flips boss_ok without touching any literal here
 		"boss_ok": boss_tier == String(map["warden"]),
@@ -222,7 +201,7 @@ func _leg_grant(tier: String) -> void:
 		for ck in offers[i]:
 			if not kinds_allowed.has(ck):
 				flavoured = false
-	_check("chest_grant", {
+	_funnel.check("chest_grant", {
 		"pending_exactly_item_count": pending_open == pending0 \
 				+ int(row["item_count"]),
 		"offers_3_cards": offers.size() == int(row["item_count"]) \
@@ -252,7 +231,7 @@ func _leg_pick_weights(tier: String) -> void:
 	for k in ["weapon", "passive", "gold"]:
 		if int(row[k]) > 0 and counts[k] == 0:
 			alive_ok = false
-	_check("chest_pick_weights", {
+	_funnel.check("chest_pick_weights", {
 		"sum_240": counts["weapon"] + counts["passive"] + counts["gold"] == 240,
 		"every_weighted_kind_appears": alive_ok,
 	}, {"tier": tier, "counts": counts, "seq": seq})
@@ -266,7 +245,7 @@ func _leg_weight_zero(kind: String) -> void:
 	for i in 200:
 		if ChestRewards.pick(weights) == kind:
 			hits += 1
-	_check("chest_weight_zero", {"never_picked": hits == 0},
+	_funnel.check("chest_weight_zero", {"never_picked": hits == 0},
 		{"kind": kind, "hits": hits, "weights": weights})
 
 
@@ -300,7 +279,7 @@ func _leg_filter_probe(kind: String) -> void:
 					ok_kind = ck == "bonus"
 			if not ok_kind:
 				bad += 1
-	_check("chest_filter_probe", {"no_wrong_flavour_in_60": bad == 0},
+	_funnel.check("chest_filter_probe", {"no_wrong_flavour_in_60": bad == 0},
 		{"kind": kind, "wrong_cards_180": bad})
 	run.queue_free()
 
@@ -337,7 +316,7 @@ func _leg_precedence() -> void:
 	var row: Dictionary = ChestRewards.TIERS["warden"]
 	var lo: int = int(row["gold_lo"])
 	var hi: int = int(row["gold_hi"])
-	_check("chest_precedence", {
+	_funnel.check("chest_precedence", {
 		# "two transforms in one chest" is the RED this instrument catches
 		"exactly_one_transform": evolved.size() == 1,
 		"base_removed": not _has_id(game, "bone-whip") \
@@ -374,7 +353,7 @@ func _leg_boss_tiers() -> void:
 			one_each = false
 		tiers[boss_id] = String(run.world.chests[0]["tier"]) \
 			if run.world.chests.size() > 0 else ""
-	_check("chest_tier_bosses", {
+	_funnel.check("chest_tier_bosses", {
 		"choir_tier_is_map_row": tiers["cathedral-choir"] \
 			== String(map["cathedral-choir"]),
 		"ossuary_tier_is_map_row": tiers["ossuary-warden"] \
@@ -404,4 +383,4 @@ func _run_legs() -> void:
 	_leg_boss_tiers() # C-E2 (MC 11284) — appended AFTER every existing leg
 	# (the forward-lock law: prior rows keep their bytes; the embedded map
 	# row re-mints as the DECLARED §3.1 7-row growth; verdict rows 14 -> 15)
-	_rows.append({"ev": "chest_tiers_verdict", "ok": _ok, "rows": _rows.size()})
+	_funnel.rows.append({"ev": "chest_tiers_verdict", "ok": _funnel.ok, "rows": _funnel.rows.size()})

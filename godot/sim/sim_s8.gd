@@ -169,4 +169,4 @@ func _r2(v: float) -> float:
 
 
 func _r3(v: float) -> float:
-	return roundi(v * 1000.0) / 1000.0
+	return SimFunnel.r3(v) # the first-seen rounding carrier

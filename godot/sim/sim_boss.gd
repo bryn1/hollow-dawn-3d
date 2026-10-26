@@ -276,14 +276,7 @@ func _spawn_boss(run: Node, steps: int, rows: Array) -> Dictionary:
 
 
 func _fresh_run(root: Window) -> Node:
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	run._start_game()
-	return run
+	return SimFunnel.fresh_run(root)
 
 
 func _pin_full_build(run: Node) -> void:
@@ -294,9 +287,7 @@ func _pin_full_build(run: Node) -> void:
 
 
 func _decline(run: Node) -> void:
-	if run.game.phase == "levelup":
-		run.game.pending_levels = 0
-		run.game.set_phase("playing") # decline: keep the pinned build pure
+	SimFunnel.decline(run) # zero-pending branch (audit S2.1: named fork)
 
 
 func _boss(run: Node) -> Dictionary:
@@ -320,4 +311,4 @@ func _in_band(last: Dictionary, band: Array) -> bool:
 
 
 func _r3(v: float) -> float:
-	return roundi(v * 1000.0) / 1000.0
+	return SimFunnel.r3(v) # the first-seen rounding carrier
