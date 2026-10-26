@@ -26,19 +26,21 @@ Usage:  python3 tools/chest_pixel_gate.py             # capture + gate
                                                    # for the RED proof)
 Env:    HD3D_GODOT (godot binary), HD3D_SEED (capture seed, default 11209).
 Exit:   0 green, 1 red.
+Seam:   the launcher lives in tools/capture_lib.py and the window counting
+        in tools/pixel_lib.py (MC 11317 C1; the gate's rows and floors stay
+        HERE — the seams count, this file judges).
 """
 import json
 import os
-import subprocess
 import sys
 
 import numpy as np
 from PIL import Image
 
+import capture_lib
+import pixel_lib
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GODOT = os.environ.get(
-    "HD3D_GODOT",
-    "/home/claudecode/Games/.tools/godot/Godot_v4.7.2-stable_linux.x86_64")
 SHOTS_DIR = os.path.join(REPO, ".tmp", "chest-shots")
 SCRIPT = "res://sim/chest_capture.gd"
 LEG = "chest_shot"
@@ -55,11 +57,8 @@ PX_MIN_HUD = 100
 
 
 def capture():
-    env = dict(os.environ, HD3D_CHEST_SHOTS_DIR=SHOTS_DIR)
-    r = subprocess.run(["xvfb-run", "-a", GODOT, "--render-driver", "opengl3",
-                        "--path", "godot", "-s", SCRIPT],
-                       cwd=REPO, env=env, capture_output=True, text=True,
-                       timeout=900)
+    r = capture_lib.run_capture(SCRIPT,
+                                {"HD3D_CHEST_SHOTS_DIR": SHOTS_DIR})
     print(r.stdout[-4000:])
     if "CAPTURE_OK" not in r.stdout or r.returncode != 0:
         print(r.stderr[-2000:])
@@ -89,11 +88,8 @@ def gate(dir_path):
             sys.exit(1)
         cx, cy = int(round(row["cx"])), int(round(row["cy"]))
         half = int(row["win"])
-        x0, x1 = max(cx - half, 0), min(cx + half, chest.shape[1])
-        y0, y1 = max(cy - half, 0), min(cy + half, chest.shape[0])
-        diff = np.abs(chest - base).max(axis=2)
-        win_px = int((diff[y0:y1, x0:x1] > DELTA).sum())
-        total_px = int((diff > DELTA).sum())
+        win_px, total_px, (x0, x1, y0, y1) = pixel_lib.window_delta_counts(
+            chest, base, cx, cy, half, half, DELTA)
         floor = PX_MIN_HUD if is_hud else PX_MIN
         state_ok = win_px >= floor
         ok = ok and state_ok

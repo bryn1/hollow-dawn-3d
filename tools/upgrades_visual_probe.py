@@ -52,19 +52,20 @@ Usage:  python3 tools/upgrades_visual_probe.py            # capture + gate
                                                   # dir (planted-mutation copy
                                                   # carries rows.json)
 Env:    HD3D_GODOT (godot binary), HD3D_SEED (capture seed).
+Seam:   both capture launches go through tools/capture_lib.py (MC 11317
+        C1); the palette/blob measures stay HERE — audit §2.3 defends them
+        as a different contract from the pixel-delta seam.
 """
 import json
 import os
-import subprocess
 import sys
 
 import numpy as np
 from PIL import Image
 
+import capture_lib
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GODOT = os.environ.get(
-    "HD3D_GODOT",
-    "/home/claudecode/Games/.tools/godot/Godot_v4.7.2-stable_linux.x86_64")
 SHOTS_DIR = os.path.join(REPO, ".tmp", "upgrades-visual-shots")
 SCRIPT = "res://sim/upgrades_visual_capture.gd"
 
@@ -131,15 +132,12 @@ FAM_TEST = {"talon": _moon, "ember": _ember, "cleaver": _bone,
 
 def capture(shots_dir):
     os.makedirs(shots_dir, exist_ok=True)
-    env = dict(os.environ, HD3D_UV_SHOTS_DIR=shots_dir)
     log = os.path.join(shots_dir, "capture.log")
-    with open(log, "w") as fh:  # streamed to the log tail-able live
-        subprocess.run(
-            ["xvfb-run", "-a", GODOT, "--render-driver", "opengl3",
-             "--path", os.path.join(REPO, "godot"), "-s", SCRIPT],
-            env=env, stdout=fh, stderr=subprocess.STDOUT, timeout=1200)
-    with open(log) as fh:
-        out = fh.read()
+    r = capture_lib.run_capture(SCRIPT, {"HD3D_UV_SHOTS_DIR": shots_dir},
+                                timeout=1200)
+    out = r.stdout + r.stderr  # capture.log keeps the merged content the
+    with open(log, "w") as fh:  # streamed run wrote (written post-run now)
+        fh.write(out)
     if "CAPTURE_OK" not in out:
         print(out[-4000:])
         sys.exit("CAPTURE FAILED (no CAPTURE_OK from %s)" % SCRIPT)
@@ -265,11 +263,7 @@ def _bulk_green(r, g, b): # bulk ICHOR (material x GEM_BULK_TINT, measured)
 
 def bulk_capture():
     os.makedirs(BULK_DIR, exist_ok=True)
-    env = dict(os.environ, HD3D_GM_SHOTS_DIR=BULK_DIR)
-    r = subprocess.run(["xvfb-run", "-a", GODOT, "--render-driver", "opengl3",
-                        "--path", "godot", "-s", BULK_SCRIPT],
-                       cwd=REPO, env=env, capture_output=True, text=True,
-                       timeout=900)
+    r = capture_lib.run_capture(BULK_SCRIPT, {"HD3D_GM_SHOTS_DIR": BULK_DIR})
     print(r.stdout[-2000:])
     if "CAPTURE_OK" not in r.stdout or r.returncode != 0:
         print(r.stderr[-2000:])

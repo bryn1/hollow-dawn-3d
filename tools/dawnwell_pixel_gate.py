@@ -20,20 +20,22 @@ Usage:  python3 tools/dawnwell_pixel_gate.py             # capture + gate
 Env:    HD3D_GODOT (godot binary), XDG_DATA_HOME (set by this tool to a
         throwaway dir so the capture's real saves never touch app_userdata).
 Exit:   0 green, 1 red.
+Seam:   the launcher lives in tools/capture_lib.py and the window counting
+        in tools/pixel_lib.py (MC 11317 C1; the gate's rows and floors stay
+        HERE — the seams count, this file judges).
 """
 import json
 import os
-import subprocess
 import sys
 import tempfile
 
 import numpy as np
 from PIL import Image
 
+import capture_lib
+import pixel_lib
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GODOT = os.environ.get(
-    "HD3D_GODOT",
-    "/home/claudecode/Games/.tools/godot/Godot_v4.7.2-stable_linux.x86_64")
 SHOTS_DIR = os.path.join(REPO, ".tmp", "shop-shots")
 SCRIPT = "res://sim/dawnwell_capture.gd"
 SHOP_PNG = "m1-dawnwell.png"
@@ -49,12 +51,9 @@ PX_MIN = 200  # roadmap floor, verbatim
 
 def capture():
     scratch = tempfile.mkdtemp(prefix="hd3d-shop-shot-")
-    env = dict(os.environ, HD3D_SHOP_SHOTS_DIR=SHOTS_DIR,
-               XDG_DATA_HOME=scratch)
-    r = subprocess.run(["xvfb-run", "-a", GODOT, "--render-driver", "opengl3",
-                        "--path", "godot", "-s", SCRIPT],
-                       cwd=REPO, env=env, capture_output=True, text=True,
-                       timeout=900)
+    r = capture_lib.run_capture(SCRIPT,
+                                {"HD3D_SHOP_SHOTS_DIR": SHOTS_DIR,
+                                 "XDG_DATA_HOME": scratch})
     print(r.stdout[-4000:])
     if "CAPTURE_OK" not in r.stdout or r.returncode != 0:
         print(r.stderr[-2000:])
@@ -88,11 +87,8 @@ def gate(dir_path):
                 print("FAIL stage-select state wrong: %s" % row)
                 ok = False
         cx, cy, hw, hh = row["cx"], row["cy"], row["hw"], row["hh"]
-        x0, x1 = max(cx - hw, 0), min(cx + hw, shot.shape[1])
-        y0, y1 = max(cy - hh, 0), min(cy + hh, shot.shape[0])
-        diff = np.abs(shot - base).max(axis=2)
-        win_px = int((diff[y0:y1, x0:x1] > DELTA).sum())
-        total_px = int((diff > DELTA).sum())
+        win_px, total_px, (x0, x1, y0, y1) = pixel_lib.window_delta_counts(
+            shot, base, cx, cy, hw, hh, DELTA)
         state_ok = win_px >= PX_MIN
         ok = ok and state_ok
         print("OVERLAY leg=%s cx=%d cy=%d crop=[%d:%d,%d:%d] "

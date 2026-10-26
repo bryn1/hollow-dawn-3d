@@ -257,3 +257,22 @@ single-row incl. re-rolls), all CLOSED rc=0, llama-swap serving at every close.
 (T-M3b note: these two rows are the A8 provenance doc-sync — T-M3a shipped asset-
 additive; the rows land where the meshes become LOAD-BEARING code rows, per the
 retired-claim grep-to-zero doctrine, capture `.tmp/m3b-bosses.txt`.)
+
+## Driverless vm100 one-shots — KEPT manual probes (MC 11317 C1, 2026-10-25)
+
+Audit MC 11316 §3.2 found four GPU-era one-shot tools with ZERO references
+anywhere (tree, docs, LEDGER, other tools — re-grepped THIS card, capture
+`.tmp/clean-code.txt`). They stay committed as provenance of the MC 11096
+TRELLIS.2/UniRig stack install, named here as KEPT manual probes (the
+dead_code `--allow` discipline — a named row, not silence):
+
+| tool | what it proved | keep-as |
+|---|---|---|
+| tools/vm100/make_synth.py | synthetic GLBs driving validate_glb.py green AND red (its planted-red donor) | manual red-control builder |
+| tools/vm100/sitecustomize-venvrig.py | the UniRig venv `torch.load(weights_only)` patch (v2, lightning-explicit) | venv re-install patch of record |
+| tools/vm100/run-unirig-giraffe-inner.sh | UniRig skeleton→skin→merge smoke on the vendor giraffe example (rig chain green case) | manual rig-chain probe |
+| tools/vm100/02-install-unirig.sh | the UniRig python-3.11 micromamba env install on vm100 (no system 3.11) | stack re-install recipe |
+
+DEFERRAL ROW (owner word pending): audit §DEFERRALS says the DELETION
+decision is owner-visible (GPU-era provenance); this card lands the
+PERMANENCE rows ONLY and deletes nothing — removal rides an owner word.

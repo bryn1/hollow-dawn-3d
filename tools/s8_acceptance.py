@@ -27,6 +27,8 @@ import sys
 
 from PIL import Image
 
+import pixel_lib
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DUMP = os.path.join(REPO, ".tmp", "hd3d-boss-s6-dump.jsonl")
 GO = os.path.join(REPO, ".tmp", "s8-gameover.jsonl")
@@ -55,15 +57,10 @@ def rows(path):
 
 
 def crop_nonbg(live, base, box):
-    im = Image.open(live).convert("RGB").crop(box)
-    bg = Image.open(base).convert("RGB").crop(box)
-    if im.size != bg.size:
-        return -1
-    n = 0
-    for p, q in zip(im.getdata(), bg.getdata()):
-        if max(abs(p[i] - q[i]) for i in range(3)) >= DIFF_MIN:
-            n += 1
-    return n
+    # MC 11317 C1: the count itself lives in tools/pixel_lib.crop_delta_count
+    # (the ONE pixel-delta seam; the >= DIFF_MIN convention and the -1
+    # size-mismatch sentinel are this table's, carried as the floor arg).
+    return pixel_lib.crop_delta_count(live, base, box, DIFF_MIN)
 
 
 def leg_end(rs, want=None):

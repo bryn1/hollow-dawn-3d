@@ -47,19 +47,20 @@ the real dir stays green; see the card evidence for the planted run.
 Usage:  python3 tools/biome_readability.py            # capture + gate
         python3 tools/biome_readability.py --gate DIR # gate existing shots
 Env:    HD3D_GODOT (godot binary), HD3D_SEED (capture seed).
+Seam:   the launcher lives in tools/capture_lib.py (MC 11317 C1); the
+        luma/readability metrics stay HERE — DEFENDED by audit §2.3 as a
+        different contract, deliberately not folded into pixel_lib.
 """
 import os
 import re
-import subprocess
 import sys
 
 import numpy as np
 from PIL import Image
 
+import capture_lib
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GODOT = os.environ.get(
-    "HD3D_GODOT",
-    "/home/claudecode/Games/.tools/godot/Godot_v4.7.2-stable_linux.x86_64")
 SHOTS_DIR = os.path.join(REPO, ".tmp", "biome-readability-shots")
 SCRIPT = "res://sim/biome_readability_capture.gd"
 
@@ -97,11 +98,7 @@ ANNULUS = (250, 330)
 
 def capture(shots_dir):
     os.makedirs(shots_dir, exist_ok=True)
-    env = dict(os.environ, HD3D_BIOME_SHOTS_DIR=shots_dir)
-    r = subprocess.run(
-        ["xvfb-run", "-a", GODOT, "--render-driver", "opengl3",
-         "--path", os.path.join(REPO, "godot"), "-s", SCRIPT],
-        env=env, capture_output=True, text=True, timeout=900)
+    r = capture_lib.run_capture(SCRIPT, {"HD3D_BIOME_SHOTS_DIR": shots_dir})
     out = r.stdout + r.stderr
     if "CAPTURE_OK" not in out:
         print(out[-3000:])
