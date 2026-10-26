@@ -47,6 +47,23 @@ var _run_reaper := false # T-M4r (MC 11364) DECLARED variant: HD3D_REAPER=1
 
 const WARP_REAPER := 901.0 # past WIN_TIME: the arrival latch has fired
 
+var _run_eventwave := false # T-M4z (MC 11363) DECLARED variant: HD3D_EVENTWAVE=1
+# walks the STAGE-2 event window instead of the 540 boss bar (M4 §1.1, the
+# HD3D_STAGE pattern verbatim): the run stage is FORCED to 2 (the window is a
+# stage-2 row), the run warps INSIDE the window to WARP_EVENTWAVE, and the
+# wave shot carries the stage's OWN event miniboss plus the live window
+# crowd (F-1 law: prelate is stage 2's row, acolyte stage 3's — no stage
+# carries both). Declared capture
+# pins (named at the shot, the reaper-row pattern): the gate is the REAL
+# schedule latch (the variant only waits for both 660 rows), the freeze lands
+# on the first frame the window reads live, and the warp skips the run's
+# pre-window damage — the player stands at the shipped start hp (the same
+# stated reading the warp rows already carry). A SEPARATE run writing to its
+# own HD3D_SHOTS_DIR; default shots byte-untouched.
+
+
+const WARP_EVENTWAVE := 662.0 # inside [660,720), both 660 latch rows fired
+
 
 func _out_dir() -> String:
 	var d: String = OS.get_environment(OUT_ENV)
@@ -62,6 +79,9 @@ func _initialize() -> void:
 	assert(_run_stage >= 1 and _run_stage <= 3)
 	var rp := OS.get_environment("HD3D_REAPER") # T-M4r variant switch (declared)
 	_run_reaper = rp == "1"
+	_run_eventwave = OS.get_environment("HD3D_EVENTWAVE") == "1" # T-M4z
+	if _run_eventwave:
+		_run_stage = 2 # declared force: the window is a stage-2 row
 	assert(DirAccess.make_dir_recursive_absolute(_out_dir()) == OK)
 	_main = load("res://Main.tscn").instantiate()
 	root.add_child(_main) # _ready lands on the first tree iteration, NOT
@@ -96,9 +116,19 @@ func _on_frame() -> void:
 			# the real gate — the boss gate is world.gd's, not injected
 			_freeze_cast()
 			_save("hud")
-			_main.game.time = WARP_REAPER if _run_reaper else WARP_BOSS
+			_main.game.time = (WARP_REAPER if _run_reaper
+					else (WARP_EVENTWAVE if _run_eventwave else WARP_BOSS))
 			_stage = 4
 		4:
+			if _run_eventwave:
+				if _event_minibosses() < 1:
+					return # the real schedule latch owns the gate (ONE class
+				           # per stage row — F-1: prelate is stage 2's, acolyte
+				           # stage 3's; no stage ever carries both)
+				_freeze_cast() # first-window-frame freeze (declared, header note)
+				_wait = SETTLE
+				_stage = 5
+				return
 			if _run_reaper:
 				if _reapers() == 0:
 					return # the real arrival latch owns the gate, not injected
@@ -115,6 +145,10 @@ func _on_frame() -> void:
 			_wait = SETTLE
 			_stage = 5
 		5:
+			if _run_eventwave:
+				_save("eventwave") # cone crowd + the stage's own miniboss
+				print("CAPTURE_OK") # variant ends at the wave shot
+				quit()
 			_save("bossbar")
 			if _run_reaper:
 				print("CAPTURE_OK") # variant ends at the reaper bar shot
@@ -156,6 +190,17 @@ func _reapers() -> int:
 	var n := 0
 	for e in _main.world.enemies:
 		if e.get("reaper", false):
+			n += 1
+	return n
+
+
+# T-M4z: the window's own two 660 latch rows on the field (String(type) read,
+# the same law the keyed drop site makes; the variant gate is the REAL latch).
+func _event_minibosses() -> int:
+	var n := 0
+	for e in _main.world.enemies:
+		var t := String(e.type)
+		if t == "sunken-prelate" or t == "stair-acolyte":
 			n += 1
 	return n
 
