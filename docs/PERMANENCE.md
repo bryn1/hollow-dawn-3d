@@ -258,21 +258,24 @@ single-row incl. re-rolls), all CLOSED rc=0, llama-swap serving at every close.
 additive; the rows land where the meshes become LOAD-BEARING code rows, per the
 retired-claim grep-to-zero doctrine, capture `.tmp/m3b-bosses.txt`.)
 
-## Driverless vm100 one-shots — KEPT manual probes (MC 11317 C1, 2026-10-25)
+## Driverless vm100 one-shots — DELETED-BY-OWNER-RULING (MC 11333, 2026-10-26)
 
 Audit MC 11316 §3.2 found four GPU-era one-shot tools with ZERO references
 anywhere (tree, docs, LEDGER, other tools — re-grepped THIS card, capture
-`.tmp/clean-code.txt`). They stay committed as provenance of the MC 11096
-TRELLIS.2/UniRig stack install, named here as KEPT manual probes (the
-dead_code `--allow` discipline — a named row, not silence):
+`.tmp/clean-code.txt`). MC 11317 C1 kept them with PERMANENCE rows and a
+DEFERRAL row (removal rides an owner word). The owner word arrived
+2026-10-26, verbatim: "Delete them." — all four git-rm'd on MC 11333;
+driverless re-grepped THIS card (capture `.tmp/vm100-delete.txt`, zero
+consumers). Rows stay as the replace-not-delete ledger — what each proved
+of the MC 11096 TRELLIS.2/UniRig stack install remains readable here:
 
-| tool | what it proved | keep-as |
+| tool | what it proved | disposition |
 |---|---|---|
-| tools/vm100/make_synth.py | synthetic GLBs driving validate_glb.py green AND red (its planted-red donor) | manual red-control builder |
-| tools/vm100/sitecustomize-venvrig.py | the UniRig venv `torch.load(weights_only)` patch (v2, lightning-explicit) | venv re-install patch of record |
-| tools/vm100/run-unirig-giraffe-inner.sh | UniRig skeleton→skin→merge smoke on the vendor giraffe example (rig chain green case) | manual rig-chain probe |
-| tools/vm100/02-install-unirig.sh | the UniRig python-3.11 micromamba env install on vm100 (no system 3.11) | stack re-install recipe |
+| tools/vm100/make_synth.py | synthetic GLBs driving validate_glb.py green AND red (its planted-red donor) | DELETED 2026-10-26 by owner ruling "Delete them." (MC 11333) |
+| tools/vm100/sitecustomize-venvrig.py | the UniRig venv `torch.load(weights_only)` patch (v2, lightning-explicit) | DELETED 2026-10-26 by owner ruling "Delete them." (MC 11333) |
+| tools/vm100/run-unirig-giraffe-inner.sh | UniRig skeleton→skin→merge smoke on the vendor giraffe example (rig chain green case) | DELETED 2026-10-26 by owner ruling "Delete them." (MC 11333) |
+| tools/vm100/02-install-unirig.sh | the UniRig python-3.11 micromamba env install on vm100 (no system 3.11) | DELETED 2026-10-26 by owner ruling "Delete them." (MC 11333) |
 
-DEFERRAL ROW (owner word pending): audit §DEFERRALS says the DELETION
-decision is owner-visible (GPU-era provenance); this card lands the
-PERMANENCE rows ONLY and deletes nothing — removal rides an owner word.
+DEFERRAL CLOSED: the owner word this row waited for is the verbatim ruling
+"Delete them." (2026-10-26); MC 11333 executes it — the files are deleted,
+these named rows are not (history stays readable).
