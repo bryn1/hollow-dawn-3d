@@ -38,7 +38,7 @@ Row map (spec row -> evidence here / in the dump):
        no new pickup kind; verified by this suite running green).
 """
 
-import json
+import functools
 import os
 import re
 
@@ -51,9 +51,8 @@ CAPTURE = os.path.join(conftest.REPO, "godot", "sim", "gemmerge_capture.gd")
 PROBE = os.path.join(conftest.REPO, "tools", "upgrades_visual_probe.py")
 
 
-def read(name):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_script,
+                       code_only=True)  # MC 11317 C2 seam
 
 
 WORLD = read("world.gd")
@@ -67,14 +66,7 @@ def const(name, source):
 
 
 def rows_of(ev):
-    out = []
-    with open(FIXTURE, encoding="utf-8") as fh:
-        for line in fh:
-            if line.strip():
-                r = json.loads(line)
-                if r.get("ev") == ev:
-                    out.append(r)
-    return out
+    return conftest.rows_by_ev(FIXTURE, ev)  # MC 11317 C2 seam
 
 
 # ---- §C.1 the rule, in the ONE seams (source truth) ---------------------------

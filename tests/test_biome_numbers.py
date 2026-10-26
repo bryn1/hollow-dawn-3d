@@ -14,9 +14,7 @@ import conftest
 SCRIPTS = os.path.join(conftest.REPO, "godot", "scripts")
 
 
-def read(name):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return fh.read()
+read = conftest.read_script  # MC 11317 C2 seam (raw script text)
 
 
 WORLD = read("world.gd")
@@ -30,10 +28,7 @@ VIZ = read("horde_viz.gd")
 PROJECT = read(os.path.join("..", "project.godot"))
 
 
-def const(name, source):
-    m = re.search(r"const\s+%s\s*:=\s*([-\d.]+)" % re.escape(name), source)
-    assert m, "constant %s not found in source" % name
-    return float(m.group(1))
+const = conftest.const  # MC 11317 C2 seam (impl in conftest.py)
 
 
 # ---- bands (N21 / A6 row) -----------------------------------------------------

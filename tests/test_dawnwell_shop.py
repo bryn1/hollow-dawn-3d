@@ -73,12 +73,7 @@ def ensure_class_cache():
         "godot --import produced no global class cache"
 
 
-def read(name, code_only=False):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        src = fh.read()
-    if code_only:  # the test_chests_evolve idiom: regex pins on code, not prose
-        src = "".join(line.split("#")[0] + "\n" for line in src.splitlines())
-    return src
+read = conftest.read_script  # MC 11317 C2 seam (same code_only shape)
 
 
 POWERUPS = read("powerups.gd")
@@ -90,10 +85,7 @@ WORLD = read("world.gd")
 SAVE = read("save.gd")
 
 
-def const(name, source):
-    m = re.search(r"const\s+%s\s*:=\s*([-\d.]+)" % re.escape(name), source)
-    assert m, "constant %s not found in source" % name
-    return float(m.group(1))
+const = conftest.const  # MC 11317 C2 seam (impl in conftest.py)
 
 
 # ---- 1. source-truth pins ----------------------------------------------------

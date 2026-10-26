@@ -22,7 +22,7 @@ Readings stated where the brief left them open:
   cap with the §b planned-40 note kept (M1 budget re-tally, T-M1g).
 """
 
-import json
+import functools
 import os
 import re
 
@@ -46,11 +46,8 @@ CLASS_KEYS = ["wraith", "hound", "crawler", "cultist", "moor-brute",
               "dune-scarab", "rime-ghoul", "pale-wight"]  # 8 swarm + warden
 
 
-def read(name):
-    """Script source with comment text removed (structural counts are CODE
-    counts, same helper policy as test_boss_numbers.py)."""
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_script,
+                       code_only=True)  # MC 11317 C2 seam
 
 
 VIZ = read("horde_viz.gd")
@@ -61,8 +58,7 @@ def fixture_rows():
     assert os.path.isfile(FIXTURE), (
         "committed probe dump missing — regenerate tests/fixtures/"
         "art-s2i-probe.jsonl with sim/art_probe.gd (see its header)")
-    with open(FIXTURE, encoding="utf-8") as fh:
-        return [json.loads(line) for line in fh if line.strip()]
+    return conftest.jsonl_rows(FIXTURE)  # MC 11317 C2 seam
 
 
 def glb_files_map():

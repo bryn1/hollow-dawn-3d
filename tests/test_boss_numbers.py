@@ -28,6 +28,7 @@ brief left them open:
   (test_art_integration.py), alongside the 5.33 m build-size const here.
 """
 
+import functools
 import os
 import re
 
@@ -36,12 +37,8 @@ import conftest
 SCRIPTS = os.path.join(conftest.REPO, "godot", "scripts")
 
 
-def read(name):
-    """Script source with comment text removed — every structural count below
-    is a CODE count (v1's suite greps raw text; here the counts would count
-    prose, so comments are cut on the way in)."""
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_script,
+                       code_only=True)  # MC 11317 C2 seam
 
 
 WORLD = read("world.gd")
@@ -52,16 +49,10 @@ VIZ = read("horde_viz.gd")
 RIG = read("camera_rig.gd")
 
 
-def const(name, source):
-    m = re.search(r"const\s+%s\s*:=\s*([-\d.]+)" % re.escape(name), source)
-    assert m, "constant %s not found in source" % name
-    return float(m.group(1))
+const = conftest.const  # MC 11317 C2 seam (impl in conftest.py)
 
 
-def block(source, start_marker, end_marker):
-    start = source.index(start_marker)
-    rest = source[start:]
-    return rest[: rest.index(end_marker)] if end_marker in rest else rest
+block = conftest.block  # MC 11317 C2 seam
 
 
 # ---- spawn: t >= 540, exactly once -------------------------------------------
@@ -172,11 +163,10 @@ def test_end_bosses_fire_once_and_drop_their_own_tier():
     # the truth channel; test_chests_tiers re-pins SPEC_MAP to the same 7).
     # Reader idiom: the ONE committed chests fixture, opened like the A-E1
     # carve opens it (test_stages.py), never a second loader class.
-    import json as _json
-    with open(os.path.join(conftest.REPO, "tests", "fixtures",
-                           "chests-tiers-m2.jsonl"), encoding="utf-8") as fh:
-        drop = [r for r in map(_json.loads, filter(str.strip, fh))
-                if r.get("ev") == "chest_tier_bosses"][0]
+    drop = conftest.rows_by_ev(
+        os.path.join(conftest.REPO, "tests", "fixtures",
+                     "chests-tiers-m2.jsonl"),
+        "chest_tier_bosses")[0]  # MC 11317 C2 seam: the ONE loader
     assert drop["ok"] and all(drop["checks"].values())
     # C-E5: the P3-1 clamp re-derivation through main.gd's own contact line.
     clamp = conftest.stages_row("boss_contact_clamp")

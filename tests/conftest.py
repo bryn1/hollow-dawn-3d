@@ -1,153 +1,91 @@
-"""Shared fixtures: the REAL server as a subprocess on seat-owned ports.
+"""Shared test-side seams (MC 11317 C2; audit MC 11316 §2.4/§2.5/§3.1/§5).
 
-MC 11026 test pass (run 202610201514-81bb9a6c). Port 8941 is this run's main
-instance, 8942 only for the restart test's second sequential instance. Port
-8123 and the repo's data/ dir are NEVER touched: every VS_DB lives in /tmp.
+ONE home for what the suite used to copy per file: the jsonl dump readers,
+the source-pin helpers (read/const/block) and the frozen Contract-B key
+list. Moved helpers are byte-identical to their donors (capture rows in
+.tmp/clean-code.txt name every file that lost a copy).
+
+DELETED HERE (audit §3.1, zero consumers re-proved THIS card — greps for
+server/purge_db/http_request/get_json/post_json/VS_DB/8941/8942/
+clean_leaderboard over tests/ return nothing outside this file): the whole
+v1-server harness block — the leaderboard-server scaffolding (MC 11026
+lineage) the remake carried from the 2D repo. This tree has no server/ and
+no static/; the PARITY-ROADMAP row-13 leaderboard claim rides the vendored
+v1 server, NOT this suite. The stale "REAL server as a subprocess" docstring
+goes with it (audit §4.2 folded row).
 """
-
-import http.client
 import json
 import os
-import sqlite3
-import subprocess
-import sys
-import time
-
-import pytest
+import re
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SERVER_MAIN = os.path.join(REPO, "server", "server.py")
-STATIC_DIR = os.path.join(REPO, "static")
+SCRIPTS = os.path.join(REPO, "godot", "scripts")
 
-MAIN_PORT = 8941
-MAIN_DB = "/tmp/hd3d-main.db"
-RESTART_PORT = 8942
-RESTART_DB = "/tmp/hd3d-restart.db"
-
-MAIN_SERVER = None  # set by the module fixture; tracked so the session can sweep
-
-
-def purge_db(path):
-    for suffix in ("", "-journal", "-wal", "-shm"):
-        try:
-            os.remove(path + suffix)
-        except FileNotFoundError:
-            pass
+# The frozen Contract-B 12-field snapshot key list, verbatim (audit §5:
+# ONE copy now — test_endless imports this; the sim-side twin at
+# godot/sim/sim_stages.gd's `expected` row stays GD on purpose: deduping
+# across the language boundary would put the byte corpus behind a test
+# import, which the audit's "one conftest constant + import" option
+# declares).
+SNAPSHOT_KEYS = ["enemies", "gold", "hp", "kills", "level", "maxHp",
+                 "phase", "runId", "time", "weapons", "xp", "xpNext"]
 
 
-def http_request(port, method, path, body=None, timeout=20):
-    """One-shot request. body: dict|list -> JSON, bytes -> raw, None -> no body.
+# ---- jsonl dump readers (audit §2.4: replaces 10 loader copies) ------------
 
-    Returns (status, content_type, raw_bytes).
-    """
-    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=timeout)
-    headers = {}
-    payload = None
-    if body is not None:
-        payload = body if isinstance(body, bytes) else json.dumps(body).encode("utf-8")
-        headers["Content-Type"] = "application/json"
-    try:
-        conn.request(method, path, body=payload, headers=headers)
-        resp = conn.getresponse()
-        data = resp.read()
-        return resp.status, resp.getheader("Content-Type"), data
-    finally:
-        conn.close()
+def jsonl_rows(path):
+    """The ONE reader of a committed sim dump: non-blank lines -> dicts,
+    order preserved (the dumps are line-appended; byte order IS row order)."""
+    out = []
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            if line.strip():
+                out.append(json.loads(line))
+    return out
 
 
-def get_json(port, path, **kw):
-    status, _, data = http_request(port, "GET", path, **kw)
-    return status, json.loads(data.decode("utf-8"))
-
-
-def post_json(port, path, body, **kw):
-    status, _, data = http_request(port, "POST", path, body=body, **kw)
-    return status, json.loads(data.decode("utf-8"))
-
-
-class Server:
-    """Spawn server/server.py on an exact port + db; stop kills that exact PID."""
-
-    def __init__(self, port, db_path, purge=True):
-        self.port = port
-        self.db_path = db_path
-        if purge:
-            purge_db(db_path)
-        env = dict(os.environ, VS_PORT=str(port), VS_DB=db_path)
-        self.proc = subprocess.Popen(
-            [sys.executable, SERVER_MAIN], cwd=REPO, env=env,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-        )
-        deadline = time.monotonic() + 15.0
-        last_err = None
-        while time.monotonic() < deadline:
-            try:
-                status, _, data = http_request(port, "GET", "/api/health", timeout=2)
-                if status == 200:
-                    return
-                last_err = "health returned %d" % status
-            except (ConnectionRefusedError, OSError, http.client.HTTPException) as exc:
-                last_err = repr(exc)
-            if self.proc.poll() is not None:
-                out, err = self.proc.communicate()
-                raise RuntimeError(
-                    "server died at startup (rc=%s): %s %s" % (self.proc.returncode, out, err))
-            time.sleep(0.05)
-        self.stop()
-        raise RuntimeError("server on port %d never became healthy: %s" % (port, last_err))
-
-    def stop(self):
-        """Terminate the exact PID we spawned; escalate to kill, then reap."""
-        if self.proc.poll() is None:
-            self.proc.terminate()
-            try:
-                self.proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                self.proc.kill()
-                self.proc.wait(timeout=5)
-
-
-@pytest.fixture(scope="module")
-def server():
-    """Fresh REAL server per test module on port 8941 with a fresh /tmp db."""
-    global MAIN_SERVER
-    srv = Server(MAIN_PORT, MAIN_DB)
-    MAIN_SERVER = srv
-    try:
-        yield srv
-    finally:
-        srv.stop()
-        MAIN_SERVER = None
-
-
-@pytest.fixture(autouse=True)
-def clean_leaderboard(request):
-    """Empty the leaderboard before each test so per-test expectations are
-    deterministic on the shared module server (direct DELETE on OUR /tmp db).
-    Only engages for tests that actually use the server fixture."""
-    if "server" not in request.fixturenames:
-        yield
-        return
-    srv = request.getfixturevalue("server")
-    conn = sqlite3.connect(srv.db_path, timeout=10)
-    try:
-        conn.execute("DELETE FROM highscores")
-        conn.commit()
-    finally:
-        conn.close()
-    yield
+def rows_by_ev(path, ev):
+    """Rows whose "ev" field equals ev (order preserved) — the ONE filter."""
+    return [r for r in jsonl_rows(path) if r.get("ev") == ev]
 
 
 def stages_row(ev):
     """The ONE reader of the committed stages-m3.jsonl dump (T-M3s, seed
     11282): rows are read through here by every file that judges a replaced
     latch pin, never a second loader."""
-    import json
-    with open(os.path.join(REPO, "tests", "fixtures", "stages-m3.jsonl"),
-              encoding="utf-8") as fh:
-        for line in fh:
-            if line.strip():
-                r = json.loads(line)
-                if r.get("ev") == ev:
-                    return r
-    raise AssertionError("stages fixture row %r missing" % ev)
+    rows = rows_by_ev(os.path.join(REPO, "tests", "fixtures",
+                                   "stages-m3.jsonl"), ev)
+    assert rows, "stages fixture row %r missing" % ev
+    return rows[0]
+
+
+# ---- source pins (audit §2.5: replaces read x16 / const x11 / block x2) ----
+
+def read_text(path, code_only=False):
+    """Source text by path. code_only strips comment text on the way in —
+    every structural count is a CODE count (the v1-suite greps raw text;
+    here the counts would count prose — the test_boss_numbers law in the
+    test_dawnwell_shop single-impl shape, bodies byte-identical to the
+    donors)."""
+    with open(path, encoding="utf-8") as fh:
+        src = fh.read()
+    if code_only:
+        src = "".join(line.split("#")[0] + "\n" for line in src.splitlines())
+    return src
+
+
+def read_script(name, code_only=False):
+    """godot/scripts/<name> through read_text (the SCRIPTS home is ONE)."""
+    return read_text(os.path.join(SCRIPTS, name), code_only)
+
+
+def const(name, source):
+    m = re.search(r"const\s+%s\s*:=\s*([-\d.]+)" % re.escape(name), source)
+    assert m, "constant %s not found in source" % name
+    return float(m.group(1))
+
+
+def block(source, start_marker, end_marker):
+    start = source.index(start_marker)
+    rest = source[start:]
+    return rest[: rest.index(end_marker)] if end_marker in rest else rest

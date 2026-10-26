@@ -1,5 +1,37 @@
 data/
-.tmp/
+# .tmp/ is scratch — UNTRACKED content is ignored (evidence-only txt stays
+# OUT of the law and out of the tree). But the DECLARED capture INPUTS under
+# .tmp/ are tracked, like tests/fixtures/, and every tracked row is negated
+# HERE (audit MC 11316 §3.3 fix as executed by MC 11317 C2 — the named
+# "negate the tracked rows" option, the audit's preferred; the alternative
+# "move inputs to tests/fixtures/" was not taken, s8_acceptance reads them
+# at .tmp/ paths). Result: zero tracked-yet-ignored rows; a clean checkout
+# carries every input tools/s8_acceptance.py reads (incl. the three s8
+# dumps + s8-shots/ pixel shots), so the S9 table is green from clone
+# without re-running the real-clock legs.
+.tmp/*
+!.tmp/art-batch-s1a.txt
+!.tmp/hd3d-boss-s6-dump.jsonl
+!.tmp/hd3d-strips-s2h-dump.jsonl
+!.tmp/hd3d-strips-s2p-dump.jsonl
+!.tmp/horde-strips-s2h.txt
+!.tmp/m2g-gems.txt
+!.tmp/pickups-upgrades-s18.txt
+!.tmp/player-s1p.txt
+!.tmp/player-s42-render.png
+!.tmp/player-seed17-flat-render.png
+!.tmp/player-seed30-slab-render.png
+!.tmp/player-seed40-flat-render.png
+!.tmp/run-player-s1p.sh
+!.tmp/s20-fx/
+!.tmp/s2h-fx/
+!.tmp/s2p-fx/
+!.tmp/s5-cards/
+!.tmp/s8-gameover.jsonl
+!.tmp/s8-shots/
+!.tmp/s8-win.jsonl
+!.tmp/stack-install-p2-1.txt
+!.tmp/tq01-redcontrol.txt
 *.db
 *.db-wal
 *.db-shm

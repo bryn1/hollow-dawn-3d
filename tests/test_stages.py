@@ -23,7 +23,7 @@ count is 8 test rows + 1 docstring + 1 probe row across 6 files, each with a
 FALSIFIED-AND-REPLACED note at its site.
 """
 
-import json
+import functools
 import os
 import re
 
@@ -34,9 +34,8 @@ SIM = os.path.join(conftest.REPO, "godot", "sim")
 FIXTURES = os.path.join(conftest.REPO, "tests", "fixtures")
 
 
-def read(path):
-    with open(path, encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_text,
+                     code_only=True)  # MC 11317 C2 seam
 
 
 RENDER = read(os.path.join(SCRIPTS, "render.gd"))
@@ -49,16 +48,10 @@ HUD = read(os.path.join(SCRIPTS, "hud_3d.gd"))
 VIZ = read(os.path.join(SCRIPTS, "pickup_viz.gd"))
 
 
-def const(name, source):
-    m = re.search(r"const\s+%s\s*:=\s*([-\d.]+)" % re.escape(name), source)
-    assert m, "constant %s not found in source" % name
-    return float(m.group(1))
+const = conftest.const  # MC 11317 C2 seam (impl in conftest.py)
 
 
-def block(source, start_marker, end_marker):
-    start = source.index(start_marker)
-    rest = source[start:]
-    return rest[: rest.index(end_marker)] if end_marker in rest else rest
+block = conftest.block  # MC 11317 C2 seam
 
 
 def leg(ev):
@@ -384,8 +377,7 @@ def test_a_e1_chests_fixture_carve_is_the_map_row_only():
     # observable half so a future observable drift can never hide behind
     # the map carve: same boss/mb/cycle tiers, same four checks.
     path = os.path.join(FIXTURES, "chests-tiers-m2.jsonl")
-    with open(path, encoding="utf-8") as fh:
-        rows = [json.loads(line) for line in fh if line.strip()]
+    rows = conftest.jsonl_rows(path)  # MC 11317 C2 seam (the ONE reader)
     drop = [r for r in rows if r["ev"] == "chest_tier_drop"][0]
     assert drop["boss_tier"] == "warden" and drop["cycle_tier"] == "dawn"
     assert drop["checks"] == {"boss_ok": True, "cycle_ok": True,

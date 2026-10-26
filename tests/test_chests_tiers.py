@@ -48,7 +48,7 @@ Replace-not-delete ledger (rows this card REPLACED, none deleted):
   discipline). No leg was removed.
 """
 
-import json
+import functools
 import os
 import re
 
@@ -67,18 +67,15 @@ GATE = os.path.join(conftest.REPO, "tools", "chest_pixel_gate.py")
 CAPTURE = os.path.join(SIMS, "chest_capture.gd")
 
 
-def read(name):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_script,
+                       code_only=True)  # MC 11317 C2 seam
 
 
-def read_raw(path):
-    with open(path, encoding="utf-8") as fh:
-        return fh.read()
+read_raw = conftest.read_text  # MC 11317 C2 seam
 
 
 def read_sim(name):
-    return read_raw(os.path.join(SIMS, name))
+    return conftest.read_text(os.path.join(SIMS, name))
 
 
 REWARDS = read("chest_rewards.gd")
@@ -115,14 +112,7 @@ SPEC_MAP = {"miniboss": "ember", "warden": "warden",
 
 
 def rows_of(ev, fixture=FIXTURE):
-    out = []
-    with open(fixture, encoding="utf-8") as fh:
-        for line in fh:
-            if line.strip():
-                r = json.loads(line)
-                if r.get("ev") == ev:
-                    out.append(r)
-    return out
+    return conftest.rows_by_ev(fixture, ev)  # MC 11317 C2 seam
 
 
 # ---- the tier table, from the source, as the spec wrote it -------------------

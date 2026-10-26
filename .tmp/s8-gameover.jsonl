@@ -1,0 +1,25 @@
+{"ev":"leg_start","hp_pinned":false,"phase":"playing","seed":"11104","time_scale":1.0,"wall_start_iso":"2026-10-25T21:04:56","wall_start_unix":1792962296.33899}
+{"enemies":11,"ev":"pos","gold":0,"hp":100.0,"kills":0,"lvl":1,"t":10.017,"x":736.4,"xp":0.0,"y":84.1}
+{"enemies":18,"ev":"pos","gold":0,"hp":96.0,"kills":6,"lvl":1,"t":20.017,"x":927.2,"xp":5.0,"y":1.6}
+{"card":"Grave Spike","ev":"pick","level":2,"t":26.25}
+{"enemies":24,"ev":"pos","gold":0,"hp":88.0,"kills":15,"lvl":2,"t":30.033,"x":900.8,"xp":2.0,"y":-137.6}
+{"enemies":28,"ev":"pos","gold":2,"hp":62.0,"kills":29,"lvl":2,"t":40.083,"x":1057.6,"xp":12.0,"y":-129.3}
+{"enemies":40,"ev":"pos","gold":2,"hp":52.0,"kills":37,"lvl":2,"t":50.133,"x":1104.2,"xp":13.0,"y":239.3}
+{"enemies":56,"ev":"pos","gold":2,"hp":52.0,"kills":43,"lvl":2,"t":60.183,"x":1734.4,"xp":13.0,"y":-73.4}
+{"enemies":71,"ev":"pos","gold":2,"hp":52.0,"kills":52,"lvl":2,"t":70.217,"x":2423.8,"xp":13.0,"y":109.6}
+{"enemies":88,"ev":"pos","gold":2,"hp":48.0,"kills":62,"lvl":2,"t":80.3,"x":3073.8,"xp":13.0,"y":411.1}
+{"enemies":105,"ev":"pos","gold":2,"hp":48.0,"kills":73,"lvl":2,"t":90.367,"x":3631.9,"xp":13.0,"y":1016.8}
+{"card":"Storm Peal","ev":"pick","level":3,"t":98.333}
+{"enemies":118,"ev":"pos","gold":2,"hp":48.0,"kills":91,"lvl":3,"t":100.4,"x":3489.3,"xp":0.0,"y":577.5}
+{"enemies":118,"ev":"pos","gold":2,"hp":32.0,"kills":124,"lvl":3,"t":110.467,"x":2806.5,"xp":13.0,"y":984.2}
+{"enemies":129,"ev":"pos","gold":2,"hp":24.0,"kills":148,"lvl":3,"t":120.533,"x":1928.3,"xp":13.0,"y":1131.2}
+{"enemies":144,"ev":"pos","gold":2,"hp":24.0,"kills":171,"lvl":3,"t":130.55,"x":1616.4,"xp":13.0,"y":1532.5}
+{"enemies":154,"ev":"pos","gold":2,"hp":20.0,"kills":200,"lvl":3,"t":140.6,"x":1177.3,"xp":14.0,"y":2315.2}
+{"enemies":171,"ev":"pos","gold":2,"hp":20.0,"kills":225,"lvl":3,"t":150.667,"x":1563.2,"xp":14.0,"y":3281.2}
+{"enemies":185,"ev":"pos","gold":2,"hp":20.0,"kills":255,"lvl":3,"t":160.75,"x":2421.5,"xp":14.0,"y":3429.3}
+{"enemies":199,"ev":"pos","gold":2,"hp":20.0,"kills":287,"lvl":3,"t":170.767,"x":3257.0,"xp":14.0,"y":4221.3}
+{"card":"Talon Lash","ev":"pick","level":4,"t":175.417}
+{"enemies":182,"ev":"pos","gold":2,"hp":11.0,"kills":352,"lvl":4,"t":180.8,"x":3656.1,"xp":12.0,"y":4581.4}
+{"enemies":208,"ev":"pos","gold":2,"hp":5.0,"kills":377,"lvl":4,"t":190.833,"x":3140.7,"xp":13.0,"y":5544.7}
+{"enemies":214,"ev":"pos","gold":2,"hp":1.0,"kills":423,"lvl":4,"t":200.867,"x":3919.1,"xp":16.0,"y":6325.4}
+{"ev":"leg_end","gold":2,"hp":0.0,"hp_pinned":false,"kills":447,"kind":"gameover","level":4,"monotonic_time_check":true,"phase":"gameover","picks":3,"score":4395,"sim_t_per_wall_s":1.0,"t_sim":205.767,"ticks":12348,"ticks_per_s":59.99,"time":205.766666666723,"time_scale":1.0,"wall_end_iso":"2026-10-25T21:08:22","wall_end_unix":1792962502.18429,"wall_s":205.85,"wall_start_unix":1792962296.33928}

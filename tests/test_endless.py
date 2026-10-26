@@ -32,7 +32,7 @@ Row map (spec row -> evidence here / in the dump):
        roadmap RED leg — the ok flags are the assertion).
 """
 
-import json
+import functools
 import os
 import re
 
@@ -42,14 +42,11 @@ SCRIPTS = os.path.join(conftest.REPO, "godot", "scripts")
 FIXTURE = os.path.join(conftest.REPO, "tests", "fixtures", "endless-m2.jsonl")
 
 
-def read(name):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_script,
+                       code_only=True)  # MC 11317 C2 seam
 
 
-def read_raw(name):  # comment-bearing source, for text-absence claims only
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return fh.read()
+read_raw = conftest.read_script  # comment-bearing source, text-absence only
 
 
 GAME_STATE = read("game_state.gd")
@@ -58,8 +55,8 @@ MAIN = read("main.gd")
 SAVE = read("save.gd")
 HUD = read("hud_3d.gd")
 
-SNAPSHOT_KEYS = ["enemies", "gold", "hp", "kills", "level", "maxHp",
-                 "phase", "runId", "time", "weapons", "xp", "xpNext"]
+SNAPSHOT_KEYS = conftest.SNAPSHOT_KEYS  # ONE copy in conftest (MC 11317 C2;
+# the sim-side twin in sim_stages.gd stays GD on purpose — see conftest)
 
 
 def const(name, source):
@@ -69,14 +66,7 @@ def const(name, source):
 
 
 def rows_of(ev):
-    out = []
-    with open(FIXTURE, encoding="utf-8") as fh:
-        for line in fh:
-            if line.strip():
-                r = json.loads(line)
-                if r.get("ev") == ev:
-                    out.append(r)
-    return out
+    return conftest.rows_by_ev(FIXTURE, ev)  # MC 11317 C2 seam
 
 
 def verdict():

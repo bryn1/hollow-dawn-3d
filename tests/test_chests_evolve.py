@@ -24,7 +24,7 @@ Stated readings (evolutions.gd + sim_evolve.gd headers carry the same):
   in test_card_icons stays untouched, so this file changes NO icons pin.
 """
 
-import json
+import functools
 import os
 import re
 
@@ -51,9 +51,8 @@ DOC_TABLE = {
 }
 
 
-def read(name):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_script,
+                       code_only=True)  # MC 11317 C2 seam
 
 
 EVO = read("evolutions.gd")
@@ -175,8 +174,7 @@ def test_pickup_viz_draws_chests():
 # ---- behaviour: the committed dump (sim_evolve.gd) --------------------------
 
 def fixture_rows():
-    with open(FIXTURE, encoding="utf-8") as fh:
-        return [json.loads(line) for line in fh if line.strip()]
+    return conftest.jsonl_rows(FIXTURE)  # MC 11317 C2 seam
 
 
 def gates():

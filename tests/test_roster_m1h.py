@@ -23,9 +23,7 @@ import conftest
 SCRIPTS = os.path.join(conftest.REPO, "godot", "scripts")
 
 
-def read(name):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return fh.read()
+read = conftest.read_script  # MC 11317 C2 seam (raw script text)
 
 
 WEAPONS = read("weapons.gd")

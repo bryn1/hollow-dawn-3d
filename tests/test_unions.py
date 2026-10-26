@@ -28,7 +28,7 @@ Stated readings (union.gd + sim_union.gd headers carry the same):
   with a union-HUD shot + the S8 hidden-element baseline.
 """
 
-import json
+import functools
 import os
 import re
 
@@ -49,9 +49,8 @@ DOC_TABLE = {
 }
 
 
-def read(path):
-    with open(path, encoding="utf-8") as fh:
-        return "".join(line.split("#")[0] + "\n" for line in fh.read().splitlines())
+read = functools.partial(conftest.read_text,
+                     code_only=True)  # MC 11317 C2 seam
 
 
 UNION = read(os.path.join(SCRIPTS, "union.gd"))
@@ -66,8 +65,7 @@ GATE = open(os.path.join(REPO, "tools", "chest_pixel_gate.py"),
 
 
 def fixture_rows(ev):
-    rows = [json.loads(l) for l in open(FIXTURE, encoding="utf-8")]
-    return [r for r in rows if r.get("ev") == ev]
+    return conftest.rows_by_ev(FIXTURE, ev)  # MC 11317 C2 seam
 
 
 # ---- D-U1: the union table is a pytest pin (id, both bases, passive) -------

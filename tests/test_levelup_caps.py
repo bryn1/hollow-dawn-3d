@@ -21,7 +21,6 @@ now has fully REAL legs too (passive_roster_kind: the 7th NEW kind never
 offered at cap while a carried NEW-kind upgrade stays offerable).
 """
 
-import json
 import os
 import re
 
@@ -32,18 +31,13 @@ FIXTURE = os.path.join(conftest.REPO, "tests", "fixtures",
                        "carry-caps-m1b.jsonl")
 
 
-def read(name):
-    with open(os.path.join(SCRIPTS, name), encoding="utf-8") as fh:
-        return fh.read()
+read = conftest.read_script  # MC 11317 C2 seam (raw script text)
 
 
 LEVELUP = read("levelup.gd")
 
 
-def const(name, source):
-    m = re.search(r"const\s+%s\s*:=\s*([-\d.]+)" % re.escape(name), source)
-    assert m, "constant %s not found in source" % name
-    return float(m.group(1))
+const = conftest.const  # MC 11317 C2 seam (impl in conftest.py)
 
 
 # ---- cap consts (roadmap M1 f3: "OUR numbers, named rule") -----------------
@@ -94,8 +88,7 @@ def test_passive_stack_cap_still_first_gate():
 # ---- behaviour: the committed offer-gating dump (sim_caps.gd) --------------
 
 def fixture_rows():
-    with open(FIXTURE, encoding="utf-8") as fh:
-        return [json.loads(line) for line in fh if line.strip()]
+    return conftest.jsonl_rows(FIXTURE)  # MC 11317 C2 seam
 
 
 def legs():
