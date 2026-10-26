@@ -219,8 +219,9 @@ Pinned by `test_endless.py` / `test_gem_merge.py` / `test_chests_tiers.py` /
 `unions-m2u` dumps.
 
 **M3-era additions (not v1 pins, T-M3s/T-M3g/T-M3b, MC 11282-11284):** stages are the ONE
-`STAGES` table (`render.gd:104`, placed BELOW `biome_at` — the slice law) read through the
-ONE band mechanism `band_at(stage, t)` (`:169`); `biome_at` stays the stage-1 wrapper
+`STAGES` table (`render.gd:110` — old pin :104, re-grepped at the v2.1.0 cut; placed BELOW
+`biome_at` — the slice law) read through the
+ONE band mechanism `band_at(stage, t)` (`:188` — old pin :169); `biome_at` stays the stage-1 wrapper
 (row identity at 0/150/300/450/900 byte-pinned). Stage + flare are run vars OUTSIDE the
 frozen 12-field snapshot (Contract B zero-delta kept, A-E8 leg); the boss schedule is the
 unified `schedule_spawned` latch (retire-and-replace of the two per-name latches) and the
@@ -238,6 +239,34 @@ re-tally stays 25-27 / plan 40 / hard 60 with the stage boss + horde 400 + named
 `test_boss_numbers.py` / `test_chests_tiers.py` + the committed `stages-m3` dump (seed
 11284, twice-cmp) and the byte-anchored M2 corpus (journey 5020 rows + the four M2
 fixtures, A-E1 carve judged on observable rows, map row the declared re-pin).
+
+**M4-era additions (not v1 pins, T-M4e/T-M4r/T-M4l, MC 11362-11365):** event waves are
+STAGES-table DATA (the `events` column): fixed windows + fixed cones read beside the
+plate loop, the surge takes `maxf(surge, EVENT_SURGE)` INSIDE the same `minf(12.0)` term
+(F-4: the `ALIVE_CAP` early-return stays ABOVE the rate — no cap-bypass, declared
+divergence from THEIR rule), window selection consumes ZERO randf/randi (the A-E5
+identity-twin law: geometry inert on the table's `[0,TAU]` identity cone), and the two
+event minibosses ride the ONE `schedule_spawned` latch as 660 entries + the ONE
+`miniboss` chest literal (map stays 7 rows, F-3). The reaper is the ONE cap-branch
+`elif` (endless precedence source-pinned, R9), the ONE hidden well-flag dict, and an
+END law in the contact loop — NOT a damage path (F-6: the `MAX_CONTACT_DMG` table gains
+no row); its `kill_enemy` death guard pays zero (B-E6). Limit-break-lite is the ONE
+offer funnel: the fallback fires ONLY at exhausted-pool `kind == ""` (the two committed
+bonus rows are the living probe, C-E4), three repeatable cards landing as additive
+terms on THREE existing stat seams (fury/haste/intake formulas exact-pinned, C-E3;
+zero-picks twin = identity exact). §b draw budget: +2 scheduled classes ride stage-2/3
+runs inside the event window (sunken-prelate/stair-acolyte), the-reaper only on a
+night-flag run — `sim_budget` 8 legs green at this cut (committed dump: draw total
+27 ≤ plan 40 ≤ hard 60; budget_reaper worst leg alive 405 / horde 400 / named 5 /
+reapers 2 / total 27 ≤ 60). The desert retone is a pixel swap at a shipped path
+(`tools/tile_gate.py` is the ONE committed tile gate, luma 26–36 envelope, measured
+32.9 at this cut). Contract B (12 fields) stays frozen through all three pillars (B-E5/
+C-E4 snapshot-absent legs). Pinned by `test_events.py` / `test_reaper.py` /
+`test_limit_break.py` + the committed `events-m4`/`reaper-m4`/`limit-m4` dumps
+(per-pillar seeds = build-card ids 11362/11334/11365 — the spec's single-seed line
+superseded, declared in LEDGER; each twice-cmp-identical) and the byte-anchored corpus
+(journey 5020 rows + every strict fixture re-measured byte-identical at the v2.1.0 cut,
+A-E1).
 
 ## (e) SERVER / LEADERBOARD — reuse v1 verbatim
 v1's server is **stdlib-only Python, language-agnostic** (`ARCHITECTURE.md:168` @ `5dc7679`;

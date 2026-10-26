@@ -38,13 +38,13 @@
 | 1 | Weapons: count + behavior | 16 (`weapons.gd IDS:19` — roster wired by T-M1h; 6 until v1.1.1), one behavior each, MAX_LEVEL 8 (`:22`), flat `META` table, `_fire` match | 273 total = 138 base + 94 evo + 7 unions + 4 gifts + 19 counterparts + 11 special (S1 tables ~19–304; tally ~710–712); base max lvl mostly 8 (S1 intro ~15) | 16 by M1, 24 by M2, 26+ by M4 — count is NOT the parity metric; behavior-class coverage + level/pool mechanics are. Their 273 incl. DLC is not a cloning target. LANDED-M1h: 16 (M2's +8 rides the deferred roster-expansion card, M2-SPEC §8.5) |
 | 2 | Evolutions + unions | evolutions LIVE + pool-reachable (`evolutions.gd` 10-row TABLE, T-M1e + T-M1h) + 2 UNIONS (`union.gd:33` TABLE, T-M2u); chest-open precedence union→evolution | max weapon + carried passive + chest after 10:00 converts (S3 ~354–358); unions = 2 maxed weapons (S1.3 ~266–276); transforms inventory parse: 29 base + 64 DLC = 93 combos (S3 ~367) | M1: chest-driven evolutions (our rule, our time gate); M2: 2 unions — LANDED both |
 | 3 | Passives | 15 × 5 stacks (`levelup.gd:10` PASSIVES, T-M1h), carry cap 6 KINDS + 6 weapon slots | 33 total (S2 ~309–311); max 6 different carried per run (S2 ~313) | 15 by M1 (one per evolution partner), 20 by M2; **M1 carry cap = 6 passive KINDS + 6 weapon slots, OUR numbers — M1 feature 3 (DA c1 P1)**; VS weapon-slot rule absent from VS-FEATURES (inventory gap — re-verify before citing any number of theirs). LANDED-M1h: 15 (M2's +5 deferred with the roster expansion) |
-| 4 | Stages + gimmicks | **3 SELECTABLE STAGES LANDED-M3** (T-M3s): `STAGES` table `render.gd:104` BELOW `biome_at` (slice law), ONE band mechanism `band_at:169` per-stage lists (stage 1 = the shipped BIOMES:68 rows, byte-anchored); gimmicks: stage 2 drowned-cairns = two ember chests at FIXED coords through the ONE collect funnel (zero RNG), stage 3 pressure-plates = spawn surge ×1.5 INSIDE the untouched `minf(12.0)` clamp + band flare +150 s NAMES-only 30 s decay; stage-select = the FIFTH overlay (`screens.gd show_stages:381`) | 25 stages, each time-limited (15–30 min) with gimmicks: stage items, traps, boss (S4 table ~382–409; Reaper at limit ~378) | M3: 3 selectable stages via a stage table riding the band mechanism; 1 cheap gimmick per stage from existing mechanisms — **LANDED-M3** (3/3 + one gimmick each; cairns shipped as ember-tier stage-item chests, M3-SPEC rev-3 §1.2 reading; their further stages ride M4+ — mechanism now exists) |
-| 5 | End-bosses + minibosses | **3 end-bosses, ONE per stage, LANDED-M3** (T-M3b): all @540 of THEIR stage through the unified schedule latch — warden (hp 3000, `BOSS_AT world.gd:8`) + cathedral-choir 4200 + ossuary-warden 5600 (`ENEMY_TYPES world.gd:123-124`, own meshes T-M3a, per-stage name bar keyed off the row); keyed chest drops `CHEST_TIER_BY_SOURCE[String(enemy.type)] world.gd:365` (choir→warden II, ossuary→dawn III); + 2 minibosses @600/780 (`MINIBOSS_AT world.gd:12`, own meshes since T-M1g) | end-of-stage bosses per stage (S5 table ~427–439) + 72 named wave bosses (S5 ~441–457); boss chest-drop rule (S5 ~419) | M1: 2 minibosses; M2: +2; M3: 1 end-boss per stage; event swarm waves M2+. **M3 LANDED: 1 end-boss per stage (3 total incl. the warden)** + the boss chest-drop rule LANDED keyed; M2's +2 minibosses NOT LANDED — rides the deferred event-wave card (M2-SPEC §8.5, re-tracked in M3 as `T-M3e-EVENTWAVE`, M3-SPEC §4) |
-| 6 | Endless mode | ENDLESS LIVE (T-M2e): `cycle = time // WIN_TIME` (`game_state.gd:7` WIN_TIME 900), flag `DawnWell.flags["endless"]`, capped scalars `HP_CYC`/`QTY_CYC`/`DMG_CYC` + clamps (`world.gd`, `main.gd:18`), best_cycle save row | cycles restart waves with per-cycle HP/qty/damage scaling; Reaper only in non-Endless (S5 ~465–471); Limit Break beyond max (S5 ~473) | M2: endless with OUR scaling curve — LANDED; M4: limit-break-lite; Reaper analogue DEFERRED (`T-M2r-REAPER`, M2-SPEC §8.3) |
-| 7 | Characters + unlocks | 1 fixed character, talon start (`game_state.gd:139` — old pin :56, the passives STAY-GREEN comment, re-grepped by MC 11317 C5) | 165 (S6 ~481; roster CONTRADICTED at 168 — treat count as ~165); gold-purchase with additive price scaling; secret unlocks (S6 ~481–483) | M4: 6 selectable, each start-weapon + one signature stat rule; purchase price curve OURS |
+| 4 | Stages + gimmicks | **3 SELECTABLE STAGES LANDED-M3** (T-M3s): `STAGES` table `render.gd:110` (old pin :104, re-grepped at the v2.1.0 cut — the M4 `events` column grew above it) BELOW `biome_at` (slice law), ONE band mechanism `band_at:188` (old pin :169) per-stage lists (stage 1 = the shipped BIOMES:68 rows, byte-anchored); gimmicks: stage 2 drowned-cairns = two ember chests at FIXED coords through the ONE collect funnel (zero RNG), stage 3 pressure-plates = spawn surge ×1.5 INSIDE the untouched `minf(12.0)` clamp + band flare +150 s NAMES-only 30 s decay; **M4 LANDED: the `events` column (T-M4e) — stages 2/3 each carry ONE event window [660,720) with a fixed cone + ×2 surge INSIDE the same ceilings, stage 1 `events: []` byte-law**; stage-select = the FIFTH overlay (`screens.gd show_stages:381`) | 25 stages, each time-limited (15–30 min) with gimmicks: stage items, traps, boss (S4 table ~382–409; Reaper at limit ~378) | M3: 3 selectable stages via a stage table riding the band mechanism; 1 cheap gimmick per stage from existing mechanisms — **LANDED-M3** (3/3 + one gimmick each; cairns shipped as ember-tier stage-item chests, M3-SPEC rev-3 §1.2 reading; their further stages ride M4+ — mechanism now exists; event waves LANDED-M4 on stages 2/3) |
+| 5 | End-bosses + minibosses | **3 end-bosses, ONE per stage, LANDED-M3** (T-M3b): all @540 of THEIR stage through the unified schedule latch — warden (hp 3000, `BOSS_AT world.gd:8`) + cathedral-choir 4200 + ossuary-warden 5600 (`ENEMY_TYPES world.gd:156-157` — old pin :123-124, re-grepped at the v2.1.0 cut), own meshes T-M3a, per-stage name bar keyed off the row); keyed chest drops `CHEST_TIER_BY_SOURCE[String(enemy.type)] world.gd:494` (old pin :365; choir→warden II, ossuary→dawn III); + 2 stage-1 minibosses @600/780 (`MINIBOSS_AT world.gd:12`, own meshes since T-M1g) + **2 event minibosses LANDED-M4** (T-M4e: sunken-prelate @660 stage 2 / stair-acolyte @660 stage 3, `ENEMY_TYPES world.gd:150-151`, own meshes T-M4a, riding the ONE schedule latch + the `miniboss` drop literal — map stays 7 rows, M4-SPEC F-3) | end-of-stage bosses per stage (S5 table ~427–439) + 72 named wave bosses (S5 ~441–457); boss chest-drop rule (S5 ~419) | M1: 2 minibosses; M2: +2; M3: 1 end-boss per stage; event swarm waves M2+. **M3 LANDED: 1 end-boss per stage (3 total incl. the warden)** + the boss chest-drop rule LANDED keyed; **M4 LANDED (2026-10-26, v2.1.0): the +2 event miniboss classes shipped with the event-wave pillar (T-M4a/T-M4e) — the deferred M2/M3 event-wave row retires HERE as this LANDED cell** |
+| 6 | Endless mode | ENDLESS LIVE (T-M2e): `cycle = time // WIN_TIME` (`game_state.gd:7` WIN_TIME 900), flag `DawnWell.flags["endless"]`, capped scalars `HP_CYC`/`QTY_CYC`/`DMG_CYC` + clamps (`world.gd`, `main.gd:20` `MAX_CONTACT_DMG` — old pin :18, re-grepped at the v2.1.0 cut), best_cycle save row + **reaper night flag LANDED-M4** (T-M4r: hidden `flags["reaper"]`, endless keeps precedence; THE REAPER arrives at the limit + one per `REAPER_PERIOD world.gd:112`, contact ENDS the run — the F-6 end law, no damage path) | cycles restart waves with per-cycle HP/qty/damage scaling; Reaper only in non-Endless (S5 ~465–471); Limit Break beyond max (S5 ~473) | M2: endless with OUR scaling curve — LANDED; **M4 LANDED (2026-10-26, v2.1.0): limit-break-lite (T-M4l: three repeatable fallback stat cards at the ONE offer funnel) + the Reaper night flag (T-M4r) — the deferred M2 Reaper row retires HERE as this LANDED cell** |
+| 7 | Characters + unlocks | 1 fixed character, talon start (`game_state.gd:173` — old pins :56, :139; re-grepped at the v2.1.0 cut) | 165 (S6 ~481; roster CONTRADICTED at 168 — treat count as ~165); gold-purchase with additive price scaling; secret unlocks (S6 ~481–483) | M4: 6 selectable, each start-weapon + one signature stat rule; purchase price curve OURS |
 | 8 | Meta shop + refund | LIVE (T-M1f): `DawnWell` save (`save.gd`, `user://dawnwell.json`) + the shop panel (`screens.gd`, fourth overlay, one style); 24 power-up rows (12 live effects, 12 sealed pending the M2 probe — T-M1h STAT-ROW count), per-rank refunds + refund-all, run gold → well gold at every run end | 24/25 PowerUps table (S7 ~573–605; count CONTRADICTED 24-vs-25); refund-all rule (S7 ~609); disable-when-maxed rule (S7 ~610) | M1: meta shop (12 power-ups M1 → ~18 M2, our ranks/prices) + refund — LANDED (24 rows shipped, 12 sealed); persist via `user://dawnwell.json` — LANDED |
 | 9 | Pickup systems | pickups DRAW via `pickup_viz` MultiMeshes (T-S18); chests in 3 tiers stamped at drop from `CHEST_TIER_BY_SOURCE` (`world.gd:76` — **7 rows since M3: miniboss/warden/endless-cycle/event + stage-item cairns + cathedral-choir + ossuary-warden**, drop site keyed `world.gd:365`, T-M2t→T-M3b) + gem-merge cap 200/batch 100 (`world.gd:29-30`, T-M2g, bulk gem same array); coin-bag tiers NOT shipped | chests w/ tiers + fixed first-6 sequence (S8 ~651–656); 400-gem merge-to-red rule (S8 ~644); Coin Bag / Rich Coin Bag + light-source pickups (S8 ~649, S7 ~628) | M1: chests (single tier); M2: 3 tiers + gem-merge cap (ours) — LANDED both (ours: 200-threshold, weighted rolls, NOT their fixed 1-1-3-1-1-5); coin-bag tiers DEFERRED (M2-SPEC §8.1) |
-| 10 | Achievement-chain unlocks | **stage-chain unlocks LIVE (M3)**: reach level 10 in stage 1 → stage 2, level 14 in stage 2 → stage 3 — SET-only through the ONE `_meta_changed` funnel, disk-persisted well flags (`main.gd:333-337`, `save.gd` flags rows; A-E5 legs). Pool-gating counters + achievements PAGE still not shipped | passives/weapons/stages gated by achievement chains (S7 ~617–624: e.g. "Level up X to lvl 4" → passive; stage unlock = reach lvl N in previous stage ~624) | M2: unlock-flag store gating the level-up pool (NOT LANDED — named follow-on); M3: stage-chain unlock — **LANDED-M3** (their stage-chain row, OUR levels); M4: achievements page (~20 rows) |
+| 10 | Achievement-chain unlocks | **stage-chain unlocks LIVE (M3)**: reach level 10 in stage 1 → stage 2, level 14 in stage 2 → stage 3 — SET-only through the ONE `_meta_changed` funnel, disk-persisted well flags (`main.gd:373-376` — old pin :333-337, re-grepped at the v2.1.0 cut; the M4 reaper fork rides the same flag channel, `main.gd:246-249` cap branch), `save.gd` flags rows; A-E5 legs). Pool-gating counters + achievements PAGE still not shipped | passives/weapons/stages gated by achievement chains (S7 ~617–624: e.g. "Level up X to lvl 4" → passive; stage unlock = reach lvl N in previous stage ~624) | M2: unlock-flag store gating the level-up pool (NOT LANDED — named follow-on); M3: stage-chain unlock — **LANDED-M3** (their stage-chain row, OUR levels); M4: achievements page (~20 rows) — NOT LANDED, deferred out of v2.1.0 named+tracked (M4-SPEC §6, `T-M4p-ACHIEVEMENTS`) |
 | 11 | Co-op | none | local co-op up to 4; changes pooling/shared chests (S8 ~671–674) | EXCLUDED — see §3 |
 | 12 | Mobile | none (desktop/web builds) | official mobile releases exist; control details UNVERIFIED (S8 ~676–678) | EXCLUDED (revisit on owner word) — see §3 |
 | 13 | Cloud save | none; leaderboard via vendored v1 server only | "Steam Cloud" listed as platform category; internals UNVERIFIED (S8 ~680–682) | EXCLUDED — platform service, see §3 |
@@ -134,7 +134,7 @@ orchestrator confirms the card on the board before M1 build cards are filed.
    planted-red: hand-corrupt the save → quarantine leg rows go RED/GREEN as named above.
 3. **Carry caps (DA c1 P1/A-1 — without these the budget rows are unbounded and unverifiable;
    OUR numbers, named rule):** **6 weapon slots + 6 passive KINDS** (existing 5-stack cap
-   per passive kind unchanged). Pool consequence: `build_pool` (`levelup.gd:17-36`, the one
+   per passive kind unchanged). Pool consequence: `build_pool` (`levelup.gd:32-66`, old pin :17-36; v2.1.0-cut re-grep; the one
    pool source) drops NEW-weapon offers when 6 slots are full (owned-weapon upgrades stay
    offerable), and identically **drops NEW passive KIND offers when 6 distinct KINDS are
    already carried — carried-kind upgrades stay offerable up to the 5-stack cap** (c2 N-3
@@ -245,18 +245,21 @@ retire-and-replace discipline as the M1 notes above):** LANDED — item 1 ENDLES
 T-M2e (`DawnWell.flags["endless"]` hand-in, cycle-clear chest + reward card on the frozen
 seams, capped `HP_CYC` ≤ 6 with the 18× clamp / `QTY_CYC` ≤ 2 / `DMG_CYC` ≤ 2.5 with the
 `MAX_CONTACT_DMG 20` contact clamp, `best_cycle` save row, endless-gated cycle HUD row;
-ACCEPT rows A-E1..A-E8 all green in the v1.3.0 acceptance capture) — **except** the Reaper
-analogue, DEFERRED as card `T-M2r-REAPER` (M2-SPEC §8.3: roadmap-is-law, no owner artifact
-retires it, so it stays tracked, not silently dropped). Item 2 LANDED as chest tiers (T-M2t:
+ACCEPT rows A-E1..A-E8 all green in the v1.3.0 acceptance capture) — the Reaper
+analogue that was deferred at this cut (the then-tracked M2-SPEC §8.3 card) LANDED in M4
+on 2026-10-26 as the reaper NIGHT FLAG (T-M4r, v2.1.0 — roadmap-is-law closed: the deferral
+row retires into this dated LANDED note, no silent drop either way). Item 2 LANDED as chest tiers (T-M2t:
 `CHEST_TIER_BY_SOURCE` single-source map incl. the endless-cycle → dawn row +
 `chest_rewards.gd` weighted rolls — NOT their fixed 1-1-3-1-1-5) + gem-merge (T-M2g: 200/100
 fold on the ONE gems array, bulk gem, both XP-conservation legs) — **except** coin-bag
 tiers, DEFERRED (M2-SPEC §8.1, named follow-on). Item 3 LANDED as the 2 unions (T-M2u:
 `union.gd` 2-row TABLE, precedence over evolution, the reserve rule for shared bases) riding
 the roster prerequisite T-M1h (16/15 pool LIVE) — the roadmap's 24/20 (+8 weapons/+5
-passives) and the knockback-lite row ride a named follow-on card (M2-SPEC §8.5). Items 4
-(unlock-flag store) and 5 (+2 minibosses + event-wave) NOT LANDED — named follow-on M2
-cards, `event` stays the forward-declared chest-source row (M2-SPEC §B.1 P4-1).
+passives) and the knockback-lite row ride a named follow-on card (M2-SPEC §8.5). Item 4
+(unlock-flag store) NOT LANDED — still named+tracked at the v2.1.0 cut; item 5
+(+2 minibosses + event-wave) LANDED in M4 on 2026-10-26 (v2.1.0, T-M4a/T-M4e — see the M4
+landing note below), `event` stays the forward-declared chest-source reservation (M4-SPEC
+F-3: event minibosses ride the `miniboss` literal, the map stays 7 rows).
 
 Assets (M2): 8 weapon + 8 evo + 2 union + 5 passive + 3 pickup icons = **26 icons**;
 8 weapon + 2 union + 2 miniboss meshes = **12 meshes**. LANDING NOTE (M2-SPEC §6 divergence,
@@ -296,21 +299,55 @@ flare moves NAMES only — difficulty reads the clock); item 3 LANDED — 1 end-
 (T-M3b: cathedral-choir + ossuary-warden rows, @540 of THEIR stage through the unified
 schedule latch, per-stage keyed name bar + keyed chest tiers) + the stage unlock chain
 (level 10/14, SET-only, one funnel, disk-verified; the roadmap's own stage-unchained leg
-green: a fresh save ships stage 2 LOCKED). **NOT LANDED (named, tracked, replace-not-
-delete):** the event-wave pillar — the M2 residue "+2 minibosses + first event-wave" —
-DEFERRED out of M3 as tracked card `T-M3e-EVENTWAVE` (M3-SPEC §4 decision: two more enemy
-classes would break the budget re-tally law; M3 ships the spawn-surge half of the math);
-the Reaper analogue stays deferred as `T-M2r-REAPER` (M2-SPEC §8.3, unchanged).
+green: a fresh save ships stage 2 LOCKED). The event-wave pillar — the M2 residue "+2
+minibosses + first event-wave" — was deferred out of M3 (M3-SPEC §4 decision: two more
+enemy classes would break the budget re-tally law; M3 shipped the spawn-surge half of the
+math); it LANDED in M4 on 2026-10-26 (v2.1.0, T-M4a/T-M4e — see the M4 landing note
+below), as did the Reaper analogue (T-M4r; both deferral rows retire into this dated
+LANDED note, replace-not-delete).
 
 Assets (M3) LANDING NOTE (M3-SPEC rev-3 §6 divergence, adopted): shipped **4 icons +
 2 meshes** (T-M3a, §6-exact: 3 stage thumbnails + icon-plate; cairns REUSE the shipped
 chest icons — zero rows); **0 new tiles** — stages ride the shipped biome-v2 tiles and the
 biome_readability gate runs per stage instead (9 windows green, the roadmap's own
-"extended per stage" ACCEPT row); the 2 miniboss meshes + the boss-adjacent icon rows ride
-`T-M3e-EVENTWAVE` with their classes. Mesh budget rows (4000-tri character class):
+"extended per stage" ACCEPT row); the 2 miniboss meshes + the boss-adjacent icon rows
+shipped in M4 (2026-10-26, v2.1.0: sunken-prelate/stair-acolyte/the-reaper meshes,
+T-M4a) with their classes. Mesh budget rows (M3, 4000-tri character class):
 cathedral-choir 3923/4000, ossuary-warden 3865/4000 — solid at all four turntable yaws
 (binding eyeball gate), same 5.33 m boss height class as the warden (height rows
 rel_err 0.0).
+
+**M4 landing note (v2.1.0 "Nightfall & Legacy", MC 11363, 2026-10-26 — LANDED named,
+NOT-LANDED named, replace-not-delete):** LANDED — **event-waves** (T-M4a/T-M4e: sunken-
+tide / stair-wall windows [660,720) as STAGES-table `events` rows, fixed 90° cones from
+the west/east, ×2 surge INSIDE the untouched `minf(12.0)`/`ALIVE_CAP 400` ceilings —
+their above-cap pause exemption REJECTED, M4-SPEC F-4 — + the 2 event miniboss classes
+sunken-prelate / stair-acolyte @660 on the ONE schedule latch, riding the `miniboss`
+drop literal, map stays 7 rows, F-3; stage 1 `events: []` byte-law, A-E1 re-measured at
+the release cut); **the Reaper night flag** (T-M4r: hidden `flags["reaper"]` = the
+endless precedent channel, endless precedence source-pinned (R9), one reaper at the
+limit + one per 60 s, contact ENDS the run — an END law, not damage, F-6; flag-off win
+byte-identical); **limit-break-lite** (T-M4l: three repeatable stat cards LIMIT · FURY/
+HASTE/BULWARK at the ONE offer funnel ONLY when the pool is exhausted — the 32 pool-kind
+law stands, s8 A7 re-pinned; three additive zero-identity seams, C-E3 formula rows);
+**desert re-tone** (T-M4a: BURNING DUNES warm-dune hue inside the luma envelope — tile
+gate 32.9/26–36 at this cut, superseded v2 tile archived). Version decision SEL-A:
+no new player-navigated surface shipped (M4-SPEC §5/§9 F-7) ⇒ MINOR v2.1.0 per the law
+at `:63-66`. **NOT LANDED (named+tracked, not silence):** the 6 characters + purchase
+screen (item 1 — `T-M4c-CHARACTERS`: the release that lands that surface carries the SEL
+version decision to the owner), the achievements page (item 2 — `T-M4p-ACHIEVEMENTS`),
+player skins (item 4 — `T-M4k-SKINS`), plus the pre-existing tracked deferrals: coin-bag
+tiers (M2-SPEC §8.1), roster-expansion +8/+5 (M2-SPEC §8.5), the unlock-flag store
+(roadmap M2 #4). The tranche name "Roster & Legacy" describes the deferred roster half;
+what shipped is the four-pillar subset the MC 11334 brief ordered (one-milestone size
+law). Assets (M4): **3 meshes + 1 tile retone, 0 new icons** (limit cards ride the
+inline-icon catch-all, M4-SPEC P3-5): sunken-prelate 3834/4000, stair-acolyte 3851/4000,
+the-reaper 3866/4000 tris, all FIRST SEED, @1.42 gates (PERMANENCE §M4 rows); the retone
+is a pixel swap at the shipped path, not a new tile. Byte law at this cut: stage-1
+journey 5020 rows + every strict fixture byte-identical vs the v2.0.0 base (declared
+re-mints: stages-m3's 3 R2 rows, art-s2i forward-lock; new events/reaper/limit fixtures
+twice-cmp-identical, per-sim seeds = card ids — the spec seed line superseded, declared
+in the LEDGER).
 
 ### M4 — v2.1.0 "Roster & Legacy" (~7 seat-days)
 
@@ -365,7 +402,7 @@ merchant NPC, audio (already open polish), light-source destructibles.
   `tests/test_game_numbers.py:35` + `tests/test_boss_numbers.py:64` (stays 540 in M1 — must
   stay GREEN). M1's run-length change retires+replaces BOTH WIN pins in the same commit; the
   full retire list is M1 feature 7 (no RED carry).
-- **Contract B snapshot** (exact 12 fields, `game_state.gd:87-104` + bridge/web JS) —
+- **Contract B snapshot** (exact 12 fields, `game_state.gd:226-245` — old pin :87-104; v2.1.0-cut re-grep — + bridge/web JS) —
   meta/evolution state lives OUTSIDE the run snapshot (menu layer + new snapshot version if
   ever exposed); any field addition is an owner-visible contract change, flagged at M1 design.
 - **Draw/horde budget + Route A** (DESIGN-3D §b/§c) — every M-phase FX addition re-tallies
