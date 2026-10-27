@@ -1,3 +1,7 @@
+# reason: >400 lines — 435 measured at MC 11398 §1.5 (a row MC 11316's
+#   "measured clean" claim MISSED, re-measured at the v2.0.0 tag): the chest
+#   truth table + the FULL end-to-end evolution legs ARE the one evolve dump
+#   contract; a split would fork the table from its legs. Header per audit.
 # Chest-open + evolution legs for M1 feature 5 (MC 11209, T-M1e; PARITY-
 # ROADMAP rev3 feature 5 ACCEPT rows). Same headless funnel as sim_caps/
 # sim_boss: the REAL Main.tscn, screens stubbed, the run started through the

@@ -1,3 +1,7 @@
+# reason: >400 lines — 533 measured at MC 11398 §1 (new in M4): the seven-leg
+#   truth table + the cone/surge/rng-twin/miniboss legs ARE the one events
+#   dump contract (sim_chest_tiers precedent); a legs split would fork that
+#   contract for no gate win — the split is the audit's declared DEFERRAL.
 # EVENT-WAVE legs for M4 pillar A (MC 11362 T-M4e; M4-SPEC rev-3 §1.4
 # ACCEPT rows A-E3..A-E6 — A-E2 rides the stages-m3 stages_table row +
 # tests/test_stages.py, A-E7 the sim_budget channel). Same headless funnel

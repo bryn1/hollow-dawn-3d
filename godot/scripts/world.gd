@@ -1,7 +1,10 @@
 # World entities + edge-spawn scaling + drops (plan §5 numbers).
-# reason: >400 lines — the ONE world module: M1-M3 law keeps the single
+# reason: >400 lines — the ONE world module: M1-M4 law keeps the single
 #   spawn latch, the single kill funnel and the ONE tier map in one file
-#   (splitting them would put drop rules beside a second spawn site).
+#   (splitting them would put drop rules beside a second spawn site). M4
+#   grew it 419->548 (event cone, reaper latch, windows, MC 11398 §1.6):
+#   the spawn/entity split stays SCHEDULED — the next card growing this
+#   file carries it, this header no longer absolves it.
 class_name GameWorld
 extends RefCounted
 

@@ -1,3 +1,8 @@
+# reason: >400 lines — 402 measured at MC 11398 §1.5 (a row MC 11316's
+#   "measured clean" claim MISSED, re-measured at the v2.0.0 tag): ONE
+#   harness-runner contract — the scripted journey, the leg gates and the
+#   TQ-01 exit law the 5020-row byte corpus rides; splitting the runner
+#   would fork the exit contract the corpus depends on.
 # Headless core-loop sim (DOD S3 row: "a full sim run (headless, seeded)
 # reaches win/gameover"). Instantiates the REAL Main.tscn, starts a run via
 # the real _start_game funnel, and drives main.gd's real _step loop manually
