@@ -270,8 +270,14 @@ def test_b_e4_handin_and_reset_source_pins():
                      r"\s*\n\t*game\.start_run\(\)", MAIN), \
         "char_sel rides the meta_ranks INPUT pattern before start_run"
     # the pawn re-skin at the F-7 hand-in tail, after seed_stage_props.
+    # WINDOW EXTENDED by T-M5k (MC 11423, replace-not-delete): M5 §3.1
+    # orders the skin hand-in INSIDE this window (props seed, skin row,
+    # pawn re-derive — the §2.1b literal order, spec AS WRITTEN); the
+    # tail position of apply_selection is the pinned law and stands.
     assert re.search(r"world\.seed_stage_props\(game\)\s*\n"
-                     r"(?:\t*#[^\n]*\n)*\t*_pawn\.apply_selection\(\)", MAIN), \
+                     r"(?:\t*(?:#[^\n]*|game\.skin_id = "
+                     r"int\(_dawnwell\.skin\))\s*\n)*"
+                     r"\t*_pawn\.apply_selection\(\)", MAIN), \
         "apply_selection rides the hand-in tail after the props seed"
     # hero_pawn: _ready is apply_selection verbatim (boot-once invariant).
     ready = block(HERO, "func _ready", "\nfunc ")
@@ -469,9 +475,15 @@ def test_b_e8_clips_move_pixels():
 # ---- B-E9: the table itself --------------------------------------------------
 
 def test_b_e9_table_source_truth():
-    ids = re.findall(r'"id": "([\w-]+)", "name"', ROSTER)
+    # SCENE-WIDENED by T-M5k (MC 11423): the SKINS table (M5 §3.1) joins
+    # roster.gd with its OWN "id"+"name" rows — the SEL-C id scan reads
+    # the CHARACTERS block, the block K-E5 already proves its own rows
+    # against (test_skins.py); same id list, same law, honest scope.
+    ids = re.findall(r'"id": "([\w-]+)", "name"',
+                     block(ROSTER, "const CHARACTERS := [", "\n]"))
     assert ids == [r[0] for r in ROWS], "SEL-C ids, in order (owner ruling C)"
-    blocks = re.split(r"\n\t\{\"id\":", ROSTER)[1:]
+    blocks = re.split(r"\n\t\{\"id\":",
+                      block(ROSTER, "const CHARACTERS := [", "\n]"))[1:]
     assert len(blocks) == 9
     for blk, (cid, mesh, start, gate, cost, rule) in zip(blocks, ROWS):
         assert '"mesh": "%s"' % mesh in blk
@@ -511,12 +523,22 @@ def test_b_e9_portraits_resolve_and_exist():
             "missing godot/assets/icons/%s.png (T-M5s asset row)" % p
 
 
-def test_b_e9_save_row_ships_char_not_skin():
-    # T-M5c owns the `char` save row; `skin` rides T-M5k (reading (3)).
+def test_b_e9_save_rows_ship_char_then_skin_end_state():
+    # FALSIFIED-BY-DESIGN AND REPLACED at T-M5k (MC 11423, replace-not-
+    # delete, this note is the history): the T-M5c original asserted the
+    # save row ships `char` NOT `skin` — the serial pair's promise (the
+    # `skin` row rides T-M5k, reading (3)). T-M5k LANDED, so the promise
+    # pin is replaced by the END-STATE it promised: BOTH rows ship, each
+    # field-by-field added, VERSION unchanged (the R1 in-series law — the
+    # disk exact-set readers in test_save.py/test_dawnwell_shop.py carry
+    # the grown set same-commit).
     assert re.search(r"var char := 0", SAVE)
     assert re.search(r'well\.char = int\(data\.get\("char", 0\)\)', SAVE)
-    assert re.search(r'"char": char\}', SAVE)
-    assert "skin" not in read_code("save.gd")
+    assert re.search(r"var skin := 0", SAVE)
+    assert re.search(r'well\.skin = int\(data\.get\("skin", 0\)\)', SAVE)
+    assert re.search(r'"char": char, "skin": skin\}', SAVE)
+    assert re.search(r"const VERSION := 1", SAVE), \
+        "the serial pair ships WITHOUT a version bump (the migration law)"
 
 
 # ---- the forward-lock: the committed fixture stands the same judge ----------

@@ -243,14 +243,16 @@ def test_buy_and_save_roundtrip(probe):
     # at card time and re-pinned in the SAME commit, the R1 in-series law) —
     # and again at T-M5c (MC 11422, M5-SPEC §2.1: the char row joins — the
     # same card's R1 move re-landed on THIS second reader in the SAME
-    # commit, the in-series law again; `skin` rides T-M5k's next move) —
+    # commit, the in-series law again) and again at T-M5k (MC 11423,
+    # M5-SPEC §3.1: the skin row joins — the same card's R1 move re-landed
+    # on THIS second reader in the SAME commit again, the in-series law) —
     # falsified-by-design + replaced, LEDGER rows; the shop card's own rule
     # (rank 1 @ 40, gold 960) is the row's point and is UNTOUCHED (no shop
     # verb moves a counter — the {} here is the fresh-well default, the 0
     # char the fresh-well roster default too).
     assert disk == {"version": 1, "gold": 960, "ranks": {"vitality": 1},
                     "flags": {}, "best_cycle": 0, "stage": 1,
-                    "counters": {}, "char": 0}
+                    "counters": {}, "char": 0, "skin": 0}
 
 
 def test_poor_buy_declines(probe):

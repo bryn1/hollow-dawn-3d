@@ -30,11 +30,12 @@ func check(leg: String, checks: Dictionary, extra: Dictionary) -> void:
 static func fresh_run(tree: Node, opts: Dictionary = {}) -> Node:
 	# The donors' order, verbatim: [well wipe] -> instantiate -> add -> stub
 	# -> wire start -> [wire pick] -> [save-side flags] -> [save-side stage]
-	# -> [save-side char] -> _start_game. opts: wipe_well (stages donor wipes
-	# first), wire_pick, flags (the endless-flag pattern), stage (the
-	# stage-select pattern), char (M5 §2.2 T-M5c DECLARED opts growth: the
-	# roster-select row the F-5 hand-in seam reads — the stage pattern, an
-	# absent default = row 0 = every pre-M5 caller byte-unchanged).
+	# -> [save-side char] -> [save-side skin] -> _start_game. opts: wipe_well
+	# (stages donor wipes first), wire_pick, flags (the endless-flag pattern),
+	# stage (the stage-select pattern), char (M5 §2.2 T-M5c DECLARED opts
+	# growth: the roster-select row the F-5 hand-in seam reads — the stage
+	# pattern, an absent default = row 0 = every pre-M5 caller byte-unchanged),
+	# skin (M5 §3.1 T-M5k growth, the same law: the worn-skin row).
 	if opts.get("wipe_well", false):
 		DawnWell.new().reset() # each leg owns its well state unless it says otherwise
 	var run: Node = load("res://Main.tscn").instantiate()
@@ -52,6 +53,12 @@ static func fresh_run(tree: Node, opts: Dictionary = {}) -> Node:
 		run._dawnwell.stage = opts["stage"]
 	if opts.has("char"):
 		run._dawnwell.char = opts["char"]
+	if opts.has("skin"):
+		# M5 §3.1 T-M5k DECLARED opts growth (the char/stage pattern,
+		# §7.1's fresh_run law restated): the WORN SKIN row the hand-in
+		# seam reads — an absent default = 0 = every pre-M5k caller and
+		# every committed byte unchanged.
+		run._dawnwell.skin = opts["skin"]
 	run._start_game()
 	return run
 

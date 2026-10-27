@@ -138,6 +138,8 @@ func _ready() -> void:
 	_screens.characters_requested.connect(_open_characters)
 	_screens.char_bought.connect(_char_buy)
 	_screens.char_selected.connect(_char_select)
+	_screens.skin_bought.connect(_char_buy_skin)
+	_screens.skin_selected.connect(_char_select_skin)
 
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
@@ -341,6 +343,14 @@ func _start_game() -> void:
 	# props seed right after the hand-in (static rows, ZERO RNG — A-E3).
 	game.stage = GameRenderer.stage_id_for_index(_dawnwell.stage)
 	world.seed_stage_props(game)
+	# The skin hand-in (M5 §3.1, T-M5k, MC 11423): the SAME _dawnwell ->
+	# start seam (the reaper/stage pattern) — AFTER start_run (which
+	# resets skin_id), BEFORE the pawn re-derive below (the §2.1b literal
+	# order lands verbatim for this row: a skin feeds NO start_run
+	# consumption, so it needs no char_sel input twin). int() lands the
+	# JSON-float disk row (save.gd law); unset/older reads 0 = the
+	# default look = the shipped mesh (K-E1 byte law).
+	game.skin_id = int(_dawnwell.skin)
 	# M5 §2.1b (T-M5c, MC 11422): the pawn receives the selection at the
 	# hand-in TAIL, the mesh re-read LAST (the P1-1 fix: the pawn was the
 	# boot-once body that never saw a selection). apply_selection() IS the
@@ -562,5 +572,25 @@ func _char_select(char_id: String) -> void:
 	# byte-compares the disk before/after exactly this call).
 	if idx >= 0 and Roster.is_owned(_dawnwell, idx) and _dawnwell.char != idx:
 		_dawnwell.char = idx
+		_meta_changed()
+	_screens.refresh_characters()
+
+
+# The skin verbs (M5 §2.2 named + §3.1, T-M5k, MC 11423): the SAME thin
+# shape — the panel displays and emits, the Roster rule re-checks the
+# whole law (owned + WEARABLE + real change — the stale-panel and the
+# wear law ride INSIDE skin_select, the Roster.buy shape; an unknown id
+# reads -1 = refusal arm, the default chip maps to pos 0), the verb
+# persists through the ONE funnel, then refreshes. NO disk-write site
+# here (the B-E5 law restated; the funnel occurrence count re-pins in
+# test_achievements.py same-commit, 9 -> 11 — the R-series serial).
+func _char_buy_skin(skin_id: String) -> void:
+	if Roster.skin_buy(_dawnwell, Roster.skin_pos_of_id(skin_id)):
+		_meta_changed()
+	_screens.refresh_characters()
+
+
+func _char_select_skin(skin_id: String) -> void:
+	if Roster.skin_select(_dawnwell, Roster.skin_pos_of_id(skin_id)):
 		_meta_changed()
 	_screens.refresh_characters()

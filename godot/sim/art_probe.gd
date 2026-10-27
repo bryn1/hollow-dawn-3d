@@ -66,6 +66,7 @@ func _run() -> void:
 	_dump_400()
 	_dump_player()
 	_dump_roster() # M5 T-M5c: R2 forward-growth (+8 char rows, §2.3)
+	_dump_skins() # M5 T-M5k: R2 FIFTH growth (+5 skin rows, §3.3 K-E2)
 	var f := FileAccess.open(_out_path(), FileAccess.WRITE)
 	assert(f != null)
 	for r in _rows:
@@ -139,6 +140,28 @@ func _dump_roster() -> void:
 		var measured: float = mesh.get_aabb().size.y
 		_rows.append({"ev": "height", "class": String(row.id),
 			"glb": String(row.mesh), "mesh": mesh.get_class(),
+			"target_m": HordeViz.MODEL_H_PLAYER,
+			"measured_m": snappedf(measured, 0.0001),
+			"rel_err": snappedf(absf(measured - HordeViz.MODEL_H_PLAYER)
+				/ HordeViz.MODEL_H_PLAYER, 0.0001)})
+
+
+func _dump_skins() -> void:
+	# M5 §3.3 K-E2 (T-M5k, MC 11423): the five SKINS meshes join the SAME
+	# measured-height table at the ONE ClassMesh seam at the PLAYER row —
+	# the R2 FIFTH forward-lock growth (13->15->17->18->26->31 measured
+	# through T-M3b/T-M4e/T-M4r/T-M5c/T-M5k): the 26 prior rows stay
+	# byte-preserved as the prefix (the PLAYER row among them — the K-E1
+	# art clause: the default look never measured a skin), the five new
+	# rows append. NO pawn read here: this measures the meshes the seam
+	# CAN hand out (the skin mesh is the same loader + same height law
+	# the char rows ride), the LIVE skin read rides the probe's pawn legs.
+	for srow in Roster.SKINS:
+		var mesh: Mesh = ClassMesh.mesh_for(String(srow.mesh),
+			HordeViz.MODEL_H_PLAYER)
+		var measured: float = mesh.get_aabb().size.y
+		_rows.append({"ev": "height", "class": String(srow.id),
+			"glb": String(srow.mesh), "mesh": mesh.get_class(),
 			"target_m": HordeViz.MODEL_H_PLAYER,
 			"measured_m": snappedf(measured, 0.0001),
 			"rel_err": snappedf(absf(measured - HordeViz.MODEL_H_PLAYER)

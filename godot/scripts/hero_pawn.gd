@@ -66,10 +66,21 @@ func _ready() -> void:
 # row 0 keeps the shipped literal call verbatim (byte law F-2 + the
 # test_art_integration seam pin); rows 1-8 read the ROSTER mesh row at the
 # SAME ClassMesh loader + SAME MODEL_H_PLAYER class height (B-E7: no new
-# loader, no per-row height special-case). The skin override (row + skin
-# lookup) rides with the SKINS table (T-M5k, wave map).
+# loader, no per-row height special-case). The skin read LANDED AT T-M5k
+# (MC 11423, replace-not-delete of the rides-with note this line carried):
+# ONE expression (Roster.skin_mesh) at this SAME seam — §3.1 "Applying a
+# skin = the SAME _player_mesh() seam reading well.skin through the
+# selected character's skin group". skin 0 / garbage / unwearable all
+# read "" (the group clamp lives in roster.gd), so every branch below
+# stands verbatim: the shipped default call is byte-untouched (K-E1/F-2)
+# and an unwearable stale row shows the CHAR's own mesh, never another
+# char's skin.
 func _player_mesh() -> Mesh:
 	var char := 0 if game == null else int(game.char_id)
+	var skin := Roster.skin_mesh(char, 0 if game == null
+		else int(game.skin_id))
+	if skin != "":
+		return ClassMesh.mesh_for(skin, HordeViz.MODEL_H_PLAYER)
 	if char > 0:
 		return ClassMesh.mesh_for(Roster.row(char).mesh,
 			HordeViz.MODEL_H_PLAYER)

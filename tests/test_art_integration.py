@@ -130,6 +130,13 @@ def test_height_table_within_spec():
     # the law the player row rides; row 0 the-vigil IS the player row, no
     # twin), rel_err 0.0 — gate unchanged, the fixture grows 18 -> 26 rows
     # with every prior row byte-preserved as the prefix (R4 again).
+    # Coverage row EXTENDED by T-M5k (MC 11423, spec §3.3 K-E2 — the R2
+    # FIFTH growth): the FIVE SKINS meshes join at the PLAYER height row
+    # (1.67 m, the same law the char rows ride — the ONE ClassMesh seam,
+    # no per-row special case), rel_err 0.0 — gate unchanged, the fixture
+    # grows 26 -> 31 rows with every prior row byte-preserved as the
+    # prefix; the PLAYER row itself is UNTOUCHED (the K-E1 art clause:
+    # the default look never measured a skin).
     assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player",
                                                     "hollow-knight",
                                                     "hollow-deacon",
@@ -146,7 +153,11 @@ def test_height_table_within_spec():
                                                     "tallow-seer",
                                                     "shroud-saint",
                                                     "iron-penitent",
-                                                    "hoard-wretch"])
+                                                    "hoard-wretch",
+                                                    # T-M5k skins rows:
+                                                    "skin-ash", "skin-marrow",
+                                                    "skin-tide", "skin-relic",
+                                                    "skin-void"])
     for key, row in by_class.items():
         spec = {"warden": SPEC_H_BOSS,
                 "cathedral-choir": SPEC_H_BOSS,
@@ -157,9 +168,13 @@ def test_height_table_within_spec():
         # T-M5c (MC 11422): the roster meshes are PLAYER-class units (the
         # pawn loader's row, §2.3) — the map arm extends, the enemy
         # default stays exactly the shipped fallback.
+        # T-M5k (MC 11422's list extended, MC 11423): the SKINS meshes are
+        # PLAYER-class units too (the pawn loader's row, §3.3 K-E2) — the
+        # map arm extends, the enemy default stays the shipped fallback.
         if key in ("emberwright", "grave-ward", "coinhound", "duskrunner",
                    "tallow-seer", "shroud-saint", "iron-penitent",
-                   "hoard-wretch"):
+                   "hoard-wretch", "skin-ash", "skin-marrow", "skin-tide",
+                   "skin-relic", "skin-void"):
             spec = SPEC_H_PLAYER
         assert row["mesh"] == "ArrayMesh", (
             "%s: live unit must render an imported ArrayMesh" % key)
@@ -180,6 +195,13 @@ def test_player_glb_swap_and_live_height():
         in seam.group(0), (
         "_player_mesh() must return the height-normalised player GLB "
         "through ClassMesh — the ONE seam, no second loader")
+    # ADDITIVE by T-M5k (MC 11423, K-E1: the literal default branch above
+    # stays verbatim — the byte law): the seam ALSO reads the skin group,
+    # through the ONE Roster resolver, at this SAME function (spec §3.1
+    # "the SAME _player_mesh() seam reading well.skin through the selected
+    # character's skin group" — no second loader, no second seam).
+    assert "Roster.skin_mesh(" in seam.group(0), (
+        "the skin read must ride the SAME _player_mesh() seam")
     assert "CapsuleMesh" not in HERO, (
         "capsule placeholder still in hero_pawn — placeholder era retired "
         "by MC 11135")

@@ -58,11 +58,22 @@ func _initialize() -> void:
 		i += 1
 	if _jobs.is_empty():
 		# the roster default: the eight NEW meshes (row 0 = player.glb is
-		# the shipped pawn, its clips measured by the S2r set already).
+		# the shipped pawn, its clips measured by the S2r set already) +
+		# the five SKINS meshes (M5 §3.1 K-E3, T-M5k MC 11423: the skins
+		# ride the SAME op-machine, the SAME fixture and the SAME pin doc
+		# — roster-capture rows GROW for skins, no second capture; the
+		# char jobs keep their queue order, the skin jobs APPEND). The
+		# diff_px values are GL-render measures: this fixture is the
+		# threshold-judged forward-lock (B-E8/K-E3 judge >= 2 / == 0 px;
+		# the twice-cmp determinism runs land in the card capture), NOT a
+		# byte corpus — the §7.1 byte law rides the journey/fixtures.
 		for row in Roster.CHARACTERS:
 			if String(row.mesh) != "player.glb":
 				_jobs.append({"rig": String(row.id),
 				              "glb": "res://assets/glb/" + String(row.mesh)})
+		for srow in Roster.SKINS:
+			_jobs.append({"rig": String(srow.id),
+			              "glb": "res://assets/glb/" + String(srow.mesh)})
 	assert(not _jobs.is_empty() and _out_dir != "", "need glb args + --out")
 	DirAccess.make_dir_recursive_absolute(_out_dir + "/frames")
 	_manifest = FileAccess.open(_out_dir + "/manifest.jsonl", FileAccess.WRITE)

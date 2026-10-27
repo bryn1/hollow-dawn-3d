@@ -24,3 +24,8 @@
 {"class":"shroud-saint","ev":"height","glb":"char-shroud-saint.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
 {"class":"iron-penitent","ev":"height","glb":"char-iron-penitent.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
 {"class":"hoard-wretch","ev":"height","glb":"char-hoard-wretch.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"skin-ash","ev":"height","glb":"skin-ash.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"skin-marrow","ev":"height","glb":"skin-marrow.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"skin-tide","ev":"height","glb":"skin-tide.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"skin-relic","ev":"height","glb":"skin-relic.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"skin-void","ev":"height","glb":"skin-void.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}

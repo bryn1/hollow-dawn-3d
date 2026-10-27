@@ -178,13 +178,16 @@ def test_valid_roundtrip(probe):
     # (untouched), the counters {} default leg rides the T-M5p probe
     # (migrate, test_achievements.py), and the char default is the equal-
     # ity row below (unset disk field -> 0 = roster row 0 — the fifth
-    # restatement of the best_cycle/stage migration proof).
+    # restatement of the best_cycle/stage migration proof). LANDED: the
+    # FIFTH move is THIS card T-M5k (M5-SPEC §3.1 skin — the worn-skin
+    # group position; the serial pair's promise kept in the same commit
+    # the save row ships, replace-not-delete, LEDGER row).
     assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle",
-                         "stage", "counters", "char"}, \
-        "on-disk keys must be exactly the roadmap's four + best_cycle + stage + counters + char"
+                         "stage", "counters", "char", "skin"}, \
+        "on-disk keys must be exactly the roadmap's four + best_cycle + stage + counters + char + skin"
     assert disk == {"version": 1, "gold": 123, "ranks": {"might": 2},
                     "flags": {"stage2": 1}, "best_cycle": 3, "stage": 3,
-                    "counters": {}, "char": 0}
+                    "counters": {}, "char": 0, "skin": 0}
     assert rows["reload"] == {"gold": 123, "ranks": 2, "flags": 1,
                               "version": 1, "best_cycle": 3, "stage": 3}
     # a stale torn temp must not block the atomic rename (recreate from garbage)

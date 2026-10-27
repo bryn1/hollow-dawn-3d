@@ -22,18 +22,25 @@ extends RefCounted
 
 const CHAR_PREFIX := "char:" # well.flags key prefix (F-4: flags ride the
 # existing dict, the achv:/stage2 write-1 SET-only law)
+const SKIN_PREFIX := "skin:" # the skin flag row's prefix (M5 §3.1, F-4
+# restated: the SAME flags dict, the write-1 SET-only law unchanged)
+const SKIN_DEFAULT_ID := "default" # the pos-0 chip's id string (the verbs
+# stay thin: the id->pos map, default included, lives in this module)
 
 # mesh = the GLB family under res://assets/glb/ (row 0 keeps the shipped
 # player.glb — the byte law: the pawn's default branch still names it);
 # portrait = the §j file family icon-portrait-<id>.png (total resolver,
-# assert-exists at every draw site). skins ride empty for every row at
-# this card (spec §3.1: only the-vigil's group is populated, and the SKINS
-# rows land with T-M5k — wave map; the field rides now so the row shape is
-# frozen once).
+# assert-exists at every draw site). THE SKIN GROUP LANDED AT T-M5k
+# (MC 11423, replace-not-delete of the frozen-shape note this line carried):
+# spec §3.1 group law — only the-vigil's group is populated (the five
+# SKINS ids below, in table order); every other row ships `skins: []`
+# (the row exists, empty — per-character skin sets are the named
+# follow-on, spec §9.4). The field froze at T-M5c exactly for this.
 const CHARACTERS := [
 	{"id": "the-vigil", "name": "THE VIGIL", "mesh": "player.glb",
 	 "portrait": "icon-portrait-the-vigil", "cost": 0, "gate": "",
-	 "skins": [],
+	 "skins": ["skin-ash", "skin-marrow", "skin-tide", "skin-relic",
+	 	"skin-void"],
 	 "desc": "The survivor the night already knows. No boon, no burden.",
 	 "start_weapons": [{"id": "talon", "level": 1, "cd": 0.0}],
 	 "start_passives": {},
@@ -209,3 +216,144 @@ static func buy(well: DawnWell, char: int) -> bool:
 # every draw site asserts the file exists before load.
 static func portrait_path(char: int) -> String:
 	return "res://assets/icons/%s.png" % String(row(char).portrait)
+
+
+# --- SKINS (M5 §3.1, T-M5k, MC 11423) — the ONE table law rides here ----
+# The five meshes ship on the EXISTING player-rig shape (the roadmap DA-c1
+# P2-6 law: REAL distinct meshes, not re-tints; the rig/clip honesty rides
+# docs/RIG-DEVIATION-SEL-C.md, owner "Rec" MC 11440 — ash/marrow/relic
+# RIGGED walk+attack, tide/void ship STATIC, EXCUSED-not-removed, the
+# K-E3 doc-pin judge re-measures every row). Prices = the spec's flat
+# curve 200/400/600/800/1000; NO gate field — roadmap item 4 names none.
+# THE `duplicate()` LAW: these rows are read-only reads by contract (the
+# rule() wording restated) — every state-homing hand-out is a String/int
+# scalar, no dict ever leaves toward run state.
+const SKINS := [
+	{"id": "skin-ash", "name": "ASH", "mesh": "skin-ash.glb",
+	 "chip": "icon-skin-ash", "cost": 200,
+	 "desc": "Pale ash over the vigil's own shape."},
+	{"id": "skin-marrow", "name": "MARROW", "mesh": "skin-marrow.glb",
+	 "chip": "icon-skin-marrow", "cost": 400,
+	 "desc": "Bone-white carvings, candle-lit edges."},
+	{"id": "skin-tide", "name": "TIDE", "mesh": "skin-tide.glb",
+	 "chip": "icon-skin-tide", "cost": 600,
+	 "desc": "Sea-dark plating from the drowned choir."},
+	{"id": "skin-relic", "name": "RELIC", "mesh": "skin-relic.glb",
+	 "chip": "icon-skin-relic", "cost": 800,
+	 "desc": "Gilt reliquary shell — the vigil's own skeleton."},
+	{"id": "skin-void", "name": "VOID", "mesh": "skin-void.glb",
+	 "chip": "icon-skin-void", "cost": 1000,
+	 "desc": "The dark between the moor-fires."},
+]
+
+
+# The worn group of a char row (§3.1 group law: row 0's five, everyone
+# else the empty row that T-M5c froze).
+static func skins_for(char: int) -> Array:
+	return row(char).skins
+
+
+# id -> well-row position (GROUP POSITION, reading (1) of the card): 0 =
+# the default look (SKIN_DEFAULT_ID), k >= 1 = the group's k-th entry =
+# SKINS[k-1] (the group order is pinned == this table's order by K-E5);
+# unknown ids read -1 (the refusal arm, index_of's shape).
+static func skin_pos_of_id(id: String) -> int:
+	if id == SKIN_DEFAULT_ID:
+		return 0
+	for i in SKINS.size():
+		if SKINS[i].id == id:
+			return i + 1
+	return -1
+
+
+# pos -> SKINS row. pos 0 has NO row (the default look is the char's own
+# mesh); readers guard on pos >= 1 FIRST (the is_wearable/skin_mesh/clamp
+# arms below), so this clamp only guards a garbage int from crashing —
+# the row() never-crashes/never-leaks law restated.
+static func skin_row(pos: int) -> Dictionary:
+	return SKINS[clampi(pos - 1, 0, SKINS.size() - 1)]
+
+
+static func skin_id(pos: int) -> String:
+	return String(skin_row(pos).id)
+
+
+static func skin_cost(pos: int) -> int:
+	return int(skin_row(pos).cost)
+
+
+# The ONE skin-mesh read (the seam expression hero_pawn carries): "" =
+# no skin. Clamps THROUGH the group, so skin 0, a garbage pos and a
+# skin the char cannot wear ALL read "" — the RENDER stays as clean as
+# the write law (a stale row after a char switch shows that char's own
+# mesh, never another char's skin).
+static func skin_mesh(char: int, skin: int) -> String:
+	if skin < 1 or skin > SKINS.size():
+		return ""
+	if not skins_for(char).has(skin_id(skin)):
+		return ""
+	return String(skin_row(skin).mesh)
+
+
+static func skin_is_owned(well: DawnWell, pos: int) -> bool:
+	# pos 0 owns by default (the char's own look needs no flag row — the
+	# char row-0 owns-by-default law restated); no flag is written for it.
+	return pos == 0 or well.flags.has(SKIN_PREFIX + skin_id(pos))
+
+
+# The wear law: the SELECTED character's group carries the id (the group
+# law: an empty-group char wears NOTHING). pos 0 is always wearable.
+static func is_wearable(well: DawnWell, pos: int) -> bool:
+	if pos == 0:
+		return true
+	if pos < 1 or pos > SKINS.size():
+		return false
+	return skins_for(int(well.char)).has(skin_id(pos))
+
+
+# Purchase law verbatim (the char/shop both-sides shape): payable +
+# unowned + in-table writes flag skin:<id> and spends EXACTLY the table
+# price; every other input is a NO-OP-NO-WRITE returning false. No disk
+# here (main's ONE _meta_changed funnel persists; the K-E4 leg measures
+# the spend value-compared against the curve).
+static func skin_buy(well: DawnWell, pos: int) -> bool:
+	if pos < 1 or pos > SKINS.size() or skin_is_owned(well, pos):
+		return false
+	var price := skin_cost(pos)
+	if well.gold < price:
+		return false
+	well.gold -= price
+	well.flags[SKIN_PREFIX + skin_id(pos)] = 1
+	return true
+
+
+# Select law (the _char_select guard restated into the rule module, the
+# Roster.buy shape): owned + wearable + a REAL change writes the well
+# row; the worn row / default re-select and the unwearable pos (empty
+# group — the K-E4 planted-red seat) are NO-OP-NO-WRITE false.
+static func skin_select(well: DawnWell, pos: int) -> bool:
+	if not skin_is_owned(well, pos) or not is_wearable(well, pos):
+		return false
+	if int(well.skin) == pos:
+		return false
+	well.skin = pos
+	return true
+
+
+# The chip four-state row (Roster.state's twin for the chip family — ONE
+# source: the panel renders it, the probe dumps it). "unwearable" renders
+# NOTHING (group law — the K-E4 chip-disabled UI side, reading (4)).
+static func skin_state(well: DawnWell, char: int, pos: int) -> String:
+	if pos == 0:
+		return "selected" if int(well.skin) == 0 else "owned"
+	if not skins_for(char).has(skin_id(pos)):
+		return "unwearable"
+	if int(well.skin) == pos:
+		return "selected"
+	return "owned" if skin_is_owned(well, pos) else "buy"
+
+
+# §j total resolver for the chip family (the portrait_path law restated):
+# every draw site asserts the file exists before load.
+static func skin_chip_path(pos: int) -> String:
+	return "res://assets/icons/%s.png" % String(skin_row(pos).chip)

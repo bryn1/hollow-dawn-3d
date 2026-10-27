@@ -75,9 +75,16 @@ var limit := {"dmg": 0, "spd": 0, "arm": 0}
 # the shipped identity = every committed byte, F-2). Like endless/cycle/
 # stage/reaper/limit both rows ride OUTSIDE the 12-field Contract B
 # snapshot (F-3, frozen: neither name may ever appear in snapshot_json).
-# The skin rows ride with the SKINS table (T-M5k, wave map + R1 sequence).
+# M5 §3.1 (T-M5k, MC 11423): skin_id is the WORN SKIN's group position
+# (0 = the default look — the Roster §3.1 law). Unlike char it feeds NO
+# start_run consumption (no formula term exists for a skin), so it rides
+# as ONE run var, no input twin: reset in start_run below, re-handed by
+# main._start_game AFTER start_run (the reaper/stage hand-in pattern).
+# OUTSIDE the 12-field snapshot too (F-3, frozen — the B-E4 exact-12 pin
+# re-proves it membership-wise, same as char).
 var char_sel := 0
 var char_id := 0
+var skin_id := 0
 var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
 # The 15 passive STAT ROWS (PARITY-ROADMAP rev3 features 3+7: original five
 # + the ten evolution partners, T-M1h). Seeded here AND in start_run so
@@ -197,6 +204,10 @@ func start_run() -> void:
 	limit = {"dmg": 0, "spd": 0, "arm": 0} # M4 §3.1 T-M4l: fresh-run reset —
 	#   the counter row is RUN state (outside the snapshot; the 13th-field
 	#   instrument is the sim_limit limit_snapshot leg + test_endless's pin)
+	skin_id = 0 # M5 §3.1 T-M5k: fresh-run reset, the reaper pattern — the
+	#   worn skin row is re-handed by main._start_game (hand-in seam, never
+	#   a start_run default — K-E1's planted "the seam reads skin 1 by
+	#   default" fires the hand-in regex leg + the probe's pawn_default)
 	stage = "moor-vigil" # §1.1 M3: fresh-run reset to the stage-1 id; re-handed
 	flare = 0.0          # by main._start_game after this call (plate logic owns decay)
 	# FALSIFIED-BY-DESIGN AND REPLACED (M2-SPEC B3/T-M2c, MC 11236): the

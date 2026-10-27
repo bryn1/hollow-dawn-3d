@@ -164,9 +164,13 @@ def test_p_e3_whole_scripts_save_pin():
     # T-M5c (MC 11422): the roster buy + select verbs are two NEW funnel
     # call SITES (the shop's _shop_buy pattern, spec §2.2 — every roster
     # mutation persists through this ONE funnel), 8 sites + the definition
-    # == 9; the MAIN-scoped `.save(` count stays 1 (the funnel body — the
-    # loop above re-proves it every run, this card included).
-    assert MAIN.count("_meta_changed(") == 9, \
+    # == 9. RE-COUNTED AGAIN by T-M5k (MC 11423): the skin buy + select
+    # verbs are two MORE funnel call SITES (the roster verbs' own pattern,
+    # M5-SPEC §3.1 — every skin mutation persists through this ONE
+    # funnel), 10 sites + the definition == 11; the MAIN-scoped `.save(`
+    # count stays 1 (the funnel body — the loop above re-proves it every
+    # run, this card included).
+    assert MAIN.count("_meta_changed(") == 11, \
         "the funnel occurrence set moved without a retire row"
 
 

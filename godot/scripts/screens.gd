@@ -35,6 +35,11 @@ signal achievements_closed
 signal characters_requested
 signal char_bought(id: String)
 signal char_selected(id: String)
+# SKINS chips (M5 §3.1, T-M5k, MC 11423): the SAME verbs-only contract;
+# the chip row rides INSIDE the character overlay as an inner row-set
+# (F-8's "not a third surface" reading — no eighth overlay, spec §3.2).
+signal skin_bought(id: String)
+signal skin_selected(id: String)
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -643,3 +648,51 @@ func refresh_characters() -> void:
 				act.disabled = true
 		line.add_child(act)
 		_chars_rows.add_child(line)
+		if st == "selected":
+			var grp: Array = Roster.skins_for(i)
+			if grp.size() > 0:
+				# The skin chip row (M5 §3.1): an inner row-set under the
+				# selected row — rendered ONLY when that character's skin
+				# group is NON-EMPTY (the group law is the chip-disabled
+				# UI side: an empty-group char renders no chip row at
+				# all, reading (4) of the card; F-8's "not a third
+				# surface"). State comes from the ONE Roster.skin_state.
+				_chars_rows.add_child(_skin_chips(i, grp))
+
+
+func _skin_chips(char: int, grp: Array) -> HBoxContainer:
+	# The chip row: the default look + one chip per group entry, the SAME
+	# disabled-not-hidden law as the char rows (the shop's both sides:
+	# the buy chip DISABLES unaffordable). §j total law: the chip icon
+	# asserts before load, unconditional draw (no blank chip ever).
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.add_child(_label("  Skins:", 12, MOON))
+	for pos in range(0, grp.size() + 1):
+		var chip := Button.new()
+		var st := Roster.skin_state(_well, char, pos)
+		var sid: String = Roster.SKIN_DEFAULT_ID if pos == 0 \
+			else Roster.skin_id(pos)
+		chip.custom_minimum_size = Vector2(118, 36)
+		if pos > 0:
+			var path: String = Roster.skin_chip_path(pos)
+			assert(ResourceLoader.exists(path))
+			chip.icon = load(path)
+			chip.expand_icon = true
+			chip.icon_max_width = 22
+		var nm := "No skin" if pos == 0 else String(Roster.skin_row(pos).name)
+		match st:
+			"buy":
+				chip.text = "%s %dg" % [nm, Roster.skin_cost(pos)]
+				chip.disabled = _well.gold < Roster.skin_cost(pos)
+				chip.pressed.connect(func(): skin_bought.emit(sid))
+			"owned":
+				chip.text = "Wear %s" % nm
+				chip.pressed.connect(func(): skin_selected.emit(sid))
+			_: # "selected" (also "unwearable" can never reach a chip —
+				# the row only renders for group entries)
+				chip.text = "%s — worn" % nm
+				chip.disabled = true
+				chip.add_theme_color_override("font_disabled_color",
+					EMBER_TINT) # the EMBER title law, stage precedent
+	return row
