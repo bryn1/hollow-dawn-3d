@@ -1,0 +1,323 @@
+{
+ "cmu_to_bone": {
+  "Head": "bone_5",
+  "Hips": "bone_0",
+  "LeftArm": "bone_7",
+  "LeftFoot": "bone_28",
+  "LeftForeArm": "bone_8",
+  "LeftHand": "bone_9",
+  "LeftLeg": "bone_27",
+  "LeftShoulder": "bone_6",
+  "LeftToeBase": "bone_29",
+  "LeftUpLeg": "bone_26",
+  "LowerBack": "bone_1",
+  "Neck": "bone_4",
+  "RightArm": "bone_17",
+  "RightFoot": "bone_32",
+  "RightForeArm": "bone_18",
+  "RightHand": "bone_19",
+  "RightLeg": "bone_31",
+  "RightShoulder": "bone_16",
+  "RightToeBase": "bone_33",
+  "RightUpLeg": "bone_30",
+  "Spine": "bone_2",
+  "Spine1": "bone_3"
+ },
+ "cmu_unmapped": [
+  "LHipJoint",
+  "LThumb",
+  "LeftFingerBase",
+  "LeftHandIndex1",
+  "Neck1",
+  "RHipJoint",
+  "RThumb",
+  "RightFingerBase",
+  "RightHandIndex1"
+ ],
+ "evidence": {
+  "Head": {
+   "bone_world": [
+    0.002,
+    0.0208,
+    0.3798
+   ],
+   "cmu_world": [
+    0.0053,
+    0.0157,
+    0.4135
+   ]
+  },
+  "Hips": {
+   "bone_world": [
+    0.002,
+    0.0364,
+    0.0518
+   ],
+   "cmu_world": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "LeftArm": {
+   "bone_world": [
+    0.1074,
+    0.0403,
+    0.2822
+   ],
+   "cmu_world": [
+    0.1872,
+    0.0098,
+    0.2985
+   ]
+  },
+  "LeftFoot": {
+   "bone_world": [
+    0.1152,
+    0.0325,
+    -0.405
+   ],
+   "cmu_world": [
+    0.3814,
+    -0.048,
+    -0.8582
+   ]
+  },
+  "LeftForeArm": {
+   "bone_world": [
+    0.1621,
+    0.0247,
+    0.1573
+   ],
+   "cmu_world": [
+    0.4675,
+    0.0098,
+    0.2985
+   ]
+  },
+  "LeftHand": {
+   "bone_world": [
+    0.2128,
+    -0.0183,
+    0.005
+   ],
+   "cmu_world": [
+    0.6571,
+    0.0098,
+    0.2985
+   ]
+  },
+  "LeftLeg": {
+   "bone_world": [
+    0.0801,
+    0.0247,
+    -0.1981
+   ],
+   "cmu_world": [
+    0.2384,
+    -0.048,
+    -0.4655
+   ]
+  },
+  "LeftShoulder": {
+   "bone_world": [
+    0.0371,
+    0.0403,
+    0.3213
+   ],
+   "cmu_world": [
+    0.0022,
+    0.0129,
+    0.2502
+   ]
+  },
+  "LeftToeBase": {
+   "bone_world": [
+    0.1269,
+    -0.1198,
+    -0.4949
+   ],
+   "cmu_world": [
+    0.3904,
+    -0.1578,
+    -0.8829
+   ]
+  },
+  "LeftUpLeg": {
+   "bone_world": [
+    0.0801,
+    0.0286,
+    0.0206
+   ],
+   "cmu_world": [
+    0.1048,
+    -0.048,
+    -0.0982
+   ]
+  },
+  "LowerBack": {
+   "bone_world": [
+    0.002,
+    0.0403,
+    0.1104
+   ],
+   "cmu_world": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "Neck": {
+   "bone_world": [
+    0.002,
+    0.0403,
+    0.3369
+   ],
+   "cmu_world": [
+    0.0022,
+    0.0129,
+    0.2502
+   ]
+  },
+  "RightArm": {
+   "bone_world": [
+    -0.1035,
+    0.0403,
+    0.2822
+   ],
+   "cmu_world": [
+    -0.1809,
+    -0.0067,
+    0.3077
+   ]
+  },
+  "RightFoot": {
+   "bone_world": [
+    -0.1113,
+    0.0325,
+    -0.405
+   ],
+   "cmu_world": [
+    -0.3708,
+    -0.048,
+    -0.8558
+   ]
+  },
+  "RightForeArm": {
+   "bone_world": [
+    -0.1542,
+    0.0286,
+    0.1573
+   ],
+   "cmu_world": [
+    -0.4755,
+    -0.0067,
+    0.3077
+   ]
+  },
+  "RightHand": {
+   "bone_world": [
+    -0.205,
+    -0.0183,
+    0.005
+   ],
+   "cmu_world": [
+    -0.6654,
+    -0.0067,
+    0.3077
+   ]
+  },
+  "RightLeg": {
+   "bone_world": [
+    -0.0761,
+    0.0286,
+    -0.1981
+   ],
+   "cmu_world": [
+    -0.2331,
+    -0.048,
+    -0.4777
+   ]
+  },
+  "RightShoulder": {
+   "bone_world": [
+    -0.0332,
+    0.0403,
+    0.3213
+   ],
+   "cmu_world": [
+    0.0022,
+    0.0129,
+    0.2502
+   ]
+  },
+  "RightToeBase": {
+   "bone_world": [
+    -0.123,
+    -0.1198,
+    -0.4949
+   ],
+   "cmu_world": [
+    -0.3825,
+    -0.1621,
+    -0.8882
+   ]
+  },
+  "RightUpLeg": {
+   "bone_world": [
+    -0.0761,
+    0.0247,
+    0.0206
+   ],
+   "cmu_world": [
+    -0.095,
+    -0.048,
+    -0.0982
+   ]
+  },
+  "Spine": {
+   "bone_world": [
+    0.002,
+    0.0403,
+    0.1768
+   ],
+   "cmu_world": [
+    -0.0009,
+    0.0021,
+    0.1264
+   ]
+  },
+  "Spine1": {
+   "bone_world": [
+    0.002,
+    0.0403,
+    0.251
+   ],
+   "cmu_world": [
+    0.0022,
+    0.0129,
+    0.2502
+   ]
+  }
+ },
+ "mapped": 22,
+ "rig": "skin-relic-rig.glb",
+ "rules": "R1..R7 as documented in tools/mocap/05-map-rig.py (MC 11138)",
+ "side_axis": "X",
+ "target_joints": 34,
+ "target_unmapped": [
+  "bone_10",
+  "bone_11",
+  "bone_12",
+  "bone_13",
+  "bone_14",
+  "bone_15",
+  "bone_20",
+  "bone_21",
+  "bone_22",
+  "bone_23",
+  "bone_24",
+  "bone_25"
+ ],
+ "up_axis": "Z"
+}

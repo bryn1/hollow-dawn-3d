@@ -387,3 +387,43 @@ serving at EVERY close, imagegen never joined a TRELLIS window. Journey re-dump
 9/9, pytest 278 green — zero code/tests touched (diff universe: assets/, tools/vm100/*.tsv,
 LEDGER.md). Capture `.tmp/m5-art.txt` VERIFY_EXIT=0.
 
+
+## M5r — rig+clip pass over the SEL-C set (T-M5r, MC 11440, 2026-10-27)
+
+The existing chain, reused: UniRig rig stage (run-unirig-inner.sh) + tools/mocap
+05-map (R1..R7) + 06-retarget (CMU 07_01 walk / 02_05 attack) over the 13 M5 meshes,
+13 single-row GPU windows (drain barrier inside, trap-close, serving proved by real
+completion pre AND post every window; one early rc=1 window was MY spec-name bug —
+40 s barrier only, no GPU work, recorded). Landed 7 rigged+clipped in place (named
+walk+attack animations; maps committed at assets/anim/maps/ per S2r precedent):
+emberwright 7891 tris (28-j), grave-ward 7670 (28-j), duskrunner 7689 (52-j),
+iron-penitent 7948 (28-j), skin-ash 7593 (53-j), skin-marrow 7916 (28-j),
+skin-relic 7773 (34-j, EXACTLY the player skeleton, match=True). Retarget added zero
+triangles on all 7 (accessor face count static==rig==final within the S2r-documented
+merge micro-delta class); embedded textures BYTE-IDENTICAL round-trip (GLBs carry no
+PNG tEXt chunks — measured on the shipped player/warden pairs too; art-src tEXt
+provenance untouched); 04-validate-glb rigged PASS + RED-control (unanimated
+intermediate rejected) + validate_glb visual PASS; post-retarget 4-yaw turntables
+eyeballed SOLID personally, all 7.
+BONE COUNT HONEST ROW (M5-SPEC §3.1): the "34-joint skeleton" is the PLAYER row;
+UniRig counts are per-asset (28-53 here; relic exactly 34) — the observable is the
+shipped named animations + skin data, measured per mesh.
+skin-ash NEEDED A MAP-DATA ADJUST (zero code touched): 05-map's R3 mapped CMU Neck1
+(zero-length in clips, folds per 06's own comment) mid-spine on the 53-bone rig and
+06's topology guard correctly rejected it; the shipped player.json maps Neck1
+UNMAPPED — the map JSON was adjusted to exactly that (mapped back to 22, head-tip
+unmapped, stamped `map_adjusted`), 06 then PASSed. Maps are committed data.
+6 SHIP STATIC (owner artifact "Rec", option A — statue-class; docs/RIG-DEVIATION-
+SEL-C.md is the B-E8/K-E3 pin): the UniRig skeleton model DETERMINISTICALLY (seed
+fixed 12345) fails on fused-mass silhouettes: coinhound 4-bone x2 (v1 seated dog,
+then ruling-1 re-master v2 UPRIGHT hound-knight — mesh GREEN, rig failed again),
+tallow-seer 3-bone x2 (v1, then ruling-2 re-master v2 with visible legs — mesh
+GREEN, rig failed again), shroud-saint 9-bone single chain, hoard-wretch 41-bone
+wings-as-arms NO legs, skin-tide 3-bone, skin-void 3-bone. Two re-masters burned
+mesh reserves 2/3 (both ratified, both first-seed GREEN meshes); 1/3 HELD. v2 files
+supersede v1 in place for coinhound + tallow-seer. Importer GHOST row: the venvrig
+glTF importer instantiates a phantom 2-m Icosphere (+80 tris) for EVERY skinned
+file — present in the SHIPPED player-rigged.glb (T-S1p's 7999 = 7919+80 is exactly
+it); it is importer-side, NOT in any GLB JSON, Godot's runtime load unaffected;
+counts on rigged files were taken with the ghost filtered (m5rig-render.py, capture
+`.tmp/m5-rig.txt`).
