@@ -39,7 +39,7 @@ const = conftest.const
 
 
 def leg(ev):
-    rows = [r for r in conftest.jsonl_rows(FIXTURE) if r["ev"] == ev]
+    rows = conftest.rows_by_ev(FIXTURE, ev) # the ONE filter (MC 11398 §2.3)
     assert len(rows) == 1, "events-m4 fixture must carry exactly one %r" % ev
     row = rows[0]
     assert row["ok"], "%s leg red: %s" % (ev, row["checks"])

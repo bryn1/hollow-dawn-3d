@@ -48,17 +48,15 @@ GAME_STATE = read("game_state.gd")
 
 
 def leg(ev):
-    rows = [r for r in conftest.jsonl_rows(FIXTURE) if r["ev"] == ev]
+    rows = conftest.rows_by_ev(FIXTURE, ev) # the ONE filter (MC 11398 §2.3)
     assert len(rows) == 1, "reaper-m4 fixture must carry exactly one %r" % ev
     row = rows[0]
     assert row["ok"], "%s leg red: %s" % (ev, row["checks"])
     return row
 
 
-def const(name, source):
-    m = re.search(r"const\s+%s\s*:=\s*([-\d.]+)" % re.escape(name), source)
-    assert m, "constant %s not found in source" % name
-    return float(m.group(1))
+const = conftest.const # the ONE seam (MC 11398 §2.2: this file had re-copied
+# the donor verbatim; the conftest body is byte-identical to it — capture)
 
 
 # ---- B-E1: flag OFF stays byte-territory ---------------------------------------
