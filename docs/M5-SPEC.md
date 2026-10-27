@@ -1,5 +1,24 @@
 # M5-SPEC — hollow-dawn-3d "Roster & Legacy" (v3.0.0) — spec for the DA gate
 
+- **REV 2, 2026-10-27, after DA cycle 1** (`docs/M5-SPEC-DA.md` @ `9b1d067`, VERDICT FIX,
+  1P1/4P2/3P3/4P4 — the DA doc is immutable; THIS doc revises in place, M2/M3/M4-SPEC
+  precedent). ALL TWELVE findings ADOPTED, each re-grepped against the tree at `9b1d067`
+  BEFORE adoption — the per-row dispositions (adopted / adopted-with-mechanism-correction,
+  each with its re-grep evidence) are the §12 REV-2 fold ledger; **0 rebuttals** — the P1 and
+  all four P2s are real and their fix clauses adopted AS WRITTEN; only two MECHANISM readings
+  inside adopted rows are corrected to measured truth (the spec's own law: the reason must
+  state the truth, not the stale story). The P1-1 pawn apply-step (§2.1b + B-E7), the FORCED
+  above-the-gold-line landing (§1.1 + P2-1 pin-hold clause), the `duplicate()` law + the
+  multi-run aliasing leg (§0 F-5 + B-E2), the zero-DIFF P-E1 leg and the REAL P-E3
+  instruments (§1.3) land as named lines; the six drifted header cites, the 18-row fixture
+  count and 537 de-staled (P3-1/2/3); the four P4s folded inline. The gate's grounding-
+  PASSes ride unchanged (F-1, the version law + the `:336-338` quote re-read verbatim, F-3's
+  zero-world.gd proof, the SEL arithmetic + option-independence re-derived per option, R1
+  VERBATIM-exact, the green base independently re-reproduced by the gate: 278 passed,
+  PYTEST_RC=0; REV-2 re-verified the suite ON THIS REV'S TREE: 278 passed, PYTEST_RC=0 —
+  warm-cache run, the canonical cold `--import` timing stays the line below) — **the design
+  core is unchanged; SEL and the OWNER-DECISION-PENDING marker
+  are UNTOUCHED.** REV 1 stays below as lineage.
 - **REV 1, 2026-10-27.** Build-depth spec for M5, authored for the **devils-advocate gate**
   (fleet law: roadmap-gated build cards file ONLY after the DA SHIPs this). Parented on
   `docs/PARITY-ROADMAP.md` rev-3 §M4 (the tranche whose roster half M4 deliberately deferred)
@@ -37,22 +56,28 @@
   NEXT milestone that moves toward '2D completed and tested, then 3D remake' — characters /
   achievements / skins / endless-depth / evolutions / stages / or a 3D pivot — recommendation
   required, with WHY now" (paraphrase; the verbatim dispatch rides the MC card).
-- **Code truth (every claim re-grepped THIS session at `48f5b33`):** `game_state.gd` (254 L —
+- **Code truth (every claim re-grepped THIS session at `48f5b33`; six cites REV-2-corrected at
+  `9b1d067` per DA P3-3 — the tree is byte-identical between them, docs-only parent, so the
+  drift was in MY cites, re-measured once and the numbers below are the truth):**
+  `game_state.gd` (254 L —
   `BASE_SPEED:5 / MAX_HP:8 / run vars endless:36 cycle:37 stage:47 reaper:57 limit:66 /
-  player_speed():98-101 / damage_taken():104 / damage_multiplier():114 / start_run():144-185
-  (the talon-start row :173; meta-rank consumption :150-159; run-var resets :163-172) /
+  player_speed():98-101 / damage_taken():104 / damage_multiplier():114 / start_run():144-180
+  (ends before `set_phase:182`; the talon-start row :173; meta-rank consumption :150-159;
+  run-var resets :163-172) /
   end_run():187-194 (stats = {time,kills,level,gold}) / snapshot_json():228-244 (exact 12)`);
   `main.gd` (472 L — cap fork `elif game.reaper: :266` + `else: _end_run("win") :268-269`
   (the R9 source-pinned fork — UNTOUCHED by M5) / `_start_game():290` (the ONE hand-in seam:
-  `game.start_run() :301 → endless :306 → reaper :311 → stage :317 → seed_stage_props :318`) /
-  `_end_run():355` (the run-end funnel: best_cycle max-rule, the stage-chain SET-only flag
-  block `gold += stats.gold` + the ONE `_meta_changed()` at `:376`, the show_end lines) /
+  `meta_ranks.duplicate() :300-301 → game.start_run() :302 → endless :306 → reaper :311 →
+  stage :317 → seed_stage_props :318`) /
+  `_end_run():355` (the run-end funnel: best_cycle max-rule :365-366, the stage-chain SET-only
+  flag block :367-374, `gold += stats.gold :375` + the ONE `_meta_changed()` at `:376` —
+  adjacency PINNED, the P2-1 law, the show_end lines follow) /
   `_meta_changed():420-421` / `_open_shop():431`, `_open_stages():461`); `screens.gd` (445 L,
   reason header :2-7 "one overlay idiom per file IS the concern" — menu/levelup/end/shop/
-  stages = the FIVE overlays at :97-106, `icon_path():65-72` with the PASSIVES key-set leg +
+  stages = the FIVE overlays at :98-107, `icon_path():65-72` with the PASSIVES key-set leg +
   the `_:` catch-all + assert-exists, `show_stages():381` the DISABLED-not-hidden lock rows);
-  `save.gd` (128 L — `VERSION := 1 :26`, fields `gold/ranks/flags/best_cycle/stage :29-46`,
-  field-by-field migration `:49-75`, temp+rename `save()` :79+`); `powerups.gd` (148 L — OUR
+  `save.gd` (128 L — `VERSION := 1 :24`, fields `gold/ranks/flags/best_cycle/stage :27-42`,
+  field-by-field migration `:49-75`, temp+rename `save()` :76); `powerups.gd` (148 L — OUR
   cost curve `cost(base,rank) = base*(rank+1) :62-65`, the buy/refund pure funcs);
   `hero_pawn.gd` (63 L — `mesh = _player_mesh() :35` set ONCE at ready; `_player_mesh():53-54`
   = `ClassMesh.mesh_for("player.glb", HordeViz.MODEL_H_PLAYER)` — the ONE player-mesh seam,
@@ -68,7 +93,9 @@
   run-mode-var reset pin) + `:130-135` (the hand-in seam regex) + `:138-148`-era R9 re-pin on
   the cap fork, `test_card_icons.py:138` (`len(rows) == 32`), `test_art_integration.py:42`
   (`DRAWS_PLANNED = 40`) + `:95` (the GLB_FILES coverage law) + `:152` (the player-swap seam
-  pin), `test_dawnwell_shop.py:136-155` (the start_run-consumption + main-wiring pins).
+  pin), `test_dawnwell_shop.py:136-157` (the start_run-consumption pin `:136-139` + the
+  main-wiring pins `:153-157` — the GOLD→FUNNEL adjacency regex `:156-157` NAMED: the
+  P2-1 forced landing, §1.1).
 - **Clean-room stance (inherited from `docs/PARITY-ROADMAP.md` §1 honesty rule, binding):**
   *their systems, our content* — `docs/VS-FEATURES.md` (clean-room wiki inventory) is a SHAPE
   reference only: characters + additive price scaling (S6 ~477-483), achievement chains (S7
@@ -95,9 +122,12 @@ decisions are **named, not silently chosen**.
   20° pitch, px→m size table) = LEDGER S3; §b (per-class MultiMeshes, ≤60 draw cap) = T-S2i
   live-table; §c Route A (transform gait + skinned player/boss) = T-S2r mocap; §d (v1 verbatim
   numbers, the copied `test_game_numbers.py`) = the suite since the first commit; §e = the
-  honest EXCLUDED pass (MC 11398/11401); §h REJECTS the "more 3D" alternatives (perspective
-  camera, full 3D physics, skinned horde, heightmap terrain) with measured reasons, under the
-  owner's own verbatim ruling: *"a 3d remake. Same type of viduals, top down…"*. A "pivot
+  honest EXCLUDED pass (MC 11398/11401); the "more 3D" alternatives are rejected WHERE THE
+  DOC PUTS THEM (REV-2/P4-1 attribution fix): the perspective camera at §a's camera line
+  `:19-20` ("perspective rejected: v1 entities are size-pinned regardless of distance,
+  render.gd:10"), full 3D physics at §a's collision law, skinned horde + heightmap terrain
+  at §h's REJECTS list — all with measured reasons, under the owner's own verbatim ruling
+  at `DESIGN-3D.md:4`: *"a 3d remake. Same type of viduals, top down…"*. A "pivot
   forward" (perspective/true-3D play) would OVERTURN a DA-gated design and the owner's top-
   down ruling — an owner decision with NO artifact on the table (Rule 2). **Reading adopted:**
   M5 continues the endgame the way the repo has always run it — the owner's DoD is a *full
@@ -148,6 +178,19 @@ decisions are **named, not silently chosen**.
   (the exact LIMIT_BREAK arm shapes, `game_state.gd:98-114` — additive, zero-identity at 0)
   + the xp fold rides `meta_xp_mult` (start_run :158). NO new stat family, no second
   multiplier — the C-E3 formula-row shape repeats, the default row reads the shipped bytes.
+  **THE `duplicate()` LAW (REV-2, DA P2-2 — adopted): every roster hand-off to run state
+  copies — `Roster.start_weapons/start_passives` return deep `duplicate()`s of the table
+  rows, never row references — the repo's own aliasing law restated (`meta_ranks` is
+  duplicated at `main.gd:300-301` precisely against this class, pinned at
+  `test_dawnwell_shop.py:153-155`); row 0's duplicate EQUALS the shipped `:173` row BY
+  VALUE (the equality pinned, never identity). Mechanism at measured truth (the one honest
+  correction inside an adopted row, §12 F-3): at the pinned Godot 4.7.2 the const TABLE's nested
+  containers are DEEPLY READ-ONLY (binary probe THIS session: `Invalid assignment on
+  read-only value (on base: 'Dictionary')` at the first in-place mutation) — so the naive
+  hand-off is a LOUD runtime failure on the run's first weapon mutation, not the silent
+  run-2 poisoning the gate described; the `duplicate()` clause and the B-E2 multi-run leg
+  are adopted regardless (the fix for the loud failure AND the lifecycle guard for any
+  future mutable-shape table — the shape the leg can actually see green-falsify).**
 - **F-6 (purchase = the PowerUps law restated; selection persists like `stage`).** Prices
   are a flat OUR curve over the roster index (`0/300/600/900/1200/1500` well-gold — the
   roadmap row 7 "additive price curve OURS", the `base*(rank+1)` precedent `powerups.gd:62-65`
@@ -162,7 +205,9 @@ decisions are **named, not silently chosen**.
   `world.seed_stage_props` at `main.gd:318`), so the pinned literal is untouched — a named
   STAY probe, and B-E4 is the leg that re-proves it green on the final tree. The char/skin
   hand-ins follow the F-4 law (`_dawnwell → start`, AFTER `start_run` reset — the endless
-  pattern's own wording).
+  pattern's own wording). **REV-2/P1-1: the pawn `_pawn.apply_selection()` call rides the
+  SAME position, as the block's last line (§2.1b) — both hand-in pins are MEMBERSHIP regexes
+  on literals the new lines never touch, so the STAY reading survives the addition.**
 - **F-8 (TWO new surfaces, ONE major — the version math).** Character select (§2) and the
   achievements page (§1) are the release's two navigated overlays (6th + 7th in the ONE
   panel style). The law keys on the trigger, not the count (M3 precedent: stage-select made
@@ -175,7 +220,9 @@ decisions are **named, not silently chosen**.
   (four lines under the 600 hard fail)** — M5 ships NO strips re-shoot (skin/character visual
   proof rides the `skinned_capture.gd` frame-diff pattern, §3), so the twice-deferred row is
   NOT carried here and is re-named for the first card that actually touches that file;
-  **sim_events 533** — untouched. Each card closes with the walk re-run (0 new findings).
+  **sim_events 537** — untouched (REV-2/P3-2: re-measured at base — the audit's 533 was
+  already stale at `48f5b33`; world/sim_stages/strips_capture 551/583/596 re-measured too).
+  Each card closes with the walk re-run (0 new findings).
 - **F-10 (no 4th stage, no roster expansion, no coin bags — tracked, named).** M3-SPEC F-8's
   reading stands (Stretch, no DoD); the +8/+5 roster-expansion (M2-SPEC §8.5), coin-bag tiers
   (§8.1) and the pool-GATING half of the unlock store stay tracked — M5 lands the COUNTER +
@@ -196,14 +243,25 @@ the counter-store half F-3/F-4 close.
   a missing field defaults `{}`, a HIGHER-version save still quarantines, the write path is
   the shipped temp+rename). The disk key-set pin `test_save.py:184-186` RETIRES-AND-RE-PINS
   with it (ledger **R1**) — replace-not-delete, same commit.
-- **The ONE update site:** `main._end_run` gains a block BESIDE the stage-chain block
-  (main.gd :372-376, the verbatim pattern): `Achievements.update(_dawnwell, game, world)`
-  reads ONLY `game.stats` (:187-194), `game.weapons`, `game.stage`, `world.reaper_spawned`,
-  `game.cycle` and the well — updates the counters (Σ-add rows + max-rule rows, the
-  best_cycle max-law shape), SETS `flags["achv:<id>"] = 1` for every table row whose target
-  the new counter values satisfy, and NOTHING ELSE. The ONE `_meta_changed()` call site at
-  `:376` stays the single write (call-count-per-end pin unchanged — the M3 A-E5 instrument
-  stays armed); run end with zero counter/flag change writes nothing new.
+- **The ONE update site — landing FORCED by a shipped pin (REV-2, DA P2-1):** `main._end_run`
+  gains the block **ABOVE the `_dawnwell.gold += game.stats.gold` line (`:375`), directly
+  below the best_cycle max-rule write (`:365-366` — beside it in every sense but the pinned
+  one)**. The landing is not stylistic: `test_dawnwell_shop.py:156-157` pins
+  `_dawnwell.gold += game.stats.gold` followed by `_meta_changed()` with **whitespace only
+  between** (`\s*\n\s*` — comments do NOT qualify), so the block may never land between the
+  gold line and the funnel (suite RED), and never BELOW the funnel (counters/flags would
+  persist one mutation late — P-E2's roundtrip-on-disk legs RED). PIN-HOLD CLAUSE (the pin
+  named in §7.2's STAY list, cite extended to `:136-157`): the block adds NO `_meta_changed`
+  call and NO `.save()` and touches neither pinned literal — the adjacency regex stays green
+  BY CONSTRUCTION. The block body: `Achievements.update(_dawnwell, game, world)` reads ONLY
+  `game.stats` (:187-194), `game.weapons`, `game.stage`, `world.reaper_spawned` (`world.gd:216`
+  — a READ of the field, zero world.gd growth), `game.cycle` and the well — updates the
+  counters (Σ-add rows + max-rule rows, the best_cycle max-law shape), SETS
+  `flags["achv:<id>"] = 1` for every table row whose target the new counter values satisfy,
+  and NOTHING ELSE. The ONE `_meta_changed()` at `:376` below persists it (the
+  `test_stages.py:296` end_run-scoped count pin stays 1 — the block calls neither); unlike a
+  shop verb a run end is NEVER a no-op (`runs_total += 1` always moves — the zero-write
+  claim was false; P-E1 carries the corrected zero-DIFF leg).
 - **The table (`godot/scripts/achievements.gd`, class_name Achievements — new rule module,
   the `powerups.gd`/`evolutions.gd`/`union.gd` precedent for every rule module since M1):**
   `TABLE` = 20 OUR rows `{id, name, counter, target}` + `update(well, game, world)` +
@@ -248,9 +306,9 @@ commit), `tools/dawnwell_pixel_gate.py` (+`achievements_shot` row, R3).
 
 | # | observable | seam (the ONE existing channel) | red |
 |---|---|---|---|
-| P-E1 | counters law, BOTH sides: a scripted run-end leg (probe, the save_probe shape) on a known stats dict shows the Σ-add rows add EXACTLY, the max-rule rows max EXACTLY (`max_level` never decreases, `minutes_total` floor law), and a zero-gold/zero-kill end changes NOTHING writable (no-op ⇒ no write — the shop law) | the `achv_probe.gd` legs against a throwaway `user://` (XDG_DATA_HOME, the save_probe pattern verbatim) | planted: `max_level = stats.level` (replace not max) ⇒ the run-2-lower-level leg goes RED (`max_rule` check); planted: Σ-add flipped to max ⇒ `kills_total` RED |
+| P-E1 | counters law, BOTH sides: a scripted run-end leg (probe, the save_probe shape) on a known stats dict shows the Σ-add rows add EXACTLY, the max-rule rows max EXACTLY (`max_level` never decreases, `minutes_total` floor law), AND the zero-DIFF leg (REV-2/P2-3, replacing the false zero-write claim): a run whose stats move ONLY Σ-add rows SETS no new flag and moves NO max-rule counter, the Σ-add rows move by the EXACT deltas and NOTHING else moves — the disk-write itself is the shipped always-write funnel law (`runs_total += 1` makes every end a write; the shop VERB no-op does not govern run end) | the `achv_probe.gd` legs against a throwaway `user://` (XDG_DATA_HOME, the save_probe pattern verbatim) | planted: `max_level = stats.level` (replace not max) ⇒ the run-2-lower-level leg goes RED (`max_rule` check); planted: Σ-add flipped to max ⇒ `kills_total` RED; planted: a max-rule row added for `kills_total` ⇒ its delta row reads 0-after-run-1 ⇒ RED |
 | P-E2 | flag law: reaching a target SETS `flags["achv:<id>"] = 1` exactly once; a later WORSE run never unsets (the stage-chain both-side leg verbatim shape); `flags` stays `{unlock_id: 1}` int-valued (key-set includes the prefix) | the same probe legs reading the on-disk JSON (the roundtrip-on-disk pin shape, `test_save.py` reload legs) | planted: SET moved to run START ⇒ the worse-later-run leg RED; planted: unset added on death ⇒ RED |
-| P-E3 | funnel law: EVERY achievement/counters change persists through exactly ONE `_meta_changed` call at run end — the `test_save.py` marker-count pin (call count == 2 boot+funnel) stays green AND the update block adds no second call site (source pin beside the R1 re-pin) | the existing source-regex + count pins (`test_save.py`), re-run green | planted: a direct `well.save()` inside `achievements.gd` ⇒ count pin RED; planted: update called from `_start_game` ⇒ boot-count leg RED |
+| P-E3 | funnel law, REAL instruments (REV-2/P2-4 — the "call count == 2" cite was PHANTOM, re-grepped: `test_save.py:133` counts `_dawnwell.save()` in MAIN == 1, MAIN-scoped; `test_stages.py:296` counts `_meta_changed()` inside the `end_run` block == 1 + `func _meta_changed` definition == 1; there is NO marker-count==2 funnel pin): the shipped pins STAY green by construction (the block calls neither save() nor the funnel), AND the card lands the named NEW whole-scripts pin: across ALL of `godot/scripts/`, zero `.save(` call sites outside `save.gd` and `main._meta_changed`'s own body (measured at `9b1d067`: exactly one outside site exists, `main.gd:421` — the funnel), and main.gd's `_meta_changed(` occurrences equal the shipped set (calls `:287/:376/:437/:443/:449/:471` + definition `:420` = 7, re-counted at card) — the block adds ZERO to both | the existing source pins above + the named NEW grep pin (SAME commit as the block; scope NAMED: all of `godot/scripts/` — no cross-file blind spot) | planted: a direct `_dawnwell.save()` in achievements.gd ⇒ the whole-scripts grep pin REDS (file scope named, the phantom class closed); planted: the block moved BETWEEN the gold line and the funnel ⇒ `test_dawnwell_shop.py:156-157` adjacency REDS — the P2-1 forced landing is itself red-proven |
 | P-E4 | the save shape: on-disk key set EXACTLY `{version, gold, ranks, flags, best_cycle, stage, counters}` (R1's replacement pin, equal-or-stronger: the OLD six still roundtrip byte-true, `counters` migrates `{}` on an older save, VERSION still 1) | `test_save.py`'s exact-set legs (the T-M2e/T-M3s falsified-and-replaced lineage, third honest move named in the row comment) | planted: VERSION bumped ⇒ version-skew legs RED (the no-bump law instrument); planted: `counters` NOT written ⇒ set pin RED |
 | P-E5 | achievements page pixel row: `dawnwell_pixel_gate.py` gains `achievements_shot` — `_center_box` crop non-bg ≥ 200 px vs the hidden-UI baseline (the shop/stage rows' own floor), 20 rows + progress text rendered | the EXISTING gate + capture idiom (`tools/capture_lib.py` — the ONE capture launcher), new row same floors | baseline-vs-baseline copy scores 0 px + exit 1 (the gates' own planted-red shape re-proven on the NEW row, R3) |
 | P-E6 | table + display pins: `TABLE` is 20 rows, ids unique, every row's counter ∈ the named counter set (no orphan), `ACHV_PREFIX` one const; every id resolves to a name/progress line (no-blank law) | pytest table pin (the LIMIT_CARDS table-pin shape) + the probe's `progress` rows | planted: a row naming `chests_total` (no producer) ⇒ orphan-counter pin RED; planted: progress on an unknown counter ⇒ probe leg RED |
@@ -274,7 +332,7 @@ additive-zero at 0 (F-5). `mesh` names the GLB through the ONE `_player_mesh()` 
 | # | id | name | mesh | start weapon | signature rule (OUR numbers) | cost | gate |
 |---|---|---|---|---|---|---|---|
 | 0 | `the-vigil` | THE VIGIL | `player.glb` (shipped) | talon | — (every field 0 = the byte law) | 0 | always |
-| 1 | `emberwright` | THE EMBERWRIGHT | `char-emberwright.glb` NEW | ember-bolt | `dmg_pct +8` | 300 | — |
+| 1 | `emberwright` | THE EMBERWRIGHT | `char-emberwright.glb` NEW | ember | `dmg_pct +8` | 300 | — |
 | 2 | `grave-ward` | THE GRAVE-WARD | `char-grave-ward.glb` NEW | ward | `hp_add +12` | 600 | — |
 | 3 | `coinhound` | THE COINHOUND | `char-coinhound.glb` NEW | talon | `gold_add +40` | 900 | — |
 | 4 | `duskrunner` | THE DUSKRUNNER | `char-duskrunner.glb` NEW | dart-loop | `spd_pct +6` | 1200 | `achv:kills-50k` |
@@ -288,7 +346,8 @@ additive-zero at 0 (F-5). `mesh` names the GLB through the ONE `_player_mesh()` 
   F-6 flat additive curve; start weapons are shipped pool ids (roster-m1h IDS — zero new
   weapon code).
 - **Stat-rule consumption (F-5, exact seams):** `start_run()` — weapons row = `Roster.
-  start_weapons(char_id)` (row 0 returns the literal talon row `:173` byte-for-byte),
+  start_weapons(char_id)` **returning a deep `duplicate()` (F-5's law; row 0's duplicate
+  EQUALS the literal talon row `:173` by value, never a shared reference)**,
   `gold = Roster.rule(char_id).gold_add` (0 = byte-identical `gold = 0` at :156), the
   `max_hp` line becomes `max_hp = MAX_HP + PowerUps.max_hp_bonus(...) + Roster.rule(...).hp_add`
   (one additive term, +0 = IEEE identity), passives dict gains `Roster.start_passives(...)`
@@ -301,6 +360,43 @@ additive-zero at 0 (F-5). `mesh` names the GLB through the ONE `_player_mesh()` 
 - **Snapshot law:** `char_id` (and `skin_id`) are run state OUTSIDE the frozen 12-field
   snapshot (the `stage/flare/reaper/limit` precedent); the exact-12 pin stays by construction
   + a named 13th-field instrument leg (the `limit_snapshot` shape).
+
+### 2.1b THE PAWN APPLY-STEP (REV-2, DA P1-1 — adopted: selection applies AT the F-7 hand-in)
+
+The Code-truth read-once fact becomes the law here: `hero_pawn.gd` sets `mesh =
+_player_mesh()` **ONCE at `_ready()` (:34-43)** and the pawn is instantiated ONCE at boot
+(`main.gd:32/:89-91` — re-grepped: `_pawn` appears nowhere else in the file), so boot
+`_ready` fires before even the FIRST `_start_game` hand-in: a selection law that only sets
+run state ships a feature that NEVER shows in-session (the gate's P1-1, adopted). Fix, at
+file/function depth:
+
+- **`hero_pawn.gd` gains `func apply_selection() -> void` — the EXISTING `_ready` body
+  (:35-43) MOVED verbatim:** `mesh = _player_mesh()` re-derivation, then the material idiom
+  unchanged — `src := mesh.surface_get_material(0)`, `duplicate()` FIRST (the ClassMesh
+  cache is shared, the imported material never mutated — the T-S2i law), `TRANSPARENCY_ALPHA`
+  + `SHADING_MODE_UNSHADED` + `albedo_color = PLAYER_TINT` (`:31`, the BONE×3.6 tone-0.62
+  readability law — the hero/floor luma ≥2.0 gate), `material_override = _mat`. `_ready()`
+  shrinks to ONE call of `apply_selection()`. The method is IDEMPOTENT: each call
+  re-derives mesh + a fresh material duplicate from the NEW surface; the old `_mat` dies
+  with the old override. No second mesh path anywhere.
+- **Call site — ONE line at the F-7 hand-in tail:** `main._start_game` gains, after
+  `world.seed_stage_props(game)` (`:318`), in order: `game.char_id = …`, `game.skin_id = …`
+  (the `int(_dawnwell.…)` reads), then **`_pawn.apply_selection()`** — mesh re-read LAST,
+  both run vars landed. Both source pins survive because they are MEMBERSHIP regexes, not
+  adjacency: `test_endless.py:130-135` (pins `start_run()` → endless), `test_stages.py:318`
+  (`hand[hi:]` membership) — re-read at `9b1d067`.
+- **Mid-run/pause lifecycle (the gate's own question, answered):** NOTHING re-instantiates
+  the pawn — one creation site (above), `world.reset()` never touches it, and the select
+  overlay is MENU-phase-only (overlays are exclusive: a mid-`playing` selection change is
+  UNREACHABLE BY CONSTRUCTION). `apply_selection` runs boot `_ready` + every run start,
+  nothing else. Zero new mechanism: same loader, cache, material law — a re-derivation.
+- **Byte/pin preservation:** for the DEFAULT row `apply_selection()` recomputes
+  `_player_mesh()` whose default branch keeps the pinned literal
+  `ClassMesh.mesh_for("player.glb", HordeViz.MODEL_H_PLAYER)` — the cache returns the SAME
+  mesh + identical tint ⇒ capture streams pixel-invariant (B-E1's strips/s8 legs); the
+  seam-pin `test_art_integration.py:152-162` asserts the literal as a SUBSTRING in the
+  function body (re-read) — the extension passes it VERBATIM, `"CapsuleMesh" not in HERO`
+  stays green.
 
 ### 2.2 The select screen (SIXTH overlay; roadmap item 1's "purchase screen")
 
@@ -334,9 +430,11 @@ class meshes additionally take the S2r frame-diff proof (walk/attack rows ≥ 2 
 `roster.gd` NEW (CHARACTERS + SKINS tables + pure fns `rule/start_weapons/start_passives/
 start_weapons/skin_for/cost/is_locked/is_owned` — ALL rules here, the powerups.gd contract),
 `game_state.gd` (char_id/skin_id vars + resets + the F-5 additive terms + `start_run`
-consumption), `main.gd` (hand-in lines at the F-7 position + the five screen verbs),
+consumption), `main.gd` (hand-in lines at the F-7 position INCLUDING `_pawn.apply_selection()`
+as the block tail (§2.1b) + the five screen verbs),
 `save.gd` (`char`/`skin` int rows), `screens.gd` (SIXTH overlay + menu button; reason header
-re-worded), `hero_pawn.gd` (`_player_mesh()` extended: the ONE seam, its doc line updated to
+re-worded), `hero_pawn.gd` (`apply_selection()` = the `_ready` body moved, §2.1b; `_player_mesh()`
+extended: the ONE seam, its doc line updated to
 name the selection read + the T-S2p seam-pin test EXTENDED not replaced), NEW
 `godot/sim/sim_chars.gd` (rides `SimFunnel` — `fresh_run` opts gains the `char` key, a
 DECLARED opts growth in the 74-L funnel, default absent = row 0; own env `HD3D_CHARS_DUMP`;
@@ -351,7 +449,9 @@ Prior artifact: roadmap row 7 (`:44`, rev-3, DA-gated) names **"M4: 6 selectable
 start-weapon + one signature stat rule; purchase price curve OURS"** — a PLAN artifact, not
 an owner choice among sizes. The MC 11402 brief forbids treating it as one. Window estimates
 are grounded on the repo's OWN yield history (T-M1c2: 4 meshes consumed 12 windows = ~3/
-mesh incl. remaster+regen; T-S1p: player = 1 TRELLIS + 1 UniRig window first-seed; the
+mesh incl. remaster+regen; T-S1p: player mesh+rig acceptance in ONE bounded window
+(15:37→15:44, the LEDGER row as measured — REV-2/P4-2 cite fix; the ~3/mesh stays the
+RESERVED estimate, reserved upward against the newer yields, never downward); the
 ~30 % reserve law, roadmap §4). **Fixed across all options:** 5 skins (§3, ~10-14 windows),
 achievement pillar (~0 windows — 0 icons, badges reuse shipped files via the catch-all).
 
@@ -379,12 +479,12 @@ achievement pillar (~0 windows — 0 icons, badges reuse shipped files via the c
 | # | observable | seam | red |
 |---|---|---|---|
 | B-E1 | default identity byte law: journey 5020 + the 12 committed fixtures + the strips dump (modulo §7.1 norm) re-dump IDENTICAL on the T-M5c tree (row 0 = the shipped game; F-2) | the §7.1 re-run pattern (fresh dump vs committed, `cmp`) | planted: `start_weapons` returns the ember row for row 0 ⇒ the journey spawn/kills digest forks ⇒ RED |
-| B-E2 | per-character start weapon: for EACH table row a `sim_chars` leg (fresh_run opts `char`) dumps the FIRST offer/owned rows — `game.weapons[0].id ==` the row's weapon at t=0, slot count 1, row 0 exactly the talon literal | the `sim_chars.gd` dump (SimFunnel; the sim_boss DECLARED-pin idiom for the pinned char_id) | planted: table key drift (`"ember"` vs shipped `"ember-bolt"`-style id typo) ⇒ the kill-attribution leg never sees the weapon ⇒ RED (roadmap M1 ACCEPT's planted cooldown-never-fires class, restated) |
+| B-E2 | per-character start weapon: for EACH table row a `sim_chars` leg (fresh_run opts `char`) dumps the FIRST offer/owned rows — `game.weapons[0].id ==` the row's weapon at t=0, slot count 1, row 0 exactly the talon literal — **AND the REV-2/P2-2 aliasing twin-leg: TWO `fresh_run()`s INSIDE ONE process start with byte-equal weapons rows (the multi-run lifecycle leg — twice-cmp fixture generation is blind to same-process poisoning, so the leg runs twice-in-one-process; the `duplicate()` law's observable guard)** | the `sim_chars.gd` dump (SimFunnel; the sim_boss DECLARED-pin idiom for the pinned char_id) | planted: table key drift (`"ember-bolt"` for the shipped `"ember"` — the REV-2 self-caught id, §12 F-13 row: this exact typo sat in the REV-1 table) ⇒ the kill-attribution leg never sees the weapon ⇒ RED (roadmap M1 ACCEPT's planted cooldown-never-fires class, restated); planted: `duplicate()` removed with run 1 upgrading its weapon ⇒ run 2's dump row carries the upgrade ⇒ the twin-leg RED |
 | B-E3 | rule math, formula rows (the C-E3 exact-formula precedent): each new row dumps `max_hp == 100 + Σmeta·10 + hp_add`, `player_speed == 140·(1+0.08haste)·(1+0.03limit)·(1+0.01·spd_pct)`, `damage_multiplier == 1+0.1·ferocity+0.08·gall+0.04·limit+0.01·dmg_pct`, intake `raw−ward−rotten−1·armor ≥ 0`, `meta_xp_mult` row, start `gold ==` row — and the ROW-0 twin of every row EQUALS the shipped byte value exactly | the same dump channel (formula rows, the shop_probe/maxhp shape) | planted: `spd_pct +6` mis-scaled as ×0.1 ⇒ the speed formula row RED while the byte corpora (row-0 twin) stay GREEN — the both-sides law: a rule that leaks into row 0 flips B-E1 instead |
-| B-E4 | hand-in + reset law: `char`/`skin` are set at the ONE `_dawnwell → start` seam AFTER `start_run` (regex pin beside the F-7 STAY probes), reset in `start_run`, absent from the exact-12 snapshot (the 13th-field instrument leg, the `limit_snapshot` shape) | the existing source-pin pattern (`test_endless.py:130-135` STAYS green by construction — named) + a new snapshot-absent leg | planted: default in `start_run` from a global ⇒ the hand-in regex leg + the planted-flag-true twin RED (the B-E1 endless pattern's own red column restated) |
+| B-E4 | hand-in + reset law: `char`/`skin` are set at the ONE `_dawnwell → start` seam AFTER `start_run` (regex pin beside the F-7 STAY probes), reset in `start_run`, absent from the exact-12 snapshot (the 13th-field instrument leg, the `limit_snapshot` shape) | the existing source-pin pattern (`test_endless.py:130-135` STAYS green by construction — named) + a new snapshot-absent leg | planted: default in `start_run` from a global ⇒ the hand-in regex leg + the planted-flag-true twin RED (the M4-SPEC B-E1 endless-pattern red restated — P4-3 namespace fix) |
 | B-E5 | purchase law (the shop both-sides): buy at affordable+unlocked+unowned writes flag `char:<id>` + spends EXACTLY the table price through the ONE funnel; unaffordable/owned/gate-missing ⇒ NO write (the shop's no-op law); gate check reads `flags["achv:<id>"]` verbatim (a gate naming no shipped achievement is a PIN FAILURE, not a runtime surprise); refund NEVER (buy-once stated) | `main._char_buy` verb legs through the save_probe-style probe (the shop_probe pattern, throwaway well) — the price rows value-compare the F-6 table | planted: gate read before the flag exists in PILLAR A (wrong prefix) ⇒ every gate leg "owned" ⇒ RED; planted: price off-by-curve ⇒ spend row RED |
 | B-E6 | select screen pixel row (`dawnwell_pixel_gate.py` +`char_select_shot` ≥ 200 px vs hidden-UI baseline) + the FOUR-state rows leg (Locked names its achievement / Buy N / Owned / Selected in EMBER; DISABLED never hidden — the S7 ~610 law) | the existing gate + capture idiom; a state-leg dump (rows.json state rows, the stage-select precedent) | baseline-vs-baseline RED (R3 re-proven on the new row); planted: hidden-when-locked ⇒ the state-dump row-count leg RED (a locked row must RENDER) |
-| B-E7 | mesh truth per new row: file exists, tris ≤ 8000, turntable-solid eyeball rows PASS, live height at the ClassMesh seam 1.67 m rel_err 0.0 (art-fixture forward-lock, R2), `_player_mesh()` renders the SELECTED row's mesh — the T-S2p seam-pin test EXTENDED (default asserts the literal player.glb byte path) | the art-integration fixture/pins (R2 growth, prior rows byte-preserved) + the seam-pin pattern | planted: 2× height (the S2p red pair) ⇒ live-height leg RED; planted: default row mesh drift ⇒ the seam-pin RED |
+| B-E7 | mesh truth per new row: file exists, tris ≤ 8000, turntable-solid eyeball rows PASS, live height at the ClassMesh seam 1.67 m rel_err 0.0 (art-fixture forward-lock, R2), `_player_mesh()` renders the SELECTED row's mesh — the T-S2p seam-pin test EXTENDED (default asserts the literal player.glb path, the substring law `test_art_integration.py:152-162` kept); **PLUS the pawn-lifecycle twin-leg (P1-1): after a run-start with a planted selection (`sim_chars` opts `char` — the pawn the SIM actually shows), the pawn's live `mesh` IS the row's `ClassMesh` mesh and `material_override` is a duplicate carrying the NEW surface's material with the UNSHADED+PLAYER_TINT law (a re-derivation check, not a leftover from boot); the row-0 twin asserts the shipped mesh object (cache identity — the observable B-E7's old self could not see)** | the art-integration fixture/pins (R2 growth, prior 18 rows byte-preserved) + the seam-pin pattern + the live-pawn read through the sim root (`_pawn` reachable — the P1-1 instrument) | planted: 2× height (the S2p red pair) ⇒ live-height leg RED; planted: default-row mesh drift ⇒ the seam-pin RED; planted: apply-step DELETED (the P1-1 regression — selection set but pawn never re-derived) ⇒ the twin-leg RED while every other row stays green — the feature-dead class is now instrumented |
 | B-E8 | skinned clips per new mesh: `roster_capture` frame-diff rows walk/attack ≥ 2 px per mesh + FROZEN same-time controls 0 px, committed fixture twice-cmp-identical | the S2r capture+validator pattern (new file, NEW fixture — the S2r CSV stays byte-locked) | planted: unanimated copy ⇒ its rows 0 px ⇒ RED (the S2r red control shape) |
 | B-E9 | roster table pin: CHARACTERS rows verbatim (ids/mesh names/start weapon ids ∈ shipped IDS/`weapons.gd` — a grep pin, rule fields/price curve/gate ids ∈ PILLAR A's table — the cross-pillar SAME-commit law), portraits resolve + assert-exists, `len(CHARACTERS)` == the OPTION the owner ruled (the pin reads the ruling's number — the card's brief carries it) | pytest table pin (the LIMIT_CARDS shape) | planted: gate id `achv:kills-999k` (no row) ⇒ the cross-pillar pin RED — the gate-vs-table drift class |
 
@@ -505,6 +605,10 @@ consumer's legs close. SEL-C splits T-M5a into two window-sized cards (same file
 PERMANENCE is append-serial, meshes are disjoint files).
 **Doc-sync rows (retired-claim doctrine):** T-M5z rewrites the roadmap gap rows 7/10 CURRENT
 cells (LANDED named: roster 6 + achievements page + skins 5 — with the SEL ruling quoted),
+**AND the roadmap's OWN M2 #4 feature row `:238-240` (REV-2/P4-4: its ACCEPT text "fresh-save
+leg shows gated card ABSENT" is the pool-GATING half M5 does NOT ship — the row gets
+"counter+flag store LANDED-M5 (named); pool-gating NOT LANDED, tracked as the §9.2
+follow-on", replace-not-delete, so no post-v3.0.0 reader finds it looking shipped-or-stale)**,
 the M5 landing note (LANDED named / NOT LANDED named: pool-gating store, coin bags, roster
 expansion, per-char skins, the 4th stage — the same replace-not-delete wording discipline),
 DESIGN-3D §(f) layout lines for `roster.gd`/`achievements.gd`, README feature list + version
@@ -515,7 +619,7 @@ in its closing commit (one-ledger law).
 `world.gd` split SCHEDULED — **UNTRIGGERED: zero M5 card touches world.gd** (the file-set
 column above is the proof; F-3); `sim_stages.gd` 583 plates-split — no M5 legs land there;
 `strips_capture.gd` 596 — not touched (skin/char visual law rides roster_capture, F-9) — the
-deferral re-named for its next touching card; `sim_events.gd` 533 — untouched. WATCH ROW:
+deferral re-named for its next touching card; `sim_events.gd` 537 — untouched. WATCH ROW:
 `screens.gd` 445 + two overlays ≈ +130 lands ~575, UNDER the 600 hard fail but within
 walking distance — each screen card carries the walk re-run; if a card crosses 400→600 the
 reason header row count (FIFTH→SEVENTH overlay) moves IN THE SAME COMMIT (the audit law:
@@ -530,8 +634,9 @@ it; the §7.1 corpus cannot move).
 1. **STRICT, byte-identical (`cmp`)**: the 12 committed fixtures — `endless-m2`,
    `gem-merge-m2g`, `unions-m2u`, `chests-tiers-m2`, `chests-evolve-m1e`, `carry-caps-m1b`,
    `stages-m3`, `events-m4`, `reaper-m4`, `limit-m4`, `skinned-clips-s2r-framediff.csv`,
-   `art-s2i-probe.jsonl` (carve: FORWARD-LOCK growth under R2 — prior rows byte-preserved,
-   the T-M3b "13 base rows" precedent, grown twice already) — plus the `sim_headless`
+   `art-s2i-probe.jsonl` (carve: FORWARD-LOCK growth under R2 — **18 rows at this base,
+   REV-2/P3-1 de-staled from the git-measured history: 13 base rows → 15 at T-M3b → 17 at
+   T-M4e → 18 at T-M4r; M5's growth is the FOURTH, prior 18 rows byte-preserved**) — plus the `sim_headless`
    **journey re-dump: 5020 rows @ HD3D_SEED=11101**, re-dumped FRESH on the card's tree vs
    the committed records (the T-C3 gate idiom; fresh worktree, `--import` first, `cmp`).
    New M5 fixtures (`chars-m5`, `roster-clips-m5-framediff`, `achv` probe rows) are
@@ -563,7 +668,7 @@ it; the §7.1 corpus cannot move).
 | # | row moved (verbatim pin cite) | falsified by | replacement (equal-or-stronger, named) |
 |---|---|---|---|
 | R1 | `tests/test_save.py:184-186` — `assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle", "stage"}, "on-disk keys must be exactly the roadmap's four + best_cycle + stage"` (the row's own comment already narrates its two earlier honest moves) | T-M5p (`counters`), T-M5c (`char`), T-M5k (`skin`) — three same-commit re-pins, in series | each re-pin names the EXACT grown set (`+counters` → `+char` → `+skin`) and keeps the older-fields-roundtrip-true legs + the VERSION==1 no-bump leg + the migration-default leg (`{}`/`0` on an older save — the `best_cycle` proof shape); equal-or-stronger: each pin adds the new field's DEFAULT assertion, none weakens an old one |
-| R2 | `tests/fixtures/art-s2i-probe.jsonl` (15→17 rows since T-M4e/R4) + `tests/test_art_integration.py` coverage/file-exists rows (`:73-95` GLB_FILES law — ENEMY-scoped, and `:152` the player-seam pin) | T-M5c (+≤5 char meshes), T-M5k (+5 skins) — PLAYER-class rows join | forward-lock growth again (prior 17 rows byte-preserved — the T-M3b precedent, grown a third time); coverage rows re-pin IN BOTH consuming commits (the standing rule); the `:152` seam-pin test is EXTENDED to the selection read, its default-mesh assertion KEPT verbatim; card-time re-grep duty: any set-equality row over the GLB dir listing found at card time retires HERE, same commit (the M4 R-rows' standing clause) |
+| R2 | `tests/fixtures/art-s2i-probe.jsonl` (**18 rows at this base** — REV-2/P3-1: 13→15→17→18 measured through T-M3b/T-M4e/T-M4r) + `tests/test_art_integration.py` coverage/file-exists rows (`:73-95` GLB_FILES law — ENEMY-scoped, and `:152` the player-seam pin) | T-M5c (+≤5 char meshes), T-M5k (+5 skins) — PLAYER-class rows join | forward-lock growth again (**prior 18 rows byte-preserved — the T-M3b precedent's FOURTH growth**); coverage rows re-pin IN BOTH consuming commits (the standing rule); the `:152` seam-pin test is EXTENDED to the selection read, its default-mesh assertion KEPT verbatim; card-time re-grep duty: any set-equality row over the GLB dir listing found at card time retires HERE, same commit (the M4 R-rows' standing clause) |
 | R3 | `tools/dawnwell_pixel_gate.py` row set `{"shop_shot", "stage_select_shot"}` (`:47-49, :69-70`) + the capture's rows.json contract | T-M5p (+achievements shot), T-M5c (+char-select shot) | ADDITIVE rows, SAME floor `PX_MIN = 200`, same hidden-UI baseline idiom (the ONE capture launcher `tools/capture_lib.py`); each new row carries its own baseline-vs-baseline planted red re-proven at the card |
 | R4 | `docs/PERMANENCE.md` asset rows' coverage ("every file under `assets/glb/`… provenance") + the `tools/vm100/` manifest set | T-M5a ships 10 character-class GLBs + 11 icons | new §M5a provenance sections (seeds, prompt-sha16, turntable rows, rejected-variant rows KEPT with reasons) — replace-not-delete, the S1p/S1q era rows untouched |
 
@@ -574,7 +679,8 @@ re-litigate them):** `test_endless.py:130-135` (hand-in regex — F-7 placement 
 `test_card_icons.py:138` (`== 32` pool kinds — characters/skins/achievements are NOT pool
 kinds, the M4 R7 wording still says exactly the truth), the exact-12 snapshot pin
 (`snapshot_json` field list untouched; the 13th-field instrument legs are B-E4's),
-`test_dawnwell_shop.py:136-155` (start_run consumption + main-wiring — additive lines keep
+`test_dawnwell_shop.py:136-157` (start_run consumption :136-139 + main wiring :153-157,
+incl. the GOLD→FUNNEL adjacency `:156-157` — additive lines keep
 every pinned regex matching), the phase enum, `SPEC_MAP` 7-row chest map, BIOMES/STAGES
 tables (F-1 adds no stage/event), `test_art_integration.py:42` (`DRAWS_PLANNED = 40` —
 consumed or not is §8's re-tally), the `sim_stages.gd:98` delegator (F-9).
@@ -607,7 +713,9 @@ construction channel; play-reachability NOT claimed — roadmap §2). Measured-n
 ## 9. EXCLUSIONS (reasons, not silence)
 
 1. **The 3D "pivot" (perspective camera / full 3D physics / skinned horde / heightmap)** —
-   DESIGN-3D §h REJECTS each under the owner's verbatim top-down ruling; overturning a DA-
+   DESIGN-3D rejects each where the doc puts it (perspective + 3D physics at §a, skinned
+   horde + heightmap at §h — REV-2/P4-1) under the owner's verbatim top-down ruling;
+   overturning a DA-
    gated design + an owner ruling is an OWNER decision with no artifact on the table (F-1,
    Rule 2). This milestone IS the endgame's next step.
 2. **The pool-GATING half of the unlock store** (roadmap M2 #4's second clause: gated cards
@@ -641,8 +749,8 @@ construction channel; play-reachability NOT claimed — roadmap §2). Measured-n
   pair independent (the T-M3g attribution pattern).
 - *"The counter store is mid-run eventing you papered over."* — F-3 named exactly which
   achievements need world sites (chest counts) and DID NOT SHIP them; the 20 shipped rows
-  are each computable at `_end_run` from the named rows; P-E3's call-count pin is the
-  mechanism proof.
+  are each computable at `_end_run` from the named rows; P-E3's whole-scripts grep pin
+  (REV-2 — the named instrument, §12 F-5) is the mechanism proof.
 - *"v3.0.0 games nothing — but did you HIDE a third surface?"* — F-8 counts the overlays
   (6th/7th) and names why the skin chips are not one; the menu gains exactly two buttons;
   a fresh save shows both reachable (the state rows in B-E6's dump).
@@ -650,7 +758,7 @@ construction channel; play-reachability NOT claimed — roadmap §2). Measured-n
   table."* — §3.1 states the honest reading at pipeline level (same tools, same CMU sources,
   no new rig CLASS; bone counts are per-asset — the S2r rows are the evidence) and B-E8/
   K-E3 gate the observable (frame-diff), not the claim.
-- *"596/583/551/533 — you grew the >400 files and dodged the splits."* — F-9 + §6's
+- *"596/583/551/537 — you grew the >400 files and dodged the splits."* — F-9 + §6's
   deferred-carry rows: world.gd/sim_stages/strips_capture/sim_events are each NAMED
   untouched with the proof (the file-set column / no-legs / no-capture / no-rows); the new
   rules live in two NEW small modules and the watch row (screens.gd) carries its own
@@ -699,10 +807,42 @@ construction channel; play-reachability NOT claimed — roadmap §2). Measured-n
 9. **Contract B untouched + persistence honest:** zero snapshot delta; THREE additive save
    fields, VERSION 1, R1's three-dated-move lineage; the F-7 pin-placement law keeps the
    endless source pins byte-true (the M4 R9 lesson applied PROACTIVELY — the pin was read
-   before choosing where the new lines go).
+   before choosing where the new lines go; REV-2 keeps the score honest: the gate caught a
+   pin I had NAMED but not obeyed — the gold→funnel adjacency — and §1.1 now OBEYS it,
+   §12 F-2).
 10. **Wave-map discipline:** ONE serial spine with every pairwise edge named; the asset
     batch the only parallel row with the mesh coupling; the deferred-carry rows named not
     inherited; the release row carries the GitHub-Release trio + the version ratification +
     the roster-option quote as DoD rows; every card's LEDGER row in its closing commit.
+
+---
+
+## 12. REV-2 FOLD LEDGER (DA cycle 1 dispositions — the M4 §13-style ledger)
+
+The DA doc (`docs/M5-SPEC-DA.md` @ `9b1d067`) is immutable; this is the author's disposition
+record, every row re-grepped against the tree at `9b1d067` BEFORE adoption. **Dispositions:
+12 ADOPTED, 0 rebutted; 2 mechanism readings inside adopted rows corrected to measured truth
+(F-12/F-13 rows) — corrections to the spec's OWN reason-text, not to the gate's fix clauses.**
+
+| # | finding | disposition | REV-2 landing + the re-grep evidence |
+|---|---|---|---|
+| F-1 | P1-1 pawn never receives the selection | **ADOPTED** (the strongest finding; re-grepped: `hero_pawn.gd:35` sets `mesh` ONCE at `_ready`; `_pawn` at `main.gd:32/:89-91`, nowhere else — boot-once confirmed) | §2.1b `apply_selection()` (the `_ready` body MOVED, material law `:36-43` rides verbatim) + call as F-7 block tail + B-E7 pawn-lifecycle twin-leg + §2.4 file rows; the seam-pin substring form re-read (`test_art_integration.py:152-162`) makes the extension legal as written |
+| F-2 | P2-1 block placement vs the gold→funnel adjacency pin | **ADOPTED** (regex re-read verbatim: `gold += …\s*\n\s*_meta_changed()` — whitespace only; "BESIDE :372-376" is ambiguous and two of its three readings fail) | §1.1 rewritten: landing FORCED ABOVE the `gold +=` line, below the best_cycle write; PIN-HOLD clause; §7.2 STAY cite extended to `:136-157` naming `:156-157`. Precision note (gate-internal, harmless to its verdict): its "between :374/:375 breaks the pin" example is WRONG — the regex STARTS at the gold line, an insert before it would not have broken `:156-157` — the finding stands because BESIDE still licensed the two readings that DO fail and the landing was never named |
+| F-3 | P2-2 table rows into run state without the aliasing law | **ADOPTED with mechanism correction** | §0 F-5 duplicate() law + §2.1 consumption + B-E2 multi-run leg, as the gate's fix clause has them. Correction to measured truth: at the pinned Godot 4.7.2 a const container's nested rows are DEEPLY READ-ONLY (binary probe THIS session: `Invalid assignment on read-only value (on base: 'Dictionary')`), so the naive hand-off FAILS LOUD at run 1's first weapon mutation, not silently poisons run 2 as the gate's Godot-3-style mechanism read said; the fix and the leg are adopted regardless (loud failure is still a shipped-milestone failure; the leg guards the mutable-shape future) |
+| F-4 | P2-3 zero-write leg contradicts the Σ-add table | **ADOPTED** (re-grepped: `runs_total += 1` unconditional in the §1.1 table; the shop no-op is a VERB law) | P-E1 rewritten to the zero-DIFF shape verbatim from the gate's fix clause; §1.1's "writes nothing new" sentence replaced by the honest always-write law |
+| F-5 | P2-4 phantom instrument on P-E3 | **ADOPTED** (re-grepped: the "marker-count == 2" pin DOES NOT EXIST — `test_save.py` markers are QUARANTINE markers; real instruments `test_save.py:133` MAIN-scoped + `test_stages.py:296` block-scoped) | P-E3 rewritten: real cites, the named NEW whole-`godot/scripts/` grep pin (`main.gd:421` the one legal outside site, measured), `_meta_changed(` shipped-set count (6 calls + def = 7, measured), reds re-pointed at instruments that FIRE (the whole-scripts pin + the adjacency pin the P2-1 landing now owns) |
+| F-6 | P3-1 stale 17-row fixture count | **ADOPTED** | §7.1 + R2: 18 rows at base, growth history 13→15→17→18 MEASURED from the git objects (`9efcf6e`=15, `1e6d366`=17, `48fad4b`=18), M5 grows the fourth; B-E7 already says prior 18 |
+| F-7 | P3-2 stale `sim_events 533` | **ADOPTED** | F-9 + §6: 537 (measured at `48f5b33` AND `9b1d067`; world/sim_stages/strips 551/583/596 re-confirmed same walk) |
+| F-8 | P3-3 six drifted header cites | **ADOPTED** (all six re-measured at `9b1d067`: `start_run() :302`, `VERSION :24`, `save() :76`, fields `:27-42`, overlays `:98-107`, `start_run():144-180`/`set_phase:182`) | Header Code-truth rewritten at the truth; the REV-2 header says plainly the drift was in MY cites, the tree was identical |
+| F-9 | P4-1 §h/§a attribution crack in F-1 | **ADOPTED** | F-1 + §9.1 re-pointed: perspective at §a `:19-20` (re-read), the rest at §h; substance (the rejection exists, the ruling is verbatim at `DESIGN-3D.md:4`) unchanged, exactly as the gate said |
+| F-10 | P4-2 T-S1p window over-count | **ADOPTED** | §2.5: ONE bounded window quoted as measured (15:37→15:44), ~3/mesh kept as the RESERVED estimate — the gate's own note: the error direction was safe, the honesty row still had to move |
+| F-11 | P4-3 cross-milestone B-E1 collision | **ADOPTED** | B-E4 red column: "the M4-SPEC B-E1 endless-pattern red" |
+| F-12 | P4-4 roadmap `:238-240` doc-sync | **ADOPTED** | §6 doc-sync list: the M2 #4 row re-worded LANDED/NOT-LANDED named, replace-not-delete (row text re-read: its ACCEPT names the pool-GATING half §9.2 excludes) |
+| F-13 | **self-caught at re-grep** (not the gate's): REV-1 §2.1 row-1 start weapon `"ember-bolt"` is not a shipped id (`weapons.gd IDS`: `"ember"` — the B-E9 rule's own list) | **ADOPTED** (self-disclosure row) | Table fixed to `ember`; the typo becomes B-E2's PLANTED red example — the drift class that row exists to catch, armed with the real near-miss |
+| F-14 | self-check: SEL table, the owner marker, the version decision, the byte-anchor classes, F-3's zero-world.gd file-set | **UNTOUCHED — the gate PASSED them** (per-option arithmetic re-derived by the gate independently; the base suite re-reproduced green there: 278 passed, RC=0) | No change; the REV-2 header records the PASS list so c2 need not re-attack it |
+
+**Fold arithmetic: 20 + 4 = 24 ACCEPT rows unchanged (legs strengthened, no row added —
+the gate's rows-1-5 fix clauses were leg/section rewrites); 0 new mechanism; the wave map,
+version decision, SEL table and owner lines are byte-identical to REV 1's decisions.**
 
 --- END M5-SPEC ---
