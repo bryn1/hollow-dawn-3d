@@ -1,0 +1,41 @@
+# MC 11420 T-M5s mesh-ref batch (30 rows) — variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha16<TAB># note
+# Three-quarter volumetric carved-block refs for the 13 M5 SEL-C meshes (8 extension characters +
+# 5 vigil skins); imagegen MCP local Qwen-Image on vm100, ONE gpu-window 2026-10-27 ~06:40->07:55:45Z
+# (close rc=0, llama-swap serving verified — capture ledger), opaque 1024x1536, seeds 701-715 (v1)
+# 741-758/761/763 (journey variants). Every raw carries its EXACT prompt in tEXt impeccable:prompt;
+# sha16 = sha256(prompt) hex[:16] of that embedded text (manifest sha16 == embedded == tool
+# prompt_sent, the icon_gate PROV shape; PIL PngInfo route — the impeccable CLI latin-1 argv
+# deviation of the M1c era avoided entirely). Rejected variants are documented and committed
+# (art-src-m1c/m2/m3/m4 convention): the yaw-turntable eyeball on the MESH is the BINDING gate
+# (fleet law: automated gates no-op on non-watertight TRELLIS shells).
+
+char-coinhound	assets/art-src/char-coinhound-ref.png	703	c0dd01f66e1f4c44	# ACCEPT input char-coinhound.glb (first-seed): collar/medallion raised relief, everything fused
+char-duskrunner	assets/art-src/char-duskrunner-ref.png	704	73527786bbf7167d	# REJECT: flying scarf ribbons off the hood (thin-tube class)
+char-duskrunner-v2	assets/art-src/char-duskrunner-ref--v2.png	744	fbd87258014a63c1	# ACCEPT input char-duskrunner.glb: straight slab cloak fused to plinth, blades belt-relief only
+char-emberwright	assets/art-src/char-emberwright-ref.png	701	a7af1af8a8ec02cb	# REJECT: rope wraps on arms, free hammer end separated from body
+char-emberwright-v2	assets/art-src/char-emberwright-ref--v2.png	741	a16127896a8b9e83	# ACCEPT input char-emberwright.glb: hammer raised relief fused flush to chest, arms welded cuffs
+char-grave-ward	assets/art-src/char-grave-ward-ref.png	702	c3913fd40b4d165d	# REJECT: hanging belt chains, free axe head off-pedestal
+char-grave-ward-v2	assets/art-src/char-grave-ward-ref--v2.png	742	e39dcc2faff7235d	# ACCEPT input char-grave-ward.glb: shield disc fused flush front, mace fused along side
+char-hoard-wretch	assets/art-src/char-hoard-wretch-ref.png	708	d31bc02c2a7eb7ac	# REJECT: spread wings on thin struts
+char-hoard-wretch-v2	assets/art-src/char-hoard-wretch-ref--v2.png	748	c68a56ba5bd1ae00	# REJECT: raised wings persisted (negation phrasing fed the trope)
+char-hoard-wretch-v5	assets/art-src/char-hoard-wretch-ref--v5.png	749	84db5032c7ad8d88	# ACCEPT input char-hoard-wretch.glb: crouching coffer-hoarder fused to coin-lump plinth; membrane wings broad/thick, hollow-knight wing precedent (M4 SHIPPED wings solid); BINDING gate is the yaw turntable eyeball
+char-iron-penitent	assets/art-src/char-iron-penitent-ref.png	706	5cafe9e9f8c907b9	# REJECT: hanging chain off waist
+char-iron-penitent-v2	assets/art-src/char-iron-penitent-ref--v2.png	746	4323de099fb6d4ab	# ACCEPT input char-iron-penitent.glb: helm fused to breastplate, cross chest relief, plate skirt welded
+char-shroud-saint	assets/art-src/char-shroud-saint-ref.png	707	cafca7ae04b85b9a	# REJECT: hanging veil cord ends
+char-shroud-saint-v2	assets/art-src/char-shroud-saint-ref--v2.png	747	6e2a6ae2091a9f76	# ACCEPT input char-shroud-saint.glb: sealed drape slab, hands fused under shroud
+char-tallow-seer	assets/art-src/char-tallow-seer-ref.png	705	9605ab119c2222d9	# REJECT: censer hung on chains
+char-tallow-seer-v2	assets/art-src/char-tallow-seer-ref--v2.png	745	5fb755785bce203d	# ACCEPT input char-tallow-seer.glb: censer block fused to chest, shoulder candle reliefs
+skin-ash	assets/art-src/skin-ash-ref.png	711	f068c32f8b8e5eeb	# REJECT: belt chains + knotted cord with free tassels
+skin-ash-v2	assets/art-src/skin-ash-ref--v2.png	751	f4dcbbe580a13352	# REJECT: knotted rope cord with two hanging tassels persisted
+skin-ash-v3	assets/art-src/skin-ash-ref--v3.png	761	7c20babe63fe5c6d	# ACCEPT input skin-ash.glb: cord reads fused against skirt; thin-tassel risk carried to the mesh gate (spec +3 regen reserve)
+skin-marrow	assets/art-src/skin-marrow-ref.png	712	6b146f66534e030e	# ACCEPT input skin-marrow.glb (first-seed): fused bone plates, no free parts
+skin-relic	assets/art-src/skin-relic-ref.png	714	b4dd852caa1e3870	# REJECT: hanging belt chains
+skin-relic-v2	assets/art-src/skin-relic-ref--v2.png	754	133224c72a4f6d2b	# REJECT: belt chain + tassels
+skin-relic-v3	assets/art-src/skin-relic-ref--v3.png	758	540d58ec14b5d42e	# ACCEPT input skin-relic.glb: gilt plates + sealed reliquary niche flush relief, fused flat belt band
+skin-tide	assets/art-src/skin-tide-ref.png	713	65a4666e7ca7ed85	# REJECT: belt chains
+skin-tide-v2	assets/art-src/skin-tide-ref--v2.png	753	3a745ee6bf0bc29b	# REJECT: chains persisted
+skin-tide-v4	assets/art-src/skin-tide-ref--v4.png	763	f7cd85acaa68a55f	# ACCEPT input skin-tide.glb: cord fused flush (M4 stair-acolyte v5 fused-cord precedent, PERMANENCE law)
+skin-void	assets/art-src/skin-void-ref.png	715	89184cb27116152b	# REJECT: thin shoulder rods behind the hood
+skin-void-v2	assets/art-src/skin-void-ref--v2.png	755	5679460784ec23f1	# REJECT: shoulder spikes persisted
+skin-void-v3	assets/art-src/skin-void-ref--v3.png	756	36f21da4c0385749	# REJECT: horns + belt chains (negation phrasing fed the tropes)
+skin-void-v4	assets/art-src/skin-void-ref--v4.png	757	1d6e4e326c6813ce	# ACCEPT input skin-void.glb: smooth pointed cowl one mass, fused flat band, star glints on stone

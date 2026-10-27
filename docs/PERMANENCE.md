@@ -323,3 +323,67 @@ these named rows are not (history stays readable).
 | script | what it replays | disposition |
 |---|---|---|
 | .tmp/run-player-s1p.sh | the MC 11132 player row on vm100: remaster sprite -> player_attempts.py (drain_barrier + extent/fill gates) with the MC 11131 env-failure classification (crash with NO `QUALITY` line = llama-swap consumer restart, not a seed attempt: re-barrier + retry the SAME seed once; recurrence -> exit 2), then the UniRig inner chain on the accepted seed | KEPT as the named manual replay probe of the player-model recipe — the tracked `.sh` stays driverless by declaration (dead_code DRIVERLESS stdout is the manual-gate shape, red_controls mut_a precedent); re-run manually to reproduce the MC 11132 seed-42 acceptance leg |
+
+## M5s SEL-C asset batch (T-M5s, MC 11420, 2026-10-27)
+
+The M5-SPEC SEL-C pillar-D batch (owner ruling verbatim: "C" = the 9-character
+roster option): **13 TRELLIS meshes + 14 icons**, ALL first-seed. COUNT READINGS
+(both stated per the owner ruling): the spec §2.5 SEL-C row says "new GLBs total
+13" (8 new characters + 5 skins — shipped 13); the §4 header "n = 10" is labeled
+SEL-A counts and does not govern at SEL-C; the card says 13. Reserves as the
+SPEC names them: +3 meshes UNBURNED, +2 icons UNBURNED (no gate-RED row; the card's
++1 mesh reading named beside it — the spec numbers bind). Icons: the spec NAMES the
+SEL-C icon set (9 roster portraits + 5 skin chips; the card's n=0 branch was
+conditioned on "unless the spec names them" — NAMED, 14 ship; §4's "n = 11" is the
+SEL-A shape, both stated). Achievement badges n=0 asserted absent. Meshes via
+TRELLIS.2-4B (batch_trellis.py, quality gate ON, 3-seed policy — never reached);
+ONE row per window; player class: tri <= 8000, aspect_gate --target 1.67
+(MODEL_H_PLAYER; the shipped player.glb precedent INFLATION 1.67 / ASPECT 0.50).
+
+| asset | source ref | seed | tris / budget | inflation / aspect | sha256[:16] | render |
+|---|---|---|---|---|---|---|
+| char-emberwright | art-src/char-emberwright-ref-v2.png | 801 FIRST SEED (ref v1 seed 701 REJECTED) | 7891 / 8000 | 1.67 / 0.55 | ee42597b6d7ee084 | concepts/char-emberwright-render.png |
+| char-grave-ward | art-src/char-grave-ward-ref-v2.png | 802 FIRST SEED (ref v1 seed 702 REJECTED) | 7670 / 8000 | 1.68 / 0.54 | c70e8b9d8a32fdea | concepts/char-grave-ward-render.png |
+| char-coinhound | art-src/char-coinhound-ref.png | 803 FIRST SEED (ref v1 seed 703 ACCEPTED first draw) | 7947 / 8000 | 1.67 / 0.74 | e6310d5c531361fc | concepts/char-coinhound-render.png |
+| char-duskrunner | art-src/char-duskrunner-ref-v2.png | 804 FIRST SEED (ref v1 seed 704 REJECTED) | 7689 / 8000 | 1.67 / 0.57 | 813fdfca83f153af | concepts/char-duskrunner-render.png |
+| char-tallow-seer | art-src/char-tallow-seer-ref-v2.png | 805 FIRST SEED (ref v1 seed 705 REJECTED) | 7966 / 8000 | 1.67 / 0.44 | 91c387871885f8a4 | concepts/char-tallow-seer-render.png |
+| char-iron-penitent | art-src/char-iron-penitent-ref-v2.png | 806 FIRST SEED (ref v1 seed 706 REJECTED) | 7948 / 8000 | 1.67 / 0.51 | b82821662ba11348 | concepts/char-iron-penitent-render.png |
+| char-shroud-saint | art-src/char-shroud-saint-ref-v2.png | 807 FIRST SEED (ref v1 seed 707 REJECTED) | 7699 / 8000 | 1.67 / 0.35 | 1e1a15da1c81a080 | concepts/char-shroud-saint-render.png |
+| char-hoard-wretch | art-src/char-hoard-wretch-ref-v5.png | 808 FIRST SEED (refs v1 seed 708 + v2 seed 748 REJECTED) | 7732 / 8000 | 1.67 / 0.71 | da568af738c84864 | concepts/char-hoard-wretch-render.png |
+| skin-ash | art-src/skin-ash-ref-v3.png | 811 FIRST SEED (refs v1 seed 711 + v2 seed 751 REJECTED) | 7593 / 8000 | 1.67 / 0.49 | 7e176c57a8861551 | concepts/skin-ash-render.png |
+| skin-marrow | art-src/skin-marrow-ref.png | 812 FIRST SEED (ref v1 seed 712 ACCEPTED first draw) | 7916 / 8000 | 1.67 / 0.49 | 9fc3389471fa42c0 | concepts/skin-marrow-render.png |
+| skin-tide | art-src/skin-tide-ref-v4.png | 813 FIRST SEED (refs v1 seed 713 + v2 seed 753 REJECTED) | 7715 / 8000 | 1.67 / 0.47 | 32cc1eaee214e4f0 | concepts/skin-tide-render.png |
+| skin-relic | art-src/skin-relic-ref-v3.png | 814 FIRST SEED (refs v1 seed 714 + v2 seed 754 REJECTED) | 7773 / 8000 | 1.67 / 0.53 | 8fef989c51239c85 | concepts/skin-relic-render.png |
+| skin-void | art-src/skin-void-ref-v4.png | 815 FIRST SEED (refs v1 seed 715 + v2 755 + v3 756 REJECTED) | 7732 / 8000 | 1.68 / 0.59 | 3b0678e5f9b23fbc | concepts/skin-void-render.png |
+
+Ref journey (manifest `tools/vm100/art-src-m5.tsv`, 30 rows; every raw tEXt
+impeccable:prompt EXACT, PIL PngInfo route): 13 ACCEPTED inputs + **17
+documented-REJECTED variants, committed**: emberwright v1 (rope arm wraps + free
+hammer end), grave-ward v1 (hanging chains + free axe head), duskrunner v1 (flying
+scarf ribbons), tallow-seer v1 (censer chains), iron-penitent v1 (waist chain),
+shroud-saint v1 (veil cord ends), hoard-wretch v1+v2 (spread wings on struts; v5
+wing-merged ACCEPTED — the hollow-knight shipped-wing precedent carries it),
+skin-ash v1+v2 (belt chains, knotted-cord tassels), skin-tide v1+v2 (belt chains),
+skin-relic v1+v2 (belt chains), skin-void v1+v2+v3 (shoulder rods/spikes; v3 grew
+horns — **negation phrasing feeds the tropes, positive fused-wording survives**: the
+M4 stair-acolyte lesson restated). All skins carry the vigil's fused-forearm lantern
+silhouette (family law). validate_glb VISUAL 13/13; aspect_gate 13/13; QUALITY
+ext_gate 13/13; bpy turntable-solid eyeball yaws 0/90/180/270 13/13 SOLID (BINDING
+gate; small closed shell holes declared vs the shipped player.glb's own 743-px
+baseline — the fill gate no-ops on non-watertight TRELLIS shells, the yaw eyeball is
+the law). Icons: imagegen MCP, seeds 721-735, 512 RGBA, `tools/vm100/icons-batch-m5.tsv`,
+icon_gate DIMS+TRANSP+FILL+PROV 14/14 GREEN + planted-red pairs (stripped-tEXt ->
+PROV rc=1; opaque-background -> TRANSP rc=1); byte-identical copies `assets/icons/new/`
++ `godot/assets/icons/`. DEVIATION named: icon-skin-ash mid-flow redraw (seed 751
+brazier wording) overwrote the embedded seed-731 file; restored by re-rendering the
+EXACT seed-731 prompt byte-identical (143901 B) then re-embedded — shipped tEXt ==
+prompt_sent of the shipped draw. Manifests: `tools/vm100/roster-batch-m5.tsv`
+(spec §4 name; the card named it art-batch-m5.tsv — both names stated, one manifest)
++ art-src-m5.tsv + icons-batch-m5.tsv. Contact sheet `assets/screens/m5a-art-sheet.png`.
+GPU windows: 14 (1 imagegen 06:40->07:55:45Z + 13 TRELLIS single-row
+07:59:15->09:14:43Z), drain-BARRIER-PASS at every open, trap-close rc=0 + llama-swap
+serving at EVERY close, imagegen never joined a TRELLIS window. Journey re-dump
+(seed 11101) 5020 rows BYTE-IDENTICAL, strips 19/19 + dump byte-identical, readability
+9/9, pytest 278 green — zero code/tests touched (diff universe: assets/, tools/vm100/*.tsv,
+LEDGER.md). Capture `.tmp/m5-art.txt` VERIFY_EXIT=0.
+

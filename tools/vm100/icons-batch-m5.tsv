@@ -1,0 +1,25 @@
+# MC 11420 T-M5s icon batch (14 rows) — icon<TAB>seeds<TAB>prompt-sha16<TAB># note
+# 9 roster portraits + 5 vigil skin chips — spec (asset pillar D manifest) NAMES the icons at SEL-C
+# (icon-portrait-<id>.png x9 + icon-skin-<short>.png x5); the card's n=0 branch was conditioned on
+# 'unless the spec names them' — it does, so 14 ship (both readings stated in the capture).
+# 512x512 RGBA transparent PNG, imagegen MCP same window as the refs; icon_gate legs DIMS+TRANSP+FILL+PROV
+# 14/14 GREEN + planted-red pairs (stripped tEXt copy -> PROV FAIL rc=1; opaque-background copy ->
+# TRANSP FAIL rc=1) — capture. Naming recorded for the T-M5c/k pins.
+# DEVIATION (honest): mid-flow icon-skin-ash was redrawn once (seed 751 brazier wording) over the
+# embedded seed-731 file; restored by re-rendering the EXACT seed-731 prompt — byte-identical to the
+# original draw (143901 B) — then re-embedded; shipped tEXt == prompt_sent of the shipped draw.
+
+icon-portrait-the-vigil	721	25845d74ba688f22	# ACCEPT roster portrait row0 (shipped player.glb identity)
+icon-portrait-emberwright	722	04d415434686796f	# ACCEPT roster portrait
+icon-portrait-grave-ward	723	4f06f3c4ce7472c4	# ACCEPT roster portrait
+icon-portrait-coinhound	724	7421fdc779f8d327	# ACCEPT roster portrait
+icon-portrait-duskrunner	725	99d9baf3151425e4	# ACCEPT roster portrait
+icon-portrait-tallow-seer	726	2fc71924c0a972c2	# ACCEPT roster portrait
+icon-portrait-iron-penitent	727	cb031c6ea7bd55c1	# ACCEPT roster portrait
+icon-portrait-shroud-saint	728	a7317eb01f10916d	# ACCEPT roster portrait
+icon-portrait-hoard-wretch	729	65f3283f9f2ba0c3	# ACCEPT roster portrait
+icon-skin-ash	731	fbccb37c95315c34	# ACCEPT (deviation note below) skin chip urn
+icon-skin-marrow	732	4f13efb795fddf63	# ACCEPT skin chip
+icon-skin-tide	733	c8cd3386e5ea6940	# ACCEPT skin chip
+icon-skin-relic	734	c54f19b4f69fa484	# ACCEPT skin chip
+icon-skin-void	735	c4052530f37914ac	# ACCEPT skin chip

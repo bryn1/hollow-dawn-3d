@@ -1,0 +1,53 @@
+# MC 11420 T-M5s mesh spec (spec §4 name roster-batch-m5.tsv governs; the card named it art-batch-m5.tsv — both names stated, ONE manifest, extend-don't-duplicate) — name<TAB>input.png<TAB>tri_budget<TAB>base_seed<TAB>quality
+# 13 rows (M5-SPEC §2.5 SEL-C pillar-D manifest: 8 extension characters + 5 vigil skins;
+# the spec §2.5 SEL-C row says "new GLBs total 13" and the spec §4 header "n = 10" line is
+# labeled SEL-A counts — both numbers stated in the capture per the owner ruling "the spec
+# SEL-C asset count and the card disagree, THE SPEC COUNTS — state both numbers").
+# ONE row per window (the §M1c2 in-session VRAM accumulation lesson — single-row specs staged
+# on vm100 as spec-row1..row13.tsv), runid mc11420, driver 3-distinct-seed fail policy
+# (seed, seed+1, seed+2); first-seed outcomes recorded per row in OUTCOMES.
+# Window law (spec §4 verbatim): single-row windows, drain_barrier before load, trap-close
+# rc=0, llama-swap serving verified at EVERY close, windows ledger inside the capture; the
+# imagegen window never joins a TRELLIS window.
+# tri budget 8000 = player-class ceiling (spec §b E7; shipped player.glb TRIS=7919;
+# ClassMesh normalizes height to 1.67 m — aspect_gate --target 1.67 per mesh).
+char-emberwright	assets/art-src/char-emberwright-ref-v2.png	8000	801	quality
+char-grave-ward	assets/art-src/char-grave-ward-ref-v2.png	8000	802	quality
+char-coinhound	assets/art-src/char-coinhound-ref.png	8000	803	quality
+char-duskrunner	assets/art-src/char-duskrunner-ref-v2.png	8000	804	quality
+char-tallow-seer	assets/art-src/char-tallow-seer-ref-v2.png	8000	805	quality
+char-iron-penitent	assets/art-src/char-iron-penitent-ref-v2.png	8000	806	quality
+char-shroud-saint	assets/art-src/char-shroud-saint-ref-v2.png	8000	807	quality
+char-hoard-wretch	assets/art-src/char-hoard-wretch-ref-v5.png	8000	808	quality
+skin-ash	assets/art-src/skin-ash-ref-v3.png	8000	811	quality
+skin-marrow	assets/art-src/skin-marrow-ref.png	8000	812	quality
+skin-tide	assets/art-src/skin-tide-ref-v4.png	8000	813	quality
+skin-relic	assets/art-src/skin-relic-ref-v3.png	8000	814	quality
+skin-void	assets/art-src/skin-void-ref-v4.png	8000	815	quality
+#
+# OUTCOMES (runid mc11420; windows ledger + glb sha rows in .tmp/m5-art.txt):
+# 13/13 rows FIRST-SEED (driver seed,+1,+2 fail policy never entered): ROW 1..13
+# rc=0, 13 single-row windows 07:59:15->09:14:43Z, BARRIER-PASS (llama-swap inactive,
+# gpu_used=260MiB held 40s) at EVERY open, trap-close rc=0 + llama-swap serving at
+# EVERY close (next-row open lines re-prove it: "llama-swap stopped" fires per open;
+# final state llama-swap.service=active gpu_used=23136MiB).
+# QUALITY ext_gate PASS every row (ext y-extent 0.994-1.000 m raw; x/z 0.331-0.740;
+# fill NaN non-watertight = the declared TRELLIS norm, vacuous fill_gate PASS leg).
+# aspect_gate --target 1.67 (player class, MODEL_H_PLAYER; shipped player.glb precedent)
+# 13/13 PASS: INFLATION 1.67-1.68, ASPECT_W_H 0.35-0.74 (limit 2.0 both).
+# validate_glb visual (vm100 venv3d) 13/13 PASS (trimesh parse, embedded texture, >1MB).
+# BINDING yaw-turntable eyeball (dump_render.py CPU venvrig, yaws 0/90/180/270, 52 views):
+# 13/13 SOLID — no shatter class (thin rods/ribbons/spirals). Family silhouette: all
+# skins carry the vigil's lantern fused to the raised forearm (ref wording "flush
+# forearm" honored by TRELLIS). Documented honest facts: char-duskrunner scarf tongues
+# solid-thick (not ref-v1's flying ribbons); char-hoard-wretch wings fused to the back
+# slab (hollow-knight wing precedent); char-coinhound collar links fused relief.
+# Small closed shell holes exist (flood-fill measure vs the SHIPPED player.glb baseline:
+# player itself 743 px @ y180; M5 max 2074 px largest-hole 1288 px — same TRELLIS
+# non-watertight class the fleet already ships; declared, not gate-covered: the fill
+# gate no-ops on non-watertight, the yaw eyeball is the law (fleet law)).
+# TRI rows (8000 budget, all PASS; every value printed by dump_render/validate this
+# session): emberwright 7891, grave-ward 7670, coinhound 7947, duskrunner 7689,
+# tallow-seer 7966, iron-penitent 7948, shroud-saint 7699, hoard-wretch 7732,
+# ash 7593, marrow 7916, tide 7715, relic 7773, void 7732.
+# +3 mesh regen reserve (spec §2.5 SEL-C) UNBURNED — stated. No regen window was needed.
