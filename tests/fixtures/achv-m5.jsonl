@@ -1,0 +1,6 @@
+{"checks":{"best_cycle_not_rehomed":true,"evo_one":true,"flags_absent":true,"flags_set":true,"gold_exact":true,"kills_exact":true,"max_level_13":true,"minutes_floor_2":true,"runs_one":true,"union_one":true,"win_one":true},"ev":"sumadd","ok":true}
+{"checks":{"counters_reload":true,"disk_flag_one":true,"disk_has_counters":true,"flags_reload":true,"version_still_1":true},"ev":"roundtrip","ok":true}
+{"checks":{"evo_never_decreases":true,"flags_int_one":true,"flags_kept":true,"gold_add_exact":true,"kills_add_exact":true,"max_level_never_decreases":true,"minutes_add_zero":true,"runs_two":true,"wins_unchanged":true},"ev":"worse_run","ok":true}
+{"checks":{"best_cycle_unmoved":true,"evo_unmoved":true,"gold_delta_exact":true,"kills_delta_exact":true,"max_level_unmoved":true,"minutes_delta_exact":true,"no_new_flags":true,"runs_delta_exact":true,"union_unmoved":true},"ev":"zero_diff","ok":true}
+{"checks":{"counters_default_empty":true,"gold_kept":true,"not_quarantined":true,"version_current":true},"ev":"migrate","ok":true}
+{"checks":{"counter_set":true,"ids_unique":true,"names_nonempty":true,"prefix_const":true,"progress_in_range":true,"rows_20":true},"ev":"table","ok":true}

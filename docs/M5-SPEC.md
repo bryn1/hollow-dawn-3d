@@ -445,6 +445,8 @@ seed = card id; committed `tests/fixtures/chars-m5.jsonl`), NEW `godot/sim/roste
 
 ### 2.5 THE ROSTER DECISION — SEL OPTIONS (⚠ OWNER-DECISION-PENDING; nobody may assume)
 
+RULING 2026-10-27: owner "C" (SEL-C, 9 chars) — wave executing; DA docs immutable. Carried verbatim by MC 11421 (T-M5p): this Pillar A card is option-independent and lands under any roster; the ruling line is append-only, every paragraph below is untouched DA history.
+
 Prior artifact: roadmap row 7 (`:44`, rev-3, DA-gated) names **"M4: 6 selectable, each
 start-weapon + one signature stat rule; purchase price curve OURS"** — a PLAN artifact, not
 an owner choice among sizes. The MC 11402 brief forbids treating it as one. Window estimates

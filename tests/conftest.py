@@ -17,9 +17,41 @@ goes with it (audit §4.2 folded row).
 import json
 import os
 import re
+import subprocess
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPTS = os.path.join(REPO, "godot", "scripts")
+
+# The pinned engine == tools/VERSIONS.txt:8 (the capture_lib resolution),
+# HD3D_GODOT the unchanged documented seat override.
+GODOT = os.environ.get(
+    "HD3D_GODOT",
+    "/home/claudecode/Games/.tools/godot/Godot_v4.7.2-stable_linux.x86_64")
+
+CLASS_CACHE = os.path.join(REPO, "godot", ".godot",
+                           "global_script_class_cache.cfg")
+
+
+def ensure_class_cache():
+    # CLEAN-CHECKOUT FIX (cycle 2), moved to this ONE home at T-M5p (the
+    # C3 seam law — the body is byte-identical to its test_save.py donor,
+    # which now delegates here): godot/.godot/ — the global class_name
+    # cache save.gd's own DawnWell self-reference needs to COMPILE — is
+    # gitignored, so a fresh checkout has none and every behavior leg dies
+    # at parse (VERIFIED: preload alone cannot dodge it — save.gd itself
+    # errors "Identifier not found: DawnWell" without the cache). The fix
+    # is the engine's canonical step that the export spine already runs:
+    # --headless --import. --import carries a documented post-work
+    # shutdown-abort quirk (LEDGER T-S9), so the gate is the cache file,
+    # never the rc.
+    if os.path.exists(CLASS_CACHE):
+        return
+    subprocess.run(
+        [GODOT, "--headless", "--path", os.path.join(REPO, "godot"),
+         "--import"],
+        capture_output=True, text=True, timeout=600)
+    assert os.path.exists(CLASS_CACHE), \
+        "godot --import produced no global class cache"
 
 # The frozen Contract-B 12-field snapshot key list, verbatim (audit §5:
 # ONE copy now — test_endless imports this; the sim-side twin at

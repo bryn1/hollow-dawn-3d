@@ -28,36 +28,16 @@ import pytest
 import conftest
 
 SCRIPTS = os.path.join(conftest.REPO, "godot", "scripts")
-GODOT = os.environ.get(
-    "HD3D_GODOT",
-    "/home/claudecode/Games/.tools/godot/Godot_v4.7.2-stable_linux.x86_64")
+GODOT = conftest.GODOT  # MC 11317 C3 one-home law (T-M5p: the resolution
+# + ensure_class_cache moved to conftest verbatim, this file delegates —
+# the class-cache gate body is byte-identical to its own prior copy)
 PROBE = "res://sim/save_probe.gd"
 
 pytestmark = pytest.mark.skipif(
     not os.path.exists(GODOT), reason="Godot binary not installed")
 
-CLASS_CACHE = os.path.join(conftest.REPO, "godot", ".godot",
-                           "global_script_class_cache.cfg")
-
-
-def ensure_class_cache():
-    # CLEAN-CHECKOUT FIX (cycle 2): godot/.godot/ — the global class_name
-    # cache save.gd's own DawnWell self-reference needs to COMPILE — is
-    # gitignored, so a fresh checkout has none and every behavior leg dies
-    # at parse (VERIFIED: preload alone cannot dodge it — save.gd itself
-    # errors "Identifier not found: DawnWell" without the cache). The fix
-    # is the engine's canonical step that the export spine already runs:
-    # --headless --import. --import carries a documented post-work
-    # shutdown-abort quirk (LEDGER T-S9), so the gate is the cache file,
-    # never the rc.
-    if os.path.exists(CLASS_CACHE):
-        return
-    subprocess.run(
-        [GODOT, "--headless", "--path", os.path.join(conftest.REPO, "godot"),
-         "--import"],
-        capture_output=True, text=True, timeout=600)
-    assert os.path.exists(CLASS_CACHE), \
-        "godot --import produced no global class cache"
+ensure_class_cache = conftest.ensure_class_cache  # C3 seam (donor of the
+# body until T-M5p; the CLEAN-CHECKOUT FIX history comment travels with it)
 
 
 read = conftest.read_script  # MC 11317 C2 seam (raw script text)
@@ -100,10 +80,17 @@ def test_format_keys_pinned():
     # the key set gained the stage row — again WITHOUT a version bump (§1.4:
     # the field-by-field defaults rule IS the migration). Exactness remains
     # the pin; the T-M2e wording precedent holds.
+    # FALSIFIED-BY-DESIGN AND REPLACED a THIRD time at T-M5p (M5-SPEC §1.1,
+    # retire ledger R1, LEDGER row): the key set gained the counters row —
+    # again WITHOUT a version bump (the same field-by-field defaults rule;
+    # the {} migration default leg lands with the T-M5p probe, named in the
+    # R1 equal-or-stronger clause). Exactness remains the pin verbatim.
     m = re.search(r'"version":\s*version,\s*"gold":\s*gold,\s*'
                   r'"ranks":\s*ranks,\s*"flags":\s*flags,\s*'
-                  r'"best_cycle":\s*best_cycle,\s*"stage":\s*stage', SAVE)
-    assert m, "as_data() must serialize exactly the roadmap keys + best_cycle + stage"
+                  r'"best_cycle":\s*best_cycle,\s*"stage":\s*stage,\s*'
+                  r'"counters":\s*counters', SAVE)
+    assert m, ("as_data() must serialize exactly the roadmap keys + "
+               "best_cycle + stage + counters")
 
 
 def test_write_path_is_temp_plus_rename():
@@ -178,14 +165,21 @@ def test_valid_roundtrip(probe):
     rows, json_text, _ = probe
     assert rows["roundtrip"] == {"ok": 1, "file": 1, "temp_gone": 1}
     disk = json.loads(json_text)
-    # FALSIFIED-BY-DESIGN + REPLACED twice, honestly: T-M2e (§A.3 best_cycle)
-    # then T-M3s (§1.4 stage, LEDGER row); exactness of the CURRENT set is
+    # FALSIFIED-BY-DESIGN + REPLACED three times, honestly: T-M2e (§A.3
+    # best_cycle) then T-M3s (§1.4 stage, LEDGER row), then T-M5p (M5-SPEC
+    # §1.1 counters, retire ledger R1 — the third same-commit re-pin, the
+    # EXACT grown set named, LEDGER row); exactness of the CURRENT set is
     # the pin, and the reload row now reads the stage back off the disk.
+    # R1 equal-or-stronger: the older six still roundtrip byte-true here
+    # (the equality row below carries them verbatim), the VERSION==1
+    # no-bump leg is test_version_is_int_one (untouched), and the counters
+    # {} default leg rides the T-M5p probe (migrate, test_achievements.py).
     assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle",
-                         "stage"}, \
-        "on-disk keys must be exactly the roadmap's four + best_cycle + stage"
+                         "stage", "counters"}, \
+        "on-disk keys must be exactly the roadmap's four + best_cycle + stage + counters"
     assert disk == {"version": 1, "gold": 123, "ranks": {"might": 2},
-                    "flags": {"stage2": 1}, "best_cycle": 3, "stage": 3}
+                    "flags": {"stage2": 1}, "best_cycle": 3, "stage": 3,
+                    "counters": {}}
     assert rows["reload"] == {"gold": 123, "ranks": 2, "flags": 1,
                               "version": 1, "best_cycle": 3, "stage": 3}
     # a stale torn temp must not block the atomic rename (recreate from garbage)

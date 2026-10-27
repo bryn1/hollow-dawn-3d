@@ -47,6 +47,9 @@ PX_MIN = 200  # roadmap floor, verbatim
 # — the stage select crops its _center_box rect against the SAME hidden-UI
 # baseline; its row also carries the state truth the shot must show: 3
 # stage rows, 2 sealed lock lines on a never-unlocked well, chosen == 1.
+# M5 P-E5 (MC 11421 T-M5p, ledger R3 additive row, SAME floor): the
+# achievements window leg — 20 table rows + progress text, >= 1 row painted
+# achieved (the capture's declared counter seeding).
 
 
 def capture():
@@ -68,7 +71,9 @@ def gate(dir_path):
     for row in rows:
         img_path = os.path.join(dir_path, {"shop_shot": SHOP_PNG,
                                            "stage_select_shot":
-                                           "m3-stage-select.png"}[row["leg"]])
+                                           "m3-stage-select.png",
+                                           "achievements_shot":
+                                           "m5-achievements.png"}[row["leg"]])
         shot = np.asarray(Image.open(img_path).convert("RGB"), dtype=np.int16)
         if shot.shape != base.shape:
             print("FAIL shot/baseline shape mismatch %s vs %s"
@@ -85,6 +90,12 @@ def gate(dir_path):
             if not (row["rows"] == 3 and row["sealed"] == 2
                     and row["chosen"] == 1):
                 print("FAIL stage-select state wrong: %s" % row)
+                ok = False
+        elif row["leg"] == "achievements_shot":
+            # M5 P-E5 (R3 additive, same floors): the 20-row table with at
+            # least one achieved row painted (the capture's seeded state)
+            if not (row["rows"] == 20 and row["achieved"] >= 1):
+                print("FAIL achievements state wrong: %s" % row)
                 ok = False
         cx, cy, hw, hh = row["cx"], row["cy"], row["hw"], row["hh"]
         win_px, total_px, (x0, x1, y0, y1) = pixel_lib.window_delta_counts(

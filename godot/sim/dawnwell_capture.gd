@@ -29,6 +29,13 @@
 #                             The gate reuses the SAME hidden-UI baseline
 #                             (the T-M2t per-window precedent, not a new
 #                             capture mechanism).
+# M5 P-E5 (MC 11421 T-M5p): a third window on the SAME machine —
+#   m5-achievements.png       the achievements page opened through main's
+#                             REAL _open_achievements verb; counters seeded
+#                             directly (the BANKROLL declared-seeding law),
+#                             so the shot carries 20 rows with progress
+#                             text + achieved rows in EMBER. Same hidden-UI
+#                             baseline (T-M2t law).
 extends SceneTree
 
 const OUT_ENV := "HD3D_SHOP_SHOTS_DIR"
@@ -95,6 +102,32 @@ func _on_frame() -> void:
 	if _stage == 3:
 		assert(_main._screens.stages_visible())
 		_save_png("m3-stage-select.png", true)
+		# Overlays are opened from the MENU only (the shipped idiom: a panel
+		# is closed before the next one opens) — close the select the same
+		# way stage 1 closed the shop, so the achievements shot carries ONLY
+		# its own draw over the hidden-UI baseline.
+		_main._screens.hide_all()
+		_wait = SETTLE_FRAMES
+		_advance(4)
+		return
+	if _stage == 4:
+		assert(not _main._screens.stages_visible())
+		# M5 P-E5 (MC 11421 T-M5p): one more window on the SAME machine —
+		# the achievements page opened through main's REAL _open_achievements
+		# verb. DECLARED seeding (the BANKROLL precedent above, capture
+		# tooling only): counter values stand in for the run cash-outs a
+		# real player would accumulate; the page itself is display-only,
+		# nothing here mutates through a game path.
+		_main._dawnwell.counters = {"kills_total": 12345, "gold_earned": 800,
+			"runs_total": 12, "wins_total": 1, "minutes_total": 40,
+			"max_level": 20, "evolutions_seen": 0, "unions_seen": 0}
+		_main._open_achievements()
+		_wait = SETTLE_FRAMES
+		_advance(5)
+		return
+	if _stage == 5:
+		assert(_main._screens.achievements_visible())
+		_save_png("m5-achievements.png", true)
 		_write_rows()
 		print("CAPTURE_OK")
 		quit()
@@ -122,6 +155,22 @@ func _save_png(png: String, with_state: bool) -> void:
 		assert(img2.save_png(_out_dir() + "/" + png) == OK)
 		print("SAVED %s %dx%d" % [_out_dir() + "/" + png,
 			img2.get_width(), img2.get_height()])
+		return
+	if png == "m5-achievements.png":
+		# M5 P-E5 state rows (the stage-select leg's shape): the table size
+		# + the achieved count the shot must paint in EMBER.
+		var achieved := 0
+		for arow in Achievements.TABLE:
+			if Achievements.progress(_main._dawnwell, arow) >= int(arow.target):
+				achieved += 1
+		_rows.append({"leg": "achievements_shot",
+			"cx": int(VIEW_HALF.x), "cy": int(VIEW_HALF.y),
+			"hw": int(PANEL_HALF.x), "hh": int(PANEL_HALF.y),
+			"rows": Achievements.TABLE.size(), "achieved": achieved})
+		var img3: Image = root.get_texture().get_image()
+		assert(img3.save_png(_out_dir() + "/" + png) == OK)
+		print("SAVED %s %dx%d" % [_out_dir() + "/" + png,
+			img3.get_width(), img3.get_height()])
 		return
 	if with_state:
 		print("STATE gold=%d ranks=%d" % [_main._dawnwell.gold,

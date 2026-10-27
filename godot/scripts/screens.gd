@@ -2,8 +2,9 @@
 # reason: >400 lines — one overlay idiom per file IS the concern (the §j
 #   no-blank guarantee + the 5-panel parity are enforced against THIS file);
 #   splitting it would fork the idiom the acceptance suite pins.
-# meta shop (T-M1f — FOURTH overlay) and the stage select (M3 §2, T-M3s —
-# FIFTH overlay; the select surface is what earns v2.0.0, SEL-A §2). Every
+# meta shop (T-M1f — FOURTH overlay), the stage select (M3 §2, T-M3s —
+# FIFTH overlay; the select surface is what earns v2.0.0, SEL-A §2) and the
+# achievements page (M5 §1.1, T-M5p — SEVENTH overlay). Every
 # one rides this ONE panel style: same _overlay/_center_box/_label/_button
 # idiom, zero new UI mechanism. Mouse works for real users; keyboard
 # picking is routed by main from the bridge press queue (Contract B), never
@@ -26,6 +27,8 @@ signal shop_refund(id: String)
 signal shop_refund_all
 signal stages_requested
 signal stage_selected(stage_id: String)
+signal achievements_requested
+signal achievements_closed
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -91,6 +94,12 @@ var _shop_rows: VBoxContainer
 # never hidden (S7 ~610 precedent).
 var _stages: Control
 var _stages_rows: VBoxContainer
+# Achievements page (M5 §1.1, T-M5p): DISPLAY of the passed-in DawnWell +
+# the ONE Achievements.TABLE only — rows rebuild per open (shop law); no
+# verb writes here (spec §1.1): main's wrappers route open/close, nothing
+# mutates, the counters/flags were already persisted at the run end.
+var _achv: Control
+var _achv_rows: VBoxContainer
 
 
 func _ready() -> void:
@@ -105,6 +114,8 @@ func _ready() -> void:
 	_build_shop()
 	_stages = _overlay() # on top of the shop (added last): the select dims all
 	_build_stages()
+	_achv = _overlay() # on top of the select (added last), same dim idiom
+	_build_achievements()
 	show_menu()
 
 
@@ -113,6 +124,7 @@ func show_menu() -> void:
 	_levelup.visible = false
 	_shop.visible = false
 	_stages.visible = false
+	_achv.visible = false
 	_menu.visible = true
 
 
@@ -122,6 +134,7 @@ func hide_all() -> void:
 	_end.visible = false
 	_shop.visible = false
 	_stages.visible = false
+	_achv.visible = false
 
 
 func show_levelup(offer: Array) -> void:
@@ -179,6 +192,9 @@ func _build_menu() -> void:
 	box.add_child(_button("The Dawn Well", _on_shop))
 	# M3 §2: the select seam sits NEXT TO those (same _button idiom).
 	box.add_child(_button("Choose your night", _on_stages))
+	# M5 §1.1: the achievements seam, same idiom (the page is display-only,
+	# so its only verb is the open; the panel's Back owns the close).
+	box.add_child(_button("Achievements", _on_achievements))
 
 
 func _build_levelup() -> void:
@@ -256,6 +272,10 @@ func _on_shop() -> void:
 
 func _on_stages() -> void:
 	stages_requested.emit()
+
+
+func _on_achievements() -> void:
+	achievements_requested.emit()
 
 
 # --- Dawn Well shop (T-M1f): the fourth overlay in the ONE panel style ----
@@ -443,3 +463,65 @@ func refresh_stages() -> void:
 					String(row.unlock_stage)).name)]
 			select.disabled = true
 		_stages_rows.add_child(select)
+
+
+# --- Achievements page (M5 §1.1, T-M5p): the seventh overlay in the ONE
+# panel style. The 20 rows rebuild per open from the ONE Achievements.TABLE
+# + the passed-in well — name, progress `min(count, target)/target` — an
+# achieved row titles in EMBER (the stage-select chosen law, §1.1). NO
+# mutation lives here (display-only, spec §1.1): the counters and flags
+# were persisted at the run end by the ONE funnel (main._end_run). The
+# wider column + scroll ride the shop precedent (20 rows > the menu box).
+
+func show_achievements(well: DawnWell) -> void:
+	_well = well
+	_menu.visible = false
+	_achv.visible = true
+	refresh_achievements()
+
+
+func achievements_visible() -> bool:
+	return _achv.visible
+
+
+func close_achievements() -> void:
+	_achv.visible = false
+	show_menu()
+
+
+func _build_achievements() -> void:
+	var box := _center_box(_achv)
+	# shop precedent (_build_shop): a 20-row table needs more than the
+	# menu's 560 column — the same 760 with its own scroll window.
+	box.offset_left = -380
+	box.offset_right = 380
+	box.custom_minimum_size = Vector2(760, 0)
+	box.add_child(_label("Achievements", 24, BONE))
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(760, 320)
+	box.add_child(scroll)
+	_achv_rows = VBoxContainer.new()
+	_achv_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_achv_rows.custom_minimum_size = Vector2(740, 0)
+	_achv_rows.add_theme_constant_override("separation", 6)
+	scroll.add_child(_achv_rows)
+	var back := Button.new()
+	back.text = "Back to the menu"
+	back.pressed.connect(func(): achievements_closed.emit())
+	box.add_child(back)
+
+
+func refresh_achievements() -> void:
+	# Rebuilds the 20 rows from the ONE table (shop/stage law): name +
+	# progress term; an achieved row in EMBER (the stage-select law — the
+	# row IS the achievement, no separate verb, nothing disabled: there is
+	# nothing to press).
+	for child in _achv_rows.get_children():
+		child.queue_free()
+	for row in Achievements.TABLE:
+		var prog := Achievements.progress(_well, row)
+		var target := int(row.target)
+		var line := _label("%s — %d/%d" % [row.name, prog, target], 13,
+			EMBER_TINT if prog >= target else BONE)
+		line.autowrap_mode = TextServer.AUTOWRAP_OFF
+		_achv_rows.add_child(line)

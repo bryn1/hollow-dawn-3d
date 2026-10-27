@@ -123,6 +123,12 @@ func _ready() -> void:
 	# _meta_changed funnel and refreshes.
 	_screens.stages_requested.connect(_open_stages)
 	_screens.stage_selected.connect(_stage_chosen)
+	# Achievements page (M5 §1.1, T-M5p): the SEVENTH overlay, DISPLAY-only
+	# — no verb writes here (spec §1.1), the panel emits open/close verbs
+	# and the thin wrappers below route them (the funnel call-count pins
+	# stay at the shipped set — P-E3).
+	_screens.achievements_requested.connect(_open_achievements)
+	_screens.achievements_closed.connect(_close_achievements)
 
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
@@ -364,6 +370,17 @@ func _end_run(result: String) -> void:
 	# the field-by-field save migration keeps older files at 0 (§A.3).
 	if game.cycle > _dawnwell.best_cycle:
 		_dawnwell.best_cycle = game.cycle
+	# M5 §1.1 counter store + achievement flags (T-M5p): the ONE run-end
+	# update site, landing FORCED above the gold cash-out (the shipped
+	# gold->funnel adjacency pin allows whitespace only between the two
+	# lines — the block may never land there; P2-1) and beside the
+	# best_cycle max-rule write above. Pure int math over stats / weapons
+	# / cycle / the well (zero RNG, no sim touch); Σ-add + max-rule rows
+	# ride well.counters, achievement flags ride the SAME flags dict as
+	# achv:<id> (F-4, SET-only, death never unsets). This block calls
+	# neither save() nor the funnel below — the ONE persisting call under
+	# the gold line covers it with the cash-out (P-E3 PIN-HOLD).
+	Achievements.update(_dawnwell, game, world)
 	# M3 §1.1/§2 unlock chain (T-M3s): riding the EXISTING flags dict — a
 	# run of stage S at level >= the next row's unlock_level SETS that row's
 	# flag (SET only; death never unset anything, the flag dict is write-1
@@ -470,3 +487,17 @@ func _stage_chosen(stage_id: String) -> void:
 			_dawnwell.stage = idx
 			_meta_changed()
 	_screens.refresh_stages()
+
+
+# --- Achievements verbs (M5 §1.1, T-M5p) ---------------------------------------
+# The same panel contract WITHOUT the writes: the page is display-only
+# (spec §1.1 — no verb writes here), so these are pure routing wrappers,
+# zero meta mutation and zero persisting calls (the P-E3 whole-scripts
+# grep pin counts the shipped funnel sites, this card adds none).
+
+func _open_achievements() -> void:
+	_screens.show_achievements(_dawnwell)
+
+
+func _close_achievements() -> void:
+	_screens.close_achievements()

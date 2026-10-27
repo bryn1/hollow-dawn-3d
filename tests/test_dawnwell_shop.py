@@ -237,11 +237,16 @@ def test_buy_and_save_roundtrip(probe):
     disk = json.loads(json_text)
     # on-disk shape REPLACED at T-M2e (MC 11237): §A.3's best_cycle joins the
     # four roadmap keys (VERSION unchanged), and again at T-M3s (§1.4: the
-    # stage row joins, still no version bump) — falsified-by-design +
-    # replaced, LEDGER rows; the shop card's own rule (rank 1 @ 40, gold 960)
-    # is the row's point and is UNTOUCHED.
+    # stage row joins, still no version bump), and again at T-M5p (M5-SPEC
+    # §1.1, retire ledger R1, MC 11421: the counters row joins — STILL no
+    # version bump; this leg is the SECOND on-disk exact-set reader, found
+    # at card time and re-pinned in the SAME commit, the R1 in-series law) —
+    # falsified-by-design + replaced, LEDGER rows; the shop card's own rule
+    # (rank 1 @ 40, gold 960) is the row's point and is UNTOUCHED (no shop
+    # verb moves a counter — the {} here is the fresh-well default).
     assert disk == {"version": 1, "gold": 960, "ranks": {"vitality": 1},
-                    "flags": {}, "best_cycle": 0, "stage": 1}
+                    "flags": {}, "best_cycle": 0, "stage": 1,
+                    "counters": {}}
 
 
 def test_poor_buy_declines(probe):
