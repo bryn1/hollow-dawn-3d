@@ -47,7 +47,7 @@
 | 10 | Achievement-chain unlocks | **stage-chain unlocks LIVE (M3)**: reach level 10 in stage 1 → stage 2, level 14 in stage 2 → stage 3 — SET-only through the ONE `_meta_changed` funnel, disk-persisted well flags (`main.gd:373-376` — old pin :333-337, re-grepped at the v2.1.0 cut; the M4 reaper fork rides the same flag channel, `main.gd:246-249` cap branch), `save.gd` flags rows; A-E5 legs). Pool-gating counters + achievements PAGE still not shipped | passives/weapons/stages gated by achievement chains (S7 ~617–624: e.g. "Level up X to lvl 4" → passive; stage unlock = reach lvl N in previous stage ~624) | M2: unlock-flag store gating the level-up pool (NOT LANDED — named follow-on); M3: stage-chain unlock — **LANDED-M3** (their stage-chain row, OUR levels); M4: achievements page (~20 rows) — NOT LANDED, deferred out of v2.1.0 named+tracked (M4-SPEC §6, `T-M4p-ACHIEVEMENTS`) |
 | 11 | Co-op | none | local co-op up to 4; changes pooling/shared chests (S8 ~671–674) | EXCLUDED — see §3 |
 | 12 | Mobile | none (desktop/web builds) | official mobile releases exist; control details UNVERIFIED (S8 ~676–678) | EXCLUDED (revisit on owner word) — see §3 |
-| 13 | Cloud save | none; leaderboard via vendored v1 server only | "Steam Cloud" listed as platform category; internals UNVERIFIED (S8 ~680–682) | EXCLUDED — platform service, see §3 |
+| 13 | Cloud save | none; no leaderboard server exists in this repo — the former "rides the v1 server" wording was a CONTRADICTED claim, retired at MC 11398 §4.1 / MC 11401 (zero commits ever touched `server/`, measured) | "Steam Cloud" listed as platform category; internals UNVERIFIED (S8 ~680–682) | EXCLUDED — platform service, see §3 |
 
 ## 2. PHASED PLAN — M1..M4, each phase a SHIPPABLE release
 
@@ -378,7 +378,8 @@ merchant NPC, audio (already open polish), light-source destructibles.
    rewrites level-up pooling, shared chests, enemy scaling). Out; separate project if the
    owner ever asks.
 2. **Cloud saves** — a platform service (Steam Cloud, S8 ~680–682); we are self-hosted
-   web+win. `user://` save files + the leaderboard server cover our persistence.
+   web+win. `user://` save files cover our persistence (the former "+ the leaderboard
+   server" clause named a component this repo never carried — retired MC 11398 §4.1).
 3. **Mobile touch controls** — owner plays desktop/web (their mobile releases exist but the
    control rows are UNVERIFIED, S8 ~676–678). Revisit on owner word.
 4. **DLC-flagged / UNVERIFIED inventory rows** (S2 DLC passives, S4 [DLC] stages, S6 DLC

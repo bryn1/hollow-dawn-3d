@@ -148,7 +148,9 @@ updatable every frame — sway/bob/lean/lunge/squash, no bones); **only player +
 **Mechanism:** v1's `test_game_numbers.py` reads `.gd` **source text** by file name
 (`test_game_numbers.py:13,17,21-24`) under `conftest.REPO` (`conftest.py:18`). The 3D build keeps the
 **same file names + constant spellings** in `godot/scripts/`; the test file is copied verbatim and
-imports this repo's vendored `tests/conftest.py` (one port/DB re-stamp, §e) — zero logic edits. A
+imports this repo's `tests/conftest.py` (the port/DB re-stamp §e once described rode a
+v1-server harness block since DELETED at MC 11317 C2 — conftest is now the repo's own seam
+home; the copied-file law itself still holds) — zero logic edits. A
 consolidated `game_data.gd` is **rejected** (§h). Band/signature pins v1 never covered
 (`ARCHITECTURE.md:197-200` @ `5dc7679`) land in new **`tests/test_biome_numbers.py`** (same regex style).
 
@@ -268,17 +270,23 @@ superseded, declared in LEDGER; each twice-cmp-identical) and the byte-anchored 
 (journey 5020 rows + every strict fixture re-measured byte-identical at the v2.1.0 cut,
 A-E1).
 
-## (e) SERVER / LEADERBOARD — reuse v1 verbatim
-v1's server is **stdlib-only Python, language-agnostic** (`ARCHITECTURE.md:168` @ `5dc7679`;
-`server.py:1-6`); `/api/health` + `/api/highscores` (`ARCHITECTURE.md:37-42` @ `5dc7679`) are
-unaffected by a 3D client. Vendored byte-identical: `server/server.py` (sha `2f973d89…38ee`),
-`api.py` (`93f50f75…6650`), `db.py` (`e92d8ead…fa537`), `static_app.py` (`898ee176…7923a`); env
-`VS_PORT`/`VS_DB` (`server.py:50-51`; cycle-1's `:49-50` off-by-one fixed) unchanged.
-**Tests copy with ONE stated diff (P3-6):** vendored `tests/conftest.py` re-stamps
-`MAIN_PORT`/`MAIN_DB` (`conftest.py:22-23`) and `RESTART_PORT`/`RESTART_DB` (`:24-25`; F-4 — c3's
-`:22-23` cite missed them, the port-2 collision would have survived) to `8941/8942` +
-`/tmp/hd3d-*.db` — else the two
-repos' suites on this host purge each other's DB. **`test_assets_manifest.py` is dropped, stated:**
+## (e) SERVER / LEADERBOARD — EXCLUDED: never carried into this repo (MC 11398 §4.1 honest pass, MC 11401)
+This section originally read "reuse v1 verbatim" and listed the `server/` files — `server.py`
+(sha `2f973d89…38ee`), `api.py`, `db.py`, `static_app.py` — as copied into this repo
+byte-identical. Measured against this tree at the v2.1.0 cut: no `server/` and no `static/`
+dir exist, and `git log --all -- server/` returns ZERO commits — the copy was never executed.
+A claim that was never true is retired like one that died: the old claim stands named in the
+previous sentence; the truth stands here. The leaderboard itself is **EXCLUDED**
+(PARITY-ROADMAP row 13 — a v1-server platform feature, see §3). v1 server facts stay cited
+v1-relative by this doc's declared convention (`:9`): stdlib-only Python + `/api/health` +
+`/api/highscores` (`ARCHITECTURE.md:37-42` @ `5dc7679`) — v1's server is unaffected by a 3D
+client, it just never moved here. The one vestige of the original plan — the v1-server harness
+block inside `tests/conftest.py` — was DELETED at MC 11317 C2 (zero consumers re-proved there);
+the stated-diff port re-stamps of §e (`MAIN_PORT`/`MAIN_DB` + `RESTART_PORT`/`RESTART_DB`,
+cited `conftest.py:22-25` v1-relative per `:9`, F-4) died with that block — the DB-purge
+collision they guarded cannot occur in this repo. `tests/conftest.py` today is this repo's own
+seam home (loaders/const/block, MC 11317 C2), not a v1 copy. The test-copy law that DID
+execute is `tests/test_game_numbers.py` verbatim (§c). **`test_assets_manifest.py` is dropped, stated:**
 its pinned 16-PNG `EXPECTED_FILES` set + v1 PLAN path cannot hold in the 3D tree; the GLB/icon tree
 gets its own manifest test at the art phase.
 
@@ -306,12 +314,22 @@ godot/scripts/render.gd         DECIDED — KEEP AS DATA MODULE ONLY: `class_nam
 godot/scripts/{world,game_state,weapons,levelup,bridge,screens}.gd  copied VERBATIM (sim + suite
                                 text-reads; screens.gd extended only by §j card icons)
 godot/assets/biomes/*.png       4 v1 tiles byte-identical; godot/assets/glb/ NEW; godot/assets/icons/ NEW (§j)
-tests/  conftest.py (one-diff §e), test_game_numbers.py verbatim, test_biome_numbers.py NEW,
-        test_contract_a_api.py + test_contract_a_validation.py + test_static_contract.py +
-        test_tree_hygiene.py copied (test_assets_manifest.py dropped, §e)
-server/ vendored verbatim (§e); static/ export target; docs/ + .audits/ per layout v2
+tests/  conftest.py (the repo's OWN seam home since MC 11317 C2 — the §e v1-server
+        re-stamp block died there; §e honest pass), test_game_numbers.py verbatim,
+        test_biome_numbers.py NEW. The §e block that once listed
+        test_contract_a_api.py + test_contract_a_validation.py +
+        test_static_contract.py + a tree-hygiene copy test as copied never
+        executed: the contract-A/server tests ride the server that never came
+        (§e) and the tree-hygiene gate test never existed here (measured
+        MC 11398 §4.2);
+        test_assets_manifest.py dropped (§e)
+server/ never carried — EXCLUDED (§e honest pass, MC 11398 §4.1); static/ export target; docs/ + .audits/ per layout v2
 ```
-Hygiene: every script above ≤ 300 lines (`test_tree_hygiene.py:19` gate ships with the copy).
+Hygiene: the fleet file law is dod_hygiene rule (h) (~250 aim / >400 needs a
+`reason` line in the first 5 / >600 hard fail) — the ≤300-line gate this row once
+cited (the phantom tree-hygiene test, `:19`) never shipped with the copy: no such
+file exists in this repo, measured at MC 11398 §4.2; replace-not-delete, the old
+claim named.
 
 ## (g) EXPORT CHAIN + releases (owner "own releases" row — P2-4 closed)
 - **Web double-export** (`ARCHITECTURE.md:25-27` @ `5dc7679`): `--import`, then

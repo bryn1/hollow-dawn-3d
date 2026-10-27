@@ -317,3 +317,9 @@ of the MC 11096 TRELLIS.2/UniRig stack install remains readable here:
 DEFERRAL CLOSED: the owner word this row waited for is the verbatim ruling
 "Delete them." (2026-10-26); MC 11333 executes it — the files are deleted,
 these named rows are not (history stays readable).
+
+## Kept manual replay probes (driverless BY DECLARATION — audit MC 11398 §3.2)
+
+| script | what it replays | disposition |
+|---|---|---|
+| .tmp/run-player-s1p.sh | the MC 11132 player row on vm100: remaster sprite -> player_attempts.py (drain_barrier + extent/fill gates) with the MC 11131 env-failure classification (crash with NO `QUALITY` line = llama-swap consumer restart, not a seed attempt: re-barrier + retry the SAME seed once; recurrence -> exit 2), then the UniRig inner chain on the accepted seed | KEPT as the named manual replay probe of the player-model recipe — the tracked `.sh` stays driverless by declaration (dead_code DRIVERLESS stdout is the manual-gate shape, red_controls mut_a precedent); re-run manually to reproduce the MC 11132 seed-42 acceptance leg |

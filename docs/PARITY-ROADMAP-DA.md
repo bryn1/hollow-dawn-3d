@@ -1,5 +1,12 @@
 # PARITY-ROADMAP-DA — adversarial gate over docs/PARITY-ROADMAP.md (MC 11202, T-S17b)
 
+> **[NOTE 2026-10-27, MC 11401]** Historical review text, kept as written. One
+> clause in it is now CONTRADICTED: D-1's claim that `user://` plus a leaderboard
+> server copied into this repo cover our persistence repeated the DESIGN-3D §e
+> wording later measured NEVER executed (zero commits ever touched `server/`,
+> MC 11398 §4.1). The shipped truth stands at PARITY-ROADMAP row 13 + DESIGN-3D
+> §e (honest pass).
+
 - Reviewed target: `docs/PARITY-ROADMAP.md` @ ba123e8 (VERIFIED: `git pull` → already up to date).
 - Inputs read this session: PARITY-ROADMAP.md (full), VS-FEATURES.md (structure + ~20 cited
   line-ranges spot-checked), LEDGER.md, README.md, DESIGN-3D.md §b/§c headers, code truth
