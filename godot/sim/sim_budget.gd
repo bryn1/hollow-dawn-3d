@@ -1,4 +1,8 @@
 # WORST-CASE LOADOUT budget legs (T-M1g, MC 11211; PARITY-ROADMAP rev3 §2
+# reason: >400 lines — 472 measured at MC 11398 §1 (grew 330->472 in the M4
+#   window, the growth class rule (h2) exists to catch): every leg shares the
+#   ONE pinned LOADOUT/PARTNERS arrays and the ONE draw_count() verdict — a
+#   split would fork the loadout beside its own tally. Audit verdict: header.
 # "Canonical WORST-CASE LOADOUT" + the budget acceptance lines). The doc's
 # NAMED loadout: six weapon slots filled by the class-covering set (every
 # weapon-FX class live, the zone MM active — c2 N-6 "fixture re-tally is the
@@ -255,15 +259,10 @@ func _run_legs() -> void:
 	# 13 (horde_viz stage-gates its boss-class MMs — a stage only ever
 	# fields its own end-boss, the replaced classes are §7's idle rows);
 	# stage 3 is the worst (plate MM joins + own ossuary): plan 40, hard 60.
-	var s3: Node = load("res://Main.tscn").instantiate()
-	root.add_child(s3)
-	var stub3 := SimStubScreens.new()
-	s3.add_child(stub3)
-	s3._screens = stub3
-	stub3.start_pressed.connect(s3._start_game)
-	stub3.card_picked.connect(s3._pick)
-	s3._dawnwell.stage = 3 # DECLARED save-side row pin (sim_stages pattern)
-	s3._start_game()
+	var s3: Node = SimFunnel.fresh_run(root, {"wire_pick": true, "stage": 3})
+	# MC 11401 C2: the 9-line verbatim body copy converted to the ONE seam
+	# (audit MC 11398 §2.1); the DECLARED save-side stage pin rides the opts
+	# (sim_stages pattern).
 	_pin_worst_case(s3)
 	var s3row: Dictionary = GameRenderer.stage_row("ossuary-stair")
 	s3.game.player.x = float(s3row.plates[0][0]) # dwell: plate MM live
@@ -331,14 +330,9 @@ func _run_legs() -> void:
 	# the real sunken-tide window OPEN over the 60 hp-pinned ticks (cap
 	# pause holds: F-4), the stage-2 cairn chests live through _start_game's
 	# seed_stage_props. §9 reading: 2 named / 402 total, draws <= 40 <= 60.
-	var s4: Node = load("res://Main.tscn").instantiate()
-	root.add_child(s4)
-	var stub4 := SimStubScreens.new()
-	s4.add_child(stub4)
-	s4._screens = stub4
-	stub4.start_pressed.connect(s4._start_game)
-	stub4.card_picked.connect(s4._pick)
-	s4._dawnwell.stage = 2 # DECLARED save-side row pin
+	var s4: Node = SimFunnel.fresh_run(root, {"wire_pick": true, "stage": 2})
+	# MC 11401 C2: same conversion as the s3 site (audit MC 11398 §2.1); the
+	# DECLARED save-side stage pin rides the opts.
 	s4._start_game()
 	_pin_worst_case(s4)
 	s4.game.time = 660.0 - DT # DECLARED: choir + prelate latch on tick 1

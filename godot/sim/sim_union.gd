@@ -1,4 +1,10 @@
 # Union legs for M2-SPEC rev-2 §D (MC 11240, T-M2u). Same headless funnel
+# reason: >400 lines — 488 measured at MC 11398 §1 (deferred carry-over): the
+#   truth table + FULL legs ARE the one unions dump contract (seed 11240,
+#   byte-pinned fixture). NON-ADOPTION declared (MC 11398 §2's copy-vs-couple
+#   law): this driver keeps its pre-C3 runner shape (_run/_gate/_emit + own
+#   _out/_rows) — C2 (MC 11401) converted ONLY the §2.1 verbatim fresh_run
+#   body site at _leg_fire to SimFunnel.fresh_run; the rest is not a copy.
 # as sim_evolve (the REUSED pattern, not a second harness): the REAL
 # Main.tscn, screens stubbed, the run started through the real
 # _start_game, chests PLACED through the real drop funnel (synthetic
@@ -420,13 +426,10 @@ func _leg_full(uid: String) -> void:
 # ALONE in the build (DECLARED pin), hp pinned every tick (declared), the
 # real _step loop spawns the horde. kills >= 1 can only be the union's.
 func _leg_fire(uid: String) -> void:
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	run._start_game()
+	# MC 11401 C2: the 6-line fresh_run body copy converted to the ONE seam
+	# (audit MC 11398 §2.1). The in-loop levelup-decline below stays the
+	# donor's verbatim body — named at the header, not a second helper.
+	var run: Node = SimFunnel.fresh_run(root)
 	run.game.weapons = [{"id": uid, "level": WeaponSystem.MAX_LEVEL,
 		"cd": 0.0}] # DECLARED pin: the union alone (sim_combat channel)
 	var max_halos := 0

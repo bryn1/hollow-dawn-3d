@@ -81,13 +81,9 @@ static func cap_violations(game, c: Dictionary) -> Array:
 # Level-ups that melee legs trigger are DECLINED (pending_levels consumed,
 # no card applied) so the build stays one-weapon and the attribution pure.
 func run_leg(root: Window, weapon_id: String, level: int) -> Dictionary:
-	var run: Node = load("res://Main.tscn").instantiate()
-	root.add_child(run)
-	var stub := SimStubScreens.new()
-	run.add_child(stub)
-	run._screens = stub
-	stub.start_pressed.connect(run._start_game)
-	run._start_game()
+	# MC 11401 C2: the 6-line fresh_run body copy converted to the ONE seam
+	# (audit MC 11398 §2.1 — this was the donor's verbatim body beside it).
+	var run: Node = SimFunnel.fresh_run(root)
 	run.game.weapons = [{"id": weapon_id, "level": level, "cd": 0.0}]
 	for _n in LEG_STEPS:
 		if run.game.phase == "levelup":
