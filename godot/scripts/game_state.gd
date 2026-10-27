@@ -64,6 +64,20 @@ var reaper := false
 # gilded-skull/rotten-plate precedent — at 0 picks every term adds exactly
 # nothing, so every committed byte of every corpus run is unchanged).
 var limit := {"dmg": 0, "spd": 0, "arm": 0}
+# M5 pillar B (MC 11422 T-M5c, M5-SPEC §2.1/F-5): the roster selection.
+# char_sel is the HAND-IN INPUT row (the meta_ranks pattern: main owns the
+# DawnWell read and sets it BEFORE start_run, because the rule table is
+# CONSUMED inside start_run below — the §2.1b after-the-reset placement is
+# declared-and-rejected for this row in the card capture + LEDGER: it
+# cannot feed the start_run consumption F-5 names). char_id is the run var
+# the formula seams and the pawn read; it joins the reset block below
+# (start_run resets it from the input row: a bare start_run reads row 0 =
+# the shipped identity = every committed byte, F-2). Like endless/cycle/
+# stage/reaper/limit both rows ride OUTSIDE the 12-field Contract B
+# snapshot (F-3, frozen: neither name may ever appear in snapshot_json).
+# The skin rows ride with the SKINS table (T-M5k, wave map + R1 sequence).
+var char_sel := 0
+var char_id := 0
 var weapons: Array = [] # [{id, level, cd}] — ids per plan §5
 # The 15 passive STAT ROWS (PARITY-ROADMAP rev3 features 3+7: original five
 # + the ten evolution partners, T-M1h). Seeded here AND in start_run so
@@ -98,7 +112,10 @@ static func xp_need(level: int) -> int:
 func player_speed() -> float:
 	# LIMIT · HASTE (M4 §3.1): +3% move speed per pick as a SECOND factor —
 	# 0 picks multiplies by 1.0, the IEEE identity (byte corpus unchanged).
-	return BASE_SPEED * (1.0 + 0.08 * passives.haste) * (1.0 + 0.03 * limit.spd)
+	# M5 F-5 (T-M5c): the roster spd_pct term rides the SAME second-factor
+	# shape — row 0 (0) multiplies by 1.0, the IEEE identity.
+	return BASE_SPEED * (1.0 + 0.08 * passives.haste) * (1.0 + 0.03 * limit.spd) \
+		* (1.0 + 0.01 * Roster.rule(char_id).spd_pct)
 
 
 func damage_taken(raw: float) -> float:
@@ -106,9 +123,12 @@ func damage_taken(raw: float) -> float:
 	# intake seam as ward — one subtraction site, our values (1 per stack).
 	# LIMIT · BULWARK (M4 §3.1): +1 ARMOR per pick inside the EXISTING
 	# maxf — intake stays clamped >= 0, so Bulwark can never heal damage;
-	# 0 picks subtracts 0.0, the IEEE identity.
+	# 0 picks subtracts 0.0, the IEEE identity. M5 F-5 (T-M5c): the roster
+	# armor_add term rides the SAME subtraction inside the existing maxf —
+	# intake stays clamped >= 0 (B-E3); row 0 subtracts 0.0.
 	return maxf(0.0, raw - passives.ward
-		- float(passives["rotten-plate"]) - 1.0 * limit.arm)
+		- float(passives["rotten-plate"]) - 1.0 * limit.arm
+		- 1.0 * Roster.rule(char_id).armor_add)
 
 
 func damage_multiplier() -> float:
@@ -117,8 +137,10 @@ func damage_multiplier() -> float:
 	# (M4 §3.1): +4% weapon damage per pick as the same-shape additive term
 	# (0.04 vs the passive's 0.08 — the fallback is WEAKER per pick than the
 	# capped passive it stands behind); 0 picks adds 0.0, the IEEE identity.
+	# M5 F-5 (T-M5c): the roster dmg_pct term is the same-shape additive
+	# (+0.01·row); row 0 adds 0.0.
 	return 1.0 + 0.1 * passives.ferocity + 0.08 * float(passives["gall-vial"]) \
-		+ 0.04 * limit.dmg
+		+ 0.04 * limit.dmg + 0.01 * Roster.rule(char_id).dmg_pct
 
 
 # Roster-passive multipliers (T-M1h partners, OUR values): consumed by the
@@ -149,13 +171,20 @@ func start_run() -> void:
 	# Meta-rank consumption (T-M1f): maxHp = 100 + Σ maxhp-ranks * 10 exactly
 	# as the roadmap pins it; the xp/gold rates fold into multipliers here.
 	# With empty meta_ranks every value is the pre-shop constant, byte-equal.
-	max_hp = MAX_HP + PowerUps.max_hp_bonus(meta_ranks)
+	# M5 §2.1 (T-M5c): the roster reset row JOINS this block as the hand-in
+	# INPUT read immediately above the consumption — unset input = row 0,
+	# and every char term below is an additive/multiplicative DEFAULT
+	# (B-E3's "+0 / ·1.0 / +0.01·0" identity rows: IEEE-exact, F-2). The
+	# planted red "a default from a global" (M4 B-E1's endless-pattern red
+	# restated) fires the hand-in regex leg in test_characters.py.
+	char_id = char_sel
+	max_hp = MAX_HP + PowerUps.max_hp_bonus(meta_ranks) + Roster.rule(char_id).hp_add
 	hp = max_hp
 	level = 1
 	xp = 0.0
-	gold = 0
+	gold = Roster.gold_start(char_id) # M5 F-5: the gold_add term, row 0 = 0
 	gold_frac = 0.0
-	meta_xp_mult = 1.0 + PowerUps.xp_bonus(meta_ranks)
+	meta_xp_mult = 1.0 + PowerUps.xp_bonus(meta_ranks) + 0.01 * Roster.rule(char_id).xp_pct
 	meta_gold_mult = 1.0 + PowerUps.gold_bonus(meta_ranks)
 	kills = 0
 	pending_levels = 0
@@ -170,11 +199,31 @@ func start_run() -> void:
 	#   instrument is the sim_limit limit_snapshot leg + test_endless's pin)
 	stage = "moor-vigil" # §1.1 M3: fresh-run reset to the stage-1 id; re-handed
 	flare = 0.0          # by main._start_game after this call (plate logic owns decay)
-	weapons = [{"id": "talon", "level": 1, "cd": 0.0}]
+	# FALSIFIED-BY-DESIGN AND REPLACED (M2-SPEC B3/T-M2c, MC 11236): the
+	# ember start-row drift — the talon literal below was the M2-era start
+	# row. REPLACED AGAIN (M5 §2.2, T-M5c, MC 11422, replace-not-delete,
+	# history kept): the literal moved VERBATIM into roster.gd as
+	# CHARACTERS[0].start_weapons (row 0 IS the shipped identity) and the
+	# hand-out rides Roster.start_weapons()'s deep duplicate() — the §2.2
+	# law: const rows are DEEP read-only on the pinned 4.7.2 and
+	# levelup.gd's upgrade arm mutates the run dict (shallow duplicate
+	# re-shares the row; assignment into a const row aborts — both DA-c2
+	# measured on the pinned binary). A bare start_run consumes row 0 = the
+	# identical row (B-E1 byte law); the re-copied-literal equality pin
+	# lives in test_characters.py (the M2-B3 shape, re-pointed to the
+	# ROSTER seam: the start_run body regex-pins the ROSTER call below).
+	weapons = Roster.start_weapons(char_id)
 	passives = {"ferocity": 0, "haste": 0, "ward": 0, "grip": 0, "insight": 0,
 		"cracked-heart": 0, "iron-wrap": 0, "tall-candles": 0, "four-leaf-charm": 0,
 		"knotted-chain": 0, "loadstone": 0, "rotten-plate": 0, "twin-runes": 0,
 		"gall-vial": 0, "gilded-skull": 0}
+	# M5 F-5 (T-M5c): start passives write INTO the same dict (the §2.2
+	# hand-out is a deep duplicate; every SEL-C row carries an EMPTY row
+	# today — the write loop is the mechanism the field shape freezes, the
+	# row-0 and every-current-row merge is exactly nothing, F-2).
+	var start_pass: Dictionary = Roster.start_passives(char_id)
+	for k in start_pass:
+		passives[k] = int(passives[k]) + int(start_pass[k])
 	player = {"x": 0.0, "y": 0.0, "dir_x": 1.0, "dir_y": 0.0, "iframes": 0.0}
 	stats = {}
 

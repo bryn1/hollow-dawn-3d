@@ -241,12 +241,16 @@ def test_buy_and_save_roundtrip(probe):
     # §1.1, retire ledger R1, MC 11421: the counters row joins — STILL no
     # version bump; this leg is the SECOND on-disk exact-set reader, found
     # at card time and re-pinned in the SAME commit, the R1 in-series law) —
+    # and again at T-M5c (MC 11422, M5-SPEC §2.1: the char row joins — the
+    # same card's R1 move re-landed on THIS second reader in the SAME
+    # commit, the in-series law again; `skin` rides T-M5k's next move) —
     # falsified-by-design + replaced, LEDGER rows; the shop card's own rule
     # (rank 1 @ 40, gold 960) is the row's point and is UNTOUCHED (no shop
-    # verb moves a counter — the {} here is the fresh-well default).
+    # verb moves a counter — the {} here is the fresh-well default, the 0
+    # char the fresh-well roster default too).
     assert disk == {"version": 1, "gold": 960, "ranks": {"vitality": 1},
                     "flags": {}, "best_cycle": 0, "stage": 1,
-                    "counters": {}}
+                    "counters": {}, "char": 0}
 
 
 def test_poor_buy_declines(probe):

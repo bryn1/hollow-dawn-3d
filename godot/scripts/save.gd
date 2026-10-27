@@ -2,7 +2,8 @@
 # Format per PARITY-ROADMAP.md M1 feature 1 rev 3: user://dawnwell.json =
 # {version:int, gold:int, ranks:{powerup_id:rank}, flags:{unlock_id:1}} +
 # M2 §A.3's best_cycle:int (T-M2e, MC 11237) + M3 §1.4's stage:int (T-M3s,
-# MC 11282) + M5 §1.1's counters:{name:int} (T-M5p, MC 11421) — field-by-
+# MC 11282) + M5 §1.1's counters:{name:int} (T-M5p, MC 11421) + M5 §2.1's
+# char:int (T-M5c, MC 11422) — field-by-
 # field ADDED rows, VERSION unchanged (1) exactly as each spec pins it.
 # Recovery rules (all observables, roadmap reset table): missing file -> fresh
 # defaults; undecodable -> quarantine (rename to dawnwell.corrupt.json kept +
@@ -47,6 +48,16 @@ var stage := 1
 # The disk key-set pin rides the growth (test_save.py R1 re-pin, LEDGER
 # row); the {} default leg lands with the T-M5p probe (equal-or-stronger).
 var counters: Dictionary = {} # counter_name -> int
+# M5 §2.1 (T-M5c, MC 11422): the chosen roster row, 0-based index into
+# Roster.CHARACTERS. ANOTHER field-by-field ADDED row, VERSION unchanged
+# (the best_cycle/stage/counters proof verbatim: a missing field defaults
+# 0 = row 0 = the shipped identity, a HIGHER-version save still
+# quarantines, the write path stays the shipped temp+rename). The R1
+# disk-key-set pin rides the growth in test_save.py same-commit (replace-
+# not-delete, equal-or-stronger; LEDGER row). The `skin` row rides with
+# the SKINS table (T-M5k, wave map — the spec §2.4 prose names both; the
+# serial pair's end-state carries skin).
+var char := 0
 
 
 # Boot load: missing file is NOT a failure — fresh defaults, silent.
@@ -75,6 +86,7 @@ static func load_save() -> DawnWell:
 	well.best_cycle = int(data.get("best_cycle", 0)) # §A.3: older saves -> 0
 	well.stage = int(data.get("stage", 1)) # §1.4 M3: older saves -> 1 (moor-vigil)
 	well.counters = _int_dict(data.get("counters", {})) # §1.1 M5: older saves -> {}
+	well.char = int(data.get("char", 0)) # §2.1 M5: older saves -> 0 (row 0)
 	return well
 
 
@@ -106,6 +118,7 @@ func reset() -> void:
 	best_cycle = 0
 	stage = 1
 	counters = {}
+	char = 0
 	var dir := DirAccess.open("user://")
 	if dir != null and dir.file_exists(SAVE_PATH.trim_prefix("user://")):
 		dir.remove(SAVE_PATH.trim_prefix("user://"))
@@ -126,7 +139,8 @@ static func quarantine(reason: String) -> void:
 
 func as_data() -> Dictionary:
 	return {"version": version, "gold": gold, "ranks": ranks, "flags": flags,
-		"best_cycle": best_cycle, "stage": stage, "counters": counters}
+		"best_cycle": best_cycle, "stage": stage, "counters": counters,
+		"char": char}
 
 
 static func _int_dict(src: Variant) -> Dictionary:

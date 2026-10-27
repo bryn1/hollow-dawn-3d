@@ -36,6 +36,16 @@
 #                             so the shot carries 20 rows with progress
 #                             text + achieved rows in EMBER. Same hidden-UI
 #                             baseline (T-M2t law).
+# M5 B-E6 (MC 11422 T-M5c): a fourth window on the SAME machine —
+#   m5-char-select.png        the roster select opened through main's REAL
+#                             _open_characters verb on a funded well: row 1
+#                             BOUGHT+selected (EMBER title), row 2 owned
+#                             (Select), rows 4-8 LOCKED carrying their
+#                             achievement names (the roadmap wants the lock
+#                             line ON screen). Roster.buy is the rule call
+#                             the real verb makes (the PowerUps.buy declared
+#                             seeding above, capture tooling only). Same
+#                             hidden-UI baseline (T-M2t law).
 extends SceneTree
 
 const OUT_ENV := "HD3D_SHOP_SHOTS_DIR"
@@ -128,6 +138,28 @@ func _on_frame() -> void:
 	if _stage == 5:
 		assert(_main._screens.achievements_visible())
 		_save_png("m5-achievements.png", true)
+		# T-M5c B-E6: close the page the shipped way (a panel closes before
+		# the next opens), then the roster shot on the funded well.
+		_main._screens.hide_all()
+		_wait = SETTLE_FRAMES
+		_advance(6)
+		return
+	if _stage == 6:
+		assert(not _main._screens.achievements_visible())
+		# DECLARED seeding (BANKROLL law, capture tooling only): row 1 is
+		# bought + chosen, row 2 bought, gates UNSET so rows 4-8 render
+		# their lock lines. Roster.buy is the pure rule the real _char_buy
+		# verb calls; the well state is the shot's subject, not a game path.
+		assert(Roster.buy(_main._dawnwell, 1))
+		assert(Roster.buy(_main._dawnwell, 2))
+		_main._dawnwell.char = 1
+		_main._open_characters()
+		_wait = SETTLE_FRAMES
+		_advance(7)
+		return
+	if _stage == 7:
+		assert(_main._screens.chars_visible())
+		_save_png("m5-char-select.png", true)
 		_write_rows()
 		print("CAPTURE_OK")
 		quit()
@@ -171,6 +203,27 @@ func _save_png(png: String, with_state: bool) -> void:
 		assert(img3.save_png(_out_dir() + "/" + png) == OK)
 		print("SAVED %s %dx%d" % [_out_dir() + "/" + png,
 			img3.get_width(), img3.get_height()])
+		return
+	if png == "m5-char-select.png":
+		# M5 B-E6 state rows (the stage-select leg's shape): the roster
+		# table size + the LOCKED count the shot must paint with gate
+		# names + the owned/selected rows the funded well carries.
+		var owned := 0
+		var locked := 0
+		for i in Roster.CHARACTERS.size():
+			if Roster.is_owned(_main._dawnwell, i):
+				owned += 1
+			elif Roster.is_locked(_main._dawnwell, i):
+				locked += 1
+		_rows.append({"leg": "char_select_shot",
+			"cx": int(VIEW_HALF.x), "cy": int(VIEW_HALF.y),
+			"hw": int(PANEL_HALF.x), "hh": int(PANEL_HALF.y),
+			"rows": Roster.CHARACTERS.size(), "locked": locked,
+			"owned": owned, "selected": int(_main._dawnwell.char)})
+		var img4: Image = root.get_texture().get_image()
+		assert(img4.save_png(_out_dir() + "/" + png) == OK)
+		print("SAVED %s %dx%d" % [_out_dir() + "/" + png,
+			img4.get_width(), img4.get_height()])
 		return
 	if with_state:
 		print("STATE gold=%d ranks=%d" % [_main._dawnwell.gold,

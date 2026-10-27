@@ -16,3 +16,11 @@
 {"class":"the-reaper","ev":"height","glb":"the-reaper.glb","measured_m":5.33,"mesh":"ArrayMesh","rel_err":0.0,"target_m":5.33}
 {"alive":400,"ev":"draws","fx_worst":7,"ground":1,"hard_cap":60,"horde":13,"ok":true,"pawn":1,"planned":40,"total":22}
 {"class":"player","ev":"height","glb":"player.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"emberwright","ev":"height","glb":"char-emberwright.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"grave-ward","ev":"height","glb":"char-grave-ward.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"coinhound","ev":"height","glb":"char-coinhound.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"duskrunner","ev":"height","glb":"char-duskrunner.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"tallow-seer","ev":"height","glb":"char-tallow-seer.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"shroud-saint","ev":"height","glb":"char-shroud-saint.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"iron-penitent","ev":"height","glb":"char-iron-penitent.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}
+{"class":"hoard-wretch","ev":"height","glb":"char-hoard-wretch.glb","measured_m":1.67,"mesh":"ArrayMesh","rel_err":0.0,"target_m":1.67}

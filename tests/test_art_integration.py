@@ -125,6 +125,11 @@ def test_height_table_within_spec():
     # ossuary rows ride; its row is boss:true), rel_err 0.0 — gate
     # unchanged, the fixture grows 17 -> 18 rows with every prior row
     # byte-preserved (R4's forward lock again).
+    # Coverage row EXTENDED by T-M5c (MC 11422, spec §2.3 R2): the EIGHT
+    # roster meshes join at the PLAYER height row (1.67 m — MODEL_H_PLAYER,
+    # the law the player row rides; row 0 the-vigil IS the player row, no
+    # twin), rel_err 0.0 — gate unchanged, the fixture grows 18 -> 26 rows
+    # with every prior row byte-preserved as the prefix (R4 again).
     assert sorted(by_class) == sorted(CLASS_KEYS + ["warden", "player",
                                                     "hollow-knight",
                                                     "hollow-deacon",
@@ -132,7 +137,16 @@ def test_height_table_within_spec():
                                                     "ossuary-warden",
                                                     "sunken-prelate",
                                                     "stair-acolyte",
-                                                    "the-reaper"])
+                                                    "the-reaper",
+                                                    # T-M5c roster rows:
+                                                    "emberwright",
+                                                    "grave-ward",
+                                                    "coinhound",
+                                                    "duskrunner",
+                                                    "tallow-seer",
+                                                    "shroud-saint",
+                                                    "iron-penitent",
+                                                    "hoard-wretch"])
     for key, row in by_class.items():
         spec = {"warden": SPEC_H_BOSS,
                 "cathedral-choir": SPEC_H_BOSS,
@@ -140,6 +154,13 @@ def test_height_table_within_spec():
                 # T-M4r (MC 11364): boss:true row → MODEL_H_BOSS law.
                 "the-reaper": SPEC_H_BOSS,
                 "player": SPEC_H_PLAYER}.get(key, SPEC_H_ENEMY)
+        # T-M5c (MC 11422): the roster meshes are PLAYER-class units (the
+        # pawn loader's row, §2.3) — the map arm extends, the enemy
+        # default stays exactly the shipped fallback.
+        if key in ("emberwright", "grave-ward", "coinhound", "duskrunner",
+                   "tallow-seer", "shroud-saint", "iron-penitent",
+                   "hoard-wretch"):
+            spec = SPEC_H_PLAYER
         assert row["mesh"] == "ArrayMesh", (
             "%s: live unit must render an imported ArrayMesh" % key)
         assert abs(row["measured_m"] - spec) / spec <= HEIGHT_TOL, (

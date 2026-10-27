@@ -174,7 +174,15 @@ def test_c_e3_three_additive_seams():
                      r" \* \(1\.0 \+ 0\.03 \* limit\.spd\)", GAME_STATE)
     assert re.search(r"return maxf\(0\.0, raw - passives\.ward\s*\n"
                      r"\s*- float\(passives\[\"rotten-plate\"\]\) "
-                     r"- 1\.0 \* limit\.arm\)", GAME_STATE)
+                     r"- 1\.0 \* limit\.arm\s*\n\s*"
+                     # T-M5c (MC 11422, spec §2.2) SAME-COMMIT RE-PIN,
+                     # equal-or-stronger: the ONE intake seam gained its
+                     # roster armor term inside the SAME maxf (the clamp
+                     # law this row exists for — Bulwark/armor can never
+                     # heal — holds over it too, the clamp is unchanged);
+                     # the shipped tail stays a verbatim prefix.
+                     r"- 1\.0 \* Roster\.rule\(char_id\)\.armor_add\)",
+                     GAME_STATE)
     assert re.search(r"return 1\.0 \+ 0\.1 \* passives\.ferocity "
                      r"\+ 0\.08 \* float\(passives\[\"gall-vial\"\]\) "
                      r"\\\s*\n\s*\+ 0\.04 \* limit\.dmg", GAME_STATE)

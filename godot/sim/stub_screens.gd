@@ -35,3 +35,21 @@ func shop_visible() -> bool:
 # M3 T-M3s surface parity: the menu Enter guard also asks the stage select.
 func stages_visible() -> bool:
 	return false
+
+
+# M5 T-M5c surface parity: the menu Enter guard also asks the roster select,
+# and main's roster verbs (show_characters / refresh_characters) route
+# through here. The stub never opens a panel (sim_chars.gd's state leg loads
+# the REAL screens.gd for the per-row render reads); this keeps _start_game,
+# _handle_presses and the char verbs on their real main.gd paths without a
+# Control tree — the same contract as stages_visible above.
+func chars_visible() -> bool:
+	return false
+
+
+func show_characters(_well: DawnWell) -> void:
+	pass
+
+
+func refresh_characters() -> void:
+	pass

@@ -125,8 +125,10 @@ decisions are **named, not silently chosen**.
   honest EXCLUDED pass (MC 11398/11401); the "more 3D" alternatives are rejected WHERE THE
   DOC PUTS THEM (REV-2/P4-1 attribution fix): the perspective camera at §a's camera line
   `:19-20` ("perspective rejected: v1 entities are size-pinned regardless of distance,
-  render.gd:10"), full 3D physics at §a's collision law, skinned horde + heightmap terrain
-  at §h's REJECTS list — all with measured reasons, under the owner's own verbatim ruling
+  render.gd:10"), full 3D physics at §h's REJECTS list (DA-c2 §7 P4-ride 1, this
+  card's same-commit text touch — the physics rejection lives at §h,
+  §a's line is the COLLISION law), skinned horde + heightmap terrain
+  also at §h's REJECTS list — all with measured reasons, under the owner's own verbatim ruling
   at `DESIGN-3D.md:4`: *"a 3d remake. Same type of viduals, top down…"*. A "pivot
   forward" (perspective/true-3D play) would OVERTURN a DA-gated design and the owner's top-
   down ruling — an owner decision with NO artifact on the table (Rule 2). **Reading adopted:**
@@ -364,14 +366,14 @@ additive-zero at 0 (F-5). `mesh` names the GLB through the ONE `_player_mesh()` 
 ### 2.1b THE PAWN APPLY-STEP (REV-2, DA P1-1 — adopted: selection applies AT the F-7 hand-in)
 
 The Code-truth read-once fact becomes the law here: `hero_pawn.gd` sets `mesh =
-_player_mesh()` **ONCE at `_ready()` (:34-43)** and the pawn is instantiated ONCE at boot
+_player_mesh()` **ONCE at `_ready()` (:34-45)** and the pawn is instantiated ONCE at boot
 (`main.gd:32/:89-91` — re-grepped: `_pawn` appears nowhere else in the file), so boot
 `_ready` fires before even the FIRST `_start_game` hand-in: a selection law that only sets
 run state ships a feature that NEVER shows in-session (the gate's P1-1, adopted). Fix, at
 file/function depth:
 
 - **`hero_pawn.gd` gains `func apply_selection() -> void` — the EXISTING `_ready` body
-  (:35-43) MOVED verbatim:** `mesh = _player_mesh()` re-derivation, then the material idiom
+  (:35-45) MOVED verbatim:** `mesh = _player_mesh()` re-derivation, then the material idiom
   unchanged — `src := mesh.surface_get_material(0)`, `duplicate()` FIRST (the ClassMesh
   cache is shared, the imported material never mutated — the T-S2i law), `TRANSPARENCY_ALPHA`
   + `SHADING_MODE_UNSHADED` + `albedo_color = PLAYER_TINT` (`:31`, the BONE×3.6 tone-0.62
@@ -481,7 +483,7 @@ achievement pillar (~0 windows — 0 icons, badges reuse shipped files via the c
 | # | observable | seam | red |
 |---|---|---|---|
 | B-E1 | default identity byte law: journey 5020 + the 12 committed fixtures + the strips dump (modulo §7.1 norm) re-dump IDENTICAL on the T-M5c tree (row 0 = the shipped game; F-2) | the §7.1 re-run pattern (fresh dump vs committed, `cmp`) | planted: `start_weapons` returns the ember row for row 0 ⇒ the journey spawn/kills digest forks ⇒ RED |
-| B-E2 | per-character start weapon: for EACH table row a `sim_chars` leg (fresh_run opts `char`) dumps the FIRST offer/owned rows — `game.weapons[0].id ==` the row's weapon at t=0, slot count 1, row 0 exactly the talon literal — **AND the REV-2/P2-2 aliasing twin-leg: TWO `fresh_run()`s INSIDE ONE process start with byte-equal weapons rows (the multi-run lifecycle leg — twice-cmp fixture generation is blind to same-process poisoning, so the leg runs twice-in-one-process; the `duplicate()` law's observable guard)** | the `sim_chars.gd` dump (SimFunnel; the sim_boss DECLARED-pin idiom for the pinned char_id) | planted: table key drift (`"ember-bolt"` for the shipped `"ember"` — the REV-2 self-caught id, §12 F-13 row: this exact typo sat in the REV-1 table) ⇒ the kill-attribution leg never sees the weapon ⇒ RED (roadmap M1 ACCEPT's planted cooldown-never-fires class, restated); planted: `duplicate()` removed with run 1 upgrading its weapon ⇒ run 2's dump row carries the upgrade ⇒ the twin-leg RED |
+| B-E2 | per-character start weapon: for EACH table row a `sim_chars` leg (fresh_run opts `char`) dumps the FIRST offer/owned rows — `game.weapons[0].id ==` the row's weapon at t=0, slot count 1, row 0 exactly the talon literal — **AND the REV-2/P2-2 aliasing twin-leg: TWO `fresh_run()`s INSIDE ONE process start with byte-equal weapons rows (the multi-run lifecycle leg — twice-cmp fixture generation is blind to same-process poisoning, so the leg runs twice-in-one-process; the `duplicate()` law's observable guard)** | the `sim_chars.gd` dump (SimFunnel; the sim_boss DECLARED-pin idiom for the pinned char_id) | planted: table key drift (`"ember-bolt"` for the shipped `"ember"` — the REV-2 self-caught id, §12 F-13 row: this exact typo sat in the REV-1 table) ⇒ the kill-attribution leg never sees the weapon ⇒ RED (roadmap M1 ACCEPT's planted cooldown-never-fires class, restated); planted: `duplicate()` removed with run 1 upgrading its weapon ⇒ run 2's dump row carries the upgrade ⇒ the twin-leg RED (DA-c2 §7 P4-ride 2: at the pinned 4.7.2 the NAIVE plant is instead the F-3 ABORT signature — `Invalid assignment on read-only value` at run 1's first mutation, itself the RED the capture records; the twin-leg's silent-poisoning shape needs the mutable-shape plant, const→var + duplicate() stripped — both signatures fire, the leg guards the mutable-shape future, F-3) |
 | B-E3 | rule math, formula rows (the C-E3 exact-formula precedent): each new row dumps `max_hp == 100 + Σmeta·10 + hp_add`, `player_speed == 140·(1+0.08haste)·(1+0.03limit)·(1+0.01·spd_pct)`, `damage_multiplier == 1+0.1·ferocity+0.08·gall+0.04·limit+0.01·dmg_pct`, intake `raw−ward−rotten−1·armor ≥ 0`, `meta_xp_mult` row, start `gold ==` row — and the ROW-0 twin of every row EQUALS the shipped byte value exactly | the same dump channel (formula rows, the shop_probe/maxhp shape) | planted: `spd_pct +6` mis-scaled as ×0.1 ⇒ the speed formula row RED while the byte corpora (row-0 twin) stay GREEN — the both-sides law: a rule that leaks into row 0 flips B-E1 instead |
 | B-E4 | hand-in + reset law: `char`/`skin` are set at the ONE `_dawnwell → start` seam AFTER `start_run` (regex pin beside the F-7 STAY probes), reset in `start_run`, absent from the exact-12 snapshot (the 13th-field instrument leg, the `limit_snapshot` shape) | the existing source-pin pattern (`test_endless.py:130-135` STAYS green by construction — named) + a new snapshot-absent leg | planted: default in `start_run` from a global ⇒ the hand-in regex leg + the planted-flag-true twin RED (the M4-SPEC B-E1 endless-pattern red restated — P4-3 namespace fix) |
 | B-E5 | purchase law (the shop both-sides): buy at affordable+unlocked+unowned writes flag `char:<id>` + spends EXACTLY the table price through the ONE funnel; unaffordable/owned/gate-missing ⇒ NO write (the shop's no-op law); gate check reads `flags["achv:<id>"]` verbatim (a gate naming no shipped achievement is a PIN FAILURE, not a runtime surprise); refund NEVER (buy-once stated) | `main._char_buy` verb legs through the save_probe-style probe (the shop_probe pattern, throwaway well) — the price rows value-compare the F-6 table | planted: gate read before the flag exists in PILLAR A (wrong prefix) ⇒ every gate leg "owned" ⇒ RED; planted: price off-by-curve ⇒ spend row RED |
@@ -596,7 +598,7 @@ B-E8 legs can close green — the M3 P2-2 precedent).
 | card | one-line scope | files touched | depends on | can run parallel with |
 |---|---|---|---|---|
 | `T-M5p-ACHIEVEMENTS` | counters + table + page + Pillar A ACCEPT (P-E1..7) + R1(first move) + R3(first move) | save.gd, main.gd, achievements.gd NEW, screens.gd, achv_probe.gd NEW, tests/test_achievements.py NEW, test_save.py, tools/dawnwell_pixel_gate.py | — | asset batch ONLY |
-| `T-M5c-CHARACTERS` | roster + select screen + seams + Pillar B ACCEPT (B-E1..9) + R1/R2/R3 moves + chars-m5 fixture + roster-clips fixture | roster.gd NEW, game_state.gd, main.gd, save.gd, screens.gd, hero_pawn.gd, sim_chars.gd NEW, roster_capture.gd NEW, sim_funnel.gd (opts growth), test_characters.py NEW, test_save.py, test_art_integration.py, test_hero seams, dawnwell_pixel_gate.py | `T-M5p` (the gate flags it consumes + shared files); **`T-M5a` — the mesh rows (B-E7/B-E8 coupling)** | asset batch ONLY |
+| `T-M5c-CHARACTERS` | roster + select screen + seams + Pillar B ACCEPT (B-E1..9) + R1/R2/R3 moves + chars-m5 fixture + roster-clips fixture | roster.gd NEW, game_state.gd, main.gd, save.gd, screens.gd, hero_pawn.gd, sim_chars.gd NEW, roster_capture.gd NEW, sim_funnel.gd (opts growth), test_characters.py NEW, test_save.py, test_art_integration.py (the hero-pawn player-row seam joins here, DA-c2 §7 P4-ride 4 name fix — no file is called "test_hero seams"), test_combat_numbers.py (the PAWN read seam), dawnwell_pixel_gate.py | `T-M5p` (the gate flags it consumes + shared files); **`T-M5a` — the mesh rows (B-E7/B-E8 coupling)** | asset batch ONLY |
 | `T-M5k-SKINS` | SKINS rows + chips + seam read + Pillar C ACCEPT (K-E1..5) + R1/R2 moves | roster.gd, save.gd, main.gd, screens.gd, hero_pawn.gd, roster_capture.gd, test_skins.py NEW, test_art_integration.py | `T-M5c` (roster.gd, screens.gd, hero_pawn.gd shared) | asset batch ONLY |
 | `T-M5a-ASSETS` | §4 batch: 10 meshes + rigs + clips + 11 icons + manifests + gates + PERMANENCE + Pillar D ACCEPT (D-E1..3) | assets/glb +10 (+sidecars), assets/icons +11, tools/vm100/*.tsv, PERMANENCE.md | — | **everything** (disjoint files; artifact coupling names the T-M5c rows) |
 | `T-M5z-ACCEPT` | v3.0.0 release cut on the S9/S11 spine + full ACCEPT re-run (P/B/K/D rows) + **the GitHub-Release doctrine trio as DoD rows** (MC 11277: (1) release notes COMMITTED as `docs/RELEASE-v3.0.0.md` — shipped + known limits + the honest not-shipped line (per-char skins, pool gating, roster-expansion); (2) README current AT the tag; (3) doc-sync grep-to-zero) + the version RATIFICATION line + the roster-option quote on the card + GA | release spine, LEDGER, README, docs/ | all | — |
@@ -715,8 +717,9 @@ construction channel; play-reachability NOT claimed — roadmap §2). Measured-n
 ## 9. EXCLUSIONS (reasons, not silence)
 
 1. **The 3D "pivot" (perspective camera / full 3D physics / skinned horde / heightmap)** —
-   DESIGN-3D rejects each where the doc puts it (perspective + 3D physics at §a, skinned
-   horde + heightmap at §h — REV-2/P4-1) under the owner's verbatim top-down ruling;
+   DESIGN-3D rejects each where the doc puts it (perspective at §a, 3D physics +
+   skinned horde + heightmap at §h — REV-2/P4-1 as finally carried by the
+   DA-c2 §7 ride 1, T-M5c same-commit) under the owner's verbatim top-down ruling;
    overturning a DA-
    gated design + an owner ruling is an OWNER decision with no artifact on the table (F-1,
    Rule 2). This milestone IS the endgame's next step.

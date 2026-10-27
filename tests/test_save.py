@@ -165,21 +165,26 @@ def test_valid_roundtrip(probe):
     rows, json_text, _ = probe
     assert rows["roundtrip"] == {"ok": 1, "file": 1, "temp_gone": 1}
     disk = json.loads(json_text)
-    # FALSIFIED-BY-DESIGN + REPLACED three times, honestly: T-M2e (§A.3
+    # FALSIFIED-BY-DESIGN + REPLACED four times, honestly: T-M2e (§A.3
     # best_cycle) then T-M3s (§1.4 stage, LEDGER row), then T-M5p (M5-SPEC
     # §1.1 counters, retire ledger R1 — the third same-commit re-pin, the
-    # EXACT grown set named, LEDGER row); exactness of the CURRENT set is
-    # the pin, and the reload row now reads the stage back off the disk.
-    # R1 equal-or-stronger: the older six still roundtrip byte-true here
-    # (the equality row below carries them verbatim), the VERSION==1
-    # no-bump leg is test_version_is_int_one (untouched), and the counters
-    # {} default leg rides the T-M5p probe (migrate, test_achievements.py).
+    # EXACT grown set named, LEDGER row), then T-M5c (M5-SPEC §2.1 char —
+    # the FOURTH same-commit re-pin, the EXACT grown set named, LEDGER
+    # row; `skin` rides T-M5k's FIFTH move, the serial pair). Exactness of
+    # the CURRENT set is the pin, and the reload row now reads the stage
+    # back off the disk. R1 equal-or-stronger: the older keys still
+    # roundtrip byte-true here (the equality row below carries them
+    # verbatim), the VERSION==1 no-bump leg is test_version_is_int_one
+    # (untouched), the counters {} default leg rides the T-M5p probe
+    # (migrate, test_achievements.py), and the char default is the equal-
+    # ity row below (unset disk field -> 0 = roster row 0 — the fifth
+    # restatement of the best_cycle/stage migration proof).
     assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle",
-                         "stage", "counters"}, \
-        "on-disk keys must be exactly the roadmap's four + best_cycle + stage + counters"
+                         "stage", "counters", "char"}, \
+        "on-disk keys must be exactly the roadmap's four + best_cycle + stage + counters + char"
     assert disk == {"version": 1, "gold": 123, "ranks": {"might": 2},
                     "flags": {"stage2": 1}, "best_cycle": 3, "stage": 3,
-                    "counters": {}}
+                    "counters": {}, "char": 0}
     assert rows["reload"] == {"gold": 123, "ranks": 2, "flags": 1,
                               "version": 1, "best_cycle": 3, "stage": 3}
     # a stale torn temp must not block the atomic rename (recreate from garbage)

@@ -129,6 +129,15 @@ func _ready() -> void:
 	# stay at the shipped set — P-E3).
 	_screens.achievements_requested.connect(_open_achievements)
 	_screens.achievements_closed.connect(_close_achievements)
+	# Roster select (M5 §2.1, T-M5c): the SIXTH overlay (the achievements
+	# page is the seventh; this one sits between the stage select and it),
+	# same verb contract as the shop — the panel emits verbs ONLY, main
+	# mutates _dawnwell + persists through the ONE _meta_changed funnel and
+	# refreshes (the R1-anchored funnel law; B-E5's disk-observability legs
+	# run THESE verbs from the sim).
+	_screens.characters_requested.connect(_open_characters)
+	_screens.char_bought.connect(_char_buy)
+	_screens.char_selected.connect(_char_select)
 
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
@@ -185,7 +194,7 @@ func _handle_presses() -> void:
 		# open the Enter that would start a run is inert (the panel's own
 		# mouse buttons own input — A-E8, shop-guard parity, MC 11282).
 		elif game.phase == "menu" and bridge.is_enter(code) and not _screens.shop_visible() \
-				and not _screens.stages_visible():
+			and not _screens.stages_visible() and not _screens.chars_visible():
 			_start_game()
 		elif game.phase == "levelup":
 			if code == "Digit1":
@@ -304,6 +313,16 @@ func _start_game() -> void:
 	# Hand the bought meta ranks to the ONE consumption seam (roadmap M1 f2:
 	# ranks are consumed at start_run; the duplicate keeps run state from
 	# aliasing the live shop dictionary).
+	# The roster selection hand-in (M5 §2.1/F-5, T-M5c): the well's char row
+	# rides in as the meta_ranks INPUT pattern — BEFORE start_run, because
+	# the rule table is CONSUMED inside start_run (the §2.1b literal tail
+	# placement cannot feed that consumption; declared reading in the card
+	# capture + LEDGER row). int() lands the JSON-float disk row (save.gd
+	# law); an unset/older save reads 0 = row 0 = every committed byte
+	# unchanged (B-E1). The pawn re-derive rides the hand-in TAIL below.
+	# (PLACED ABOVE the meta_ranks line: the test_dawnwell_shop:153-155
+	# wiring pin demands meta_ranks -> start_run adjacency — a STAY probe.)
+	game.char_sel = int(_dawnwell.char)
 	game.meta_ranks = _dawnwell.ranks.duplicate()
 	game.start_run()
 	# The endless hand-in (F-4, meta_ranks pattern): the ONE _dawnwell ->
@@ -322,6 +341,15 @@ func _start_game() -> void:
 	# props seed right after the hand-in (static rows, ZERO RNG — A-E3).
 	game.stage = GameRenderer.stage_id_for_index(_dawnwell.stage)
 	world.seed_stage_props(game)
+	# M5 §2.1b (T-M5c, MC 11422): the pawn receives the selection at the
+	# hand-in TAIL, the mesh re-read LAST (the P1-1 fix: the pawn was the
+	# boot-once body that never saw a selection). apply_selection() IS the
+	# _ready body moved verbatim (mesh + material re-derive, duplicate-first
+	# PLAYER_TINT law); boot still calls it once through _ready — the
+	# pawn is instantiated EXACTLY once at :89-91 (boot-once invariant
+	# preserved), this re-skims the SAME node. char_id is already the
+	# consumed row (start_run above); zero RNG, zero state mutation.
+	_pawn.apply_selection()
 	_current_offer = []
 	_screens.hide_all()
 
@@ -501,3 +529,38 @@ func _open_achievements() -> void:
 
 func _close_achievements() -> void:
 	_screens.close_achievements()
+
+
+# --- Roster select verbs (M5 §2.1/§2.2, T-M5c, MC 11422) ---------------------
+# The shop/stage verb contract verbatim: the panel displays and emits, main
+# mutates _dawnwell and persists through the ONE meta funnel, then refreshes
+# (the P-E3 whole-scripts save pin holds — these verbs carry ZERO direct
+# disk-write sites; the funnel occurrence set grows by exactly these two
+# call SITES, the re-pin lives in test_achievements.py same-commit). The
+# NO-OP-NO-WRITE law (B-E5): a refused buy/select never enters the funnel,
+# so nothing reaches disk (the disk legs in sim_chars.gd read the file back).
+# Comment-wording note: this block spells no counter literals on purpose —
+# it sits inside the _close_achievements block the P-E5 display-only law
+# extracts, and verb text must stay free of the counted strings.
+
+func _open_characters() -> void:
+	_screens.show_characters(_dawnwell)
+
+
+func _char_buy(char_id: String) -> void:
+	if Roster.buy(_dawnwell, Roster.index_of(char_id)):
+		_meta_changed()
+	_screens.refresh_characters()
+
+
+func _char_select(char_id: String) -> void:
+	var idx := Roster.index_of(char_id)
+	# The _stage_chosen stale-panel law (A-E8): the verb RE-CHECKS the rule,
+	# never trusts the rendered button; an out-of-table id (idx < 0) is the
+	# same refusal arm. A re-select of the already-chosen row writes
+	# nothing (the _dawnwell.stage != idx guard pattern — B-E5's no-op leg
+	# byte-compares the disk before/after exactly this call).
+	if idx >= 0 and Roster.is_owned(_dawnwell, idx) and _dawnwell.char != idx:
+		_dawnwell.char = idx
+		_meta_changed()
+	_screens.refresh_characters()

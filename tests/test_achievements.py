@@ -160,8 +160,13 @@ def test_p_e3_whole_scripts_save_pin():
                 "%s writes to disk itself — the one-funnel law is broken" % fn
     # the shipped occurrence set: 6 call sites + the definition == 7
     # (measured at base 9b1d067 by the DA gate; re-counted at this card —
-    # the block adds ZERO to both instruments).
-    assert MAIN.count("_meta_changed(") == 7, \
+    # the block adds ZERO to both instruments). RE-COUNTED AGAIN by
+    # T-M5c (MC 11422): the roster buy + select verbs are two NEW funnel
+    # call SITES (the shop's _shop_buy pattern, spec §2.2 — every roster
+    # mutation persists through this ONE funnel), 8 sites + the definition
+    # == 9; the MAIN-scoped `.save(` count stays 1 (the funnel body — the
+    # loop above re-proves it every run, this card included).
+    assert MAIN.count("_meta_changed(") == 9, \
         "the funnel occurrence set moved without a retire row"
 
 

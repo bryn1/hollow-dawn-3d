@@ -31,7 +31,15 @@ var _mat: StandardMaterial3D
 const PLAYER_TINT := GameRenderer.BONE * 3.6
 
 
-func _ready() -> void:
+# The §2.1b apply-step (M5 §2.1b, T-M5c, MC 11422 — the MC 11316 P1-1
+# class fix): the ENTIRE _ready body moved here VERBATIM (mesh read + the
+# material re-derive, duplicate-first law included; the mesh row is now
+# char-guarded INSIDE _player_mesh(), the ONE seam). _ready() calls this
+# unchanged — boot = row 0 = the shipped byte behaviour, the boot-once
+# invariant holds (main instantiates the pawn exactly once, :89-91) — and
+# main._start_game() calls it again at the F-7 hand-in tail so a mid-menu
+# selection re-skins the SAME node in-session (B-E7's twin legs).
+func apply_selection() -> void:
 	mesh = _player_mesh()
 	# The iframes-alpha rule carried onto the GLB material (T-S2i seam
 	# note): duplicate FIRST — the ClassMesh cache is shared, the imported
@@ -45,12 +53,26 @@ func _ready() -> void:
 	material_override = _mat
 
 
+func _ready() -> void:
+	apply_selection()
+
+
 # The ONE mesh-source seam: the player rides the same ClassMesh loader as
 # the horde, height-normalised to the §a row (1.67 m). The live height of
 # this very mesh is a table row in the committed probe dump
 # (sim/art_probe.gd -> tests/fixtures/art-s2i-probe.jsonl), gated <= 10 %
 # by test_art_integration.py.
+# M5 §2.1 (T-M5c): the row read is char-guarded HERE, at this ONE seam —
+# row 0 keeps the shipped literal call verbatim (byte law F-2 + the
+# test_art_integration seam pin); rows 1-8 read the ROSTER mesh row at the
+# SAME ClassMesh loader + SAME MODEL_H_PLAYER class height (B-E7: no new
+# loader, no per-row height special-case). The skin override (row + skin
+# lookup) rides with the SKINS table (T-M5k, wave map).
 func _player_mesh() -> Mesh:
+	var char := 0 if game == null else int(game.char_id)
+	if char > 0:
+		return ClassMesh.mesh_for(Roster.row(char).mesh,
+			HordeViz.MODEL_H_PLAYER)
 	return ClassMesh.mesh_for("player.glb", HordeViz.MODEL_H_PLAYER)
 
 

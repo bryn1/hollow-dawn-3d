@@ -3,7 +3,8 @@
 #   no-blank guarantee + the 5-panel parity are enforced against THIS file);
 #   splitting it would fork the idiom the acceptance suite pins.
 # meta shop (T-M1f — FOURTH overlay), the stage select (M3 §2, T-M3s —
-# FIFTH overlay; the select surface is what earns v2.0.0, SEL-A §2) and the
+# FIFTH overlay; the select surface is what earns v2.0.0, SEL-A §2), the
+# roster select (M5 §2.2, T-M5c — SIXTH overlay) and the
 # achievements page (M5 §1.1, T-M5p — SEVENTH overlay). Every
 # one rides this ONE panel style: same _overlay/_center_box/_label/_button
 # idiom, zero new UI mechanism. Mouse works for real users; keyboard
@@ -29,6 +30,11 @@ signal stages_requested
 signal stage_selected(stage_id: String)
 signal achievements_requested
 signal achievements_closed
+# Roster select (M5 §2.2, T-M5c): verbs ONLY (the shop contract) — the
+# panel never mutates, main's wrappers own the rule calls + the funnel.
+signal characters_requested
+signal char_bought(id: String)
+signal char_selected(id: String)
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -100,6 +106,16 @@ var _stages_rows: VBoxContainer
 # mutates, the counters/flags were already persisted at the run end.
 var _achv: Control
 var _achv_rows: VBoxContainer
+# Roster select (M5 §2.2, T-M5c): DISPLAY of the passed-in DawnWell + the
+# ONE Roster.CHARACTERS table only — rows rebuild per open (shop law);
+# main's verbs own the mutations through the ONE _meta_changed funnel,
+# refresh_characters() rebuilds. The four-state row (locked/buy/owned/
+# selected, Roster.state) renders here; a locked row is DISABLED, never
+# hidden (the S7 ~610 / stage-select law), and its button names the
+# achievement gate (roadmap: "Locked shows the achievement name").
+var _chars: Control
+var _chars_rows: VBoxContainer
+var _chars_gold: Label
 
 
 func _ready() -> void:
@@ -114,6 +130,8 @@ func _ready() -> void:
 	_build_shop()
 	_stages = _overlay() # on top of the shop (added last): the select dims all
 	_build_stages()
+	_chars = _overlay() # the SIXTH overlay (T-M5c), same dim idiom
+	_build_characters()
 	_achv = _overlay() # on top of the select (added last), same dim idiom
 	_build_achievements()
 	show_menu()
@@ -124,6 +142,7 @@ func show_menu() -> void:
 	_levelup.visible = false
 	_shop.visible = false
 	_stages.visible = false
+	_chars.visible = false
 	_achv.visible = false
 	_menu.visible = true
 
@@ -134,6 +153,7 @@ func hide_all() -> void:
 	_end.visible = false
 	_shop.visible = false
 	_stages.visible = false
+	_chars.visible = false
 	_achv.visible = false
 
 
@@ -190,6 +210,9 @@ func _build_menu() -> void:
 		13, MOON))
 	box.add_child(_button("Enter the night", _on_start))
 	box.add_child(_button("The Dawn Well", _on_shop))
+	# M5 §2.2 (T-M5c): the roster seam sits NEXT TO the Well (same _button
+	# idiom) — the well pays, the roster spends + selects.
+	box.add_child(_button("Characters", _on_characters))
 	# M3 §2: the select seam sits NEXT TO those (same _button idiom).
 	box.add_child(_button("Choose your night", _on_stages))
 	# M5 §1.1: the achievements seam, same idiom (the page is display-only,
@@ -276,6 +299,10 @@ func _on_stages() -> void:
 
 func _on_achievements() -> void:
 	achievements_requested.emit()
+
+
+func _on_characters() -> void:
+	characters_requested.emit()
 
 
 # --- Dawn Well shop (T-M1f): the fourth overlay in the ONE panel style ----
@@ -525,3 +552,94 @@ func refresh_achievements() -> void:
 			EMBER_TINT if prog >= target else BONE)
 		line.autowrap_mode = TextServer.AUTOWRAP_OFF
 		_achv_rows.add_child(line)
+
+
+# --- Roster select (M5 §2.2, T-M5c): the sixth overlay in the ONE panel
+# style. Nine rows from the ONE Roster table + the well (shop/stage law);
+# Roster.state is the single four-state source (locked/buy/owned/selected,
+# B-E6). A locked row is DISABLED, never hidden, and NAMES its achievement
+# (roadmap law; Roster.gate_name reads the ONE achievements table). The
+# portrait TextureRect carries no conditional — §j assert-before-load. The
+# panel emits verbs ONLY; main's wrappers mutate + persist via the ONE
+# funnel (B-E5). Wider column + scroll: shop/achievements precedent.
+
+func show_characters(well: DawnWell) -> void:
+	_well = well
+	_menu.visible = false
+	_chars.visible = true
+	refresh_characters()
+
+
+func chars_visible() -> bool:
+	return _chars.visible
+
+
+func close_characters() -> void:
+	_chars.visible = false
+	show_menu()
+
+
+func _build_characters() -> void:
+	var box := _center_box(_chars) # shop precedent: portrait rows > the 560
+	box.offset_left = -380
+	box.offset_right = 380
+	box.custom_minimum_size = Vector2(760, 0)
+	box.add_child(_label("Characters", 24, BONE))
+	_chars_gold = _label("Gold in the well: 0", 15, EMBER_TINT)
+	box.add_child(_chars_gold)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(760, 360)
+	box.add_child(scroll)
+	_chars_rows = VBoxContainer.new()
+	_chars_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_chars_rows.custom_minimum_size = Vector2(740, 0)
+	_chars_rows.add_theme_constant_override("separation", 10)
+	scroll.add_child(_chars_rows)
+	box.add_child(_button("Back to the menu", close_characters))
+
+
+func refresh_characters() -> void:
+	for child in _chars_rows.get_children():
+		child.queue_free()
+	_chars_gold.text = "Gold in the well: %d" % _well.gold
+	for i in Roster.CHARACTERS.size():
+		var row: Dictionary = Roster.CHARACTERS[i]
+		var st := Roster.state(_well, i)
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 10)
+		var portrait := TextureRect.new() # §j: NO conditional, assert-first
+		var path: String = Roster.portrait_path(i)
+		assert(ResourceLoader.exists(path))
+		portrait.texture = load(path)
+		portrait.custom_minimum_size = Vector2(64, 64)
+		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		line.add_child(portrait)
+		var title := _label(String(row.name), 14,
+			EMBER_TINT if st == "selected" else BONE)
+		title.autowrap_mode = TextServer.AUTOWRAP_OFF
+		title.custom_minimum_size = Vector2(180, 0)
+		line.add_child(title)
+		var desc := _label(String(row.desc), 12, MOON)
+		desc.autowrap_mode = TextServer.AUTOWRAP_OFF
+		desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		line.add_child(desc)
+		var act := Button.new()
+		var cid: String = String(row.id)
+		match st:
+			"locked":
+				act.text = "Locked — %s" % Roster.gate_name(i)
+				act.disabled = true
+			"buy":
+				act.text = "Buy %dg" % Roster.cost(i)
+				act.disabled = _well.gold < Roster.cost(i)
+				act.pressed.connect(func(): char_bought.emit(cid))
+			"owned":
+				act.text = "Select"
+				act.pressed.connect(func(): char_selected.emit(cid))
+			_: # "selected": a no-op verb cannot fire (the stage law)
+				act.text = "Selected"
+				act.disabled = true
+		line.add_child(act)
+		_chars_rows.add_child(line)

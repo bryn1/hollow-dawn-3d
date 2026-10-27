@@ -50,6 +50,10 @@ PX_MIN = 200  # roadmap floor, verbatim
 # M5 P-E5 (MC 11421 T-M5p, ledger R3 additive row, SAME floor): the
 # achievements window leg — 20 table rows + progress text, >= 1 row painted
 # achieved (the capture's declared counter seeding).
+# M5 B-E6 (MC 11422 T-M5c, R3 additive row again, SAME floor): the roster
+# select leg — 9 SEL-C rows, the five gated rows LOCKED with their
+# achievement names, 3 owned (default + the two declared buys), row 1
+# selected (the EMBER title the shot must paint).
 
 
 def capture():
@@ -73,7 +77,9 @@ def gate(dir_path):
                                            "stage_select_shot":
                                            "m3-stage-select.png",
                                            "achievements_shot":
-                                           "m5-achievements.png"}[row["leg"]])
+                                           "m5-achievements.png",
+                                           "char_select_shot":
+                                           "m5-char-select.png"}[row["leg"]])
         shot = np.asarray(Image.open(img_path).convert("RGB"), dtype=np.int16)
         if shot.shape != base.shape:
             print("FAIL shot/baseline shape mismatch %s vs %s"
@@ -96,6 +102,14 @@ def gate(dir_path):
             # least one achieved row painted (the capture's seeded state)
             if not (row["rows"] == 20 and row["achieved"] >= 1):
                 print("FAIL achievements state wrong: %s" % row)
+                ok = False
+        elif row["leg"] == "char_select_shot":
+            # M5 B-E6 (R3 additive, same floors): the nine SEL-C rows,
+            # five lock lines (gates unset on the capture well), three
+            # owned (default + the two declared buys), row 1 chosen.
+            if not (row["rows"] == 9 and row["locked"] == 5
+                    and row["owned"] == 3 and row["selected"] == 1):
+                print("FAIL char-select state wrong: %s" % row)
                 ok = False
         cx, cy, hw, hh = row["cx"], row["cy"], row["hw"], row["hh"]
         win_px, total_px, (x0, x1, y0, y1) = pixel_lib.window_delta_counts(

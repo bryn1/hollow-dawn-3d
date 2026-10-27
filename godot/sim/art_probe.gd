@@ -8,7 +8,9 @@
 # pawn + FX worst case (planned 40 / hard cap 60 — plan raised 33 -> 40 by
 # the M1 budget re-tally, PARITY-ROADMAP §2, T-M1g MC 11211); (3) the player's own
 # live-height row (T-S2p, MC 11135: the GLB pawn mesh — the same
-# measured-aabb reading as the class rows). One JSON
+# measured-aabb reading as the class rows); (4) the eight ROSTER mesh rows
+# at the same seam (M5 §2.3, T-M5c MC 11422 — R2 forward-growth, the 18
+# existing rows byte-preserved as the prefix). One JSON
 # line per row; the committed copy lives at
 # tests/fixtures/art-s2i-probe.json for test_art_integration.py.
 extends SceneTree
@@ -63,6 +65,7 @@ func _run() -> void:
 	_dump_heights()
 	_dump_400()
 	_dump_player()
+	_dump_roster() # M5 T-M5c: R2 forward-growth (+8 char rows, §2.3)
 	var f := FileAccess.open(_out_path(), FileAccess.WRITE)
 	assert(f != null)
 	for r in _rows:
@@ -116,3 +119,27 @@ func _dump_player() -> void:
 		"measured_m": snappedf(measured, 0.0001),
 		"rel_err": snappedf(absf(measured - HordeViz.MODEL_H_PLAYER)
 			/ HordeViz.MODEL_H_PLAYER, 0.0001)})
+
+
+func _dump_roster() -> void:
+	# M5 §2.3 (T-M5c, MC 11422): the eight NEW roster meshes join the same
+	# measured-height table at the ONE ClassMesh seam, at the PLAYER-class
+	# row (1.67 m) — the same measured-aabb reading as every other row, no
+	# second loader, no per-row height special case (B-E7). R2 forward-lock
+	# growth: the 18 existing rows stay byte-preserved as the prefix, the
+	# new rows append (row 0 the-vigil is the PLAYER row above — measured
+	# off the LIVE pawn, no twin). tests/fixtures/art-s2i-probe.jsonl is
+	# re-minted after the T-M5s asset commit lands (this row set IS that
+	# gate); test_art_integration.py's additions list carries the ids.
+	for row in Roster.CHARACTERS:
+		if String(row.mesh) == "player.glb":
+			continue # the player row already measures it
+		var mesh: Mesh = ClassMesh.mesh_for(String(row.mesh),
+			HordeViz.MODEL_H_PLAYER)
+		var measured: float = mesh.get_aabb().size.y
+		_rows.append({"ev": "height", "class": String(row.id),
+			"glb": String(row.mesh), "mesh": mesh.get_class(),
+			"target_m": HordeViz.MODEL_H_PLAYER,
+			"measured_m": snappedf(measured, 0.0001),
+			"rel_err": snappedf(absf(measured - HordeViz.MODEL_H_PLAYER)
+				/ HordeViz.MODEL_H_PLAYER, 0.0001)})

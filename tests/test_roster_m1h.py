@@ -56,9 +56,16 @@ def test_damage_seams_extended_not_duplicated():
     # and-RE-PIN same commit, equal-or-stronger — the ONE-intake-seam claim
     # now pins the LIMIT · BULWARK term too; the T-M1h byte truth (ward +
     # rotten-plate first, inside the same maxf) stays pinned verbatim.
+    # RE-PIN AGAIN T-M5c (MC 11422, spec §2.2 — same-card same-commit, the
+    # roster armor term joined INSIDE the same maxf; the ONE-intake-seam
+    # claim grows one additive member, the clamp law unchanged — and the
+    # sim_chars rule_rows legs MEASURE the roster term through this seam,
+    # so the claim is stronger, not just longer).
     assert re.search(r"return maxf\(0\.0, raw - passives\.ward\s*\n"
                      r"\s*- float\(passives\[\"rotten-plate\"\]\) "
-                     r"- 1\.0 \* limit\.arm\)", GAME_STATE)
+                     r"- 1\.0 \* limit\.arm\s*\n\s*"
+                     r"- 1\.0 \* Roster\.rule\(char_id\)\.armor_add\)",
+                     GAME_STATE)
     # gilded-skull: its OWN additive line in add_xp (the insight pin stays)
     assert re.search(r"xp \+= amount \* 0\.08 \* float\(passives"
                      r"\[\"gilded-skull\"\]\) \* meta_xp_mult", GAME_STATE)
