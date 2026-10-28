@@ -190,7 +190,7 @@ icon_gate, player_attempts, validate_glb). Two rows are REAL leftovers:
 
 ## 5. VACUITY SPOT-CHECK — 4 M5 ACCEPT rows (does each REACH the implementation?)
 
-- **P-E3 (test_achievements.py:126 `test_p_e3_block_lands_forced_between_
+- **P-E3 (test_achievements.py:128 `test_p_e3_block_lands_forced_between_
   best_cycle_and_gold` + the whole-scripts save pin): REACHES — verdict REAL.**
   It reads the REAL `main.gd` text (block-scoped to `func _end_run`; the
   `index()` calls LOUD-fail if a pinned line vanishes — no silent pass),
@@ -204,7 +204,7 @@ icon_gate, player_attempts, validate_glb). Two rows are REAL leftovers:
   disk. Weakest assertion: `MAIN.count("_meta_changed(") == 11` — a wiring
   COUNT, not the funnel's effect (the funnel body could no-op and stay green
   here; the funnel's effect is pinned by test_stages/test_save legs).
-- **B-E8 (test_characters.py:406 `test_b_e8_clips_move_pixels`): SNAPSHOT
+- **B-E8 (test_characters.py:432 `test_b_e8_clips_move_pixels`): SNAPSHOT
   GATE — honest, doc-armed, never live.** It PARSES the pin doc live (the
   owner "Rec" verbatim + every STATIC row must carry a REASON — real value,
   the doc cannot be quietly rewritten) and cross-checks the doc's rows against
@@ -214,7 +214,7 @@ icon_gate, player_attempts, validate_glb). Two rows are REAL leftovers:
   capture that does (§4.2) has no caller. Weakest assertion: `d >= 2` over the
   CSV's `diff_px` — snapshot values no run recomputes. (Planted-red history is
   real — the row reds pre-build per the card capture.)
-- **K-E3 (test_skins.py:237 `test_k_e3_clips_move_pixels`): same class —
+- **K-E3 (test_skins.py:257 `test_k_e3_clips_move_pixels`): same class —
   SNAPSHOT GATE, plus the strongest cross-pin of the family** (`states ==`
   the shipped SKINS table's recorded rig states: doc↔code drift goes RED,
   measured by reading both sides). Same weakness named: green under a broken
