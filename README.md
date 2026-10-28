@@ -19,7 +19,10 @@ models and animated movement** under a top-down camera, in the same dark-gothic 
 direction. As of v2.1.0 there are **THREE selectable stages** — Moor Vigil, Sunken Chapel
 and Ossuary Stair — chosen from a stage-select overlay ("Choose your night") and persisted
 in the Dawn Well save, unlocked by OUR level chain (reach level 10 in stage 1 → stage 2;
-level 14 in stage 2 → stage 3; stages stay locked until then). Each stage is **15 minutes —
+level 14 in stage 2 → stage 3; stages stay locked until then). As of v3.0.0 the player
+also picks a **character** from a 9-row roster (select/purchase overlay, per-character
+start weapon + one signature stat rule) and may wear one of **5 Vigil skins** — with an
+**achievements page** (20 rows over 9 run-end counters) tracking the gates. Each stage is **15 minutes —
 a 900-second win** (the 2D original keeps its own shorter run) with its own end-boss at
 9:00 and its own name bar (THE HOLLOW WARDEN / THE CATHEDRAL CHOIR / THE OSSUARY WARDEN),
 its own end-boss chest tier (the keyed source→tier map: choir drops a Warden-tier chest,
@@ -59,9 +62,23 @@ Hunyuan3D models are EXCLUDED (their license terms do not apply in the EU/UK/SK 
 ships in the EU).
 
 ## Status
-v2.1.0 ("Nightfall & Legacy") is the current release; releases live on this repo. What
-M4 deliberately did NOT ship stays tracked on the roadmap, not silent: the 6 selectable
-characters + purchase screen (`T-M4c-CHARACTERS` — the release that lands that surface
-carries the SEL version decision), the achievements page (`T-M4p-ACHIEVEMENTS`), player
-skins (`T-M4k-SKINS`), plus the pre-existing coin-bag / roster-expansion / unlock-store
-deferrals — see docs/PARITY-ROADMAP.md.
+v3.0.0 ("Roster & Legacy") is the current release; releases live on this repo. The
+M4-deferred roster tranche LANDED with it — v2.1.0's honest not-shipped line retires
+into this dated statement, replace-not-delete: **9 selectable characters** (SEL-C,
+owner ruling "C" 2026-10-27; row 0 THE VIGIL is the shipped identity byte-law; gold
+purchase 0…2400 on the additive curve, five characters achievement-gated) on a
+roster select/purchase overlay (the SIXTH overlay in the one panel style), an
+**achievements page** (20 rows over 9 run-end counters; the SEVENTH overlay) and
+**5 player skins** (Dawn Well purchases at 200…1000, wear-chips riding INSIDE the
+character overlay — no eighth surface). v3.0.0 is MAJOR per the roadmap's own
+version law (two new player-navigated surfaces; the owner's ratification rides the
+v3.0.0 release notes). The end-of-run panel now exposes **The Dawn Well +
+Back to the menu** (MC 11497) — spend your run's gold where you died, then hand
+back to the menu. Still tracked, not silent (docs/PARITY-ROADMAP.md): coin-bag
+tiers (M2-SPEC §8.1), roster expansion +8/+5 (M2-SPEC §8.5), the unlock-flag store
+gating the LEVEL-UP POOL, a settings/options screen (Esc-pause + M-mute is all
+this build carries — no audio yet), and the VS 4th level-up option (our level-up
+overlay offers exactly THREE cards; the special-conditions fourth is not a
+mechanism here). Of the 13 SEL-C meshes **7 ship rigged+clipped and 6 ship
+STATIC** (statue-class deterministic rig failures — owner ratification verbatim
+"Rec" to OPTION A, MC 11440; the per-asset table is docs/RIG-DEVIATION-SEL-C.md).
