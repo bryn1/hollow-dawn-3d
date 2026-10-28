@@ -56,6 +56,10 @@ func _process(_delta: float) -> bool:
 		print("PROBE_DONE")
 		quit(3)
 		return true
+	if _frames == 2:
+		_leg_panel_a() # T-P1b: reads the REAL screens BEFORE the stub swap
+		return false
+	_leg_panel_b()
 	_leg_convert()
 	_convert_done = true
 	return false
@@ -257,6 +261,90 @@ func _leg_convert() -> void:
 	var ranks_note := "ranks" if not r.ranks.is_empty() else "empty"
 	print("LEG convert well_gold=%d on_disk=%d file=%d ranks=%s" % [
 		_main._dawnwell.gold, r.gold, int(_exists(SAVE)), ranks_note])
+
+
+# --- T-P1b (MC 11497): the DEATH PANEL exposes shop + menu -------------------
+# ACCEPT leg for the owner ask 2026-10-27 ("shop is available when you die").
+# NO-RELAUNCH law: ONE live Main instance starts, DIES and is re-used — the
+# panel's buttons are CLICKED (`pressed.emit()`, the signal a mouse release
+# drives) against the REAL screens.gd + the REAL main.gd verbs; no second
+# instantiate, no restart, ever. State read back through the same seams the
+# UI uses: shop_visible(), the ONE funnel's on-disk gold, show_menu's law.
+# The cash-out is the UNCHANGED convert law (gold 100 lands in the well at
+# death); the Buy click rides the SAME shop_buy verb + ONE funnel (40 spent
+# through the shipped curve), and BOTH hand-backs are show_menu.
+var _panel := {}
+var _panel_id := 0
+
+
+func _btn(root: Node, text: String) -> Button:
+	for b in root.find_children("*", "Button", true, false):
+		if b.text == text:
+			return b
+	return null
+
+
+func _leg_panel_a() -> void:
+	_panel = {"end_btns": 0, "has_shop": 0, "has_menu": 0, "clickable": 0,
+		"same_run": 0, "opens": 0, "end_hidden": 0, "buy_gold": 0,
+		"buy_rank": 0, "disk_gold": 0, "menu_after_close": 0, "menu_reach": 0}
+	_main._dawnwell.reset() # the convert leg's fresh-state law, same verb
+	_panel_id = _main.get_instance_id()
+	_main._start_game()
+	_main.game.gold = 100
+	_main._end_run("gameover") # the REAL death: cash-out + show_end, UNTOUCHED
+	var sc = _main._screens
+	var eb: Array = sc._end.find_children("*", "Button", true, false)
+	_panel["end_btns"] = eb.size()
+	var well_btn := _btn(sc._end, "The Dawn Well")
+	var menu_btn := _btn(sc._end, "Back to the menu")
+	_panel["has_shop"] = int(well_btn != null)
+	_panel["has_menu"] = int(menu_btn != null)
+	if well_btn != null and menu_btn != null:
+		_panel["clickable"] = int(not well_btn.disabled
+			and not menu_btn.disabled
+			and well_btn.is_visible_in_tree()
+			and menu_btn.is_visible_in_tree())
+	if well_btn != null:
+		well_btn.pressed.emit() # the menu's OWN verb: shop_requested -> _open_shop
+		_panel["opens"] = int(sc.shop_visible())
+		_panel["end_hidden"] = int(not sc._end.visible)
+
+
+func _leg_panel_b() -> void:
+	var sc = _main._screens
+	_panel["same_run"] = int(_main.get_instance_id() == _panel_id)
+	if sc.shop_visible():
+		# frame 3: the 24 rows frame 2's open built are LIVE (queue_free
+		# settles at frame end, the chest_capture law); row 0 is vitality
+		# (TABLE order) and its Buy button is the real rendered verb.
+		for c in sc._shop_rows.get_child(0).get_children():
+			if c is Button and String(c.text).begins_with("Buy"):
+				c.pressed.emit() # -> shop_buy -> main._shop_buy + ONE funnel
+				break
+		var back := _btn(sc._shop, "Back to the menu")
+		if back != null:
+			back.pressed.emit() # close_shop -> show_menu, the shipped law
+		_panel["menu_after_close"] = int(sc._menu.visible
+			and not sc._shop.visible)
+		_panel["buy_gold"] = _main._dawnwell.gold
+		_panel["buy_rank"] = int(_main._dawnwell.ranks.get("vitality", 0))
+		_panel["disk_gold"] = DawnWell.load_save().gold
+	# the end panel's OWN menu button (a display-only re-show — the exact
+	# call _end_run makes; zero state mutation in it):
+	sc.show_end(false, [])
+	var menu_btn := _btn(sc._end, "Back to the menu")
+	if menu_btn != null:
+		menu_btn.pressed.emit() # the hand-back IS show_menu — extended, not forked
+		_panel["menu_reach"] = int(sc._menu.visible and not sc._end.visible)
+	print(("LEG death_panel end_btns=%d has_shop=%d has_menu=%d clickable=%d "
+		+ "same_run=%d opens=%d end_hidden=%d buy_gold=%d buy_rank=%d "
+		+ "disk_gold=%d menu_after_close=%d menu_reach=%d") % [
+			_panel["end_btns"], _panel["has_shop"], _panel["has_menu"],
+			_panel["clickable"], _panel["same_run"], _panel["opens"],
+			_panel["end_hidden"], _panel["buy_gold"], _panel["buy_rank"],
+			_panel["disk_gold"], _panel["menu_after_close"],
+			_panel["menu_reach"]])
 
 
 func _wipe() -> void:

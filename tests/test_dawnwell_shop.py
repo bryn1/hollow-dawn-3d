@@ -340,6 +340,32 @@ def test_run_gold_cashes_out_through_main_funnel(probe):
                                "ranks": "empty"}
 
 
+def test_death_panel_exposes_shop_and_menu(probe):
+    # T-P1b ACCEPT (MC 11497, owner verbatim 2026-10-27: "I also want you
+    # to do a playthrough to verify ... that shop is available when you
+    # die ..."). PLANTED RED by construction: the row names the end panel's
+    # shop + menu buttons; on the PRE-BUILD tree the leg reads end_btns=1 /
+    # has_shop=0 / has_menu=0 / opens=0 and this row REDS (the pre-build
+    # red run is transcripted in the capture .tmp/m5-panel.txt, red before
+    # green). The probe legs (shop_probe.gd _leg_panel_a/_leg_panel_b)
+    # drive ONE live Main with NO relaunch (same_run): death through the
+    # REAL _end_run (gold cash-out UNTOUCHED — 100 lands in the well),
+    # then CLICK the panel's "The Dawn Well" (the menu's OWN shop_requested
+    # verb -> the same _open_shop -> show_shop — opens/end_hidden) and a
+    # rendered Buy row (the SAME shop_buy seam + the ONE funnel:
+    # buy_gold/disk_gold 100-40=60 ON DISK = spends+applies+persists), and
+    # BOTH hand-backs land on show_menu (menu_after_close: closing the
+    # death-opened shop returns to the menu, the declared reading in
+    # screens.gd; menu_reach: the panel's own Back-to-the-menu button).
+    rows, *_ = probe
+    assert rows["death_panel"] == {
+        "end_btns": 3, "has_shop": 1, "has_menu": 1, "clickable": 1,
+        "same_run": 1, "opens": 1, "end_hidden": 1, "buy_gold": 60,
+        "buy_rank": 1, "disk_gold": 60, "menu_after_close": 1,
+        "menu_reach": 1,
+    }
+
+
 def test_shot_asset_exists():
     assert os.path.isfile(SHOT), \
         "assets/screens/m1-dawnwell.png must be committed (gate: dawnwell_pixel_gate)"

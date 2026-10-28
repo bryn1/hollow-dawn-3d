@@ -248,6 +248,18 @@ func _build_end() -> void:
 		box.add_child(_label("Sign the ledger in the score panel (top right).",
 			12, MOON))
 	box.add_child(_button("Play again", _on_start))
+	# T-P1b (MC 11497, owner ask 2026-10-27 "shop is available when you
+	# die"): the end panel exposes the SAME meta seams the menu owns, in
+	# the menu's own button idiom. The well button rides the menu's OWN
+	# handler (_on_shop — the one shop_requested verb, main's one
+	# _open_shop, the one shop overlay: zero new mechanism); the hand-back
+	# IS show_menu — the landing every overlay close already returns to
+	# (close_shop/close_stages/close_characters all land there). DECLARED
+	# READING: buying from a death-opened shop and closing returns to the
+	# MENU, not the end panel — the run is over and cashed out, the shop's
+	# own Back label says exactly that, and the menu is the meta hub.
+	box.add_child(_button("The Dawn Well", _on_shop))
+	box.add_child(_button("Back to the menu", show_menu))
 
 
 func _card(card: Dictionary, index: int) -> Control:
@@ -318,6 +330,11 @@ func _on_characters() -> void:
 func show_shop(well: DawnWell) -> void:
 	_well = well
 	_menu.visible = false
+	# T-P1b (MC 11497): the idiom holds from BOTH openings (menu AND the
+	# end panel) — the surface it opened from goes dark, or the dim +
+	# table double-paints the end panel under the shop. The Back button
+	# still lands on show_menu (declared reading, _build_end comment).
+	_end.visible = false
 	_shop.visible = true
 	refresh_shop()
 
