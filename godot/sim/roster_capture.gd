@@ -9,10 +9,15 @@
 # on frame_post_draw; GLTFDocument runtime load; duplicate()d viewport
 # grabs; projected-AABB rect; 2 motion pairs + 1 frozen control per clip),
 # with the roster as the job source. The CSV conversion + validator ride
-# the S2r shape (tools/... one-off PIL pass -> committed
-# tests/fixtures/roster-clips-m5-framediff.csv, generated TWICE cmp-
-# identical, judged by test_skinned_clips-shaped rows in
-# tests/test_characters.py B-E8). RIG STATE IS MEASURED, NOT ASSUMED
+# the S2r shape -> committed tests/fixtures/roster-clips-m5-framediff.csv,
+# judged by test_skinned_clips-shaped rows in tests/test_characters.py
+# B-E8 + tests/test_skins.py K-E3. THE CONVERTER'S HOME IS NOW THE COMMITTED
+# DRIVER tools/roster_clip_gate.py (MC 11573 T-CC3R, audit-3 §4.2 P3: the
+# T-M5c mint ran an UNCOMMITTED one-off PIL pass — this capture had zero
+# code call-sites; the driver launches this script through the ONE
+# capture_lib seam, defines the diff predicate on the manifest's own
+# projected rect and re-mints the CSV; numbers are threshold-judged,
+# never a byte corpus). RIG STATE IS MEASURED, NOT ASSUMED
 # (docs/RIG-DEVIATION-SEL-C.md, MC 11440 owner "Rec"): a mesh with an
 # AnimationPlayer MUST ship both named clips (else loud), a mesh without
 # one writes an EXCUSED static row per clip (EXCUSED-not-removed; the

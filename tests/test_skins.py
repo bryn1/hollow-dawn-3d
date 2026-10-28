@@ -21,7 +21,8 @@ reads; the planted reds fire on the FINAL tree in the card capture
        at MODEL_H_PLAYER through the ONE ClassMesh seam, the R2 FIFTH
        growth: the 26 prior rows byte-preserved as the prefix, the PLAYER
        row verbatim) + the chip-icon family file-exists.
-  K-E3 clips per skin          the committed roster clips CSV, the skin
+  K-E3 clips per skin          the committed roster clips CSV (re-minted
+       by tools/roster_clip_gate.py, MC 11573), the skin
        rows judged against the PIN DOC docs/RIG-DEVIATION-SEL-C.md — the
        B-E8 pattern RE-RIDDEN (the doc PARSED, not a hardcoded list:
        owner ratification verbatim "Rec" asserted, static rows require a
@@ -104,6 +105,12 @@ GAME = read("game_state.gd")
 GAME_CODE = read_code("game_state.gd")
 HERO = read("hero_pawn.gd")
 SCREENS = read("screens.gd")
+# MC 11573 T-CC3R (audit-3 §1.1 P2 split): the chip row + the selected-
+# row grp guard moved to roster_select.gd; the two K-E4 pins that judged
+# them are re-pointed there replace-not-delete (regex text kept byte-
+# identical; the disabled-pin string moved WITH the body's idiom call and
+# stays equal-or-stronger on the same shop law).
+ROSTER_SELECT = read("roster_select.gd")
 SAVE = read("save.gd")
 
 # THE table (M5-SPEC §3.1 verbatim): 5 rows, prices 200/400/600/800/1000,
@@ -354,10 +361,10 @@ def test_k_e4_verb_source_pins():
     # and the buy chip DISABLES unaffordable, never hidden (shop law).
     assert re.search(r"if st == \"selected\":\s*\n"
                      r"\t*var grp: Array = Roster\.skins_for\(i\)\s*\n"
-                     r"\t*if grp\.size\(\) > 0:", SCREENS), \
+                     r"\t*if grp\.size\(\) > 0:", ROSTER_SELECT), \
         "the skin row rides the selected row's non-empty group"
-    chips = block(SCREENS, "func _skin_chips", "\nfunc ")
-    assert "chip.disabled = _well.gold < Roster.skin_cost(pos)" in chips, \
+    chips = block(ROSTER_SELECT, "func skin_chips", "\nfunc ")
+    assert "chip.disabled = s._well.gold < Roster.skin_cost(pos)" in chips, \
         "the buy chip is DISABLED unaffordable, never hidden"
     assert "skin_bought.emit" in chips and "skin_selected.emit" in chips
     assert "assert(ResourceLoader.exists(path))" in chips, \
@@ -380,7 +387,7 @@ def test_k_e5_table_pin_and_group_law():
             "id %s has no file on disk (K-E5's planted-red class)" % sid
     # GROUP LAW: only the-vigil (row 0) carries the five, in table order.
     blocks = re.split(r"\n\t\{\"id\":", ROSTER)[1:9]  # the CHARACTERS rows
-    groups = [re.findall('"([\w-]+)"',
+    groups = [re.findall(r'"([\w-]+)"',  # raw string: MC 11573 (audit-3 §6)
               re.search(r'"skins": \[([^\]]*)\]', b).group(1))
               for b in blocks]
     assert groups[0] == [r[0] for r in SKIN_ROWS], \

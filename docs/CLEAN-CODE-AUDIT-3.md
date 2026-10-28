@@ -289,3 +289,76 @@ docs-only, zero product diff (this card's own gate-run over the untouched
 v3.0.0 tree).
 
 # VERDICT: FIX
+
+# REFACTOR-3 — executed over this fix-list (MC 11573 T-CC3R, code, 2026-10-28)
+
+Resume provenance, stated: the prior run of this card was INTERRUPTED mid-build,
+leaving uncommitted WIP (modified screens.gd + the 3 M5 test files; NEW
+achievements_page.gd + roster_select.gd + .uids) on this worktree. This card
+REVIEWED EVERY WIP LINE, kept what served the DoD, and completed the rest; the
+LEDGER row repeats the same provenance. Author identity: code (11573).
+ZERO-BEHAVIOR-CHANGE LAW executed: the pristine pre-edit base is a worktree
+this card created (`git worktree add .tmp/wt-cc3r-base --detach 6fdfc82`); the
+journey + every strict fixture were re-dumped on BOTH trees and cmp-verified
+(capture .tmp/cc3r.txt; battery scripts .tmp/cc3r-battery*.sh ride the m5z
+L0-L7 precedent).
+
+## MIRROR TABLE (per-finding, measured before -> after at this commit)
+
+| § | finding | status | measured |
+|---|---|---|---|
+| 1.1 | screens.gd 715, >600 crossing nobody judged | CLOSED — SPLIT EXECUTED | screens 715 -> 582; NEW roster_select.gd 131 + achievements_page.gd 52; idiom call-sites 54 -> 54 FAMILY (44 screens + 7 + 3, measured grep); concern_check flag=clean defs=36 (was 39: exactly the 3 moved defs); shop/stage stay HERE (smallest re-pin: 9 pins vs the shop's A-E*/funnel set); <600 band RE-ENTERED |
+| 4.2 | roster_capture.gd ZERO code call-sites | CLOSED — WIRED | NEW tools/roster_clip_gate.py (sibling driver pattern: strips_gate_check/dawnwell_pixel_gate; launches res://sim/roster_capture.gd through the ONE capture_lib launcher; call-site greppable: tools/ + capture_lib.py docstring); CSV re-minted BY THE DRIVER (54 rows; 26 motion re-measured, 14 frozen + 14 excused byte-preserved; laws green; TWICE-CMP across two independent xvfb runs; planted reds: motion frame-clone -> motion[min]=0 FAIL rc=1, frozen swap -> frozen=[133188,0] FAIL rc=1, both on COPIES, committed fixture never mutated) |
+| 1.2 | main.gd stale phase enum, 4L-from-band | CLOSED — re-worded comment-only | 596 -> 599 (+3: enum names the M5 meta-verb wrappers; growth 503/566/596 @T-M5p/c/k + verb blocks :530/:553-596 = the named wire-graph evidence; reason stays in the first 5 lines; WATCH CARRIED: 1 line from the 601 fail-line, the next touching card re-measures the split FIRST) |
+| 4.1 | poc_trellis.py + 01-install-trellis2.sh unreferenced | CLOSED — PERMANENCE rows | two KEPT-probe rows in docs/PERMANENCE.md; measured correction (replace-not-delete): the audit's zero-doc-refs claim for poc_trellis.py re-measured ONE historical mention (docs/CLEAN-CODE-AUDIT.md:126) + a live exec in run-trellis-inner.sh:14 invisible to the instrument (no .sh driver graph — §4 instrument-limit row) |
+| 6 | test_skins escape | CLOSED | `'"([\w-]+)"'` -> raw string at the measured line (389 at this base, the audit's :383 pointer was pre-fix); warning class, regex bytes identical |
+| 6 | M5-SPEC skin_for misname | CLOSED — dated annotation | spec :433 annotated in place (SHIPPED name `skins_for`; grep-to-zero re-confirmed: the wrong name lives ONLY in the spec line + this audit's row) |
+| 2.3 | strips_capture watch | RE-MEASURED only (per fix-list) | 596 at this commit, +0 this card (comment-only law untouched it); 5-from-band row carries |
+| — | instrument drift | CARRIED, NAMED | current dead_code.py stdout still lists driver-shaped tools (incl. NEW roster_clip_gate.py) as ORPHAN-MODULE: name-based, no .sh/.gd driver graph; seat-local --allow per audit-2 §5 precedent — NOT tree debt |
+
+## How the split was chosen (the §1.1 decision, made and measured)
+
+Cohesion cut, not size cut: the two M5 overlays (roster select + skin chips,
+achievements page) are the YOUNGEST, most self-contained builders; their
+bodies moved VERBATIM into static-builder modules that call screens.gd's ONE
+panel-style idiom through the passed-in instance (`RosterSelect.build(self)`
+/ `AchievementsPage.build(self)`) — zero new UI mechanism, zero new colors,
+the overlays still open on screens.gd's `_overlay` in `_ready`, and ALL
+dispatcher verbs main routes (show/close/visible/refresh) STAY in screens.gd
+(main.gd diff: comment-only). FALSIFIED-COUNT: 9 source pins re-pointed to
+the moved homes (3 test_achievements, 4 test_characters, 2 test_skins) —
+6 re-pointed with the regex text byte-identical; 3 moved WITH the body's
+idiom call and their text shifted `_well`->`s._well`, `_chars_rows`->
+`s._chars_rows`, `_well.gold`->`s._well.gold` (strictly MORE specific, same
+ONE-seam laws — equal-or-stronger); ZERO pins deleted; suite 315 -> 315
+(replace-not-delete). The shop/stage overlays stayed: their pin sets
+(A-E*/funnel text) are larger and funnel-adjacent — the split the audit
+scheduled, at the cost it named: the moved surfaces are RENDER surfaces,
+and the pixel proof is below.
+
+## BYTE-ANCHOR ROWS (base = the 6fdfc82 worktree this card created)
+
+- journey-5020 @HD3D_SEED=11101: BASE dump == FINAL dump == committed
+  .tmp/hd3d-boss-s6-dump.jsonl — all three BYTE-IDENTICAL (5020 rows).
+- Strict corpus: 11 fixtures × BOTH trees = 22 cmp legs, ALL BYTE-IDENTICAL
+  (endless/gems/unions/chests-tiers/chests-evolve/carry-caps/art-probe/
+  stages/events/reaper/limit). chars 38/38 unmatched=0; achv BYTE-IDENTICAL
+  both sides.
+- Strips: fresh capture BOTH sides 75 rows, gate 19/19 GREEN, NORM diff 0
+  base-vs-committed, final-vs-committed AND base-vs-final.
+- Pixel gates (THE split proof): dawnwell_pixel_gate 4/4 PASS on BASE and on
+  FINAL with IDENTICAL counts — shop 60855 / stage 52020 / achievements
+  56802 / char_select 65237 — and equal to the m5z-LEDGER numbers; the two
+  moved builders render pixel-for-pixel identical (achievements + char_select
+  are exactly the split surfaces).
+- s8 A1 contract table 11/11 PASS rc=0 on the final tree (fresh strips leg,
+  committed-GA-record comparison; the tracked strips dump was cp-backupped
+  and cp-restored, cmp-verified byte-identical after the run).
+- world.gd diff ZERO (git diff --numstat empty; 551 L unchanged).
+- Gate walk re-run on the final tree: 0 findings (ceiling arms both sides;
+  new family files 131/52/190 L, all < 250, no reason needed).
+
+CAPTURE: `.tmp/cc3r.txt` (main checkout, gitignored) — ends VERIFY_EXIT=0.
+Instruments run: 7 (pytest, corpus battery both trees, roster gate twice-cmp
++ 2 planted reds, pixel gates both trees, strips gate both trees, s8, walk +
+dead_code + concern_check).

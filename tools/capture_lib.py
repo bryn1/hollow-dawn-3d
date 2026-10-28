@@ -26,12 +26,18 @@ def godot_bin():
     return os.environ.get("HD3D_GODOT", GODOT_DEFAULT)
 
 
-def run_capture(script, env_extra=None, timeout=900):
+def run_capture(script, env_extra=None, timeout=900, user_args=None):
     """One capture under xvfb. Returns the CompletedProcess (text; stdout and
     stderr captured separately so each caller keeps its own CAPTURE_OK check:
-    chest/dawnwell/bulk judge stdout, biome/upgrades judge stdout+stderr)."""
+    chest/dawnwell/bulk judge stdout, biome/upgrades judge stdout+stderr).
+    user_args (MC 11573, audit-3 §4.2 wire) ride AFTER the engine's `--`
+    separator — the OS.get_cmdline_user_args() channel captures like
+    roster_capture.gd read their job/out args from; argv before `--` and the
+    env discipline stay the ONE shape every existing caller already passes."""
     env = dict(os.environ, **(env_extra or {}))
-    return subprocess.run(
-        ["xvfb-run", "-a", godot_bin(), "--render-driver", "opengl3",
-         "--path", os.path.join(REPO, "godot"), "-s", script],
-        env=env, capture_output=True, text=True, timeout=timeout)
+    argv = ["xvfb-run", "-a", godot_bin(), "--render-driver", "opengl3",
+            "--path", os.path.join(REPO, "godot"), "-s", script]
+    if user_args:
+        argv += ["--"] + list(user_args)
+    return subprocess.run(argv, env=env, capture_output=True, text=True,
+                          timeout=timeout)

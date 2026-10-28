@@ -63,6 +63,13 @@ ACHV = read("achievements.gd")
 MAIN = read("main.gd")
 SAVE = read("save.gd")
 SCREENS = read("screens.gd")
+# MC 11573 T-CC3R (audit-3 §1.1 P2 split): the SEVENTH overlay's builder
+# moved to achievements_page.gd; the three source pins that judged the
+# BUILT rows (table read + the progress term + the closed-emit) are re-
+# pointed there replace-not-delete — same regex text where the body is
+# byte-identical, the progress pin moved WITH its body and stays equal-or-
+# stronger on the same ONE-seam law.
+ACHV_PAGE = read("achievements_page.gd")
 
 
 # ---- the probe: throwaway user://, fresh run, rows judged here --------------
@@ -194,14 +201,14 @@ def test_p_e5_achievements_is_the_seventh_overlay():
     assert SCREENS.count("_achv.visible = false") >= 2, \
         "show_menu AND hide_all own the new overlay (no-blank law, §j)"
     assert re.search(r"func achievements_visible\(\) -> bool", SCREENS)
-    assert re.search(r"for row in Achievements\.TABLE", SCREENS), \
+    assert re.search(r"for row in Achievements\.TABLE", ACHV_PAGE), \
         "rows rebuild from the ONE table, per open (shop law)"
-    assert re.search(r"Achievements\.progress\(_well, row\)", SCREENS), \
+    assert re.search(r"Achievements\.progress\(s\._well, row\)", ACHV_PAGE), \
         "the progress term reads the ONE progress seam, min(count, target)"
     assert re.search(r'_button\("Achievements", _on_achievements\)', SCREENS), \
         "menu gains the button, same idiom"
     assert re.search(r"achievements_requested\.emit\(\)", SCREENS) and \
-        re.search(r"achievements_closed\.emit\(\)", SCREENS)
+        re.search(r"achievements_closed\.emit\(\)", ACHV_PAGE)
     assert "achievements_requested.connect(_open_achievements)" in MAIN and \
         "achievements_closed.connect(_close_achievements)" in MAIN
     verbs = block(MAIN, "func _open_achievements", "\nfunc ") + \

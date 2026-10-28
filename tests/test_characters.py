@@ -51,7 +51,9 @@ reads (the planted reds fire on the FINAL tree in the card capture,
        transparency + UNSHADED + PLAYER_TINT) + this file's file-exists
        + tris <= 8000 rows (the m5-art manifest eyeball row rides the
        capture after the asset rebase; no stub GLB ever).
-  B-E8 clips move pixels      tools/... + the committed roster clip CSV
+  B-E8 clips move pixels      tools/roster_clip_gate.py (the committed
+       driver + converter, MC 11573; before it the mint was an
+       uncommitted one-off) + the committed roster clip CSV
        (walk/attack >= 2 px per mesh, FROZEN same-time control == 0 px;
        generated TWICE cmp-identical — a forward-lock, never a byte
        anchor of this card).
@@ -106,6 +108,13 @@ GAME = read("game_state.gd")
 GAME_CODE = read_code("game_state.gd")
 HERO = read("hero_pawn.gd")
 SCREENS = read("screens.gd")
+# MC 11573 T-CC3R (audit-3 §1.1 P2 split): the roster builder bodies moved
+# to roster_select.gd; the B-E6 pins below that judged BUILT rows are
+# re-pointed there REPLACE-NOT-DELETE (regex text kept where the moved
+# body is byte-identical; where the body calls the idiom through the
+# screens instance, the pin moved with the body and stays equal-or-
+# stronger on the same law).
+ROSTER_SELECT = read("roster_select.gd")
 SAVE = read("save.gd")
 
 # SEL-C (owner ruling "C" over the §2.5 SEL table, M5-SPEC RULING line):
@@ -323,12 +332,13 @@ def test_b_e6_overlay_source_pins():
                      SCREENS)
     assert re.search(r"_chars = _overlay\(\)", SCREENS), \
         "the sixth overlay rides the ONE _overlay idiom"
-    assert re.search(r"for i in Roster\.CHARACTERS\.size\(\)", SCREENS), \
+    assert re.search(r"for i in Roster\.CHARACTERS\.size\(\)",
+                     ROSTER_SELECT), \
         "rows rebuild from the ONE table (shop law)"
-    assert re.search(r"for child in _chars_rows\.get_children\(\):\s*\n"
-                     r"\t*child\.queue_free\(\)", SCREENS)
+    assert re.search(r"for child in s\._chars_rows\.get_children\(\):\s*\n"
+                     r"\t*child\.queue_free\(\)", ROSTER_SELECT)
     assert re.search(r'act\.text = "Locked — %s" % Roster\.gate_name\(i\)\s*\n'
-                     r"\t*act\.disabled = true", SCREENS), \
+                     r"\t*act\.disabled = true", ROSTER_SELECT), \
         "locked rows are DISABLED with the achievement NAME, never hidden"
     assert re.search(r'_button\("Characters", _on_characters\)', SCREENS), \
         "the menu seam sits next to the Well (the _button idiom)"
@@ -337,7 +347,7 @@ def test_b_e6_overlay_source_pins():
     # the §j no-blank law for the new family: unconditional TextureRect +
     # assert-before-load (the same shape as _card's icon).
     assert re.search(r"assert\(ResourceLoader\.exists\(path\)\)\s*\n"
-                     r"\t*portrait\.texture = load\(path\)", SCREENS)
+                     r"\t*portrait\.texture = load\(path\)", ROSTER_SELECT)
     # the Enter guard extension (the stages A-E8 parity; test_stages pin
     # re-pointed same commit, equal-or-stronger).
     assert re.search(r"stages_visible\(\) and not _screens\.chars_visible"

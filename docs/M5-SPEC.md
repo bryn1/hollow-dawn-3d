@@ -430,7 +430,10 @@ class meshes additionally take the S2r frame-diff proof (walk/attack rows ≥ 2 
 ### 2.4 Files (Pillar B)
 
 `roster.gd` NEW (CHARACTERS + SKINS tables + pure fns `rule/start_weapons/start_passives/
-start_weapons/skin_for/cost/is_locked/is_owned` — ALL rules here, the powerups.gd contract),
+start_weapons/skin_for/cost/is_locked/is_owned` — ALL rules here, the powerups.gd contract)
+[T-CC3R ANNOTATION 2026-10-28 (MC 11573, audit-3 §6): this spec-era line names `skin_for`;
+the SHIPPED name is `skins_for` (roster.gd, T-M5c) — dated spec artifact, grep-measured ZERO
+propagation outside this line + the audit's retire row; the spec stays as written],
 `game_state.gd` (char_id/skin_id vars + resets + the F-5 additive terms + `start_run`
 consumption), `main.gd` (hand-in lines at the F-7 position INCLUDING `_pawn.apply_selection()`
 as the block tail (§2.1b) + the five screen verbs),

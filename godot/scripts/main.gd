@@ -1,8 +1,11 @@
 # Entry point: 3D scene wiring (orthographic camera rig, biome ground, per-
 # class horde viz, hero pawn), JS bridge registration, fixed-step simulation,
-# phase routing (menu/playing/levelup/end) and the Contract B snapshot eval.
+# phase routing (menu/playing/levelup/end), the Contract B snapshot eval and
+#   the M5 meta-verb wrappers over the five overlay surfaces (MC 11573, §1.2).
 # reason: >400 lines — the ONE fixed-step sim loop + phase router of the
 #   whole game (DESIGN-3D §d v1-verbatim); splitting it would fork the loop.
+# M5 GROWTH NAMED (audit-3 §1.2, the C1 world.gd shape): 472 -> 596 in M5,
+#   503/566/596 @T-M5p/c/k; verb blocks :530/:553-596 = the wire-graph proof.
 # The simulation loop below is v1 main.gd VERBATIM (DESIGN-3D §d): same
 # constants, same WIN_TIME gate, same score formula; only the visible layer
 # wiring is 3D (the v1 Node2D renderer body is deleted, §f — render.gd

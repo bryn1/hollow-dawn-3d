@@ -1,15 +1,19 @@
-# Screens layer: menu, level-up cards, the end screen, the Dawn Well
-# reason: >400 lines — one overlay idiom per file IS the concern (the §j
-#   no-blank guarantee + the 5-panel parity are enforced against THIS file);
-#   splitting it would fork the idiom the acceptance suite pins.
-# meta shop (T-M1f — FOURTH overlay), the stage select (M3 §2, T-M3s —
-# FIFTH overlay; the select surface is what earns v2.0.0, SEL-A §2), the
-# roster select (M5 §2.2, T-M5c — SIXTH overlay) and the
-# achievements page (M5 §1.1, T-M5p — SEVENTH overlay). Every
-# one rides this ONE panel style: same _overlay/_center_box/_label/_button
-# idiom, zero new UI mechanism. Mouse works for real users; keyboard
-# picking is routed by main from the bridge press queue (Contract B), never
-# from here.
+# Screens layer: the overlay DISPATCHER + the core panels (menu, level-up
+# reason: >400 lines — dispatcher + the ONE panel-style idiom (_overlay/
+#   _center_box/_label/_button — 54 call sites across the FAMILY: 44 HERE +
+#   10 in the two moved builders, measured MC 11573; no second style) is ONE
+#   concern. M5 grew this file 445->715 (crossed the 600 band, MC 11570
+#   §1.1 P2 — the split-vs-ceiling decision the audit + M5-SPEC-DA:135's
+#   broken 575<600 plan asked for): EXECUTED at MC 11573 T-CC3R — the
+#   roster select (SIXTH overlay, T-M5c) and its skin chips moved to
+#   roster_select.gd, the achievements page (SEVENTH, T-M5p) moved to
+#   achievements_page.gd, both builders calling THIS idiom through the
+#   passed-in instance (zero new UI mechanism; the overlays still open on
+#   THIS file's _overlay in _ready). The Dawn Well shop (T-M1f — FOURTH
+#   overlay) and the stage select (M3 §2, T-M3s — FIFTH overlay; the
+#   select surface is what earns v2.0.0, SEL-A §2) stay HERE. Mouse works
+#   for real users; keyboard picking is routed by main from the bridge
+#   press queue (Contract B), never from here.
 # §j (MC 11103): every card kind resolves to an icon file. v1's blank-icon
 # path (passives shipped icon: "", levelup.gd:35) is closed structurally:
 # _card() has NO conditional around the icon TextureRect, icon_path() is
@@ -40,6 +44,12 @@ signal char_selected(id: String)
 # (F-8's "not a third surface" reading — no eighth overlay, spec §3.2).
 signal skin_bought(id: String)
 signal skin_selected(id: String)
+
+# MC 11573 T-CC3R (audit-3 §1.1 P2 split): the M5 overlays' builders moved
+# out (see header); the signals ABOVE stay here — main connects to them on
+# this node, and the moved emitters emit through the passed-in instance.
+const RosterSelect := preload("res://scripts/roster_select.gd")
+const AchievementsPage := preload("res://scripts/achievements_page.gd")
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -136,9 +146,9 @@ func _ready() -> void:
 	_stages = _overlay() # on top of the shop (added last): the select dims all
 	_build_stages()
 	_chars = _overlay() # the SIXTH overlay (T-M5c), same dim idiom
-	_build_characters()
+	RosterSelect.build(self) # builder in roster_select.gd (MC 11573 split)
 	_achv = _overlay() # on top of the select (added last), same dim idiom
-	_build_achievements()
+	AchievementsPage.build(self) # builder in achievements_page.gd
 	show_menu()
 
 
@@ -514,13 +524,14 @@ func refresh_stages() -> void:
 		_stages_rows.add_child(select)
 
 
-# --- Achievements page (M5 §1.1, T-M5p): the seventh overlay in the ONE
-# panel style. The 20 rows rebuild per open from the ONE Achievements.TABLE
+# --- Achievements page (M5 §1.1, T-M5p): the SEVENTH overlay's dispatcher
+# half. The display builder moved to achievements_page.gd (MC 11573
+# split; it rebuilds the 20 rows per open from the ONE Achievements.TABLE
 # + the passed-in well — name, progress `min(count, target)/target` — an
-# achieved row titles in EMBER (the stage-select chosen law, §1.1). NO
-# mutation lives here (display-only, spec §1.1): the counters and flags
-# were persisted at the run end by the ONE funnel (main._end_run). The
-# wider column + scroll ride the shop precedent (20 rows > the menu box).
+# achieved row titles in EMBER, the stage-select chosen law §1.1). NO
+# mutation lives on either side (display-only, spec §1.1): the counters
+# and flags were persisted at the run end by the ONE funnel
+# (main._end_run).
 
 func show_achievements(well: DawnWell) -> void:
 	_well = well
@@ -538,52 +549,18 @@ func close_achievements() -> void:
 	show_menu()
 
 
-func _build_achievements() -> void:
-	var box := _center_box(_achv)
-	# shop precedent (_build_shop): a 20-row table needs more than the
-	# menu's 560 column — the same 760 with its own scroll window.
-	box.offset_left = -380
-	box.offset_right = 380
-	box.custom_minimum_size = Vector2(760, 0)
-	box.add_child(_label("Achievements", 24, BONE))
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(760, 320)
-	box.add_child(scroll)
-	_achv_rows = VBoxContainer.new()
-	_achv_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_achv_rows.custom_minimum_size = Vector2(740, 0)
-	_achv_rows.add_theme_constant_override("separation", 6)
-	scroll.add_child(_achv_rows)
-	var back := Button.new()
-	back.text = "Back to the menu"
-	back.pressed.connect(func(): achievements_closed.emit())
-	box.add_child(back)
-
-
 func refresh_achievements() -> void:
-	# Rebuilds the 20 rows from the ONE table (shop/stage law): name +
-	# progress term; an achieved row in EMBER (the stage-select law — the
-	# row IS the achievement, no separate verb, nothing disabled: there is
-	# nothing to press).
-	for child in _achv_rows.get_children():
-		child.queue_free()
-	for row in Achievements.TABLE:
-		var prog := Achievements.progress(_well, row)
-		var target := int(row.target)
-		var line := _label("%s — %d/%d" % [row.name, prog, target], 13,
-			EMBER_TINT if prog >= target else BONE)
-		line.autowrap_mode = TextServer.AUTOWRAP_OFF
-		_achv_rows.add_child(line)
+	AchievementsPage.refresh(self)
 
 
-# --- Roster select (M5 §2.2, T-M5c): the sixth overlay in the ONE panel
-# style. Nine rows from the ONE Roster table + the well (shop/stage law);
-# Roster.state is the single four-state source (locked/buy/owned/selected,
-# B-E6). A locked row is DISABLED, never hidden, and NAMES its achievement
-# (roadmap law; Roster.gate_name reads the ONE achievements table). The
-# portrait TextureRect carries no conditional — §j assert-before-load. The
-# panel emits verbs ONLY; main's wrappers mutate + persist via the ONE
-# funnel (B-E5). Wider column + scroll: shop/achievements precedent.
+# --- Roster select (M5 §2.2, T-M5c): the SIXTH overlay's dispatcher half.
+# The row builder + the skin chip row (M5 §3.1, T-M5k) moved to
+# roster_select.gd (MC 11573 split; nine rows from the ONE Roster table +
+# the well, Roster.state the single four-state source, locked rows
+# DISABLED never hidden and NAMING their achievement, §j assert-before-
+# load — all re-pinned in tests/test_characters.py + tests/test_skins.py
+# against the new home). The panel still emits the verbs declared above
+# THIS file; main's wrappers mutate + persist via the ONE funnel (B-E5).
 
 func show_characters(well: DawnWell) -> void:
 	_well = well
@@ -601,115 +578,5 @@ func close_characters() -> void:
 	show_menu()
 
 
-func _build_characters() -> void:
-	var box := _center_box(_chars) # shop precedent: portrait rows > the 560
-	box.offset_left = -380
-	box.offset_right = 380
-	box.custom_minimum_size = Vector2(760, 0)
-	box.add_child(_label("Characters", 24, BONE))
-	_chars_gold = _label("Gold in the well: 0", 15, EMBER_TINT)
-	box.add_child(_chars_gold)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(760, 360)
-	box.add_child(scroll)
-	_chars_rows = VBoxContainer.new()
-	_chars_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_chars_rows.custom_minimum_size = Vector2(740, 0)
-	_chars_rows.add_theme_constant_override("separation", 10)
-	scroll.add_child(_chars_rows)
-	box.add_child(_button("Back to the menu", close_characters))
-
-
 func refresh_characters() -> void:
-	for child in _chars_rows.get_children():
-		child.queue_free()
-	_chars_gold.text = "Gold in the well: %d" % _well.gold
-	for i in Roster.CHARACTERS.size():
-		var row: Dictionary = Roster.CHARACTERS[i]
-		var st := Roster.state(_well, i)
-		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 10)
-		var portrait := TextureRect.new() # §j: NO conditional, assert-first
-		var path: String = Roster.portrait_path(i)
-		assert(ResourceLoader.exists(path))
-		portrait.texture = load(path)
-		portrait.custom_minimum_size = Vector2(64, 64)
-		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		line.add_child(portrait)
-		var title := _label(String(row.name), 14,
-			EMBER_TINT if st == "selected" else BONE)
-		title.autowrap_mode = TextServer.AUTOWRAP_OFF
-		title.custom_minimum_size = Vector2(180, 0)
-		line.add_child(title)
-		var desc := _label(String(row.desc), 12, MOON)
-		desc.autowrap_mode = TextServer.AUTOWRAP_OFF
-		desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		line.add_child(desc)
-		var act := Button.new()
-		var cid: String = String(row.id)
-		match st:
-			"locked":
-				act.text = "Locked — %s" % Roster.gate_name(i)
-				act.disabled = true
-			"buy":
-				act.text = "Buy %dg" % Roster.cost(i)
-				act.disabled = _well.gold < Roster.cost(i)
-				act.pressed.connect(func(): char_bought.emit(cid))
-			"owned":
-				act.text = "Select"
-				act.pressed.connect(func(): char_selected.emit(cid))
-			_: # "selected": a no-op verb cannot fire (the stage law)
-				act.text = "Selected"
-				act.disabled = true
-		line.add_child(act)
-		_chars_rows.add_child(line)
-		if st == "selected":
-			var grp: Array = Roster.skins_for(i)
-			if grp.size() > 0:
-				# The skin chip row (M5 §3.1): an inner row-set under the
-				# selected row — rendered ONLY when that character's skin
-				# group is NON-EMPTY (the group law is the chip-disabled
-				# UI side: an empty-group char renders no chip row at
-				# all, reading (4) of the card; F-8's "not a third
-				# surface"). State comes from the ONE Roster.skin_state.
-				_chars_rows.add_child(_skin_chips(i, grp))
-
-
-func _skin_chips(char: int, grp: Array) -> HBoxContainer:
-	# The chip row: the default look + one chip per group entry, the SAME
-	# disabled-not-hidden law as the char rows (the shop's both sides:
-	# the buy chip DISABLES unaffordable). §j total law: the chip icon
-	# asserts before load, unconditional draw (no blank chip ever).
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-	row.add_child(_label("  Skins:", 12, MOON))
-	for pos in range(0, grp.size() + 1):
-		var chip := Button.new()
-		var st := Roster.skin_state(_well, char, pos)
-		var sid: String = Roster.SKIN_DEFAULT_ID if pos == 0 \
-			else Roster.skin_id(pos)
-		chip.custom_minimum_size = Vector2(118, 36)
-		if pos > 0:
-			var path: String = Roster.skin_chip_path(pos)
-			assert(ResourceLoader.exists(path))
-			chip.icon = load(path)
-			chip.expand_icon = true
-			chip.icon_max_width = 22
-		var nm := "No skin" if pos == 0 else String(Roster.skin_row(pos).name)
-		match st:
-			"buy":
-				chip.text = "%s %dg" % [nm, Roster.skin_cost(pos)]
-				chip.disabled = _well.gold < Roster.skin_cost(pos)
-				chip.pressed.connect(func(): skin_bought.emit(sid))
-			"owned":
-				chip.text = "Wear %s" % nm
-				chip.pressed.connect(func(): skin_selected.emit(sid))
-			_: # "selected" (also "unwearable" can never reach a chip —
-				# the row only renders for group entries)
-				chip.text = "%s — worn" % nm
-				chip.disabled = true
-				chip.add_theme_color_override("font_disabled_color",
-					EMBER_TINT) # the EMBER title law, stage precedent
-	return row
+	RosterSelect.refresh(self)
