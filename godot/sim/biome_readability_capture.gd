@@ -27,9 +27,30 @@
 # paint the HUD pause overlay into the shot; cutting _physics_process at the
 # node keeps the live scene honest (HUD/viz/ground stay live, they are pure
 # functions of sim state — gait phase rides game.time, no AnimationPlayer).
+# F7 MOB GRID (M6 §7.1, MC 11677 T-M6c): the DECLARED mob-grid variant —
+# the s8_capture declared-variant law (MC 11320): HD3D_MOB_GRID non-empty
+# runs a SEPARATE capture (own shots dir HD3D_MOB_SHOTS_DIR, own STATE row
+# MOBSTATE), the default windows byte-invariant (no shipped line moved, the
+# same engine run idles here and paints nothing when the flag is unset).
+# Per (stage × band × spawnable class) one shot: the spawnable set is READ
+# from the shipped rows — _types_open over the band roster + GATES rotation,
+# the STAGES bosses column, and the ENEMY_TYPES row flagging reaper:true at
+# the arrival window (declared: 5.0 s guard BELOW GameState.WIN_TIME, the
+# band the arrival law reads at 900.017, so the shot lands on the TUNDRA
+# ground with no win overlay painted over it). One mob rides the REAL
+# _spawn_enemy funnel, repositioned to the FIXED player+(0, MOB_DY) point
+# and FROZEN (spd zeroed — the shipped POSE-only deviation class), pawn
+# elsewhere; 180 px clears every weapon reach (talon 90+4L ≤ 110 at the
+# ceiling) so no hit flash ever whitewashes the bbox, and the point clears
+# every cairn/plate gimmick coord (§1.2 rows). The default 14-roster cast
+# NEVER runs in this mode.
 extends SceneTree
 
 const OUT_ENV := "HD3D_BIOME_SHOTS_DIR"
+const MOB_ENV := "HD3D_MOB_GRID"
+const MOB_OUT_ENV := "HD3D_MOB_SHOTS_DIR"
+const MOB_DY := 180.0 # game-space px, east of the pawn on screen (+y maps
+	# screen-down through the pitched ortho rig; camera_rig.gd law)
 # Band times from the T-S10 brief: 5 mid-moor, 200 mid-dunes, 350 mid-frozen,
 # 500 mid-tundra (all strictly inside their BIOMES t_start bands). M3 A-E7
 # (MC 11282 T-M3s) extends the SAME mechanism per stage: each row carries
@@ -66,15 +87,22 @@ var _main: Node
 var _stage := 0
 var _wait := 0
 var _ticks_this_shot := 0
+var _mob := false
+var _rows: Array = [] # mob-grid mode only: the declared windows (below)
 
 
 func _out_dir() -> String:
+	if _mob:
+		var m: String = OS.get_environment(MOB_OUT_ENV)
+		return m if m != "" else \
+			ProjectSettings.globalize_path("res://.tmp/mob-readability-shots")
 	var d: String = OS.get_environment(OUT_ENV)
 	return d if d != "" else ProjectSettings.globalize_path("res://.tmp/biome-readability-shots")
 
 
 func _initialize() -> void:
 	print("CAPTURE_START")
+	_mob = OS.get_environment(MOB_ENV) != ""
 	var s := OS.get_environment("HD3D_SEED")
 	seed(s.to_int() if s != "" else 11159)
 	assert(DirAccess.make_dir_recursive_absolute(_out_dir()) == OK)
@@ -94,6 +122,9 @@ func _initialize() -> void:
 # re-enter the cast branch (cycle-1 fix: re-advancing on the same stage
 # live-looped the sim forever with no save, no quit).
 func _on_frame() -> void:
+	if _mob:
+		_mob_frame()
+		return
 	if _wait > 0:
 		_wait -= 1
 		_advance(_stage) # keep frames coming; stage unchanged
@@ -198,5 +229,98 @@ func _save(index: int) -> void:
 			_main.world.enemies.size(), _ticks_this_shot, _main.game.hp])
 	var img: Image = root.get_texture().get_image()
 	var path: String = _out_dir() + "/" + String(SHOTS[index].png)
+	assert(img.save_png(path) == OK)
+	print("SAVED %s %dx%d" % [path, img.get_width(), img.get_height()])
+
+
+# --------------------------------------------------------------------------
+# MOB-GRID MODE (HD3D_MOB_GRID — M6 §7.1). The same stage machine as the
+# default windows (start, then per stage: save k-2, cast k-1) over the
+# DECLARED windows list instead of SHOTS; one frozen mob per shot.
+# --------------------------------------------------------------------------
+
+# The window list, READ from the shipped rows (never typed): per stage row,
+# every band row sampled mid-band with the band's own spawnable set through
+# the ONE _types_open mechanism (band roster + GATES rotation); the stage's
+# STAGES bosses column verbatim (boss/miniboss windows, +0.05 s so the
+# window reads AFTER its schedule tick); the reaper row at the arrival band
+# (declared guard below WIN_TIME — see header).
+func _mob_windows() -> Array:
+	var out: Array = []
+	for si in GameRenderer.STAGES.size():
+		var stage_id: String = GameRenderer.stage_id_for_index(si + 1)
+		var row: Dictionary = GameRenderer.stage_row(stage_id)
+		var bands: Array = row.bands
+		for bi in bands.size():
+			var t0: float = float(bands[bi][1])
+			var t1: float = float(bands[bi + 1][1]) \
+				if bi + 1 < bands.size() else float(row.limit)
+			var t: float = (t0 + t1) / 2.0
+			for cls in _main.world._types_open(stage_id, t):
+				out.append({"stage": si + 1, "id": stage_id, "t": t,
+					"cls": String(cls)})
+		for brow in GameRenderer.stage_bosses(stage_id):
+			out.append({"stage": si + 1, "id": stage_id,
+				"t": float(brow[0]) + 0.05, "cls": String(brow[1])})
+	for key in GameWorld.ENEMY_TYPES:
+		if GameWorld.ENEMY_TYPES[key].get("reaper", false):
+			out.append({"stage": 1, "id": String(GameRenderer.STAGES[0].id),
+				"t": GameState.WIN_TIME - 5.0, "cls": String(key)})
+	return out
+
+
+func _mob_frame() -> void:
+	if _wait > 0:
+		_wait -= 1
+		_advance(_stage) # keep frames coming; stage unchanged
+		return
+	if _stage == 0:
+		_main._start_game()
+		_main.set_physics_process(false) # the same sim-pinning gate
+		_rows = _mob_windows()
+		print("MOBGRID windows=%d" % _rows.size())
+		_advance(1)
+		return
+	if _stage >= 2:
+		_save_mob(_stage - 2)
+	if _stage <= _rows.size():
+		var win: Dictionary = _rows[_stage - 1]
+		_main._dawnwell.stage = int(win.stage) # the same save-side hand-in
+		_main._start_game()
+		_cast_mob(win)
+		_advance(_stage + 1)
+	else:
+		print("CAPTURE_OK")
+		quit()
+
+
+# One mob through the REAL funnel, FROZEN at the FIXED player+(0,MOB_DY)
+# point (pose-only deviation, the shipped cast law). No placement RNG: the
+# funnel's single spawn draw advances the stream identically every run; the
+# settle budget and frame settle are the shipped determinism carriers.
+func _cast_mob(win: Dictionary) -> void:
+	_main.game.time = float(win.t)
+	_main.world._spawn_enemy(String(win.cls), _main.game, GameRenderer.VIEW)
+	var e: Dictionary = _main.world.enemies.back()
+	e.x = _main.game.player.x
+	e.y = _main.game.player.y + MOB_DY
+	e.spd = 0.0
+	_tick(SETTLE_TICKS)
+	_wait = SETTLE_FRAMES
+
+
+func _save_mob(index: int) -> void:
+	var win: Dictionary = _rows[index]
+	var band: Dictionary = GameRenderer.band_at(String(win.id),
+		_main.game.time + _main.game.flare)
+	var slug: String = String(band.name).to_lower().replace(" ", "-")
+	var png: String = "mob-%s-%s-%s.png" % [String(win.id), slug,
+		String(win.cls)]
+	print("MOBSTATE %d:%s t=%.1f cls=%s shot=%s alive=%d ticks=%d player_hp=%.0f"
+		% [int(win.stage), String(band.name), _main.game.time,
+			String(win.cls), png, _main.world.enemies.size(),
+			_ticks_this_shot, _main.game.hp])
+	var img: Image = root.get_texture().get_image()
+	var path: String = _out_dir() + "/" + png
 	assert(img.save_png(path) == OK)
 	print("SAVED %s %dx%d" % [path, img.get_width(), img.get_height()])

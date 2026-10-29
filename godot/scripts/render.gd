@@ -23,27 +23,57 @@ const DAWNLIGHT := Color(1.0, 0.94, 0.66) # bright warm glow of the heal pickup
 
 # Per-type modulate so enemy silhouettes separate from the dark background
 # (playthrough finding: sprites read as invisible). Alpha stays 1.0.
+# M6 F7 (MC 11677 T-M6c): four rows lifted MEASURED — the mob grid (§7.1,
+# tools/biome_readability.py mob leg, RATIO_MIN 2.0) read wraith 1.13,
+# hound 1.09, crawler 1.11, cultist 1.11 min band ratios (the owner clause
+# "some mobs are very hard to spot"): rows ride the hero's BONE×3.6
+# unshaded-multiplier precedent (hero_pawn.gd:31), keyed to clear the WORST
+# band with margin. Warden keeps its shipped row (measured 2.70, clears).
+# Hound rides DEEPER (§7.1 lift-first, measured twice): its baked texture
+# is the darkest of the family — ×2.3 moved only the specular pixels
+# (patch max 85→155, bbox mean 19.0→19.3: black texels do not multiply),
+# every band still read ≤1.97 — so the row lands at base×5.5 (past the
+# hero's BONE×3.6 on the same law, hue held).
 const ENEMY_TINTS := {
-	"wraith": Color(0.62, 0.70, 0.88),
-	"hound": Color(0.88, 0.72, 0.55),
-	"crawler": Color(0.58, 0.80, 0.62),
-	"cultist": Color(0.75, 0.62, 0.88),
+	"wraith": Color(1.36, 1.54, 1.94),
+	"hound": Color(4.84, 3.96, 3.03),
+	"crawler": Color(1.30, 1.80, 1.40),
+	"cultist": Color(1.69, 1.40, 1.98),
 	"warden": Color(1.0, 0.72, 0.45),
 }
 
 # Biome signature creatures (MC 11082): same separation rule, own hues. Kept
 # as a second table because the acceptance suite pins ENEMY_TINTS to exactly
 # the five classic rows; tint_of() is the single lookup both draw paths use.
+# M6 F7: pale-wight lifted measured (min 1.16 tundra); the other signatures
+# measured CLEAR (moor-brute 4.76, dune-scarab 3.41, rime-ghoul 6.16) and
+# stay byte-verbatim — the lift lands only where the floor is breached.
 const BIOME_TINTS := {
 	"moor-brute": Color(0.66, 0.78, 0.48),
 	"dune-scarab": Color(0.92, 0.78, 0.42),
 	"rime-ghoul": Color(0.55, 0.82, 0.95),
-	"pale-wight": Color(0.85, 0.82, 0.96),
+	"pale-wight": Color(1.83, 1.76, 2.06),
+}
+
+# M6 F7 (M6-SPEC §7.1): the WHITE fallback classes that MEASURED below the
+# floor ride these real rows on the SAME tint_of lookup (the min ratios:
+# hollow-knight 1.24, hollow-deacon 1.16 on the warden-reused GLB rendered
+# at ENEMY height — miniboss rows field no boss:true). The rows ride the
+# warden family HUE at a measured ×2.4 multiplier (lift-first, hero
+# BONE×3.6 precedent). The other five fallback classes (cathedral-choir,
+# sunken-prelate, ossuary-warden, stair-acolyte, the-reaper) MEASURED
+# 4.3-5.8 on their own T-M3a/T-M4a meshes — they clear the floor at the
+# fallback and are NOT given rows here: the grid, not the guess, is the
+# floor (§7.1 lift-first).
+const BOSS_TINTS := {
+	"hollow-knight": Color(2.40, 1.73, 1.08),
+	"hollow-deacon": Color(2.40, 1.73, 1.08),
 }
 
 
 static func tint_of(type: String) -> Color:
-	return ENEMY_TINTS.get(type, BIOME_TINTS.get(type, Color.WHITE))
+	return ENEMY_TINTS.get(type, BIOME_TINTS.get(type,
+		BOSS_TINTS.get(type, Color.WHITE)))
 
 # Additive glow halos on enemies + Dawnlight. v1 drew them on an additive
 # CanvasItem child (Godot 4 has no per-draw blend switch); in this build the
