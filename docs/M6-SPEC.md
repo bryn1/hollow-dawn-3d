@@ -1,5 +1,46 @@
 # M6-SPEC — hollow-dawn-3d "Feel & Fidelity" (v3.1.0) — build-depth spec for the DA gate
 
+- **REV 4, 2026-10-29 — OWNER-RULING AMENDMENT (MC 11674).** The owner package generated from
+  the REV-3 table (the §9 ask-text supersession law) carrying the §1.5 / §4.2 / §8 decision
+  rows + the §9 ratification ask went to the web UI; the owner's reply, VERBATIM (2026-10-29),
+  typos intact per rule 2 — the artifact is quoted, never corrected:
+  **"Ibwant skeletons with movements. 2. Rec. 3. Ship. Ratufy"**.
+  DECLARED READING (stated, the reading used by this amendment per the MC 11674 brief): the
+  reply answers the package's items in order — 1 → §1.5 (the six statue-class statics),
+  2 → §4.2 (the clear carve), 3 → §8 (the version), "Ratufy" → §9 (the byte-deviation table).
+  **AMENDMENT LEDGER — REPLACE-NOT-DELETE (fleet law): every retired claim stays in its row,
+  struck (`~~…~~`) with the ruling date, NEVER deleted; the REV-3 text below is lineage, the
+  dated RESOLVED / RATIFIED / RULED rows are the live reading.** Each resolved row — owner
+  quote → resolution → what changes downstream:
+  - **§1.5 RESOLVED = OPTION (c) RE-MASTER + RE-RIG** for the six statue-class statics —
+    quote *"Ibwant skeletons with movements."* (item 1). The REV-3 recommendation **(a)+(d) is
+    RETIRED-IN-ROW** (struck + this date; the rows and their honest cost text STAY). Honest
+    odds KEPT: the riggable-wording precedent (M5: the 7/13 first-seed rigs all carry the
+    arms-flat/fused reference wording — re-grepped from the accepted ref PNGs this session)
+    + the rig-yield law's SCOPE (the collapses are deterministic per SAME mesh + seed-fixed
+    12345; option (c) changes the INPUT — same-mesh retries, option (b), remain pointless).
+    Downstream: NEW card **T-M6a-STATUE** joins §10's GPU rows (separate card, own windows,
+    **NOT wave-gating**); the wave rows are otherwise UNCHANGED — T-M6r ships the procedural
+    arm REGARDLESS (ONE CLIP_SOURCE consumer; the rigged rows land later through the SAME
+    consumer); the per-character **TWO-FAIL STOP + procedural-static fallback** named there
+    is a **DECLARED READING the owner can veto**. §11's exclusion line carries the dated
+    supersession note (it still holds FOR THIS WAVE — the ruling's work is T-M6a-STATUE's).
+  - **§4.2 RESOLVED = carve AS RECOMMENDED** — quote *"2. Rec."* → bosses + MINIBOSSES + THE
+    REAPER survive the clear; **the sigil-counter eligibility rides this ONE ruling** (NF-5:
+    one carve rules the counter AND the clear — they can never disagree). The "kills
+    everything" alternative is RETIRED-IN-ROW (struck, dated). SD-E2/SD-E3 read AS WRITTEN.
+  - **§8 RESOLVED = SHIPS v3.1.0** — quote *"3. Ship."* (the recommended MINOR reading).
+    T-M6z tags v3.1.0; the v4.0.0 counter-offer is RETIRED-IN-ROW (struck, dated); the
+    release-trio law is unchanged (notes committed AT the tag, version settled BEFORE it —
+    settled now).
+  - **§9 RATIFIED = the REV-3 16-row table AS-IS** — quote *"Ratufy"* (typo intact). The
+    `docs/BYTE-DEVIATION-M6.md` footer (T-M6d's FIRST commit) carries every declared
+    SHIFTS/REMINT/RE-DERIVE channel's OWNER-RATIFICATION cell = the owner quote **verbatim +
+    the date (2026-10-29)**, typos intact ("Ratufy") — cell format exactly what SD-E6's parse
+    reads (NON-EMPTY is the contract; the quote is the content; one table, one ruling, every
+    shifted channel). No ask regenerates; the NF-7/T-M6z pre-close blocker is satisfied at
+    T-M6d's commit and T-M6z's VERIFIES leg re-runs the parse over all.
+  REV 3, REV 2 and REV 1 stay below as lineage.
 - **REV 3, 2026-10-29, after DA cycle 2** (`docs/M6-SPEC-DA-c2.md` @ `34156ea`, VERDICT FIX,
   1P1/2P2/3P3/4P4 NEW + 2 PARTIAL fold rows — the DA doc is immutable; this doc revises in
   place, M2–M5 precedent). **ALL TEN NEW FINDINGS ADOPTED** (NF-1…NF-10; 0 rebuttals, 0
@@ -183,7 +224,11 @@ row `doom-sigil → pale-moon` at `evolutions.gd:37`).
   (`roster-clips-m5-framediff.csv`, `skinned-clips-s2r-framediff.csv`); what M6 ships is the
   RUNTIME CONSUMER (clips for the pawn path, better procedural motion for everything the
   MultiMesh draws) and the honest re-pin that the shipped game, not the capture harness,
-  animates. The rig-yield law is untouched (no rig attempts in this spec, §1.5).
+  animates. The rig-yield law is untouched (no rig attempts in this spec, §1.5). **REV 4
+  (2026-10-29):** the ruled option-(c) attempts are the SEPARATE card T-M6a-STATUE's windows
+  (§10's GPU rows), not attempts in this spec's wave — and the law's determinism binds the
+  SAME mesh + seed; the ruling changes the INPUT, it does not repeal the law (§1.5's scope
+  note).
 - **F-2 (attack looks are per-CLASS, not per-skill — the owner's complaint is exactly true).**
   Six classes, seven materials (`viz_fx.gd:43-50`): all five bolt-skills draw the same EMBER
   orb+trail, both throw-skills the same BONE axe, ward/rot-water/doom-sigil/dirge all the same
@@ -245,7 +290,10 @@ row `doom-sigil → pale-moon` at `evolutions.gd:37`).
   static". F1's procedural secondary motion is VISUAL MOTION ON TOP of the static meshes — it
   does not re-rig anything and does not re-open the ruling; whether the six statics
   ALSO get their own re-master/rig attempts is priced in §1.5 as OWNER-DECISION, with the
-  fleet rig-yield law stated honestly.
+  fleet rig-yield law stated honestly. **The ruling ARRIVED 2026-10-29 (MC 11674) — option
+  (c), quote *"Ibwant skeletons with movements."*: the six DO get re-master + re-rig attempts,
+  as the separate card T-M6a-STATUE (§1.5's RESOLVED row + the REV-4 header ledger); the
+  procedural arm F1 ships is still not a re-rig and still re-opens nothing by itself.**
 - **F-9 (byte corpus: M6 is the first milestone that DELIBERATELY shifts committed dumps —
   deviation-doc-as-pin BEFORE the wave, owner-ratified).** M1–M5 all shipped on the
   byte-identical corpus law. F3 (pool-size change → offer-shuffle fork; F6 removes a pool
@@ -367,6 +415,9 @@ animation — bpy/gltf validator read at card time, the S2r validator reused), P
 (the player-rigged promotion row), the gait rows of the strips dump (declared §9).
 
 ### 1.5 THE TENSION ROW — the six statue-class statics (⚠ OWNER-DECISION, recommendation first)
+— **RESOLVED 2026-10-29 (REV 4, MC 11674): OWNER RULED OPTION (c) — RE-MASTER + RE-RIG for
+the six** (quote *"Ibwant skeletons with movements."*; the full ledger is at the REV-4 header;
+the pre-ruling header wording is kept — replace-not-delete)
 
 The pin, verbatim from `docs/RIG-DEVIATION-SEL-C.md` (owner artifact MC 11440): owner
 ratification verbatim **"Rec"** (2026-10-27) to the recorded recommendation — *"OPTION A —
@@ -379,27 +430,69 @@ skin-tide + skin-void (3-bone + skin-stage crash)). The law this pins (fleet rig
 UniRig inference on sculpture-class meshes collapses DETERMINISTICALLY — seed-fixed 12345,
 retries do not change the result (the doc's stop-clause wording); two re-masters were
 ratified and both collapsed at the rig stage with GREEN meshes.
+**REV 4 SCOPE NOTE (2026-10-29, the ruling's honest-odds row):** the law's measured universe
+is the **same mesh + seed-fixed 12345** — it is a law about RETRIES, not about new inputs:
+option (b) (re-run the same files) stays pointless under it, while option (c) changes the
+INPUT (new reference art per failure class) and the law does not predict that either way.
+The riggable-wording precedent, honestly stated and re-grepped from the accepted ref PNGs
+THIS session: all 7 meshes M5 rig-got on the FIRST seed (7/13: emberwright, grave-ward,
+duskrunner, iron-penitent, ash, marrow, relic) carry arm-fused reference wording — the four
+characters literally *"arms fused/welded flat against the body/sides"* (emberwright-v2 and
+iron-penitent-v2 say FLAT), the three vigil skins the fused-lantern bell-robe line (*"lantern
+fused flush against the raised right forearm / to the outstretched right hand"*) — i.e. a
+riggable wording family existed inside the SAME ref style from which the six statics came.
+The precedent is a LEAD, not a promise: tallow-seer-v2 carried the fused-arms wording and
+still collapsed 3-bone — so the honest read on (c) per class stays LOW-TO-MODERATE odds,
+LOW for the shroud/quadruped/wing classes, and the six statics' collapses were on
+SCULPTURE-CLASS geometry (sealed robes/bells, wings-as-arms, fused quadruped), which is what
+option (c) exists to change.
 
 **What F1 ships for them (already decided, no consent needed):** §1.3 procedural walk-bob +
 lean + the §1.2 gait law where they ever ride the MultiMesh (they don't — characters are
 pawn-class) — visible motion WITHOUT any rig. This does NOT re-open option A: the meshes
-stay static, nothing is re-rolled.
+stay static, nothing is re-rolled. **REV 4 note (2026-10-29): this paragraph is about the
+WAVE and stays TRUE for the wave — T-M6r ships the procedural arm for the six regardless of
+the ruling below; the ruled re-master + re-rig attempts are the SEPARATE card T-M6a-STATUE
+(§10 GPU rows), which changes the ART INPUT at its own windows, never T-M6r's consumer code.**
 
 **The decision the spec must not manufacture:** whether M6 ALSO attempts rigged motion FOR
 THE SIX (beyond procedural). Priced options:
 
 | option | what it is | cost / odds (honest, from the ledger's own history) |
 |---|---|---|
-| **(a) Procedural secondary motion ONLY (RECOMMENDED)** | §1.1/§1.2/§1.3 as designed — bob/lean/sway/displacement-driven motion, NO rig, NO GPU window | zero windows; ships in T-M6r; every claim instrumented (frame-diff ≥ 2 px on a MOVING static pawn — the bob itself passes the S2r floor); honest limit: it is a walking statue, not a striding one |
-| (b) Re-rig attempts | re-run UniRig on the six | **violates the fleet rig-yield law**: the collapses are deterministic + seed-fixed (the doc, per-asset); a window burns, the same 3/4/9/41-bone skeleton returns. NOT offered as viable — named so the option list is complete |
-| (c) Re-MASTER + re-rig (new reference art per failure class, then the same chain) | TRELLIS re-generation with pose/silhouette re-refs (the coinhound/tallow-seer v2 lesson: a GREEN mesh does NOT survive the rig stage — both double-failed) | 6 × (~1 mesh window + 1 rig window ≈ 12 windows) + owner's mesh-reserve law (1/3 held); odds: 2/2 ratified re-masters then failed the rig stage — the failure classes (sealed robes, wings-as-arms, quadrupeds) are structural against the humanoid CMU chain. Honest read: LOW probability the humanoid-chain class ever accepts these six |
-| (d) Owner scope-exempts the six AGAIN (status quo, procedural only) | no attempt, procedural motion, deviation doc row re-affirmed | zero cost; re-quotes option A with the six named; the cheapest honest landing |
+| **(a) Procedural secondary motion ONLY ~~(RECOMMENDED)~~** *(recommendation label RETIRED-IN-ROW 2026-10-29 by the REV-4 ruling — the row STAYS and its arm STILL SHIPS in T-M6r regardless: procedural motion is clause 1-2's mechanism for every pawn, rigged or not)* | §1.1/§1.2/§1.3 as designed — bob/lean/sway/displacement-driven motion, NO rig, NO GPU window | zero windows; ships in T-M6r; every claim instrumented (frame-diff ≥ 2 px on a MOVING static pawn — the bob itself passes the S2r floor); honest limit: it is a walking statue, not a striding one — and under the REV-4 ruling it is the FLOOR/fallback, not the answer, for the six |
+| (b) Re-rig attempts | re-run UniRig on the six | **violates the fleet rig-yield law**: the collapses are deterministic + seed-fixed (the doc, per-asset); a window burns, the same 3/4/9/41-bone skeleton returns. NOT offered as viable — named so the option list is complete. **REV 4 (2026-10-29): stays OFF the table under the ruling too — the owner ruled (c), which changes the INPUT; THIS row re-runs the SAME mesh + seed, the exact input the law kills; retries here remain pointless** |
+| **(c) Re-MASTER + re-rig (new reference art per failure class, then the same chain) — RULED 2026-10-29 (REV 4, MC 11674): the OWNER SELECTED (c)** *(quote "Ibwant skeletons with movements."; the card is **T-M6a-STATUE**, §10 GPU rows — separate card, own windows, NOT wave-gating)* | TRELLIS re-generation with pose/silhouette re-refs (the coinhound/tallow-seer v2 lesson: a GREEN mesh does NOT survive the rig stage — both double-failed) | 6 × (~1 mesh window + 1 rig window ≈ 12 windows) + owner's mesh-reserve law (1/3 held); odds: 2/2 ratified re-masters then failed the rig stage — the failure classes (sealed robes, wings-as-arms, quadrupeds) are structural against the humanoid CMU chain. Honest read: LOW probability the humanoid-chain class ever accepts these six — **kept as the honest odds row; read against the REV-4 scope note above (the collapses were sculpture-class geometry; (c) changes the input; the M5 riggable-wording precedent is a lead, not a promise)** |
+| (d) ~~Owner scope-exempts the six AGAIN (status quo, procedural only)~~ *(RETIRED-IN-ROW 2026-10-29 by the REV-4 ruling — the owner ruled the opposite for the six statics; row kept, struck, never deleted)* | no attempt, procedural motion, deviation doc row re-affirmed | zero cost; re-quotes option A with the six named; the cheapest honest landing |
 
-**RECOMMENDATION: (a) now (it is what T-M6r ships), and (d) as the ruling on (b)/(c) — i.e.
-keep the static ruling, accept procedural motion, spend no windows on sculpture-class rigs.**
-Every decision row carries the recommendation per the owner's standing rule; the wave ships
-(a) regardless, because (a) is required by clause 1-2 for the HERO and every rigged row
-ANYWAY — the mechanism is one consumer, not a per-row fork.
+~~**RECOMMENDATION: (a) now (it is what T-M6r ships), and (d) as the ruling on (b)/(c) — i.e.
+keep the static ruling, accept procedural motion, spend no windows on sculpture-class rigs.**~~
+**RETIRED-IN-ROW 2026-10-29 (REV 4, MC 11674) — superseded by the owner's reply to the
+package, verbatim: *"Ibwant skeletons with movements."* (item 1). RESOLVED = OPTION (c)
+RE-MASTER + RE-RIG for the six statue-class statics** (new reference art per failure class →
+the same TRELLIS + UniRig chain). The recommendation row is kept struck, never deleted
+(replace-not-delete); the honest odds text above stays as written. The REV-1 lineage sentence
+stands with it: "Every decision row carries the recommendation per the owner's standing rule;
+the wave ships (a) regardless, because (a) is required by clause 1-2 for the HERO and every
+rigged row ANYWAY — the mechanism is one consumer, not a per-row fork." (TRUE under the
+ruling — the wave DOES ship the procedural arm regardless; see (2) — its "(a)" reads now as
+the procedural ARM, the option (a) label being retired as a RECOMMENDATION only.)
+**What changes downstream (REV 4):** (1) NEW card **T-M6a-STATUE** runs the six — SEPARATE
+card, OWN GPU windows (re-master + rig per asset, single-row windows + drain_barrier +
+trap-close + llama-swap-serving law, the mesh reserve 1/3 held — burning the reserve needs a
+NEW owner word, unchanged law), **NOT wave-gating: no M6 build card waits on it.** (2) T-M6r
+ships the procedural arm REGARDLESS — the wave rows are otherwise UNCHANGED: the mechanism is
+ONE CLIP_SOURCE consumer (§1.1), it plays a named clip when the file carries one and takes the
+procedural arm otherwise (MV-E4 pins both shapes), so the rigged rows land LATER through the
+SAME consumer when T-M6a-STATUE's files arrive — zero T-M6r rework. (3) Honest odds KEPT: the
+riggable-wording precedent (M5: the 7/13 first-seed rigs carry arm-fused reference wording)
+against the rig-yield law's scope (deterministic per SAME mesh + seed — (c) changes the input;
+(b)-style same-mesh retries remain pointless) — the §1.5 scope note is the reading. (4)
+**DECLARED READING the owner can VETO:** a per-character **TWO-FAIL STOP** — the second
+deterministic collapse of a character's re-mastered mesh retires THAT character to the
+procedural-static fallback (the §1.3 arm; the coinhound/tallow-seer double-fail precedent
+verbatim) and stops its windows; surviving characters continue. The fallback is motion-without
+rig, never a silent static row: T-M6a-STATUE's close names per character which landed.
 
 ### 1.6 ACCEPT (MV-E1..MV-E5; each names ONE seam + its planted red)
 
@@ -686,19 +779,25 @@ set defined precisely" now READS precisely, per owning card.
   16 px touch ⇒ remove + CLEAR (below). No magnet call on sigils (stated reading: a screen-
   clear pickup the horde can drag to you would clear on accident — the owner's design word
   is "when picked up"; touch-only, the chest precedent's spirit).
-- **The CLEAR (design decision, ⚠ OWNER-DECISION, recommendation):** clear = kill every
+- **The CLEAR (design decision, ⚠ OWNER-DECISION, recommendation — RESOLVED 2026-10-29
+  (REV 4, MC 11674): the carve SHIPS AS RECOMMENDED, owner *"2. Rec."* — bosses + MINIBOSSES
+  + THE REAPER SURVIVE the clear, and the SIGIL-COUNTER ELIGIBILITY rides this ONE ruling
+  (NF-5: one carve rules counter AND clear, they can never disagree); SD-E2/SD-E3 read AS
+  WRITTEN, nothing else moves):** clear = kill every
   non-BOSS, non-MINIBOSS, non-REAPER enemy on the field, each through the ONE `kill_enemy`
   funnel (so gems/coins/heals/chest-rolls ride — the clear pays out, the kill counters
   advance); **bosses + minibosses + the reaper SURVIVE** (recommendation). Why: the bosses
   are the encounter law (their 1.0/0.6 chest roll is the M1 drop economy's spine; a screen-
   clear that one-shots the Warden deletes the milestone's endgame moment); the reaper is the
   run's END LAW (T-M4r F-6: its contact ends the run — a pickup that kills it would fork the
-  end law itself). One big ring FX (the existing rings class) marks the moment. Alternative
-  offered: "kills everything" reads literal — priced: the reaper row is the run-end rule
-  (would need its OWN carve anyway — the death-guard precedent `:477-478`), and bosses-to-
-  one-shot trivializes three scheduled fights. If the owner rules boss-kill, the carve line
-  moves (one term) and the boss chest law needs its own ruling — stated so no reader thinks
-  the spec chose silently.
+  end law itself). One big ring FX (the existing rings class) marks the moment.
+  ~~Alternative offered: "kills everything" reads literal — priced: the reaper row is the
+  run-end rule (would need its OWN carve anyway — the death-guard precedent `:477-478`), and
+  bosses-to-one-shot trivializes three scheduled fights. If the owner rules boss-kill, the
+  carve line moves (one term) and the boss chest law needs its own ruling — stated so no
+  reader thinks the spec chose silently.~~ **RETIRED-IN-ROW 2026-10-29 (REV 4): the owner
+  ruled *"2. Rec."* — the carve as recommended SHIPS; the alternative is closed, its pricing
+  kept struck (replace-not-delete).**
 - **Viz:** `pickup_viz` gains the sigil MM (5→6 draws — the §10 re-tally row, ≤ plan 40
   holds): billboard quad on the SHIPPED `icon-doom-sigil.png` (the coin/gem billboard
   mechanism verbatim), DRAWS const re-pin row, assert-exists law.
@@ -861,20 +960,31 @@ table), the grid-run gate leg), PERMANENCE untouched (no generated art).
 | CT-E3 | one-lookup law: `tint_of` is the only class-color read site (grep: horde material + any new glow read it; zero second `albedo_color = <class literal>` sites), `ENEMY_TINTS` still exactly five classic rows | the grep/pin family | planted: a per-class material color literal in `horde_viz._make_class` ⇒ the one-lookup grep RED |
 | CT-E4 | (only if the glow fallback fires) the glow MM rides the §b radii/alphas consts verbatim and the draw row re-pins +1 over the §10 RE-TALLY row's total AT THIS CLOSE (REV 3 NF-9: the REV-1 "27→28" predicated glow as the first addition — post-T-M6d the sigil MM already took 27→28, so the conditional glow lands 28→29; §10 RE-TALLY row is the ONE budget law, not the §b ≤33 pickup budget — named correctly) | the `draws` dump + the sim_budget leg | planted: glow radii typed at the draw site ⇒ the single-source pin RED |
 
-## 8. VERSION DECISION (⚠ OWNER-DECISION — recommendation first)
+## 8. VERSION DECISION (⚠ OWNER-DECISION — recommendation first) — **RESOLVED 2026-10-29
+(REV 4, MC 11674): SHIPS v3.1.0**, owner *"3. Ship."* — the recommended MINOR reading stands
+(the header is kept — replace-not-delete)
+
+**RESOLUTION (REV 4): T-M6z tags v3.1.0.** The v4.0.0 MAJOR counter-offer below is
+RETIRED-IN-ROW (struck, dated — never deleted); the release-trio law is unchanged (notes
+committed AT the tag, version settled BEFORE it — settled by this ruling).
 
 The version law (`docs/PARITY-ROADMAP.md` — "major = a new player-navigated UI surface (M3
 stage select → v2.0.0)"; M5 read the same law to v3.0.0 on TWO new surfaces). **M6 adds NO
 new player-navigated surface**: the level-up cards GROW IN PLACE (chips + text — same
 overlay), the sigil is an in-game pickup entity, the evolution is run state, contrast is
-pixels. **RECOMMENDATION: v3.1.0 (MINOR)** — the law's literal trigger does not fire, and
+pixels. ~~**RECOMMENDATION: v3.1.0 (MINOR)** — the law's literal trigger does not fire, and
 calling this v4.0.0 on vibes dilutes the law the roadmap wrote. Honest counter recorded for
 the owner (he counts what the game IS): M6 REPLACES a core mechanic (chest-evolution →
 level-5 evolution), RETIRES a weapon id from the pool, and adds the screen-clear drop — a
 ruleset change, not just polish. If the owner rules MAJOR anyway (v4.0.0), the only build
 difference is the tag + notes header — every card, row and gate reads the same; the spec
 ships v3.1.0 as the default reading and names this row so the ruling exists before T-M6z
-tags (release-trio law: notes are committed AT the tag, the version is settled BEFORE it).
+tags (release-trio law: notes are committed AT the tag, the version is settled BEFORE it).~~
+**RETIRED-IN-ROW 2026-10-29 (REV 4, MC 11674): the whole pre-ruling recommendation block is
+struck as LINEAGE — the owner ruled *"3. Ship."* = v3.1.0 SHIPS (the MINOR reading; the
+counter was heard and answered, nothing else changes — the spec's own sentence holds: "every
+card, row and gate reads the same"). The release-trio law it states stands independently and
+is NOT retired: notes committed AT the tag; version settled BEFORE it — settled.**
 
 ## 9. THE BYTE-ANCHOR LAW — the re-anchor ledger (M6's honest break; deviation doc FIRST)
 
@@ -923,7 +1033,19 @@ P1-2/P2-4/NF-1/NF-2):**
 
 **Owner-ratification rows:** the doc's footer carries the ratification block (the rule-2
 discipline): per shifted channel a one-line ask + the owner's verbatim answer pasted when
-it arrives. **REV 3 (NF-1): THE OWNER-RATIFICATION ASK TEXT DERIVES FROM THIS REV-3 TABLE AND
+it arrives. **REV 4 RATIFIED (2026-10-29, MC 11674): the answer ARRIVED — the reply to the
+ask generated from THIS table (the supersession law below), verbatim:
+"Ibwant skeletons with movements. 2. Rec. 3. Ship. Ratufy". "Ratufy" IS the ratification
+word, TYPO INTACT (rule 2: the artifact is pasted, never corrected): the REV-3 16-row table
+is RATIFIED AS-IS (SHIFTS-class 5 / AT-RISK 6 rows-7 channels / STAY 5 — no row moved).
+THE FOOTER FORMAT, binding on T-M6d's first commit: EVERY declared SHIFTS/REMINT/RE-DERIVE
+channel's OWNER-RATIFICATION cell = the owner quote VERBATIM + the date (2026-10-29), i.e.
+`"Ibwant skeletons with movements. 2. Rec. 3. Ship. Ratufy" (owner, web-UI reply to the M6
+owner package, 2026-10-29)` — cell format exactly what SD-E6's parse reads: a NON-EMPTY cell
+is the gate contract, the verbatim quote is the content (one table, one ruling, every shifted
+channel carries it); SD-E6's planted EMPTY-cell red stays shipped. No ask regenerates (there
+is nothing left to ask); the NF-7 pre-close blocker is satisfied at T-M6d's commit and T-M6z's
+leg re-runs the parse over all channels.** **REV 3 (NF-1): THE OWNER-RATIFICATION ASK TEXT DERIVES FROM THIS REV-3 TABLE AND
 SUPERSEDES EVERY EARLIER DRAFT** — the pre-REV-3 ask (a "~4 SHIFTS, 5 STAY" premise) is refuted
 by the fixtures' own bytes and is RETIRED; presenting it would manufacture consent on a premise
 the code refutes (rule-2 law; the c2 dissent row: the SD-E6 instrument gates closes on the
@@ -973,6 +1095,18 @@ texture cards) exists ONLY if the owner rules against color-first (§12 D-6) —
 window: AFTER the vm100 backup window clears (owner's backup; today's brief: "builds later,
 not you") + the windows-closed law (drain_barrier, trap-close rc=0, llama-swap serving
 verified at every close, single-row windows). No M6 build card waits on it by default.
+**REV 4 (2026-10-29, MC 11674) — GPU rows += T-M6a-STATUE:** the §1.5 owner ruling (option
+(c) re-master + re-rig of the six statue-class statics, quote *"Ibwant skeletons with
+movements."*) files as the SEPARATE card **T-M6a-STATUE** — its OWN GPU windows (TRELLIS
+re-master + UniRig rig per asset, single-row windows + drain_barrier + trap-close +
+llama-swap-serving law, mesh reserve 1/3 held — a 4th burn needs a new owner word), the
+per-character TWO-FAIL STOP + procedural-static fallback per §1.5's DECLARED reading (owner
+may veto). **NOT wave-gating:** T-M6a-STATUE is not in the file-ownership matrix and NO M6
+build card waits on it. **The wave rows above are otherwise UNCHANGED:** T-M6r ships the
+procedural arm REGARDLESS — the CLIP_SOURCE consumer is ONE consumer, and T-M6a-STATUE's
+rigged rows (if/when they land) flow through the SAME consumer later (MV-E4's validator
+already pins both shapes), zero T-M6r rework. T-M6 v1 still ships zero GPU art: every window
+this ruling costs belongs to T-M6a-STATUE, outside the wave.**
 **DRAW/CAP RE-TALLY ROW (REV 3 NF-9 — the §10 row the MV-E5, §2.1, §4.2 Viz, SD-E4 and CT-E4
 cites name; today it exists, the cites resolve HERE — the numbers' other home is §12 D-6 +
 DESIGN-3D §b): baseline 27 measured draws (sim_budget, seed-fixed journey dump); T-M6d's sigil
@@ -993,9 +1127,18 @@ SCHEDULED (F-10) — the audit verifies it SHIPPED, not just planned.
 
 ## 11. WHAT M6 IS NOT (exclusions the DA should hold me to)
 
-- NOT a re-rig milestone: zero UniRig attempts, zero mesh windows (§1.5's ruling stands; the
-  procedural arm ships without any of them). If the owner rules option (c) in §1.5, that is
-  a SEPARATE card filed later with its own windows, not this wave.
+- NOT a re-rig milestone: zero UniRig attempts, zero mesh windows (§1.5's ruling stands —
+  *for the WAVE*; SUPERSEDED 2026-10-29 FOR THE SIX STATICS by the REV-4 ruling, note at this
+  row's end —; the procedural arm ships without any of them). If the owner rules option (c)
+  in §1.5 — RULED: option (c), 2026-10-29, the card is T-M6a-STATUE (§10 GPU rows) —, that is
+  a SEPARATE card filed later with its own windows, not this wave. **DATED SUPERSESSION NOTE
+  (2026-10-29, REV 4, MC 11674): the owner ruled option (c) in §1.5 — *"Ibwant skeletons with
+  movements."* — so "(§1.5's ruling stands)" above reads against the MC 11440 "Rec"
+  statue-artifact it quotes, now superseded for the six statics by the REV-4 ruling (§1.5's
+  RESOLVED row + the header ledger). THIS exclusion itself STILL HOLDS FOR THE WAVE — M6 v1
+  ships zero UniRig attempts and zero mesh windows — the ruled work is the separate card
+  T-M6a-STATUE with its own windows (§10's GPU row): exactly the landing this row's own
+  final clause pre-named.**
 - NOT new weapon ids or new effect classes (15 weapons after the retirement; SIX classes +
   per-skill looks INSIDE them; the `_cap` family math re-derives, no cap becomes per-id
   alone — FX-E3).
@@ -1079,7 +1222,10 @@ SCHEDULED (F-10) — the audit verifies it SHIPPED, not just planned.
   1-2 duty, no ruling needed — it is visual motion, not a re-rig) and prices the re-rig as
   OWNER-DECISION with the rig-yield law + the 2/2 re-master-failed history honestly stated.
   If the DA reads the §1.3 arm as smuggling option B back in, the rebuttal is the rig-yield
-  quote: the meshes stay static; only transforms move.
+  quote: the meshes stay static; only transforms move. **REV 4 (2026-10-29): this held and
+  was ANSWERED — the owner ruled option (c) as a SEPARATE card (T-M6a-STATUE, §10 GPU rows);
+  the WAVE's §1.3 arm stayed smuggle-free exactly as rebutted, and the ruled attempts change
+  the art INPUT at their own windows, never T-M6r's consumer.**
 
 ## SELF-DA CHECKLIST (what the author ran before filing)
 
@@ -1101,7 +1247,10 @@ SCHEDULED (F-10) — the audit verifies it SHIPPED, not just planned.
   in no row) — RETRACTED; the REV-3 table (16 rows, every verdict byte-derived per-channel,
   the omitted strict channel in with its measured STAY) is the honest one, and the
   OWNER-RATIFICATION ask regenerates from it (rule-2 law).
-- Decision rows each carry a RECOMMENDATION (§1.5 a, §4.2 bosses/reapers survive, §8 v3.1.0).
+- Decision rows each carried a RECOMMENDATION (§1.5 a+d → **RETIRED by ruling 2026-10-29,
+  owner RULED option (c)**; §4.2 bosses/minibosses/reapers survive → **RULED "2. Rec."**; §8
+  v3.1.0 → **RULED "3. Ship."**) — REV 4 (MC 11674) records the outcome: every decision row
+  was answered by the owner's reply to the package; see the REV-4 header ledger.
 - Known limit disclosed up front: the clips shipped in M5 were never consumed by the game;
   the spec says so in the first finding instead of letting the owner discover it at GA.
 
@@ -1178,3 +1327,13 @@ matrix reconciled at T-M6d (weapons.gd) + the T-M6z pre-close truth stated, and 
 P3/P4 one-liners landed. The two c1 gate mechanisms (option (a), SD-E6) needed NO change —
 c2 verified both sound. c3 re-checks the declared REV-3 lines; per c2 §5, after this list
 lands, c3 SHIPs.**
+**REV 4 STATUS (2026-10-29, MC 11674): c3 SHIPPED (`docs/M6-SPEC-DA-c3.md`, VERDICT SHIP —
+its three new rows were all P4 WAVE-BRIEF items, not spec folds) and the owner package generated
+from the REV-3 table went to the web UI. The owner's reply — verbatim *"Ibwant skeletons with
+movements. 2. Rec. 3. Ship. Ratufy"* (2026-10-29) — CLOSES every open decision: §1.5 option
+(c) re-master + re-rig (new card T-M6a-STATUE, §10 GPU rows, NOT wave-gating), §4.2 carve as
+recommended (sigil-counter eligibility rides the one ruling), §8 ships v3.1.0, §9 16-row table
+ratified as-is (footer carries the verbatim quote, typo intact, per the SD-E6 cell contract).
+This rev is the amendment; all rulings replaced-not-deleted per the header ledger. The wave
+opens as the gate line above always stated: T-M6d ∥ T-M6r ∥ T-M6c, then T-M6p → T-M6f → T-M6z
+serial.**
