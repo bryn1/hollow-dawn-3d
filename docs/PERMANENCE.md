@@ -429,3 +429,31 @@ file — present in the SHIPPED player-rigged.glb (T-S1p's 7999 = 7919+80 is exa
 it); it is importer-side, NOT in any GLB JSON, Godot's runtime load unaffected;
 counts on rigged files were taken with the ghost filtered (m5rig-render.py, capture
 `.tmp/m5-rig.txt`).
+
+## M6 F1 — the movement consumer + the player-rigged PROMOTION (T-M6r, MC 11676, 2026-10-29)
+
+PROMOTION ROW (M6-SPEC §1.1, the card's spine): `player-rigged.glb` is PROMOTED
+from the art-side `assets/glb/` (the S2r rig the skinned-clips CSV was measured
+on) into the RUNTIME pack at `godot/assets/glb/player-rigged.glb` as a
+BYTE-IDENTICAL COPY — sha256 `9cadc033181c5f32fdc9db1af509276fcae74451c1d68c7c7b1182a9aa42814b`
+both sides, cmp PROVEN this card (tests/test_skinned_clips.py re-checks it on
+every suite run: the promoted pawn visual can never silently diverge from the
+rig the committed frame-diff numbers describe). The original stays byte-untouched;
+the runtime loader (ClassMesh's loader law for horde strips included) never sees
+the promotion — only `Roster.CLIP_SOURCE` row 0 + `ClassMesh.scene_for` ride it.
+THE CONSUMER (the spec's headline finding — M5's clips shipped but were never
+played): `hero_pawn.gd` now instantiates the rig through CLIP_SOURCE (the ONE
+seam mesh-file -> clip plan) and plays `"walk"` at the stride-tied rate
+(`minf(spd/GAIT_STRIDE_M, GAIT_FREQ_MAX)` — the horde gait law, one rule);
+the six statue-class statics (owner "Rec" option A, docs/RIG-DEVIATION-SEL-C.md)
+ride the procedural bob+lean instead, keyed `fmod(p.x*0.017+p.y*0.031, TAU)` —
+the SAME phase law the horde rows use (horde_viz `gait_wave`, caps bob/lean
+±0.05, ranges pinned ≤0.10 by tools/motion_gate.py MV-E2). MV-E5 mutual
+exclusion is a per-SURFACE alpha-0 ghost override on self (pinned-binary law:
+the camera culls ALL 20 layers, and visible=false measured half-hides children;
+the ghost keeps `pawn.mesh` + `material_override` byte-untouched for every
+committed probe). Proof: tools/motion_gate.py (`--twice`) + godot/sim/
+motion_capture.gd; planted reds (rig-dead -> MOVING legs 0px, both-draws ->
+draws=2, randf wave -> determinism pin RED, game.time-only key -> phase pin RED,
+static-file-claims-walk -> validator RED) all executed RED, cp+cmp restored
+(capture `.tmp/m6r.txt`).

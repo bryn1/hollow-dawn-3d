@@ -181,7 +181,14 @@ def test_k_e1_handin_reset_and_default_source_pins():
     # expression AND the literal player.glb branch stays verbatim
     # (test_art_integration carries the substring law; this is the
     # DEFAULT-BRANCH twin: skin 0 must fall through to the literal).
-    seam = block(HERO, "func _player_mesh", "\nfunc ")
+    # EXTENDED by T-M6r (MC 11676, MV-E4, the M5 §2.1b precedent): the
+    # name rule (skin/char/row-0 literal) now lives in the seam's own
+    # name source _player_glb() — ONE rule the §1.1 CLIP_SOURCE visual
+    # read rides too — so the skin-read substring law holds at that
+    # pair member; the literal mesh_for("player.glb"...) branch stays
+    # VERBATIM inside _player_mesh() itself (the F-2 default below).
+    seam = block(HERO, "func _player_mesh", "\nfunc ") \
+        + block(HERO, "func _player_glb", "\nfunc ")
     assert "Roster.skin_mesh(" in seam, \
         "the ONE seam must read the skin group through Roster"
     assert 'ClassMesh.mesh_for("player.glb", HordeViz.MODEL_H_PLAYER)' \

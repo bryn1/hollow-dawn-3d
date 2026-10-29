@@ -32,6 +32,46 @@ static func measured_height(glb_file: String, target_h: float) -> float:
 	return mesh_for(glb_file, target_h).get_aabb().size.y
 
 
+# --- SKINNED consumer seam (M6 F1 §1.1, T-M6r, MC 11676) ------------------
+# THE FINDING this file ships the fix for: _import below (:35-48) copies
+# surface 0's arrays into a NEW ArrayMesh — the skin (Skeleton3D binding,
+# blend shapes, the imported AnimationPlayer) is STRIPPED, by design: the
+# MultiMesh horde never animates through a skeleton (§c Route A). That is
+# why the M5 clips never PLAYED: the pawn rode this same stripping loader
+# and had nothing left to animate. M6 F1's skinned consumer therefore
+# rides the IMPORTED SCENE, not the ArrayMesh: scene_for() hands out the
+# pinned import pass's PackedScene (load() = the engine's own cache — no
+# second cache beside _cache) and the CALLER instantiates + normalises at
+# the ROOT-NODE SCALE — nothing re-frees the skin, the skinning survives.
+static func scene_for(glb_file: String) -> PackedScene:
+	return load(GLB_DIR + glb_file) as PackedScene
+
+
+# Rest-pose height of the imported SCENE (the child normaliser's measure-
+# ment, ClassMesh.measured_height shape, read off the scene's own mesh
+# node — instantiate/find/measure/free ONCE per apply_selection, not per
+# frame). The scene-side twin of _find_mesh: first MeshInstance3D below n.
+static func scene_rest_height(glb_file: String) -> float:
+	var inst: Node = scene_for(glb_file).instantiate()
+	var mi := mesh_node(inst)
+	var h: float = mi.get_aabb().size.y if mi != null else 0.0
+	inst.free()
+	return h
+
+
+# The scene-side twin of _find_mesh: the first MeshInstance3D below n
+# (public — hero_pawn's child uses it for the material-override target;
+# one walker, never a second beside it).
+static func mesh_node(n: Node) -> MeshInstance3D:
+	for c in n.get_children():
+		if c is MeshInstance3D:
+			return c as MeshInstance3D
+		var m := mesh_node(c)
+		if m != null:
+			return m
+	return null
+
+
 static func _import(glb_file: String, target_h: float) -> ArrayMesh:
 	var inst: Node = (load(GLB_DIR + glb_file) as PackedScene).instantiate()
 	var src := _find_mesh(inst)

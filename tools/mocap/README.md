@@ -6,6 +6,14 @@ end-to-end on the fleet 3090 box (vm100), **CPU-only** (the 3090 window is
 never opened by this route; `00-run-all.sh` records its CLOSED status).
 No TRELLIS.2 / DINOv3 dependency anywhere in this route.
 
+> **Consumer status (M6 F1, T-M6r, MC 11676):** the runtime animation
+> consumer LANDED — the named clips play while the survivor moves, not
+> just in capture gates. `Roster.CLIP_SOURCE` is the ONE seam from a mesh
+> file to its clip plan; `hero_pawn.gd` plays `"walk"` at the stride-tied
+> rate (row 0 rides the promoted byte-identical `player-rigged.glb` copy
+> under `godot/assets/glb/`, height-normalised at the root-node scale).
+> This pipeline is unchanged — it minted the clips the consumer reads.
+
 ## Chosen route (ONE, justified) + license verdicts
 
 | source | what we use | license (verbatim / repo) | verdict for shipped derivative |

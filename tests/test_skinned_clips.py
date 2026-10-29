@@ -95,3 +95,27 @@ def test_frame_diff_fixture_shape_and_gate_rows():
     cover = {(r["rig"], r["clip"]) for r in motion}
     assert cover == {(rig.replace(".glb", ""), clip) for rig in RIGS
                      for clip in ("walk", "attack")}, "coverage lost"
+
+
+# ---- STAY leg GROWN by T-M6r (MC 11676, M6 §1.1) --------------------------
+# player-rigged.glb was PROMOTED to the row-0 pawn's visual source: the
+# shipped copy under godot/assets/glb must stay byte-identical to the rig
+# these CSV rows were measured on (the PERMANENCE row's enforceable half
+# — one byte edit anywhere forks this pin), and the clip/skin contract
+# this file validates re-validates on the promoted file. The CSV itself
+# STAYS byte-locked: re-minting it is not this card (the capture inputs
+# are unchanged by construction).
+
+def test_promoted_copy_stays_byte_identical():
+    src = os.path.join(GLB_DIR, "player-rigged.glb")
+    promoted = os.path.join(REPO, "godot", "assets", "glb",
+                            "player-rigged.glb")
+    assert open(src, "rb").read() == open(promoted, "rb").read(), (
+        "the promoted pawn visual diverged from the rig the S2r CSV was "
+        "measured on — the frame-diff numbers would describe a different "
+        "file")
+    gj = load_glb_json(promoted)
+    names = {a.get("name") for a in gj.get("animations", [])}
+    assert {"walk", "attack"} <= names, \
+        f"promoted copy lost clips: {names}"
+    assert len(gj.get("skins", [])) >= 1, "promoted copy lost its skin"

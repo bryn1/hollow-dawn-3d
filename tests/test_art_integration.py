@@ -200,8 +200,19 @@ def test_player_glb_swap_and_live_height():
     # through the ONE Roster resolver, at this SAME function (spec §3.1
     # "the SAME _player_mesh() seam reading well.skin through the selected
     # character's skin group" — no second loader, no second seam).
-    assert "Roster.skin_mesh(" in seam.group(0), (
-        "the skin read must ride the SAME _player_mesh() seam")
+    # EXTENDED by T-M6r (MC 11676, MV-E4, the M5 §2.1b extension
+    # precedent): the seam's NAME rule moved whole into the seam's own
+    # name source _player_glb() — one rule, which the §1.1 CLIP_SOURCE
+    # visual read rides too — so the skin-read substring law now holds at
+    # that pair member; the row-0 literal call above stays VERBATIM
+    # inside _player_mesh() itself, and the loader stays ONE.
+    glbseam = re.search(r"func _player_glb\(\).*?\n(?=func |\Z)",
+                        HERO, re.S)
+    assert glbseam, "the ONE name-rule source _player_glb() is missing"
+    assert "Roster.skin_mesh(" in glbseam.group(0) \
+        or "Roster.skin_mesh(" in seam.group(0), (
+        "the skin read must ride the SAME pawn-mesh seam "
+        "(_player_mesh/_player_glb pair, one rule)")
     assert "CapsuleMesh" not in HERO, (
         "capsule placeholder still in hero_pawn — placeholder era retired "
         "by MC 11135")

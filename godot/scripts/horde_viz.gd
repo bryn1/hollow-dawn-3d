@@ -81,6 +81,35 @@ const GAIT_FREQ_MAX := 2.2
 const SCISSOR_MIN := 1.00
 const SCISSOR_MAX := 1.24
 
+# M6 F1 gait law (T-M6r, MC 11676) — the scissor-only transform grows the
+# shipped §c locomotion cues: a Y-bob (step height) and a forward lean,
+# BOTH keyed on the SAME gait wave as the scissor (the ONE gait_wave
+# below) so the bob frequency IS the stride-tied gait frequency already
+# computed per class (_freqs). Amplitude caps are the MV-E2 pinned rows:
+# bob_range = 2*BOB_M = 0.10 m, lean_range = 2*LEAN_RAD = 0.10 rad
+# (declared caps; the scissor row keeps its own byte-anchored pins).
+# Deterministic like the scissor: sin(TAU*f*game.time + e.gait_p) — no
+# RNG, no per-frame state (the same seed re-derives the same transforms,
+# the §1.2 phase law). Applied only while the unit has velocity — the
+# chase loop's per-class speed read (world.gd update_entities is the
+# velocity source: it moves e.x/e.y toward the player at e.spd every
+# tick), so a unit the loop never moves never bobs.
+const BOB_M := 0.05
+const LEAN_RAD := 0.05
+const GAIT_EPS_MPS := 0.01 # rest gate shared by the pawn arm (hero_pawn
+#	_uses_gait): below this m/s the pawn pauses the clip at rest / takes
+#	no bob — the §1.1 "rest = the static-era frame" row.
+
+
+# The ONE gait wave (M6 F1, §1.3): every bob/lean/scissor cue in the game
+# rides this single sine — horde instances AND the static pawn arm read it
+# (the pawn's own amplitudes live in hero_pawn; values OURS per the
+# spec). f is the class/pawn stride-tied frequency, phase the spawn-
+# anchored e.gait_p law, so instances that beat together stay a RED
+# instrument leg, never the shipped behaviour.
+static func gait_wave(time: float, phase: float, f: float) -> float:
+	return sin(TAU * f * time + phase)
+
 const HP_BAR_M := Vector2(0.7, 0.08) # full-hp bar footprint; scale.x = hp/max
 const BAR_Y_CLEARANCE := 0.15
 # §d HP-bar quads billboard to the camera: the bar quad's normal must match
@@ -187,6 +216,30 @@ func refresh() -> void:
 					tr.origin + Vector3(vf.z.x * lunge, 0.0, vf.z.z * lunge))
 				last_s = 2.0 - s_v
 				last_d = s_v
+			# M6 F1 (§1.2, T-M6r): the locomotion cues on the SAME wave —
+			# Y-bob BOB_M + a forward lean LEAN_RAD toward the unit's
+			# SPAWN-ANCHORED e.gait_p direction (the same position-keyed
+			# law the scissor phase rides), gated on the unit's velocity
+			# (e.spd IS the speed world.gd's chase loop moves it at —
+			# read, never written). The lean axis rides e.gait_p and NOT
+			# the live chase vector on purpose: chase direction is live
+			# sim position, and position-driven lean would fire during the
+			# strips FROZEN-SLIDE control (game.time frozen, instances
+			# sliding) — the instrument whose whole job is proving nothing
+			# animates off game.time+phase must stay RED there. Time-
+			# frozen + phase-frozen => every cue constant => both channels
+			# read 0. MV-E2 planted-red pair: key the bob on randf() and
+			# the determinism twin forks; key it on game.time WITHOUT
+			# e.gait_p and the phase-spread pin goes RED. Transform-only:
+			# sim x/y stay verbatim. The lunge block above stays verbatim;
+			# the cues compose after it (pure rotation + origin shift —
+			# the scale channels the strips probe measures are untouched).
+			if e.spd > 0.0:
+				var w := gait_wave(game.time, e.gait_p, f)
+				var b := tr.basis.rotated(
+					Vector3(sin(e.gait_p), 0.0, -cos(e.gait_p)),
+					LEAN_RAD * w)
+				tr = Transform3D(b, tr.origin + Vector3(0.0, BOB_M * w, 0.0))
 			mm.set_instance_transform(i, tr)
 		_scales[key] = {"s": last_s, "d": last_d}
 	_write_hp_bars(damaged)
@@ -275,6 +328,14 @@ func gait_probe() -> Dictionary:
 				and not _sched_on_stage(key):
 			continue
 		out[key] = {"freq": _freqs[key], "range": [SCISSOR_MIN, SCISSOR_MAX],
+			# M6 F1 (T-M6r, MC 11676) DECLARED shape growth per M6 §1.2
+			# ("the gait_probe dump leg extends its shape under the forward
+			# lock, the T-M3b growth precedent"): the scissor row stays the
+			# byte-anchored [1.00,1.24] pin, the two NEW rows carry their
+			# own named caps — declared like "range", deterministic by
+			# construction (same seed twice => identical dump, twice-cmp).
+			"bob_range": [-BOB_M, BOB_M],
+			"lean_range": [-LEAN_RAD, LEAN_RAD],
 			"last": _scales.get(key, {})}
 	return out
 

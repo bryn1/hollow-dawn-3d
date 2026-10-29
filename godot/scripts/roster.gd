@@ -126,6 +126,52 @@ const CHARACTERS := [
 ]
 
 
+# --- CLIP SOURCE (M6-SPEC §1.1, T-M6r, MC 11676) — the ONE clip map ------
+# Per mesh file under res://assets/glb/, the SKINNED runtime consumer's
+# clip row, or null = STATIC. The law this table pins (docs/
+# RIG-DEVIATION-SEL-C.md, owner "Rec" 2026-10-27, MC 11440): the seven
+# RIGGED rows carry the named clips the mocap chain shipped (walk +
+# attack); the six statue-class rows are static EXCUSED-not-removed and
+# take the §1.3 procedural arm — they name NO clip here (null). clip_node
+# = the AnimationPlayer node name inside the IMPORTED GLB scene (the
+# pinned import pass ships it; the runtime-GLTFDocument route stays
+# harness-side, §1.1); walk = the clip the pawn plays while moving. The
+# attack clip is NOT played in-game (stated reading §0/F-1: the auto-fire
+# FX is the hero's attack read; F2 owns the attack look) — it stays
+# capture-proven.
+# ROW 0: the PAWN VISUAL promotes the byte-identical twin player-rigged
+# (S2r rewrite, docs/PERMANENCE.md; the promotion copy + .import sidecar
+# is the T-M5s permanence law) — the ONE "visual" key that differs from
+# its map key, §1.1's row-0 law. Every NON-visual consumer keeps reading
+# the literal "player.glb" (Roster.CHARACTERS[0].mesh stays: the art
+# fixture heights + the test_art_integration seam-pin ride it).
+# The map is a read-only row by contract (the duplicate() law's read-side
+# restated: no consumer mutates it; the hand-out is the scalar read below).
+const CLIP_SOURCE := {
+	"player.glb": {"visual": "player-rigged.glb",
+		"clip_node": "AnimationPlayer", "walk": "walk"},
+	"char-emberwright.glb": {"clip_node": "AnimationPlayer", "walk": "walk"},
+	"char-grave-ward.glb": {"clip_node": "AnimationPlayer", "walk": "walk"},
+	"char-coinhound.glb": null, # statue-class static (owner "Rec")
+	"char-duskrunner.glb": {"clip_node": "AnimationPlayer", "walk": "walk"},
+	"char-tallow-seer.glb": null, # statue-class static (owner "Rec")
+	"char-shroud-saint.glb": null, # statue-class static (owner "Rec")
+	"char-iron-penitent.glb": {"clip_node": "AnimationPlayer", "walk": "walk"},
+	"char-hoard-wretch.glb": null, # statue-class static (owner "Rec")
+	"skin-ash.glb": {"clip_node": "AnimationPlayer", "walk": "walk"},
+	"skin-marrow.glb": {"clip_node": "AnimationPlayer", "walk": "walk"},
+	"skin-tide.glb": null, # statue-class static (owner "Rec")
+	"skin-relic.glb": {"clip_node": "AnimationPlayer", "walk": "walk"},
+	"skin-void.glb": null, # statue-class static (owner "Rec")
+}
+
+
+# The ONE clip-map read: Dictionary (rigged: optional "visual" twin +
+# "clip_node" + "walk") or null (static / unmapped — the procedural arm).
+static func clip_source(glb_file: String): # Dictionary | null
+	return CLIP_SOURCE.get(glb_file)
+
+
 # Clamp the well row through the table (the stage out_of_range_clamps
 # precedent: a garbage int never crashes, never leaks past the table).
 static func row(char: int) -> Dictionary:
