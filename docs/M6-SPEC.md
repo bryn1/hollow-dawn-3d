@@ -1,5 +1,26 @@
 # M6-SPEC — hollow-dawn-3d "Feel & Fidelity" (v3.1.0) — build-depth spec for the DA gate
 
+- **REV 3, 2026-10-29, after DA cycle 2** (`docs/M6-SPEC-DA-c2.md` @ `34156ea`, VERDICT FIX,
+  1P1/2P2/3P3/4P4 NEW + 2 PARTIAL fold rows — the DA doc is immutable; this doc revises in
+  place, M2–M5 precedent). **ALL TEN NEW FINDINGS ADOPTED** (NF-1…NF-10; 0 rebuttals, 0
+  deferrals), each re-derived THIS session from the instrument the c2 doc names — the FIXTURE
+  BYTES themselves, not the direct-read grep that produced the false clause: §9's five-STAY row
+  is GONE, re-derived per-channel (endless-m2 dumps `"phase":"levelup"` rows + declares "offers
+  declined"; events-m4 dumps an RNG-dependent digest with `types[]`; stages-m3 dumps
+  `offer_drew_three_cards` through the wired funnel ⇒ the three are **AT-RISK → measured-SHIFTS
+  expected**; reaper-m4 + gem-merge-m2g are **AT-RISK** — funnel wired, digest shape unmeasured,
+  cmp decides; no channel keeps a refuted "why"); `art-s2i-probe.jsonl` ENTERS §9 as measured
+  STAY (NF-2, the strict-12 channel the 11-row COMPLETE claim omitted); §10's T-M6d row gains
+  `weapons.gd` so the first-editor law and SD-E5's grep universe agree again (NF-3); and the
+  P3/P4 one-liners land (NF-4 stranded reserve-law comments, NF-5 miniboss sigil-carve, NF-6 the
+  limit-m4 wrong cite, NF-7 T-M6z filled→VERIFIES, NF-8 10→9 evolved, NF-9 the §10 re-tally row
+  the five cites name, NF-10 the §3.3 insight-chip law replacing its "?"). **§9 FINAL: 16 rows —
+  SHIFTS-class 5 (3 SHIFTS + 1 REMINT + 1 RE-DERIVE), AT-RISK 6 rows / 7 channels (unions,
+  limit, endless, events, stages, reaper, gem-merge; the three fixture-proven ones
+  EXPECT SHIFTS), STAY 5 — and the OWNER-RATIFICATION ASK TEXT derives
+  from THIS table, superseding every earlier draft (the c2 dissent: pasting the owner a "~4
+  SHIFTS, 5 STAY" premise the code refutes would manufacture consent).** ACCEPT rows stay **31**
+  (no new row; SD-E2 grows its planted pair in place). REV 2 and REV 1 stay below as lineage.
 - **REV 2, 2026-10-28, after DA cycle 1** (`docs/M6-SPEC-DA.md` @ `668fee3`, VERDICT FIX,
   2P1/5P2/3P3/2P4 — the DA doc is immutable; this doc revises in place, the M2/M3/M4/M5-SPEC
   precedent). **ALL TWELVE findings ADOPTED**, each re-grepped against the tree BEFORE adoption
@@ -205,7 +226,8 @@ row `doom-sigil → pale-moon` at `evolutions.gd:37`).
 - **F-6 (the drop is a deterministic counter, not an RNG roll — chosen FOR the byte corpus).**
   A rare `randf()` roll in `kill_enemy` would shift EVERY committed dump's RNG stream at the
   first extra draw. The kill-counter law (drop on every `SIGIL_EVERY_KILLS`-th ELIGIBLE —
-  non-boss, non-reaper — kill, counted on the dedicated `Drops.sigil_kills`, §4.2 REV 2 P2-2)
+  non-boss, non-miniboss, non-reaper — kill, counted on the dedicated `Drops.sigil_kills`,
+  §4.2 REV 2 P2-2 + REV 3 NF-5 miniboss carve)
   consumes
   ZERO RNG: the corpus byte-identical stays enforceable up to the pickup moment, and forks
   only where a sigil is actually picked and clears the field (each kill riding `kill_enemy`
@@ -394,10 +416,12 @@ ANYWAY — the mechanism is one consumer, not a per-row fork.
 ### 2.1 Mechanism — the SKILL_FX table, color-first, at the ONE write sites
 
 New const `SKILL_FX` (`viz_fx.gd`, data in the file that consumes it — the §i pattern): per
-weapon id (15 after F6 + the 10 evolved + 2 union ids — every fireable id) `{color, scale,
-trail, ring_band}`. Colors are SAMPLED from the shipped icon PNGs (`icon-<id>.png` — the
-owner's stated reference) at card time with the sampling row printed into the capture
-(centre-weighted mean of the icon's dominant non-bg pixel, OUR method, the values pinned in
+weapon id (15 after F6 + the 9 evolved + 2 union ids — every fireable id; REV 3 NF-8: R2's
+`doom-sigil → pale-moon` retirement makes the live evolved count 9, not 10 — pinning "10"
+would pin a row for an id that can never fire, the vacuity class clean-code audits 2/3 walk),
+`{color, scale, trail, ring_band}`. Colors are SAMPLED from the shipped icon PNGs
+(`icon-<id>.png` — the owner's stated reference) at card time with the sampling row printed into
+the capture (centre-weighted mean of the icon's dominant non-bg pixel, OUR method, the values pinned in
 the table); no new assets, no GPU. The write sites already carry the firing weapon in hand
 (`_fire(w, …)`): each append dict gains `wid: String` (additive field, arrays' counts/caps
 untouched — §10 re-tally proves the sim caps are family-sums of the SAME levels; evolved
@@ -441,8 +465,8 @@ unchanged).
 | # | observable | seam | red |
 |---|---|---|---|
 | FX-E1 | per-skill look: two bolt-skills fired in the same sample frame (ember + dart-loop) produce ≥ 2 distinct instance colors ≥ Δ-channel apart (the table pins the pairs); the strips/visual probe windows show per-skill palette rows where master showed one shared EMBER row | the upgrades_visual probe's palette method (extended windows) + the `fx` dump counts UNTOUCHED (the RED/both-sides pair) | planted: two ids share a color ⇒ the distinctness leg RED; planted: writer ignores `wid` ⇒ every color = the family default ⇒ RED while every sim leg stays GREEN — the visual-dead class instrumented |
-| FX-E2 | table pin: `SKILL_FX` covers every fireable id (15 weapons + 10 evolved + 2 unions + the base-fallback), `icon-<id>.png` assert for every row, sampled constants equal the capture-printed values (the drift class), NO icon file added (reuse law) | the pytest table pin + `ResourceLoader.exists` | planted: a new id appended without a row ⇒ pin RED; planted: hand-typed color drifts from the sampled value ⇒ value-compare RED |
-| FX-E3 | caps/budget: the §i family caps re-derive byte-equal for the family-sum counts (the `fx_caps` journey row stays 0 violations), draws row unchanged 27→27 (§10), no new draw class | the existing `fx_caps` + `draws` dump rows + sim_budget | planted: per-id cap replaces the family sum ⇒ the 600-sample cap row RED |
+| FX-E2 | table pin: `SKILL_FX` covers every fireable id (15 weapons + **9 evolved** + 2 unions + the base-fallback — REV 3 NF-8: after R2 there are 9 live evolved ids; `pale-moon` is KEEP-as-file, DEAD-as-fireable (the `_:` no-op arm stays, `weapons.gd:327-330`) and is named HERE as the declared fallback row the pin EXCLUDES — a dead row the "new id appended without a row" red cannot catch is the vacuity class, so the exclusion is stated, not hidden), `icon-<id>.png` assert for every row, sampled constants equal the capture-printed values (the drift class), NO icon file added (reuse law) | the pytest table pin + `ResourceLoader.exists` | planted: a new id appended without a row ⇒ pin RED; planted: hand-typed color drifts from the sampled value ⇒ value-compare RED |
+| FX-E3 | caps/budget: the §i family caps re-derive byte-equal for the family-sum counts (the `fx_caps` journey row stays 0 violations), draws row adds ZERO for this card — the TOTAL unchanged on its own tree (REV 3 NF-9 honest re-read: T-M6f runs AFTER T-M6d's +1, so its tree reads 28→28, not the REV-1 "27→27"; §10 RE-TALLY row), no new draw class | the existing `fx_caps` + `draws` dump rows + sim_budget | planted: per-id cap replaces the family sum ⇒ the 600-sample cap row RED |
 | FX-E4 | evolved look leg: an evolved weapon's fire (T-M6p's §3.3 behaviour, declared-pin construction the sim_boss way) paints its own SKILL_FX color + the flash ring (counted, never a second ring draw) | the rings `mini(…,1)` cap row + the visual probe window | planted: flash adds a 2nd MM ⇒ live_draws RED |
 
 ## 3. F3 — PASSIVES CONNECT TO SKILLS; THE LEVEL-5 EVOLUTION (T-M6p)
@@ -493,8 +517,12 @@ convention consumes them — zero new code).
 - Data: `EvolutionSystem.affects_by_passive()` (ONE read over the ONE TABLE) + union.gd's
   rows (loadstone/insight chip their union too — the partner column of BOTH tables, no
   second copy). `levelup.build_pool` stamps the passive card `chips: [icon names]`;
-  generic passives (ferocity/haste/ward/grip/insight — insight also partners nothing? re-grep:
-  the five v1 passives have no TABLE row) get `chips: []` + their desc already names the
+  GENERIC passives — exactly {ferocity, haste, ward, grip} (REV 3 NF-10: `insight` is NOT one
+  of them — the REV-2 list carried it with an unresolved "?" beside a law that contradicted
+  PS-E5: `insight` has no EVOLUTIONS-table row (grep: zero in `evolutions.gd`) but it IS the
+  `requiem-toll` UNION partner (`union.gd:37` `"passive": "insight"`), and PS-E5's law is
+  `chips == the partner set` over BOTH tables ⇒ `insight` CARRIES the requiem-toll chip; the
+  four true generics get `chips: []`) + their desc already names the
   global effect (stated reading: no fake chips on global passives; the ALL-skills chip set
   was weighed — noise, rejected).
 - Render: `_card` grows a chip row (small TextureRects, 28 px, under the desc label — the
@@ -537,7 +565,15 @@ equal-or-stronger — the pin asserts BOTH branches (below-MAX + eligible-at-MAX
 `uni_reserve_lifted` leg keeps its meaning (partner GONE lifts both branches; no-partner carries
 no reserve — the union needs the passive anyway, so nothing is blocked: the DA's
 dead-loadstone trap reads honestly in the window); (2) `union.gd` gets the ONE-test edit (§3.5
-re-grep note updated — "expected ZERO edits" is RETIRED); (3) **PS-E4 grows the leg the REV-1
+re-grep note updated — "expected ZERO edits" is RETIRED) **AND the three STRANDED LAW COMMENTS
+are re-worded in the SAME commit (REV 3 NF-4 — the retired-claim grep-to-zero law is this spec's
+own §4.1 law and it binds comments too): `union.gd:21-27`'s header ("must NOT evolve while its
+union partner is carried below MAX"), `union.gd:64-67`'s `reserved_for_union` doc comment ("True
+exactly when … that row's partner base is carried below MAX_LEVEL") and `evolutions.gd:52-58`'s
+try_evolve RESERVE comment ("skipped while its union partner is carried below MAX") all state
+the BELOW-MAX-ONLY window the extension falsifies — re-worded to the extended window, or they
+become CONTRADICTED code at T-M6p's close (union.gd is owned; a one-line honesty change at each
+site, not a file-structure change)**; (3) **PS-E4 grows the leg the REV-1
 design cannot pass** (§3.6): both bases AT MAX + passive carried + a pick landing BEFORE any
 chest ⇒ NO evolve, the next chest lands the union — planted red = the predicate as REV-1 wrote
 it (below-MAX-only) ⇒ rot-water evolves on the MAX-landing pick ⇒ RED on the REV-1 design, the
@@ -633,9 +669,17 @@ set defined precisely" now READS precisely, per owning card.
   named counter `Drops.sigil_kills` — world-side run state beside the drop arrays (NOT a
   `game.kills` read, NOT a snapshot field — the frozen 12-field law stands), incremented
   inside the ONE kill funnel AFTER the reaper guard (reaper-kills already returned) and ONLY
-  `if not enemy.boss` — so every increment IS an eligible kill and
+  `if not enemy.boss and not enemy.miniboss` (REV 3 NF-5 — DESIGN DECISION, stated not silent:
+  `kill_enemy` carries SEPARATE `boss` and `miniboss` fields (`world.gd:495/:498` — the chest
+  arms `if enemy.boss` / `elif enemy.miniboss`), so a literal `if not enemy.boss` would make
+  MINIBOSS kills counter-eligible while the CLEAR below carves MINIBOSS out as a survivor CLASS;
+  the counter rides the SAME survivor ruling — miniboss kills neither advance the counter nor
+  drop — so ONE carve (the §4.2 OWNER-DECISION row: bosses + minibosses + the reaper survive the
+  clear) rules both sites and the counter can never disagree with the clear; if the owner rules a
+  class dies instead, BOTH terms move together, one ruling) — so every increment IS an eligible
+  kill and
   `sigil_kills % SIGIL_EVERY_KILLS == 0` emits the drop at the enemy's position on the NEW
-  `sigils` array on EXACTLY every 750th non-boss, non-reaper kill. Zero RNG consumed
+  `sigils` array on EXACTLY every 750th non-boss, non-miniboss, non-reaper kill. Zero RNG consumed
   unchanged; `game.kills` keeps its shipped meaning (reaper kills count — the guard comment's
   own law, stated honestly at last).
 - **Touch/consume (the ONE funnel, 5th kind):** beside heals (`:516-520`): sigil inside the
@@ -669,7 +713,7 @@ set defined precisely" now READS precisely, per owning card.
 | # | observable | seam | red |
 |---|---|---|---|
 | SD-E1 | pool retirement: `make_offer` never yields a doom-sigil card at ANY level state (offer-stream leg over the full pool); `len(IDS) == 15`; the 31-kind icon pin green; WEAPON-side card-icons green; journey weapon-attribution legs 15/15 | the offer funnel + the re-pinned `test_card_icons.py:138` | planted: id restored to IDS without table/meta ⇒ the 31-kind pin RED; planted: IDS row removed but `_fire` branch kept ⇒ the dead-code concern check RED (coding-discipline concern_check, the fleet walk) |
-| SD-E2 | drop law determinism (REV 2, P2-2 fixed): a scripted kill-run — boss + reaper kills INTERLEAVED — dumps a sigil at EXACTLY every 750th non-boss, non-reaper kill (counter rows in the dump), zero drops at boss/reaper kills, ZERO extra RNG — the RNG-tap-free leg: same seed, drop-array removed from the comparison ⇒ the ENTIRE drop stream byte-identical (the corpus's own both-sides guard). The observable is ACHIEVABLE only because the counter is the dedicated NON-BOSS `Drops.sigil_kills` (§4.2 — the REV-1 `game.kills`-counter could not produce it: a boss kill on a multiple silently consumes it, and the leg would read RED against its own correct build) | the sim drop-stream channel (the sim_boss CHEST ROLL LEG pattern verbatim) | planted: a boss kill advancing `sigil_kills` (increment before the boss test — the REV-1 shape in miniature) ⇒ the exact-750th leg RED while the tap-free twin stays GREEN (the attribution pair); planted: roll on `randf() < 0.001` ⇒ the tap-free leg forks ⇒ RED (the class this law exists to catch — every committed dump shifting for a drop that was never picked) |
+| SD-E2 | drop law determinism (REV 2, P2-2 fixed; REV 3 NF-5 carve): a scripted kill-run — boss + MINIBOSS + reaper kills INTERLEAVED — dumps a sigil at EXACTLY every 750th non-boss, non-miniboss, non-reaper kill (counter rows in the dump), zero drops at boss/miniboss/reaper kills, ZERO extra RNG — the RNG-tap-free leg: same seed, drop-array removed from the comparison ⇒ the ENTIRE drop stream byte-identical (the corpus's own both-sides guard). The observable is ACHIEVABLE only because the counter is the dedicated ELIGIBLE-KILL `Drops.sigil_kills` (§4.2 — the REV-1 `game.kills`-counter could not produce it: a boss kill on a multiple silently consumes it, and the leg would read RED against its own correct build) | the sim drop-stream channel (the sim_boss CHEST ROLL LEG pattern verbatim) | planted: a boss kill advancing `sigil_kills` (increment before the boss test — the REV-1 shape in miniature) ⇒ the exact-750th leg RED while the tap-free twin stays GREEN (the attribution pair); planted (NF-5 twin): the `and not enemy.miniboss` term dropped ⇒ the interleaved-miniboss leg RED at the first miniboss crossing (the counter/clear disagreement this ruling exists to close); planted: roll on `randf() < 0.001` ⇒ the tap-free leg forks ⇒ RED (the class this law exists to catch — every committed dump shifting for a drop that was never picked) |
 | SD-E3 | clear both sides: picking a sigil kills every non-boss/miniboss/reaper (alive-set dump before/after; each kill rode `kill_enemy` — the gems/gold/kills deltas prove it), bosses+miniboss+reaper counts UNCHANGED, ONE ring FX counted; touch-only (a magnet-widened build never auto-clears) | the collect funnel + the alive-set dump legs | planted: the clear loop includes the reaper ⇒ the end-law twin RED (the run that should end-by-reaper doesn't); planted: the carve term dropped ⇒ the boss survives-leg RED |
 | SD-E4 | viz row: the sigil draws via the ONE pickup_viz idiom, `icon-doom-sigil.png` assert-exists, draws tally row 6 (pickup family), budget row green | the existing pickup_viz rows + `draws` dump | baseline-vs-baseline pixel RED (the gate's own planted-red class re-proven on the new row); planted: second MM for the sigil ⇒ 7 draws ⇒ the tally RED |
 | SD-E5 | retire-ledger completeness, **WEAPON-SIDE SCOPED** (REV 2, P2-3/P4-2 — the REV-1 row could not read zero at this close: the evolution-side sites retire in T-M6p, where PS-E7 runs the sibling leg): at T-M6d's close `grep -rn "doom-sigil"` returns ZERO hits in live code/tables/tests across the files T-M6d OWNS (§4.1's weapon-side list) outside the KEEP set — the two PNG provenance rows + `tools/vm100/icons-batch-m1c.tsv :11/:21` + `tools/vm100/art-batch-m1c.tsv :17` (P4-2, batch-manifest law), `docs/PERMANENCE.md`/manifest history rows, this spec's own retire rows, the pickup id, `tests/fixtures/carry-caps-m1b.jsonl` (re-anchored, §9), and every EVOLUTION-SIDE file (T-M6p-owned — PS-E7's universe, named in the KEEP definition so this grep reads zero honestly) | the grep-to-zero idiom scoped PER OWNING CARD (fleet doctrine, replace-not-delete ledger rows named; §10 matrix law) | planted: one live site left IN T-M6d's OWNED universe (`sim_combat SPECS`) ⇒ the grep row RED (a self-example named in §12) |
@@ -815,7 +859,7 @@ table), the grid-run gate leg), PERMANENCE untouched (no generated art).
 | CT-E1 | the floor: every (band × spawnable-class) grid shot reads `mob_ratio ≥ 2.0` (the full grid: stage-1 four bands × 6 horde classes + each stage's boss/miniboss windows — the spawnable set read from `BIOMES/STAGES` rows, not typed); the planted dark copy (a copy of the shots dir with one mob lift REMOVED) FAILS the gate (rc 1, row named) | the extended readability gate + its planted-fake idiom | planted: revert one class to WHITE ⇒ its rows RED; planted: floor lowered to 1.5 to "pass" ⇒ the planted-fake row goes GREEN ⇒ the gate-integrity leg RED (a gate that never fails is not a gate — fleet law) |
 | CT-E2 | the three shipped readability rows byte-INARIANT (the pawn + band windows unchanged — the lift table's identity rows read 1.0× where nothing moved) AND the default capture dir byte-invariant (the declared-variant law, s8 precedent) | the shipped gate legs re-run on the default dir | planted: a lift applied to the pawn ⇒ its row moves ⇒ the byte-invariant leg RED |
 | CT-E3 | one-lookup law: `tint_of` is the only class-color read site (grep: horde material + any new glow read it; zero second `albedo_color = <class literal>` sites), `ENEMY_TINTS` still exactly five classic rows | the grep/pin family | planted: a per-class material color literal in `horde_viz._make_class` ⇒ the one-lookup grep RED |
-| CT-E4 | (only if the glow fallback fires) the glow MM rides the §b radii/alphas consts verbatim and the draw row re-pins 27→28 with the §10 budget row (not the §b ≤33 pickup budget — named correctly) | the `draws` dump + the sim_budget leg | planted: glow radii typed at the draw site ⇒ the single-source pin RED |
+| CT-E4 | (only if the glow fallback fires) the glow MM rides the §b radii/alphas consts verbatim and the draw row re-pins +1 over the §10 RE-TALLY row's total AT THIS CLOSE (REV 3 NF-9: the REV-1 "27→28" predicated glow as the first addition — post-T-M6d the sigil MM already took 27→28, so the conditional glow lands 28→29; §10 RE-TALLY row is the ONE budget law, not the §b ≤33 pickup budget — named correctly) | the `draws` dump + the sim_budget leg | planted: glow radii typed at the draw site ⇒ the single-source pin RED |
 
 ## 8. VERSION DECISION (⚠ OWNER-DECISION — recommendation first)
 
@@ -853,9 +897,10 @@ first commit, structure per-channel: `{channel, shifting card, mechanism (one li
 the spec section), declared diff (row counts + sample rows), STAY rows (channels measured
 unchanged), owner-ratification row (verbatim answer, pasted when it arrives)}`.
 
-**Pre-declared channel table (honest BEFORE the wave — the brief's exact ask; REV 2 completes
-it: the channel the first pass missed enters, the false STAY whys are corrected per-channel —
-P1-2/P2-4):**
+**Pre-declared channel table (honest BEFORE the wave — the brief's exact ask; REV 3 RE-DERIVES
+it per-channel from the fixtures' OWN BYTES — the instrument NF-1 names: the five-channel STAY
+row is refuted and replaced by five honest rows, and the omitted strict channel enters —
+P1-2/P2-4/NF-1/NF-2):**
 
 | channel | expected | why |
 |---|---|---|
@@ -863,17 +908,27 @@ P1-2/P2-4):**
 | `carry-caps-m1b.jsonl` | **SHIFTS** (offer-stream channels) | pool-size change forks the shuffle wherever the leg draws offers; re-anchor where the leg reads offers, STAY where it reads caps dumps — per-ROW measured diff in the doc; the 64 rows carrying the `doom-sigil` id are §4.1's named KEEP-vs-re-anchor resolution (P4-2: the id's rows move HERE, the file is not an edit site) |
 | `chests-evolve-m1e.jsonl` | **REMINT** | the fixture's own subject moves (chest trigger → level trigger, table 10→9, GATE_T retired); the 9-row both-sides truth re-mints, the union/precedence rows keep their legs (PS-E3's DIRECT-arm legs prove the UNtouched lines byte-true — the REV-1 "STAY pair" wording retracted, P1-2) |
 | `chests-tiers-m2.jsonl` | **SHIFTS** — measured, per-row diff (REV 2 P1-2: the channel the REV-1 table OMITTED while PS-E3 named it a STAY pair) | it IS a strict-corpus byte consumer of the FORKED stream — re-read THIS session: `sim_chest_tiers.gd:23-30` opens the REAL `collect_pickups` per tier, drain through the real `_enter_levelup/_pick` seam == `item_count` offers of 3 cards each, plus `chest_pick_weights x3`: **240 weighted picks per tier** through the real `make_offer` + `wire_pick` + `run._pick` (`:90/:190/:270`). T-M6d's pool 16→15 changes the weapon-filtered pool SIZE ⇒ `pool.shuffle()` (`levelup.gd:119`) consumes a DIFFERENT RNG count ⇒ the legs' card streams AND the byte-dumped pick sequences move. Re-anchor with the row-level diff in the doc BEFORE this channel's card closes |
-| `unions-m2u` + `limit-m4` | **AT-RISK → measured-SHIFTS at card time** (REV 2 P2-4: the REV-1 STAY why "these legs pick scripted cards, not shuffled streams" is CONTRADICTED by the sims' own headers — both read the REAL funnel) | `sim_union.gd:15`: the FULL legs "acquire EVERY part through the real offer funnel (real make_offer cards + real _pick, no id pinned)" — pick ORDER over the forked stream moves the dumped sequences ⇒ EXPECTS SHIFTS; `sim_limit.gd:249` iterates `LevelUpDeck.make_offer` in the PINNED pool-exhausted state, where the shuffled array is `LIMIT_CARDS` (size unchanged by 16→15) ⇒ the shuffle fork need NOT touch it, but the leg's worst-case all-max loadout pin re-pins if it carries the retired id ⇒ bytes move iff it does. Both channels are pre-marked **AT-RISK** in the deviation doc; per-row `cmp` at card time records the verdict BEFORE the owning card closes — no surprise RED mid-card, no false GREEN premise |
-| `endless-m2 / events-m4 / stages-m3 / gem-merge-m2g / reaper-m4` | expected **STAY** — measured | the sigil counter consumes ZERO RNG (F-6, and the REV-2 counter is the dedicated non-boss `Drops.sigil_kills` — §4.2), magnet consumes ZERO, `effect()` is ×1.0 identity un-evolved, the level-evolve trigger is zero-RNG; and THESE legs construct DECLARED state — none reads the offer funnel (the consumer set re-grepped THIS session: `make_offer|LevelUpDeck` in `godot/sim/` = cards_capture, sim_budget, sim_chest_tiers, sim_evolve, sim_limit, sim_union — none of these five); per-channel `cmp` still decides, the doc records both outcomes |
+| `unions-m2u` + `limit-m4` | **AT-RISK → measured-SHIFTS at card time** (REV 2 P2-4: the REV-1 STAY why "these legs pick scripted cards, not shuffled streams" is CONTRADICTED by the sims' own headers — both read the REAL funnel) | `sim_union.gd:15`: the FULL legs "acquire EVERY part through the real offer funnel (real make_offer cards + real _pick, no id pinned)" — pick ORDER over the forked stream moves the dumped sequences ⇒ EXPECTS SHIFTS; **limit cite CORRECTED REV 3 NF-6:** `sim_limit.gd:249` iterates the **KINDED** `LevelUpDeck.make_offer(game, kind)` (`kind ∈ {gold, weapon, passive}`) — the KINDED calls never reach the `LIMIT_CARDS` arm (that arm is `kind == ""` ONLY, `levelup.gd:117-118` — measured this session; the c2 doc's `:126-128` is ITSELF a drifted cite, it sits on `apply_offer`'s head, corrected here per the same class the finding files), so the LIMIT bytes' actual producer is the UNKINDED main-funnel leg `limit_all_maxed` (limit-m4.jsonl:1: "half the offers picked through the real `_pick` seam, half declined", counters arm:16/dmg:14/spd:20 — sequence-sensitive), where the PINNED exhausted pool shuffles `LIMIT_CARDS` (size 3, unchanged by 16→15) ⇒ the shuffle fork need NOT touch it, and the leg's worst-case all-max loadout pin re-pins iff it carries the retired id (NF-6 re-read: its icons are cleaver/dart-loop/plate — no retired id — the REV-2 verdict survives, the cite now names the leg that produces the bytes). Both channels are pre-marked **AT-RISK** in the deviation doc; per-row `cmp` at card time records the verdict BEFORE the owning card closes — no surprise RED mid-card, no false GREEN premise |
+| `endless-m2.jsonl` | **AT-RISK → EXPECTS SHIFTS** (REV 3 NF-1 — the five-channel "STAY / none reads the offer funnel" row is REFUTED by this fixture's OWN bytes and retired; verdict re-derived per-channel from the bytes below) | BYTE EVIDENCE (re-read THIS session): `sim_endless.gd:95` wires the funnel (`wire_pick: true`) and endless-m2.jsonl:1-3 DUMP `"phase":"levelup"` rows — an offer is `make_offer`'d (the shuffle consumes RNG at `levelup.gd:119`) BEFORE any decline, and the leg's own declared row says "offers declined" ⇒ the shuffle fork (IDS 16→15, `build_pool` loses a new-weapon card in every run with an open slot) is consumed INSIDE this byte-dumped leg; every downstream `randf()` (spawn types, drop rolls) rides the forked stream. The zero-RNG facts (sigil counter, magnet, `effect()` identity, zero-RNG trigger) stay TRUE but are UPSTREAM-IRRELEVANT: the fork is in the pool math itself, not in those mechanisms. Per-row `cmp` at card time records the verdict before close |
+| `events-m4.jsonl` | **AT-RISK → EXPECTS SHIFTS** (REV 3 NF-1) | BYTE EVIDENCE: `sim_events.gd:114` wires the funnel and the fixture DUMPS an RNG-DEPENDENT DIGEST — events-m4.jsonl:6 `digest_off_end`: `{alive:45, gems:3, gold:0, kills:19, level:2, phase:"levelup", types:[47 entries]}` — the leg's own check IS `rng_stream` (RNG-stream identity is the leg's purpose); the forked shuffle count + different `_pick(0)` draws move the shared game RNG from the first level-up ⇒ every dumped digest field that rides `randf()` moves. Per-row `cmp` at card time records the verdict |
+| `stages-m3.jsonl` | **AT-RISK → EXPECTS SHIFTS** (REV 3 NF-1) | BYTE EVIDENCE: `sim_stages.gd:111/:521` wire the funnel and the cairns leg DUMPS THE SEAM ITSELF — stages-m3.jsonl:4: `"offer_drew_three_cards": true, "offer_cards": 3` (the open→drain→pick seam consumed inside the byte-dumped leg; the leg's `_decline` ACCEPTS card 0 — `take_first_card`, the stages donor's fork) ⇒ the forked pool draws DIFFERENT cards, `apply_offer` lands different state ⇒ the leg's dumped gold/seeded/offered rows move with it. Per-row `cmp` at card time records the verdict |
+| `reaper-m4.jsonl` | **AT-RISK — per-row `cmp` decides** (REV 3 NF-1: honest verdict — funnel wired, level-ups CERTAIN at run length, the dumped fields' RNG-dependence unmeasured THIS session) | BYTE EVIDENCE: `sim_reaper.gd:102/:125/:245` wire the funnel; the runs drive to the WIN_TIME boundary and beyond (nights, clear cycles) so level-up offers fire during the leg; the dumped fields (arrival times 900.017/960.017, tick counts, `reapers_alive`) are SCHEDULE-driven, not RNG-driven, BUT the forked stream moves every earlier `randf()` (spawn positions → contact timing → arrivals) — unmeasured ⇒ AT-RISK, NOT STAY (staying here would be the same false-premise class NF-1 files). Per-row `cmp` at card time records the verdict |
+| `gem-merge-m2g.jsonl` | **AT-RISK — per-row `cmp` decides** (REV 3 NF-1) | BYTE EVIDENCE: `sim_gems.gd:81` wires the funnel. The merge legs are SYNTHETIC-PINNED (`_pin_gems` constructs the array; `update_entities` called directly — the fixture's own declared rows) so the boundary/sum rows ride NO game RNG; what is unmeasured THIS session is whether any leg's loop window reaches a level-up (the wired funnel forks the stream iff it does) ⇒ AT-RISK, NOT STAY. Per-row `cmp` at card time records the verdict |
 | strips dumps (`strips-m1f/stage2/stage3` + gate table) | **RE-DERIVE** | F1 gait shape + F2 per-skill colour change MEASURED values; thresholds stay, expectation table re-derived T-S20-verbatim; the gate's 19/19 legs stay GREEN on the fresh dumps (a red gate is a bug, not a deviation) |
 | s8 capture tables (gameover 11104 / win 11103) | expected STAY, seeds **re-selectable** | the offer-stream fork can flip a seed's class (the M2z seed-scan lesson: "seeds 11101-11106 die t=375..467, scan in the card") — if a seed flips, the doc row names the replacement + the scan |
 | `skinned-clips-s2r-framediff.csv`, `roster-clips-m5-framediff.csv` | **STAY byte-locked** | no rigged source mesh changes (F1 animates files as shipped; the `player-rigged.glb` COPY is byte-identical to its root-assets source) — STAY pair with the MV-E4 drift leg |
+| `art-s2i-probe.jsonl` | **STAY — measured** (REV 3 NF-2: the strict-12 channel — named in M5-SPEC:641's committed list — that REV 2's 11-row "COMPLETE" table named in NO row; it enters with its honest verdict before T-M6d commits the deviation doc) | byte-derived reason: the probe enumerates `HordeViz.GLB_FILES` (`art_probe.gd:80`) + `Roster.CHARACTERS` (:135) + `Roster.SKINS` (:159) — NONE of which M6 re-rows (§11 excludes roster/skins/stage tables; `GLB_FILES` untouched); row-0's mesh stays the literal `"player.glb"` (§1.1's law — the art fixture's player row untouched), the promotion copy is byte-identical, and the heights re-measure the SAME file bytes; a card-time `cmp` records the outcome into the doc's STAY rows (a committed channel with no row cannot carry a measured outcome — that is why the row exists, not because STAY is uncertain) |
 | `dawnwell_pixel_gate` rows | **STAY + NEW legs** | the 4/5/7/6 shipped rows byte-true (chips/text/levelup grow inside the panel boxes the baselines crop — the M5 §4.2 both-sides rule: a baseline crop that would shift gets a NEW row id beside, the char-pick-row precedent verbatim); the level-up CHIPS row is new |
 | `achv-m5 / chars-m5 / skins-m5` | **STAY** | roster/skins/achievements tables untouched by M6 |
 
 **Owner-ratification rows:** the doc's footer carries the ratification block (the rule-2
 discipline): per shifted channel a one-line ask + the owner's verbatim answer pasted when
-it arrives. **GATE: no M6 card whose feature shifts a channel CLOSES until its channel's
+it arrives. **REV 3 (NF-1): THE OWNER-RATIFICATION ASK TEXT DERIVES FROM THIS REV-3 TABLE AND
+SUPERSEDES EVERY EARLIER DRAFT** — the pre-REV-3 ask (a "~4 SHIFTS, 5 STAY" premise) is refuted
+by the fixtures' own bytes and is RETIRED; presenting it would manufacture consent on a premise
+the code refutes (rule-2 law; the c2 dissent row: the SD-E6 instrument gates closes on the
+footer, but NO instrument protects the owner from a wrong table — the table is honest first,
+then the ask is regenerated from it). **GATE: no M6 card whose feature shifts a channel CLOSES until its channel's
 ratification row is filled** — the spec files the ask in the release notes draft and the
 orchestrator presents the decision with the recommendation ("re-anchor as designed, the old
 digest archived"), because shipping on unratified corpus shifts is exactly what this doc's
@@ -890,12 +945,12 @@ in-run reader and left the loophole open by construction.**
 
 | card | content | files it OWNS (matrix, REV 2 law per P2-3: a file has ONE OWNING card = the FIRST editor; a card listed AFTER its declared serial edge may edit an owned file under the owner card's already-landed bytes — ordered, never concurrent) |
 |---|---|---|
-| **T-M6d** (F5+F6, drops & pickups) | world.gd SCHEDULED split (drops.gd out), coin magnet, sigil counter-drop + clear + touch on the dedicated non-boss counter (`Drops.sigil_kills`, §4.2 REV 2), retirement greps (WEAPON-SIDE ONLY — the evolution-side sites retire in T-M6p, PS-E7), `docs/BYTE-DEVIATION-M6.md` FIRST, the SD-E6 ratification-doc parse | `godot/scripts/drops.gd` NEW, `godot/scripts/world.gd`, `godot/scripts/pickup_viz.gd`, `tests/test_biome_numbers.py`, `tests/test_sigil_drop.py` NEW, `tests/test_card_icons.py`, `tests/test_levelup_caps.py`, `tests/test_roster_m1h.py` (REV 2 P2-3 — joins the owned set: the doom `_fire` stat row at :112 retires HERE; the REV-1 matrix had this file owned by NOBODY), `godot/sim/sim_combat.gd`, `docs/BYTE-DEVIATION-M6.md` NEW, `tools/s8_acceptance.py` |
-| **T-M6p** (F3+F4, the connective rules) | evolution trigger move + grown table + `effect()` + union reserve at the new trigger (predicate window EXTENDED, §3.4 option (a)) + chest-arm line retirement + card chips + Lv4→5 desc clause + desc rewrite table + EVOLUTION-SIDE grep-to-zero at this card's close (PS-E7) | `godot/scripts/evolutions.gd`, `godot/scripts/union.gd` (the ONE-test predicate extension, §3.4 — the REV-1 "expected ZERO edits" note retired), `godot/scripts/weapons.gd`, `godot/scripts/levelup.gd`, `godot/scripts/screens.gd`, `godot/scripts/roster_select.gd` (re-pin reads only — owner if it moves), `godot/sim/sim_evolve.gd`, `tests/test_chests_evolve.py`, `tests/test_evolve_level.py` NEW, `tests/test_card_text.py` NEW, `tests/test_unions.py` (reserve legs + the falsified-and-replaced :148 pin), `tests/fixtures/chests-evolve-m1e.jsonl` re-mint |
+| **T-M6d** (F5+F6, drops & pickups) | world.gd SCHEDULED split (drops.gd out), coin magnet, sigil counter-drop + clear + touch on the dedicated non-boss counter (`Drops.sigil_kills`, §4.2 REV 2), retirement greps (WEAPON-SIDE ONLY — the evolution-side sites retire in T-M6p, PS-E7), `docs/BYTE-DEVIATION-M6.md` FIRST, the SD-E6 ratification-doc parse | `godot/scripts/drops.gd` NEW, `godot/scripts/world.gd`, **`godot/scripts/weapons.gd` (REV 3 NF-3 — joins the owned set: the IDS/META/`_fire`/header retire (§4.1's weapon-side list, which STARTS with this file) is the FIRST edit on it; SD-E5's grep universe — "the files T-M6d OWNS" — and the first-editor law now agree; the REV-2 row DENIED the file its own retire ledger edits, which made SD-E5 either theater or a matrix break at this close — the identical shape T-M6f's row got for P2-3(c) two rows below)**, `godot/scripts/pickup_viz.gd`, `tests/test_biome_numbers.py`, `tests/test_sigil_drop.py` NEW, `tests/test_card_icons.py`, `tests/test_levelup_caps.py`, `tests/test_roster_m1h.py` (REV 2 P2-3 — joins the owned set: the doom `_fire` stat row at :112 retires HERE; the REV-1 matrix had this file owned by NOBODY), `godot/sim/sim_combat.gd`, `docs/BYTE-DEVIATION-M6.md` NEW, `tools/s8_acceptance.py` |
+| **T-M6p** (F3+F4, the connective rules) | evolution trigger move + grown table + `effect()` + union reserve at the new trigger (predicate window EXTENDED, §3.4 option (a)) + chest-arm line retirement + card chips + Lv4→5 desc clause + desc rewrite table + EVOLUTION-SIDE grep-to-zero at this card's close (PS-E7) | `godot/scripts/evolutions.gd`, `godot/scripts/union.gd` (the ONE-test predicate extension, §3.4 — the REV-1 "expected ZERO edits" note retired), `godot/scripts/weapons.gd` **EDITED UNDER SERIAL (REV 3 NF-3: FIRST-owned by T-M6d — the retire lands there; this card's `effect()` head + flags OR + orbit-key edits land only after T-M6d's close, the §3.5 serial edge already stated at source — owned and ordered read from ONE table)**, `godot/scripts/levelup.gd`, `godot/scripts/screens.gd`, `godot/scripts/roster_select.gd` (re-pin reads only — owner if it moves), `godot/sim/sim_evolve.gd`, `tests/test_chests_evolve.py`, `tests/test_evolve_level.py` NEW, `tests/test_card_text.py` NEW, `tests/test_unions.py` (reserve legs + the falsified-and-replaced :148 pin), `tests/fixtures/chests-evolve-m1e.jsonl` re-mint |
 | **T-M6f** (F2, the per-skill FX) | `SKILL_FX` + color-instance switch + `wid` stamps + evolved look/flash + visual-probe windows | `godot/scripts/viz_fx.gd`, `tools/strips_gate_check.py` (+ expectation table — F1's gait rows re-derive HERE too: the table is this card's), `godot/sim/upgrades_visual_capture.gd` (grows), `tests/test_skill_fx.py` NEW, strips fixture re-mint, + REV 2 P2-3: `godot/scripts/weapons.gd` (the `wid` stamp lines) and `godot/sim/sim_combat.gd` (the caps mirror) EDITED UNDER SERIAL — owned first by T-M6p/T-M6d, this card touches them only after those closes (the §2.2 serial edge, now named on the matrix row: the REV-1 row was the wrong-ownership half of P2-3(c)) |
 | **T-M6r** (F1, motion) | pawn skinned consumer + clip play + static bob, horde gait law (bob+lean), `CLIP_SOURCE`, motion capture/gate, the `player-rigged.glb` promotion copy | `godot/scripts/hero_pawn.gd`, `godot/scripts/horde_viz.gd`, `godot/scripts/roster.gd` (CLIP_SOURCE const), `godot/sim/motion_capture.gd` NEW, `tools/motion_gate.py` NEW, `tests/test_motion.py` NEW, `godot/assets/glb/player-rigged.glb` (+`.import`) COPY, `docs/PERMANENCE.md`, `tests/test_art_integration.py`, `tests/test_skinned_clips.py` (STAY leg grows), `tools/roster_clip_gate.py` (STAY) |
 | **T-M6c** (F7, contrast) | tint rows + mob-grid capture leg + gate leg + planted pair | `godot/scripts/render.gd`, `godot/sim/biome_readability_capture.gd`, `tools/biome_readability.py`, its `tests/` pins |
-| **T-M6z** (acceptance) | full §9 re-run on the re-anchored corpus, deviation-doc ratification rows filled (owner answers pasted), release trio per the GitHub-Release doctrine (committed notes artifact `docs/RELEASE-v3.1.0.md` with the not-shipped honesty rows + the RATIFICATION rows, README truthful AT the tag, doc-sync grep-to-zero on "16 weapons"/"chest evolution"/"doom sigil is a skill"), version tag per §8's ruling | `LEDGER.md`, `README.md`, `docs/RELEASE-v3.1.0.md`, `docs/PARITY-ROADMAP.md`, `docs/BYTE-DEVIATION-M6.md` (footer) |
+| **T-M6z** (acceptance) | full §9 re-run on the re-anchored corpus, deviation-doc ratification rows **VERIFIED filled — NOT filled here** (REV 3 NF-7: the SD-E6 instrument makes a filled footer a PRE-CLOSE precondition of every shifting card, starting with T-M6d — the owner answers must land before T-M6d closes, which serializes the parallel wave's close on the owner answer: intended by §9's gate, stated once, truthfully, in this row only; T-M6z's leg is the all-channels SD-E6 battery re-run), release trio per the GitHub-Release doctrine (committed notes artifact `docs/RELEASE-v3.1.0.md` with the not-shipped honesty rows + the RATIFICATION rows, README truthful AT the tag, doc-sync grep-to-zero on "16 weapons"/"chest evolution"/"doom sigil is a skill"), version tag per §8's ruling | `LEDGER.md`, `README.md`, `docs/RELEASE-v3.1.0.md`, `docs/PARITY-ROADMAP.md`, `docs/BYTE-DEVIATION-M6.md` (footer) |
 
 **Serial edges (shared file or shared truth; ordering DECLARED, never inferred):**
 T-M6r ∥ T-M6c ∥ T-M6d may all start in parallel (disjoint file sets — verified pairwise
@@ -918,6 +973,17 @@ texture cards) exists ONLY if the owner rules against color-first (§12 D-6) —
 window: AFTER the vm100 backup window clears (owner's backup; today's brief: "builds later,
 not you") + the windows-closed law (drain_barrier, trap-close rc=0, llama-swap serving
 verified at every close, single-row windows). No M6 build card waits on it by default.
+**DRAW/CAP RE-TALLY ROW (REV 3 NF-9 — the §10 row the MV-E5, §2.1, §4.2 Viz, SD-E4 and CT-E4
+cites name; today it exists, the cites resolve HERE — the numbers' other home is §12 D-6 +
+DESIGN-3D §b): baseline 27 measured draws (sim_budget, seed-fixed journey dump); T-M6d's sigil
+MM takes the pickup family 5→6 and the TOTAL 27→28; F1's pawn child stays 1 draw by the MV-E5
+mutual-exclusion pin (28→28); F2 adds ZERO draws (color-instance switch + the rings
+`mini(…,1)` cap — the FX-E3 27→27 row reads the TOTAL on its own tree, post-T-M6d: 28→28);
+F7's glow MM is CONDITIONAL — only if the §7.1 fallback fires, +1 to 29. Plan 40 / hard 60
+hold in every combination (D-6's headroom math unchanged). Family caps: the sim `_cap` sums
+stay FAMILY sums of the SAME levels through M6 — the `wid` stamp is an additive dict field and
+the evolved ids add their term through `effect()`'s base-family map (§2.1/§3.2) — no cap
+becomes per-id alone (FX-E3's planted red).**
 **Clean-code cycle after GA (owner doctrine, named here so T-M6z files it):**
 **T-M6q-AUDIT** (findings-only: the EXISTING gate-instrument walk over the tag tree —
 audit-3's shape: LOC bands + header-reason lines + both-sides dupes + vacuity audit) then
@@ -1028,9 +1094,13 @@ SCHEDULED (F-10) — the audit verifies it SHIPPED, not just planned.
 - Replace-not-delete ledgers written for every retirement (§4.4 R1–R8).
 - Both-sides tests written for every rule row (the shipped C-E3/PS-*/SD-E2/CT-E1 pattern).
 - Byte anchors + the deviation amendment + the ratification gate BEFORE the wave (§9) —
-  REV 2: the gate carries its instrument (SD-E6), the shift table is COMPLETE (11 rows — the
-  missed channel named, the false STAY whys corrected), and the union-precedence law survives
-  the trigger move by ONE extended predicate test (§3.4).
+  REV 2: the gate carries its instrument (SD-E6), and the union-precedence law survives
+  the trigger move by ONE extended predicate test (§3.4). REV 2's further claim that the
+  shift table was "COMPLETE (11 rows)" was FALSE on two counts (DA c2 NF-1: the five-STAY
+  row's why was refuted by the fixtures' own bytes; NF-2: `art-s2i-probe.jsonl` was named
+  in no row) — RETRACTED; the REV-3 table (16 rows, every verdict byte-derived per-channel,
+  the omitted strict channel in with its measured STAY) is the honest one, and the
+  OWNER-RATIFICATION ask regenerates from it (rule-2 law).
 - Decision rows each carry a RECOMMENDATION (§1.5 a, §4.2 bosses/reapers survive, §8 v3.1.0).
 - Known limit disclosed up front: the clips shipped in M5 were never consumed by the game;
   the spec says so in the first finding instead of letting the owner discover it at GA.
@@ -1062,14 +1132,49 @@ split); ACCEPT rows **31** (was 29 — PS-E7, SD-E6, both shipped with named pla
 D-8's tally re-counted; new ACCEPT rows carry the SAME column contract (one seam + one
 planted-red).
 
+## REV-3 FOLD LEDGER (DA c2 `docs/M6-SPEC-DA-c2.md` @ `34156ea` → this REV; finding → change → section)
+
+All ten NEW findings ADOPTED (0 rebuttals, 0 deferrals — every one re-grepped/re-byted against
+the tree this session: the five sims' `wire_pick` sites, the fixture lines cited below, the
+`levelup.gd` LIMIT arm, the `union.gd`/`evolutions.gd` comment lines, the `art_probe.gd`
+enumerations, M5-SPEC:641's strict-12 list); the c2 doc's verdicts on the two c1 gate fixes
+(option (a), SD-E6) need NO spec change — verified, untouched. The gate rows (NF-1/NF-2) landed
+together per the interlock law, rows 1-10:
+
+| finding | sev | disposition | what changed (WHERE → HOW) | sections touched |
+|---|---|---|---|---|
+| **NF-1** | P1 | ADOPTED | §9 five-STAY row DELETED — its "none reads the offer funnel" clause was refuted by the fixtures' OWN bytes (all five wire: `sim_endless.gd:95`, `sim_events.gd:114`, `sim_stages.gd:111/:521`, `sim_reaper.gd:102/:125/:245`, `sim_gems.gd:81`). Five per-channel rows with byte evidence: endless-m2 (`endless-m2.jsonl:1-3` dump `"phase":"levelup"` + declare "offers declined" — an offer is made, shuffle consumed, BEFORE any decline); events-m4 (`events-m4.jsonl:6` dumps the RNG-dependent digest incl. `level:2`, `phase:"levelup"`, 47-entry `types[]`; leg's check IS `rng_stream`); stages-m3 (`stages-m3.jsonl:4` dumps `offer_drew_three_cards`/`offer_cards:3`; `_decline` ACCEPTS card 0) ⇒ the three **AT-RISK → EXPECTS SHIFTS**; reaper-m4 + gem-merge-m2g **AT-RISK** (funnel wired, level-ups certain/unmeasured, dumped-field dependence unmeasured — cmp decides; NO STAY kept on a refuted why). The ratification block states the ASK TEXT derives from THIS table, superseding every earlier draft (manufactured-consent hazard closed) | REV-3 header, §9 table + intro + ratification para, SELF-DA checklist |
+| **NF-2** | P2 | ADOPTED | `art-s2i-probe.jsonl` ENTERS §9 with a byte-derived **STAY** row (the probe enumerates `GLB_FILES` :80 / `CHARACTERS` :135 / `SKINS` :159 — none M6 re-rows; row-0 literal stays; promotion copy byte-identical and never enumerated); SELF-DA's "COMPLETE (11 rows)" claim RETRACTED + re-worded | §9 (new row), REV-3 header, SELF-DA checklist |
+| **NF-3** | P2 | ADOPTED | §10 T-M6d row += `weapons.gd` (the retire's FIRST edit — §4.1's weapon-side list starts with it; SD-E5's grep universe and the first-editor law agree again); T-M6p row's `weapons.gd` re-tagged EDITED UNDER SERIAL (the §3.5 edge, owned+ordered from ONE table — the identical shape T-M6f's row carries); both-side tags stay disjoint (weapons.gd is WEAPON-side only) | §10 (T-M6d + T-M6p rows) |
+| **NF-4** | P4 | ADOPTED | §3.4 consequence (2) GROWS: the three stranded reserve-law comments (`union.gd:21-27` header, `union.gd:64-67` doc comment, `evolutions.gd:52-58` RESERVE comment — all state the BELOW-MAX-ONLY window) must be re-worded in the SAME commit as the predicate test, per the spec's own grep-to-zero law — or they are CONTRADICTED code at T-M6p's close | §3.4 |
+| **NF-5** | P4 | ADOPTED | §4.2 increment condition: `if not enemy.boss` → `if not enemy.boss and not enemy.miniboss`, stated as a DESIGN DECISION riding the §4.2 OWNER-DECISION survivor carve (separate fields at `world.gd:495/:498`; counter and clear now ruled by ONE carve, can never disagree); "EXACTLY every 750th non-boss, non-miniboss, non-reaper kill"; SD-E2 leg grows the interleaved-miniboss twin + planted red; §0 F-6 wording follows | §4.2, SD-E2, §0 F-6 |
+| **NF-6** | P4 | ADOPTED | §9 limit cite CORRECTED: `sim_limit.gd:249` iterates the KINDED `make_offer(game, kind)` — never reaches the `LIMIT_CARDS` arm (`kind == ""` only, `levelup.gd:117-118` MEASURED — the c2 doc's own `:126-128` was a drifted cite on `apply_offer`'s head, corrected in the fold); the cite now names the real producer, the UNKINDED `limit_all_maxed` main-funnel leg (`limit-m4.jsonl:1`, counters sequence-sensitive); verdict survives (size-3 array, same shuffle; icons cleaver/dart-loop/plate — no retired id) | §9 unions+limit row |
+| **NF-7** | P3 | ADOPTED | §10 T-M6z row: "ratification rows filled" → **VERIFIED filled, NOT filled here** — SD-E6 makes a filled footer a PRE-CLOSE precondition of every shifting card (first = T-M6d); the wave's close serializes on the owner answer, stated ONCE truthfully | §10 (T-M6z row) |
+| **NF-8** | P3 | ADOPTED | "10 evolved" → **9** at §2.1 and FX-E2 (R2's TABLE 10→9; a pin for `pale-moon` would pin a dead row — its `_:` no-op arm never fires); FX-E2 names `pale-moon` as the declared fallback row the pin EXCLUDES (vacuity class stated, not hidden) | §2.1, FX-E2 |
+| **NF-9** | P3 | ADOPTED | §10 GAINS the DRAW/CAP RE-TALLY ROW the cites name (27 baseline → 28 at T-M6d; F1 28→28; F2 adds ZERO — FX-E3's stale "27→27" re-read to its own tree 28→28; conditional glow 28→29 — CT-E4's stale "27→28" corrected; caps stay family-sums; plan 40/hard 60 hold). All five cites (MV-E5, §2.1, §4.2 Viz, SD-E4, CT-E4) resolve; grep-to-zero on dangling re-tally/budget cites | §10 (new row), FX-E3, CT-E4 |
+| **NF-10** | P4 | ADOPTED | §3.3 insight row RESOLVED: GENERIC set = {ferocity, haste, ward, grip} carry `chips: []`; `insight` is NOT generic — it is the `requiem-toll` union partner (`union.gd:37`) and CARRIES that chip per PS-E5's `chips == partner set` law; the "?" and the contradiction deleted | §3.3 |
+
+**Counts after the fold:** §9 shift table **11 → 16 rows** (five-STAY row replaced by five
+per-channel rows; `art-s2i-probe.jsonl` enters) — SHIFTS-class 5, AT-RISK 6 rows / 7 channels,
+STAY 5; ACCEPT rows **31 UNCHANGED** (no new row — SD-E2/PS-* grew in place; D-8's tally holds);
+`docs/M6-SPEC-DA-c2.md` immutable at `34156ea`. No §11 exclusions touched; no code bytes touched.
+
 ## DA GATE
 
 This doc ships to `docs/M6-SPEC.md` for the devils-advocate gate (fleet law: roadmap-gated
 build cards file ONLY after the DA SHIPs it; the DA doc lands as `docs/M6-SPEC-DA.md` beside
-it, immutable; this spec then revises in place as REV 2 with the §12-style fold ledger —
-M2/M3/M4/M5 precedent). After DA SHIP + owner ruling on §1.5/§4.2/§8 + the deviation-doc
+it, immutable; this spec then revises in place as REV 2 / REV 3 with the §12-style fold
+ledgers — M2/M3/M4/M5 precedent). After DA SHIP + owner ruling on §1.5/§4.2/§8 + the deviation-doc
 ratifications: T-M6d ∥ T-M6r ∥ T-M6c open; T-M6p → T-M6f → T-M6z serial behind them.
 **REV 2 STATUS (2026-10-28, MC 11653): the DA c1 landed FIX (2P1/5P2/3P3/2P4) and THIS rev
 folds all twelve findings per the FOLD LEDGER above — the gate rows (P1-1/P1-2) plus every
 second/third appearance of the same claims (fold-map rows 1-6 landed together, per the DA's
 interlock law). c2 re-checks the declared lines only.**
+**REV 3 STATUS (2026-10-29, MC 11657): the DA c2 landed FIX (1P1/2P2/3P3/4P4 NEW + 2 PARTIAL
+fold rows) and THIS rev folds all ten new findings per the REV-3 FOLD LEDGER above — the NF-1
+gate re-derived from the fixtures' own bytes (five honest per-channel rows, no refuted "why"
+left; ask text regenerated from the honest table), NF-2's omitted strict channel entered, the
+matrix reconciled at T-M6d (weapons.gd) + the T-M6z pre-close truth stated, and the six
+P3/P4 one-liners landed. The two c1 gate mechanisms (option (a), SD-E6) needed NO change —
+c2 verified both sound. c3 re-checks the declared REV-3 lines; per c2 §5, after this list
+lands, c3 SHIPs.**
