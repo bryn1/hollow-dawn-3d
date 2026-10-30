@@ -239,11 +239,31 @@ def test_expected_grid_reads_the_tables():
     for sid in stage_ids:
         for band in bands & {r[2] for r in grid if r[1] == sid}:
             assert any(r[2] == band for r in grid if r[1] == sid)
-    # the WHITE seven: the fallback classes are all measured somewhere
-    white = {"hollow-knight", "hollow-deacon", "cathedral-choir",
-             "sunken-prelate", "ossuary-warden", "stair-acolyte",
-             "the-reaper"}
-    assert white <= {r[4] for r in grid}
+    # The LIVE fallback-WHITE set, DERIVED from the tables (T-M6q2, audit-4
+    # F-7). The old fragment typed the "white seven" as a literal and was
+    # ENTAILED by the ENEMY_TYPES pin above (white7 ⊆ ENEMY_TYPES == the
+    # grid's classes — it could never go RED independently; the vacuity was
+    # PROVEN in the card capture) and wore the premise T-M6c REFUTED:
+    # hollow-knight + hollow-deacon ride BOSS_TINTS rows since, so live
+    # white is FIVE. tint_of() paints WHITE exactly the classes no tint
+    # table rows — derive that set here, pin it to the set render.gd's own
+    # F7 comment names, and keep the coverage leg. This can go RED: vanish
+    # a fallback class from ENEMY_TYPES or move a tint row and the pin
+    # fires (planted-red at T-M6q2: rename the-reaper in world.gd).
+    def tint_keys(table):
+        m = re.search(r'const %s := \{(.*?)\n\}' % table, render, re.S)
+        return set(re.findall(r'"([\w-]+)":', m.group(1))) if m else set()
+
+    tinted = (tint_keys("ENEMY_TINTS") | tint_keys("BIOME_TINTS")
+              | tint_keys("BOSS_TINTS"))
+    white = enemy_types - tinted
+    i0 = render.index("fallback classes (")  # the F7 comment's own naming
+    i1 = render.index(") MEASURED", i0)
+    named = {s.strip() for s in
+             render[i0:i1].replace("\n#", " ").partition("(")[2].split(",")}
+    assert white == named, (sorted(white), sorted(named))
+    assert len(white) == 5, sorted(white)
+    assert white <= {r[4] for r in grid}  # every white class is measured
 
 
 def test_grid_shots_dir_is_separate_from_default():
