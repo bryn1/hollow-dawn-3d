@@ -77,6 +77,29 @@ static func take_first_card(run: Node) -> void:
 		run._pick(0)
 
 
+static func take_trigger_card(run: Node, exclude: Array, tries := 800) -> bool:
+	# M6 T-M6p (MC 11697, M6-SPEC §3.6 PS-E1) — DECLARED opts/verbs growth
+	# (the fresh_run law): ONE trigger-eligible pick through the real
+	# funnel. The moved evolution trigger reads the "upgrade" and "passive"
+	# arms of apply_offer, so this takes a PASSIVE card only (an "upgrade"
+	# pick could newly satisfy a table row and defeat a pinned NO-side
+	# leg's state; the passive pick changes no pinned weapon math), never a
+	# key in `exclude` (a leg's own partner passive), declining unfit
+	# offers with the SAME zero-pending decline() owns. Returns true when
+	# the pick applied; every offer round is a real _enter_levelup/_pick
+	# pair, zero id pinned, zero RNG beyond the shipped shuffle.
+	for i in tries:
+		run.game.pending_levels = 1
+		run._enter_levelup()
+		for c in run._current_offer.size():
+			var card: Dictionary = run._current_offer[c]
+			if card.kind == "passive" and card.key not in exclude:
+				run._pick(c)
+				return true
+		decline(run) # decline the unfit offer, re-offer next round
+	return false
+
+
 static func out_path(env_name: String, fallback: String) -> String:
 	var d: String = OS.get_environment(env_name)
 	return d if d != "" else fallback

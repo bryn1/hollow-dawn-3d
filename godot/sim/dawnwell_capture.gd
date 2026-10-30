@@ -58,6 +58,7 @@ var _main: Node
 var _stage := 0
 var _wait := 0
 var _rows: Array = []
+var _offer: Array = [] # T-M6p: the seeded level-up offer (rows read it)
 
 
 func _out_dir() -> String:
@@ -160,6 +161,37 @@ func _on_frame() -> void:
 	if _stage == 7:
 		assert(_main._screens.chars_visible())
 		_save_png("m5-char-select.png", true)
+		_main._screens.hide_all()
+		_wait = SETTLE_FRAMES
+		_advance(8)
+		return
+	if _stage == 8:
+		# T-M6p E-5 (M6-SPEC §3.3/§6.3): the level-up panel with the F3
+		# chip rows painted. DECLARED seeding (the BANKROLL law, capture
+		# tooling only): the three cards are the LIVE PASSIVES rows (names
+		# + descs verbatim) in the exact card shape build_pool stamps —
+		# loadstone + rotten-plate carry their partner chips, the generic
+		# ferocity carries none (the chips==partner-set law, PS-E5). The
+		# render path is the REAL one: game.set_phase + screens.show_levelup
+		# are exactly what _enter_levelup calls.
+		var offer: Array = [
+			{"kind": "passive", "key": "loadstone", "name": "Loadstone",
+				"desc": "+15 px pull radius per stack", "icon": "",
+				"chips": ["icon-rot-water", "icon-censer-of-hours"]},
+			{"kind": "passive", "key": "rotten-plate", "name": "Rotten Plate",
+				"desc": "-1 damage taken (plate)", "icon": "",
+				"chips": ["icon-spectral-disc"]},
+			{"kind": "passive", "key": "ferocity", "name": "Ferocity",
+				"desc": "+10% weapon damage", "icon": "", "chips": []},
+		]
+		_offer = offer
+		_main.game.set_phase("levelup")
+		_main._screens.show_levelup(offer)
+		_wait = SETTLE_FRAMES
+		_advance(9)
+		return
+	if _stage == 9:
+		_save_png("m6-levelup-chips.png", true)
 		_write_rows()
 		print("CAPTURE_OK")
 		quit()
@@ -225,6 +257,20 @@ func _save_png(png: String, with_state: bool) -> void:
 		print("SAVED %s %dx%d" % [_out_dir() + "/" + png,
 			img4.get_width(), img4.get_height()])
 		return
+	if png == "m6-levelup-chips.png":
+		# T-M6p E-5 state rows (the stage-select leg's shape): the three
+		# offered cards + the chip total the shot must paint (2 partner
+		# chips on loadstone + 1 on rotten-plate; the generic none — the
+		# chips==partner-set law, PS-E5's pixel half).
+		_rows.append({"leg": "levelup_chips_shot",
+			"cx": int(VIEW_HALF.x), "cy": int(VIEW_HALF.y),
+			"hw": int(PANEL_HALF.x), "hh": int(PANEL_HALF.y),
+			"cards": _offer.size(), "chips": _chip_total()})
+		var img5: Image = root.get_texture().get_image()
+		assert(img5.save_png(_out_dir() + "/" + png) == OK)
+		print("SAVED %s %dx%d" % [_out_dir() + "/" + png,
+			img5.get_width(), img5.get_height()])
+		return
 	if with_state:
 		print("STATE gold=%d ranks=%d" % [_main._dawnwell.gold,
 			_main._dawnwell.ranks.size()])
@@ -244,3 +290,13 @@ func _write_rows() -> void:
 	assert(f != null)
 	f.store_string(JSON.stringify(_rows))
 	f.close()
+
+
+func _chip_total() -> int:
+	# MEASURED, not hardcoded: the rows read the offer the capture actually
+	# stamped — a planted strip of one card's chips reddens this row
+	# (PS-E5's law: chips == the partner set, never a hardcoded green).
+	var n := 0
+	for c in _offer:
+		n += (c.chips as Array).size()
+	return n

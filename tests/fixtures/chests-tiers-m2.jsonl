@@ -11,6 +11,6 @@
 {"checks":{"no_wrong_flavour_in_60":true},"ev":"chest_filter_probe","kind":"weapon","ok":true,"wrong_cards_180":0}
 {"checks":{"no_wrong_flavour_in_60":true},"ev":"chest_filter_probe","kind":"passive","ok":true,"wrong_cards_180":0}
 {"checks":{"no_wrong_flavour_in_60":true},"ev":"chest_filter_probe","kind":"gold","ok":true,"wrong_cards_180":0}
-{"checks":{"base_removed":true,"cards_full_after_transform":true,"exactly_one_transform":true,"gold_in_range":true,"in_slot_level_kept":true},"ev":"chest_precedence","evolved":["red-wail"],"gold_delta":38,"item_count":2,"ok":true,"pending":2}
+{"checks":{"base_removed":true,"cards_full_after_transform":true,"exactly_one_transform":true,"gold_in_range":true,"in_slot_level_kept":true},"ev":"chest_precedence","evolved":[],"gold_delta":38,"item_count":2,"ok":true,"pending":2}
 {"checks":{"chest_each_1of1":true,"choir_tier_is_map_row":true,"ossuary_tier_is_map_row":true,"tiers_differ_II_vs_III":true},"ev":"chest_tier_bosses","map":{"cathedral-choir":"warden","endless-cycle":"dawn","event":"dawn","miniboss":"ember","ossuary-warden":"dawn","stage-item":"ember","warden":"warden"},"ok":true,"tiers":{"cathedral-choir":"warden","ossuary-warden":"dawn"}}
 {"ev":"chest_tiers_verdict","ok":true,"rows":15}

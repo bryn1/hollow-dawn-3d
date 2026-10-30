@@ -1,4 +1,10 @@
 # Combat-layer probe for sim_headless.gd (MC 11102 T-S4):
+# reason: >400/500 lines (514 measured at MC 11697 T-M6p) — the T-M6p
+#   boost-MATH channel (the 9 spec-constant-pinned evo_boost_rows + the
+#   effect()-identity row) grew the file; the spec NAMES this channel here
+#   (M6-SPEC §3.6 PS-E2: "the boost math rides sim_combat's channel, merged
+#   into the journey dump"), and the boost rows share the _first_fire +
+#   fx_counts readers with the A4 legs — a split would duplicate them.
 # (1) §i/A4 live-FX cap formulas + the per-sample violation check — the
 #     capped thing is the RENDERED live count (WeaponFxViz.fx_counts()),
 #     never the sim's own projectile lists (sim stays v1-verbatim);
@@ -319,3 +325,190 @@ func magnet_coins_leg(root) -> Dictionary:
 		ok = ok and checks[k]
 	run.queue_free()
 	return {"ev": "magnet_coins", "checks": checks, "ok": ok}
+
+
+# ---- M6 T-M6p boost-MATH legs (MC 11697, M6-SPEC §3.6 PS-E2) ---------------
+# GROWTH NOTE (file-size law): the boost formula twins ARE this file's
+# spec channel (PS-E2 names the existing sim_combat spec channel — the
+# per-weapon spec-channel legs merged into the journey dump by
+# sim_headless._run_sigil; _run_boosts rides the same merge). Each TABLE
+# row runs the SAME scripted first fire twice: once with the evolved id,
+# once with the family base (the UN-evolved twin — the shipped byte value,
+# the zero-identity guard). The dict/arc/ring/burst entries the fire
+# appends ARE the observable; the hp-delta classes read the pinned enemy's
+# hp across the one fire tick (one enemy, full-sector classes hit nothing
+# else). Equality rows are EXACT float `==` on IEEE: the evolved value is
+# the shipped formula re-computed with ONE extra ×table-constant factor,
+# the twin pins the same operands, so a planted nerf (dmg 1.6 -> 1.05)
+# turns the evolved row RED while every twin stays GREEN (PS-E2's named
+# attribution pair). cd rows read w.cd on the fire tick (the fresh
+# cooldown, before any decay). feat rows: the dict key appears on the
+# evolved entry and NOT on the twin (extra-target rows count entries).
+func boost_legs(root: Window) -> Array:
+	var out: Array = []
+	for base in EvolutionSystem.TABLE:
+		out.append(_boost_row(root, base))
+	# effect()-identity rows (PS-E2's named dump row): EVERY live id —
+	# the 15 pool weapons, the 9 evolutions, the unions, the roster start
+	# — resolves through the ONE effect(): the 9 evolved ids to their
+	# row's constants, EVERYTHING ELSE to the ×1.0 identity with an empty
+	# feat list (the IEEE guard the byte law rides).
+	var bad: Array = []
+	for id in WeaponSystem.IDS:
+		var e: Dictionary = EvolutionSystem.effect(id)
+		var expect: Dictionary = {"base": id}
+		for bid in EvolutionSystem.TABLE:
+			if EvolutionSystem.TABLE[bid].evo == id:
+				expect = {"base": bid, "dmg": EvolutionSystem.TABLE[bid].dmg,
+					"area": EvolutionSystem.TABLE[bid].area,
+					"cd": EvolutionSystem.TABLE[bid].cd,
+					"feat": EvolutionSystem.TABLE[bid].feat}
+		if not expect.has("dmg"):
+			expect = {"base": id, "dmg": EvolutionSystem.IDENTITY_DMG,
+				"area": EvolutionSystem.IDENTITY_AREA,
+				"cd": EvolutionSystem.IDENTITY_CD,
+				"feat": EvolutionSystem.IDENTITY_FEAT}
+		if e.dmg != expect.dmg or e.area != expect.area or e.cd != expect.cd \
+				or e.base != expect.base or e.feat != expect.feat:
+			bad.append(id)
+	out.append({"ev": "evo_effect_identity", "ids": WeaponSystem.IDS.size(),
+		"bad": bad, "ok": bad.is_empty()})
+	return out
+
+
+# THE pinned spec copy (M6-SPEC §3.2, MC 11697): the expected multipliers
+# and feat columns live HERE as constants, read never from the live table
+# — an instrument that derives its expectation from the object it tests is
+# plant-immune (PS-E2's law: the planted nerf 1.6 -> 1.05 goes RED while
+# the twin rows stay GREEN). table_match below is the other half: it names
+# a table that drifts away from the spec copy.
+const SPEC_BOOST := {"dmg": 1.6, "area": 1.35, "cd": 0.75}
+const SPEC_FEATS := {
+	"bone-whip": [], "dart-loop": ["pierce"], "hewn-axe": ["ret"],
+	"pilgrim-cross": ["pierce"], "censer-of-hours": ["pierce"],
+	"rot-water": [], "spectral-disc": ["extra"], "storm-peal": [],
+	"fire-lash": ["extra"],
+}
+
+
+func _boost_row(root: Window, base: String) -> Dictionary:
+	var row: Dictionary = EvolutionSystem.TABLE[base]
+	var twin := _first_fire(root, base)
+	var evo := _first_fire(root, String(row.evo))
+	var want_feats: Array = SPEC_FEATS[base]
+	var checks := {
+		"dmg_row": evo.dmg == twin.dmg * SPEC_BOOST.dmg,
+		"area_row": evo.r == twin.r * SPEC_BOOST.area,
+		"cd_row": evo.cd == twin.cd * SPEC_BOOST.cd,
+		"table_match": row.dmg == SPEC_BOOST.dmg and row.area == SPEC_BOOST.area \
+			and row.cd == SPEC_BOOST.cd and row.feat == want_feats,
+	}
+	var evo_keys: Array = evo["keys"]
+	var twin_keys: Array = twin["keys"]
+	var added: Array = []
+	for k in evo_keys:
+		# String() ON PURPOSE: the feat flags are set with dict-property
+		# syntax (bolts.back().pierce = true), which keys the entry with a
+		# StringName — comparing raw keys against the String `want` list
+		# would read false-negative on identical content.
+		if twin_keys.find(k) < 0:
+			added.append(String(k))
+	var want: Array = []
+	if want_feats.has("pierce"):
+		want.append("pierce")
+	if want_feats.has("ret"):
+		want.append("ret")
+	checks["feat_flags"] = added == want # empty-feat rows: NO key added
+	checks["count_row"] = evo.count == twin.count + (1 if row.feat.has("extra") else 0)
+	checks["twin_identity"] = twin.dmg > 0.0 and twin.cd > 0.0 and twin.count > 0
+	var ok: bool = true
+	for k in checks:
+		ok = ok and checks[k]
+	return {"ev": "evo_boost_row", "leg": "evo_boost_" + base, "base": base,
+		"evo": row.evo, "row": {"dmg": row.dmg, "area": row.area,
+			"cd": row.cd, "feat": row.feat},
+		"twin": {"dmg": twin.dmg, "r": twin.r, "cd": twin.cd,
+			"count": twin.count},
+		"evolved": {"dmg": evo.dmg, "r": evo.r, "cd": evo.cd,
+			"count": evo.count},
+		"twin_keys": twin["keys"], "evo_keys": evo["keys"],
+		"feat_added": added, "feat_want": want,
+		"checks": checks, "ok": ok}
+
+
+# One scripted first fire: fresh real funnel, the ONE weapon pinned at L5
+# (cd 0 -> fires on the first tick, before any spawner wave), enemies
+# pinned to the class's minimum observable set (2 where extra-target
+# needs a second foe), then ONE run._step(DT). dmg: the dict entry's dmg
+# key, or the pinned enemy's hp delta for the hp-delta classes (arc /
+# ring / burst — the shipped _hit arms, the same S6 kill-leg precedent of
+# hp observation). r: the entry's radius key (arcs.range, rings.r,
+# bursts.r, bolts.r). cd: w.cd read ON the fire tick. count: entries
+# appended (hp-delta classes append exactly one FX entry).
+func _first_fire(root: Window, id: String) -> Dictionary:
+	var run: Node = SimFunnel.fresh_run(root)
+	var game = run.game
+	var w := {"id": id, "level": 5, "cd": 0.0}
+	game.weapons = [w]
+	# passives stay at the shipped start_run zero-seed (the ONE identity
+	# state: every passive rank 0 — clearing the dict would remove the
+	# shipped pre-seeded keys the rate/magnet readers walk property-style).
+	var eff: Dictionary = EvolutionSystem.effect(id)
+	var foe := _synth("hound", 40.0, 0.0)
+	# hp pinned at 64.0 — a POWER OF TWO: the one hp -= dmg round-trip
+	# (64.0 − (64.0 − d) re-read as the delta) lands bit-exact on the
+	# weapon's own IEEE dmg value for every pinned formula here (all dmg
+	# < 64, the foe survives: no kill/xp noise enters the leg).
+	foe.hp = 64.0
+	foe.max_hp = 64.0
+	foe.spd = 0.0
+	foe.dmg = 0.0
+	foe.xp = 0.0
+	run.world.enemies.append(foe)
+	if eff.feat.has("extra"):
+		var foe2 := _synth("hound", 70.0, 30.0)
+		foe2.hp = 64.0
+		foe2.max_hp = 64.0
+		foe2.spd = 0.0
+		foe2.dmg = 0.0
+		foe2.xp = 0.0
+		run.world.enemies.append(foe2)
+	var hp_before: float = foe.hp
+	var before: Dictionary = _fx_counts(run)
+	var entry_keys: Array = []
+	run._step(DT)
+	if game.phase == "levelup":
+		game.pending_levels = 0
+		game.set_phase("playing")
+	var after: Dictionary = _fx_counts(run)
+	var entry_count: int = 0
+	var dmg_v: float = 0.0
+	var r_v: float = 0.0
+	var fx = run.fx
+	for key in after:
+		var grew: int = int(after[key]) - int(before.get(key, 0))
+		if grew > 0:
+			entry_count += grew
+			var entries: Array = fx.get(key)
+			var e: Dictionary = entries[entries.size() - 1]
+			# the LAST grown array's entry carries the observable keys:
+			# the feat flags are dict-key ADDITIONS on this entry (the
+			# twin's identical entry is the no-addition baseline).
+			entry_keys = e.keys()
+			if e.has("dmg"):
+				dmg_v = e.dmg
+			if e.has("r"):
+				r_v = e.r
+			elif e.has("range"):
+				r_v = e.range
+	if dmg_v == 0.0:
+		dmg_v = hp_before - foe.hp # the hp-delta classes: the _hit arm
+	return {"dmg": dmg_v, "r": r_v, "cd": float(w.cd),
+		"count": entry_count, "keys": entry_keys}
+
+
+func _fx_counts(run) -> Dictionary:
+	var fx = run.fx
+	return {"bolts": fx.bolts.size(), "throws": fx.throws.size(),
+		"arcs": fx.arcs.size(), "rings": fx.rings.size(),
+		"bursts": fx.bursts.size()}

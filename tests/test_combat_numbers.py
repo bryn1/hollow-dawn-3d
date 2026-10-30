@@ -37,11 +37,16 @@ const = conftest.const  # MC 11317 C2 seam (impl in conftest.py)
 # ---- damage per weapon (N36-N39 row family) ------------------------------------
 
 def test_damage_per_weapon():
-    assert re.search(r"\(6\.0 \+ 3\.0 \* l\) \* mul\)", WEAPONS), "talon dmg 6+3L"
+    # T-M6p RE-PIN: the formula byte stands + the boost term (identity 1.0
+    # for every un-evolved class — the IEEE guard of the byte law).
+    assert re.search(r"\(6\.0 \+ 3\.0 \* l\) \* mul \* eff\.dmg\)",
+                     WEAPONS), "talon dmg 6+3L (x eff.dmg identity)"
     assert re.search(r"\(9\.0 \+ 4\.0 \* l\) \* mul", WEAPONS), "ember dmg 9+4L"
     assert re.search(r"\(15\.0 \+ 6\.0 \* l\) \* mul", WEAPONS), "cleaver dmg 15+6L"
-    assert re.search(r"\(4\.0 \+ 2\.0 \* l\) \* mul, true\)", WEAPONS), "ward dmg 4+2L (ticked)"
-    assert re.search(r"\(18\.0 \+ 7\.0 \* l\) \* mul\)", WEAPONS), "spike dmg 18+7L"
+    # T-M6p RE-PIN: the ticked-hit byte stands + the boost term (identity).
+    assert re.search(r"\(4\.0 \+ 2\.0 \* l\) \* mul \* eff\.dmg, true\)",
+                     WEAPONS), "ward dmg 4+2L (ticked; x eff.dmg identity)"
+    assert re.search(r"\(18\.0 \+ 7\.0 \* l\) \* mul \* eff\.dmg\)", WEAPONS), "spike dmg 18+7L"
     assert re.search(r"\(6\.0 \+ 2\.0 \* w\.level\) \* mul", WEAPONS), "halo dmg 6+2L"
 
 
@@ -52,7 +57,9 @@ def test_fire_rate_formula_and_bases():
     assert re.search(r"w\.cd = rate\(l, 0\.55\)", WEAPONS), "talon cd base 0.55"
     assert re.search(r"w\.cd = rate\(l, 0\.85\)", WEAPONS), "ember cd base 0.85"
     assert re.search(r"w\.cd = rate\(l, 1\.15\)", WEAPONS), "cleaver cd base 1.15"
-    assert re.search(r"w\.cd = 0\.45", WEAPONS), "ward cd 0.45 (fixed)"
+    # T-M6p RE-PIN: cd byte + the boost term on the same line.
+    assert re.search(r"w\.cd = 0\.45 \* eff\.cd", WEAPONS), \
+        "ward cd 0.45 (fixed; x eff.cd identity)"
     assert re.search(r"w\.cd = rate\(l, 2\.6\)", WEAPONS), "spike cd base 2.6"
     assert const("MAX_LEVEL", WEAPONS) == 8.0
 

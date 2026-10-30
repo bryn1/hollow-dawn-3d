@@ -148,6 +148,7 @@ func _run_sim() -> void:
 	_run_attribution()
 	_run_boss()
 	_run_sigil()
+	_run_boosts()
 	if _fx_bad > 0 or _hard_fail or _journey_failed:
 		_done = false
 
@@ -161,6 +162,18 @@ func _run_sim() -> void:
 func _run_sigil() -> void:
 	for row in [_combat.sigil_drops_leg(root), _combat.sigil_tapfree_leg(root),
 			_combat.sigil_clear_leg(root), _combat.magnet_coins_leg(root)]:
+		_emit(row)
+		if row.get("ok", false) == false:
+			_hard_fail = true
+
+
+# M6 T-M6p (MC 11697, M6-SPEC §3.6 PS-E2): the boost-MATH formula twins +
+# the effect()-identity row, the SAME tail-merge pattern as _run_sigil (the
+# lines live in SimCombat — the channel PS-E2 names). Appended after every
+# pre-existing row: the forward-lock law holds (only this card's declared
+# §9 rows move above; these ten lines are the dump's T-M6p growth).
+func _run_boosts() -> void:
+	for row in _combat.boost_legs(root):
 		_emit(row)
 		if row.get("ok", false) == false:
 			_hard_fail = true

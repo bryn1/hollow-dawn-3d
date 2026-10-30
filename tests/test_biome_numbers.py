@@ -212,19 +212,28 @@ def test_weapon_level_cap_and_fire_rate():
 def test_talon_numbers():
     assert re.search(r"w\.cd = rate\(l, 0\.55\)", WEAPONS)
     assert re.search(r"var half := 0\.62", WEAPONS)
-    assert re.search(r"var range_px := 90\.0 \+ 4\.0 \* l", WEAPONS)
+    # T-M6p RE-PIN (T-M6p, M6-SPEC §9 row 7 — replace-not-delete): the
+    # formula byte stands; the evolved multiplier now rides the SAME line
+    # through effect() (identity x1.0 keeps this byte for the un-evolved).
+    assert re.search(r"var range_px: float = \(90\.0 \+ 4\.0 \* l\) \* eff\.area",
+                     WEAPONS)
     assert re.search(r"\(6\.0 \+ 3\.0 \* l\)", WEAPONS)
 
 
 def test_ward_numbers():
     assert re.search(r"w\.cd = 0\.45", WEAPONS)
-    assert re.search(r"\{\"x\": p\.x, \"y\": p\.y, \"r\": 80\.0\}", WEAPONS)
+    # T-M6p RE-PIN: the radius byte stands, the boost term now rides it.
+    assert re.search(r"\{\"x\": p\.x, \"y\": p\.y, \"r\": 80\.0 \* eff\.area\}",
+                     WEAPONS)
     assert re.search(r"\(4\.0 \+ 2\.0 \* l\)", WEAPONS)
-    assert re.search(r"rings\.append\(\{\"r\": 80\.0, \"life\": 0\.12, \"max\": 0\.12\}\)", WEAPONS)
+    # T-M6p RE-PIN: same byte, boost term riding (identity keeps it).
+    assert re.search(r"rings\.append\(\{\"r\": 80\.0 \* eff\.area, "
+                     r"\"life\": 0\.12, \"max\": 0\.12\}\)", WEAPONS)
 
 
 def test_spike_numbers():
-    assert re.search(r"var burst_r := 56\.0", WEAPONS)
+    # T-M6p RE-PIN: the boost term rides the SAME byte (identity keeps it).
+    assert re.search(r"var burst_r: float = 56\.0 \* eff\.area", WEAPONS)
     assert re.search(r"w\.cd = rate\(l, 2\.6\)", WEAPONS)
     assert re.search(r"\(18\.0 \+ 7\.0 \* l\)", WEAPONS)
     assert re.search(r"\"life\": 0\.25, \"max\": 0\.25", WEAPONS)

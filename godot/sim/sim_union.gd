@@ -9,8 +9,11 @@
 # Main.tscn, screens stubbed, the run started through the real
 # _start_game, chests PLACED through the real drop funnel (synthetic
 # boss-flagged kill, the pinned 1.0 chance) and OPENED by the real
-# world.collect_pickups touch funnel — which now holds the ONE
-# try_union-else-try_evolve seam. Loadouts ride the DECLARED-PIN channel
+# world.collect_pickups touch funnel — which since M6 T-M6p (MC 11697,
+# M6-SPEC §3.1/§4.4 R5) holds the UNION-ONLY chest arm: the evolution
+# trigger MOVED to the level-up pick seam, so the rows below drive it via
+# SimFunnel.take_trigger_card where the M2-era legs used the second chest.
+# Loadouts ride the DECLARED-PIN channel
 # (sim_boss/sim_evolve verbatim); the FULL legs acquire EVERY part
 # through the real offer funnel (real make_offer cards + real _pick, no
 # id pinned) before the real chest performs the union.
@@ -23,17 +26,22 @@
 #   uni_wrong_passive      bases MAX, carried NON-partner -> does NOT
 #   uni_before_gate        same but t < 600 -> does NOT (RED side)
 #   uni_precedence         state eligible for BOTH union and evolution ->
-#                          the chest performs the UNION (D-U3); a second
-#                          chest evolves the still-eligible base (one
-#                          transform per chest stays)
-#   uni_reserve_keeps      D-U5: rot-water MAX + loadstone, partner
-#                          censer-of-hours carried NOT max -> try_evolve
-#                          does NOT take rot-water (dirge-eternal stays
-#                          reachable; no union either); maxing the partner
-#                          + one more chest -> the UNION lands
-#   uni_reserve_lifted     partner GONE -> reserve lifts, the-sluice
-#                          evolves as before (the rule never blocks an
-#                          unreachable union)
+#                          the chest performs the UNION (D-U3); the still-
+#                          eligible base then evolves at its NEXT trigger
+#                          PICK (T-M6p: the second-chest evolution is
+#                          retired with the chest arm — player's choice
+#                          still reads honestly: union OR its evolution,
+#                          never silently both)
+#   uni_reserve_keeps      D-U5 + M6 §3.4: rot-water MAX + loadstone,
+#                          partner censer-of-hours carried NOT max -> the
+#                          chest does NOT evolve it (nothing evolves at a
+#                          chest now) AND the new trigger does NOT either
+#                          (dirge-eternal stays reachable); maxing the
+#                          partner + one more chest -> the UNION lands
+#   uni_reserve_lifted     partner GONE -> reserve lifts: the chest still
+#                          evolves NOTHING (the direct arm is dead), the
+#                          next trigger PICK evolves the-sluice (the rule
+#                          never blocks an unreachable union)
 #   uni_full_<uid>         FULL end-to-end: both bases + the partner
 #                          acquired by real _picks, real chest opens the
 #                          union IN-SLOT, then a capped real-tick watch accrues the first kill
@@ -43,7 +51,9 @@
 #                          kills >= 1, and BOTH composed FX branches
 #                          observed live (halos+bursts / halos+rings)
 # Seed-pinned (HD3D_SEED, default 11240) — the dump is byte-stable; the
-# committed copy tests/fixtures/unions-m2u.jsonl gates tests/test_unions.py.
+# committed copy tests/fixtures/unions-m2u.jsonl gates tests/test_unions.py
+# (RE-MINTED at T-M6p — the precedence/reserve legs moved with the trigger,
+# M6-SPEC §9 row 5, union side REMINT by this card).
 extends SceneTree
 
 const UNION_SEED := 11240
@@ -248,8 +258,11 @@ func _leg_passives() -> void:
 		}, "carried rule = the RECIPE passive (evolutions carried-rule shape)")
 
 
-# D-U3: eligible for union AND evolution at once -> the chest takes the
-# UNION; a second chest still evolves the other base (one per chest).
+# D-U3 + M6 T-M6p (MC 11697): eligible for union AND evolution at once ->
+# the chest takes the UNION and NOTHING else (the direct evolve arm is
+# retired, §4.4 R5); the other base evolves at its NEXT trigger PICK — the
+# player's choice still reads honestly: union OR its evolution, never
+# silently both.
 func _leg_precedence() -> void:
 	var game = _main.game
 	game.start_run()
@@ -273,19 +286,22 @@ func _leg_precedence() -> void:
 	var one_ok: bool = _has_id(game, "requiem-toll") \
 			and not _has_id(game, "red-wail") \
 			and _has_id(game, "bone-whip")
-	_drop_chest(game)
-	var after2 := _open()
+	# M6 T-M6p: the second chest is replaced by ONE trigger-eligible pick
+	# through the real funnel (SimFunnel.take_trigger_card — PASSIVE card,
+	# zero id pinned): the evolution now rides the pick seam.
+	var pick_applied := SimFunnel.take_trigger_card(_main, [])
+	var after2 := _line(game)
 	_gate("uni_precedence", {"before": before}, [after1, after2],
 		GATE_OK_T, {
 			"first_chest_union": one_ok,
-			"second_chest_evolution": _has_id(game, "red-wail") \
+			"pick_evolution": pick_applied and _has_id(game, "red-wail") \
 					and _has_id(game, "requiem-toll"),
-			"one_transform_per_chest": after1.split(" ").size() == 3 \
+			"one_transform_per_seam": after1.split(" ").size() == 3 \
 					and after2.split(" ").size() == 3, # slot math: 4 entries
 			# -> 3 after the UNION (net -1) -> 3 after the EVOLUTION
 			# (in-slot replace keeps the count)
-		}, "union precedence > evolution (spec §Reuse); one weapon-transform" \
-				+ " per chest; both chests transform exactly one weapon")
+		}, "union precedence > evolution (spec §Reuse; chest arm union-only " \
+				+ "since T-M6p); the eligible base evolves at its next pick")
 
 
 # D-U5: the rev-2 P3-6 reserve rule, BOTH sides.
@@ -309,6 +325,13 @@ func _leg_reserve() -> void:
 	var kept_ok: bool = _has_id(game, "rot-water") \
 			and not _has_id(game, "the-sluice") \
 			and not _has_id(game, "dirge-eternal")
+	# M6 T-M6p (MC 11697, §3.4): the REAL reserve test at the NEW trigger —
+	# one trigger-eligible pick must NOT evolve the reserved base while the
+	# partner is below MAX (the chest arm no longer evolves anything, so the
+	# kept-check above alone would be vacuous; this pick makes the row bite
+	# again — planted red: reserve skipped ⇒ the-sluice appears here).
+	var pick_applied := SimFunnel.take_trigger_card(_main, ["loadstone"])
+	var after_pick := _line(game)
 	# partner MAXED (in-slot, declared pin write — the sim's own channel)
 	# + one more chest -> dirge-eternal is still REACHABLE and lands.
 	for w in game.weapons:
@@ -316,13 +339,18 @@ func _leg_reserve() -> void:
 			w.level = WeaponSystem.MAX_LEVEL
 	_drop_chest(game)
 	var after2 := _open()
-	_gate("uni_reserve_keeps", {"before": before}, [after1, after2],
+	_gate("uni_reserve_keeps", {"before": before}, [after1, after_pick, after2],
 		GATE_OK_T, {
 			"reserved_base_not_evolved": kept_ok,
+			"trigger_pick_keeps": pick_applied \
+					and not _has_id(game, "the-sluice"),
 			"union_still_reachable": _has_id(game, "dirge-eternal"),
-		}, "rev-2 P3-6: the chest must not foreclose a reachable union; " \
-				+ "maxing the partner then chesting -> the union fires")
-	# The LIFT side: partner GONE (never carried here) -> evolution proceeds.
+		}, "rev-2 P3-6 + M6 §3.4: neither the chest nor the new trigger may " \
+				+ "foreclose a reachable union; maxing the partner then " \
+				+ "chesting -> the union fires")
+	# The LIFT side: partner GONE (never carried here) -> the reserve lifts.
+	# M6 T-M6p re-home: the chest evolves NOTHING (direct arm retired,
+	# PS-E3) — the next trigger PICK carries the evolution.
 	game.start_run()
 	_main.world.reset()
 	game.weapons.append({"id": "rot-water", "level": WeaponSystem.MAX_LEVEL,
@@ -334,12 +362,20 @@ func _leg_reserve() -> void:
 		"t": GATE_OK_T, "gate": EvolutionSystem.GATE_T})
 	var before2 := _line(game)
 	_drop_chest(game)
-	var after3 := _open()
-	_gate("uni_reserve_lifted", {"before": before2}, after3, GATE_OK_T, {
-		"evolution_proceeds": _has_id(game, "the-sluice") \
-				and not _has_id(game, "rot-water"),
-	}, "partner gone = union unreachable = reserve lifts (the rule never " \
-			+ "blocks an unreachable union)")
+	var after_chest := _open()
+	# snapshot BEFORE the pick: the base must survive the chest (the direct
+	# arm dead) — evaluated after the pick it would read the evolved state.
+	var chest_inert: bool = not _has_id(game, "the-sluice") \
+			and _has_id(game, "rot-water")
+	var pick2 := SimFunnel.take_trigger_card(_main, [])
+	var after3 := _line(game)
+	_gate("uni_reserve_lifted", {"before": before2}, [after_chest, after3],
+		GATE_OK_T, {
+			"chest_inert_direct_arm": chest_inert,
+			"evolution_proceeds": pick2 and _has_id(game, "the-sluice") \
+					and not _has_id(game, "rot-water"),
+		}, "partner gone = union unreachable = reserve lifts at the NEW " \
+				+ "trigger; the chest arm stays inert (PS-E3 direct twin)")
 
 
 # FULL legs: every part ACQUIRED through the real offer funnel (no id

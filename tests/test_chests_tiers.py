@@ -163,7 +163,11 @@ def test_drop_sites_stamp_tier_from_the_map():
 
 
 def test_open_runs_transform_then_grant_in_the_one_funnel():
-    assert re.search(r"EvolutionSystem\.try_evolve\(game\)\s*\n\s*gold \+="
+    # T-M6p RE-PIN (MC 11697, replace-not-delete): the TRANSFORM that runs
+    # at the open before the grant is now the UNION alone (M6-SPEC §4.4 R5
+    # retired the evolve ELSE-half — its new home is the level-up pick
+    # seam, pinned in test_chests_evolve). The funnel law is unchanged.
+    assert re.search(r"UnionSystem\.try_union\(game\)\s*\n\s*gold \+="
                      r" ChestRewards\.grant\(game, c\)",
                      DROPS) # M6 T-M6d: the chest arm moved VERBATIM
     # the grant module itself: strict tier key (unknown tier crashes, never
@@ -261,9 +265,13 @@ def test_bt3_pick_sequence_and_weight_zero_legs():
 
 
 def test_bt4_precedence_row():
+    # T-M6p RE-PIN (MC 11697, replace-not-delete): B-T4's transform moved
+    # to the level-up PICK (§4.4 R5); the chest-open itself must now
+    # transform NOTHING (the union side is sim_union's leg; no union
+    # recipe here, so the open is grant-only).
     r = rows_of("chest_precedence")[0]
     assert r["ok"] and all(r["checks"].values())
-    assert len(r["evolved"]) == 1  # two eligibles, ONE chest -> ONE transform
+    assert r["evolved"] == []  # the open transforms NOTHING at chest
     assert r["pending"] == SPEC_TABLE["warden"]["item_count"]  # cards full
 
 

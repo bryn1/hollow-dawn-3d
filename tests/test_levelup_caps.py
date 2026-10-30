@@ -59,12 +59,17 @@ def test_weapon_new_kind_gated_by_slots():
 
 
 def test_weapon_upgrade_stays_offerable_at_full_slots():
-    # The owned-weapon upgrade append sits directly on its own elif: no
-    # slots_full guard may ever gate it (plant E RED-proved this leg).
-    assert re.search(
-        r"elif owned\.level < WeaponSystem\.MAX_LEVEL:\s*\n\s*"
-        r"pool\.append\(\{\"kind\": \"upgrade\"",
-        LEVELUP)
+    # The owned-weapon upgrade append sits on its own elif: no slots_full
+    # guard may ever gate it (plant E RED-proved this leg). T-M6p RE-PIN
+    # (replace-not-delete): the Lv5-hint clause (M6-SPEC §3.3) now sits
+    # between the elif and the append, so the LAW is pinned directly —
+    # the append still hangs on the level-only elif and NOTHING slots-ish
+    # may ever gate it.
+    m = re.search(r"elif owned\.level < WeaponSystem\.MAX_LEVEL:((?:.|\n)*?)"
+                  r"pool\.append\(\{\"kind\": \"upgrade\"", LEVELUP)
+    assert m, "the upgrade append vanished from its level-only elif"
+    assert "slots_full" not in m.group(1) and "slots" not in m.group(1), \
+        "no slots guard may gate the weapon upgrade"
 
 
 def test_passive_new_kind_gated_by_carried_kinds():

@@ -11,18 +11,26 @@
 # the HUD row resolves a union icon through the ONE naming convention
 # (icon-<id>.png, hud_3d.gd fallback) — both union icons shipped in
 # T-M2a (tools/vm100/icons-batch-m2.tsv).
-# UNION PRECEDENCE > EVOLUTION (spec §Reuse): world.gd's chest-open site
-# calls try_union BEFORE try_evolve — one weapon-transform per chest (the
-# stated reading at evolutions.gd:22-24), and a state eligible for BOTH
-# takes the union. First eligible row in TABLE order transforms (the
+# UNION PRECEDENCE > EVOLUTION (spec §Reuse; M6 T-M6p §3.1/§4.4 R5): the
+# chest-open arm is UNION-ONLY — the evolution trigger MOVED to the
+# level-up pick seam (levelup.apply_offer), so the chest's weapon-transform
+# slot holds try_union ALONE (the retired `else try_evolve` line is §4.4
+# R5). A state eligible for BOTH still takes the union at the chest, and
+# the reserve below keeps its base unevolving until the union is out of
+# reach. First eligible row in TABLE order transforms (the
 # first-eligible-in-order reading, evolutions.gd:23-26 shape).
 # The rev-2 P3-6 RESERVE rule lives in reserved_for_union() below and is
 # enforced by EvolutionSystem.try_evolve: a TABLE weapon that is a union
-# base must NOT evolve while its union partner is carried below MAX —
-# otherwise a chest would evolve rot-water into the-sluice and PERMANENTLY
-# foreclose dirge-eternal cross-time (rot-water is both an evolution base
-# and a union base). Partner GONE (never carried or since changed) means
-# the union is unreachable — the reserve lifts and evolution proceeds.
+# base must NOT evolve while its union recipe is still ACHIEVABLE — the
+# partner base carried BELOW MAX, or AT MAX with the recipe passive
+# carried (the union is ELIGIBLE and a live chest can still complete it;
+# the window EXTENSION, M6 T-M6p §3.4 option (a): the below-MAX-only
+# window was complete only while the two triggers shared the chest site).
+# Otherwise the new trigger would evolve rot-water into the-sluice and
+# PERMANENTLY foreclose dirge-eternal cross-time (rot-water is both an
+# evolution base and a union base). Partner GONE (never carried or since
+# changed) means the union is unreachable — the reserve lifts and
+# evolution proceeds.
 class_name UnionSystem
 extends RefCounted
 
@@ -61,17 +69,27 @@ static func try_union(game: GameState) -> String:
 	return ""
 
 
-# Rev-2 P3-6: is base_id kept from EVOLVING because one of its unions is
-# still reachable? True exactly when a TABLE row lists base_id as a base
-# AND that row's partner base is carried below MAX_LEVEL. Called from the
-# ONE evolution rule entry (evolutions.gd try_evolve skip clause).
+# Rev-2 P3-6 + M6 T-M6p §3.4 (option (a)): is base_id kept from EVOLVING
+# because one of its unions is still reachable? True exactly when a TABLE
+# row lists base_id as a base AND that row's recipe is still ACHIEVABLE —
+# the row's partner base carried below MAX_LEVEL (the shipped below-MAX
+# branch), OR the partner AT MAX_LEVEL with the row's recipe passive
+# carried (the ELIGIBLE-at-MAX branch: the union can fire at the next
+# chest, so the new pick-site trigger must not foreclose it — the chest-era
+# co-location that made the below-MAX-only window complete is gone with
+# the moved trigger). One predicate, one TABLE walk, the ONE skip site the
+# evolution rule reads (evolutions.gd try_evolve). Called from there only.
 static func reserved_for_union(game: GameState, base_id: String) -> bool:
 	for row in TABLE.values():
 		if row.a != base_id and row.b != base_id:
 			continue
 		var partner: String = row.b if row.a == base_id else row.a
 		for w in game.weapons:
-			if w.id == partner and w.level < WeaponSystem.MAX_LEVEL:
+			if w.id != partner:
+				continue
+			if w.level < WeaponSystem.MAX_LEVEL:
+				return true
+			if int(game.passives.get(row.passive, 0)) >= 1:
 				return true
 	return false
 

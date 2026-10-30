@@ -301,6 +301,25 @@ func _card(card: Dictionary, index: int) -> Control:
 	box.add_child(icon)
 	box.add_child(_label(card.name, 16, BONE))
 	box.add_child(_label(card.desc, 12, MOON))
+	# M6 T-M6p (§3.3, PS-E5): the connective chip row — the SKILLS a
+	# passive affects, small TextureRects under the desc label, the ONE
+	# panel idiom and the §j assert-before-load law. Names come from the
+	# card dict (levelup.build_pool stamps them from the ONE tables);
+	# icon_path()'s catch-all resolves them exactly like the bonus row's
+	# "coin" (no second resolver, every chip file ships since T-M1c).
+	if card.has("chips"):
+		var chips := HBoxContainer.new()
+		for chip: String in card.chips:
+			var chip_rect := TextureRect.new()
+			var chip_path: String = icon_path({"kind": "chip", "icon": chip})
+			assert(ResourceLoader.exists(chip_path))
+			chip_rect.texture = load(chip_path)
+			chip_rect.custom_minimum_size = Vector2(28, 28) # §3.3 size
+			chip_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			chip_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			chips.add_child(chip_rect)
+		if card.chips.size() > 0: # generics carry [] — no row, no gap
+			box.add_child(chips)
 	if card.kind == "upgrade":
 		box.add_child(_label("Lv %d" % card.to_level, 12, EMBER_TINT))
 	box.add_child(_label(str(index + 1), 14, EMBER_TINT))

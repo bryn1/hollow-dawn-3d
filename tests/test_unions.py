@@ -109,17 +109,21 @@ def test_union_ids_never_enter_meta_or_ids():
         os.path.join(SCRIPTS, "hud_3d.gd"))), "HUD icon fallback must ride icon-<id>"
 
 
-# ---- the ONE seam: try_union ELSE try_evolve, at the chest-open site -------
+# ---- the ONE seam: the chest arm is UNION-ONLY since T-M6p (M6-SPEC §4.4 R5)
 
 def test_chest_open_precedence_in_source():
+    # T-M2u pinned "try_union ELSE try_evolve" at the chest; T-M6p (MC 11697)
+    # moved the evolution trigger to the level-up pick seam, so the chest
+    # arm's ELSE half is RETIRED — the arm is union-only + tier grant.
+    # Replace-not-delete: the claim "the union takes the chest ONLY" got
+    # STRONGER (now literally: nothing else transforms at the open).
     body = re.search(r"for i in range\(_world\.chests\.size\(\) - 1, -1, -1\):"
                      r"((?:.|\n)*?)gold \+= ChestRewards",
                      # M6 T-M6d (MC 11675): the ONE funnel moved to drops.gd
                      read(os.path.join(SCRIPTS, "drops.gd"))).group(1)
-    assert re.search(r"if UnionSystem\.try_union\(game\) == \"\":", body)
-    assert re.search(r"try_union\(game\) == \"\":\s*\n\s*EvolutionSystem"
-                     r"\.try_evolve\(game\)", body), \
-        "the union takes the chest ONLY; evolution runs ELSE (one transform)"
+    assert re.search(r"UnionSystem\.try_union\(game\)", body)
+    assert "try_evolve" not in body, \
+        "the direct evolve arm at the chest is DEAD (T-M6p moved the trigger)"
 
 
 def test_gate_is_one_reference_no_second_600():
@@ -143,11 +147,19 @@ def test_in_slot_write_rule():
 # ---- D-U5: the reserve rule, both halves, on the source seam ---------------
 
 def test_reserve_rule_is_enforced_by_try_evolve():
+    # M6 T-M6p §3.4 option (a): the predicate GREW to two branches — the
+    # shipped below-MAX hold (byte-verbatim lines) PLUS the eligible-at-MAX
+    # window (partner AT MAX + the recipe passive carried: the recipe is
+    # achievable by the next chest, the pick must not foreclose it). A
+    # REV-1 (below-MAX-only) predicate fails the evo_reserve_at_max leg.
     assert re.search(r"UnionSystem\.reserved_for_union\(game, w\.id\)", EVO), \
         "try_evolve must skip a reserved union base (rev-2 P3-6)"
-    assert re.search(r"if w\.id == partner and w\.level < "
-                     r"WeaponSystem\.MAX_LEVEL:", UNION), \
-        "the reserve holds exactly while the partner is carried below MAX"
+    reserved = UNION[UNION.index("func reserved_for_union"):]
+    assert re.search(r"if w\.level < WeaponSystem\.MAX_LEVEL:\s*\n"
+                     r"\s*return true", reserved), "below-MAX hold (shipped)"
+    assert re.search(r"if int\(game\.passives\.get\(row\.passive, 0\)\)"
+                     r" >= 1:\s*\n\s*return true", reserved), \
+        "eligible-at-MAX window (M6 §3.4) — the REV-1 killer case"
 
 
 # ---- §D behaviour: the _fire/_update branches are compositions, no new class

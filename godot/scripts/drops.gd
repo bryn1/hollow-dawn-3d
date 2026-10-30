@@ -12,9 +12,10 @@
 # VERBATIM-MOVE LAW (the split commit): the moved bodies are the shipped
 # logic, zero edits — a byte-diff review shows mechanical `_world.` prefixes
 # and the const moves only. The CHEST-ARM LINE (try_union-else-try_evolve)
-# moved HERE verbatim and STAYS until T-M6p removes it (the cross-card
-# honesty row, M6-SPEC §3.5/§4.4 R5: "T-M6d moves the line VERBATIM first,
-# T-M6p removes it").
+# moved HERE verbatim at T-M6d and WAS REMOVED HERE at T-M6p (MC 11697):
+# the chest arm is UNION-ONLY (M6-SPEC §3.1/§4.4 R5, the evolution trigger
+# moved to the level-up pick; the cross-card honesty row, §3.5 — "T-M6d
+# moves the line VERBATIM first, T-M6p removes it").
 # M6 F6 (M6-SPEC §4.2, owner ruling 2026-10-29 "2. Rec."): the Doom Sigil's
 # screen-clear retires WEAPON-SIDE (weapons.gd, pool 16→15, kinds 32→31 —
 # NF-8: that also cuts the evolution table 10→9 at T-M6p) and rides HERE as
@@ -235,25 +236,26 @@ func collect_pickups(game: GameState) -> int:
 					_world.kill_enemy(game, e)
 			fx_rings.append({"r": 760.0, "life": 0.5, "max": 0.5})
 	# Chest OPENING (M1 feature 5): the same 16 px touch funnel. The M2 §B.1
-	# OPEN ORDER is exactly three lines: the ONE transform first (evolutions
-	# fire at OPEN time, the gate reads game.time here; since T-M2u the
-	# union pillar holds the try_union-else-try_evolve precedence slot at
-	# THIS site), then the tier cards + the gold line, both owned
-	# by chest_rewards.gd — the cards ride the frozen pending_levels ->
-	# _enter_levelup seam (each is one 3-card offer, the per-offer reward
-	# kind pops the game.reward_kinds FIFO), the gold roll returns raw and
-	# enters the run through the ONE credit_gold funnel below (roadmap
-	# feature 5 phase decision, DA c1 A-2: the enum
+	# OPEN ORDER is exactly TWO lines since M6 T-M6p (MC 11697, M6-SPEC
+	# §3.1/§4.4 R5): the UNION transform — the chest's only weapon-transform,
+	# because the evolution trigger MOVED to the level-up pick seam
+	# (levelup.apply_offer); the `else EvolutionSystem.try_evolve(game)`
+	# line T-M6d moved HERE VERBATIM is RETIRED HERE (the cross-card
+	# honesty row, both LEDGER lines) — then the tier cards + the gold
+	# line, both owned by chest_rewards.gd — the cards ride the frozen
+	# pending_levels -> _enter_levelup seam (each is one 3-card offer, the
+	# per-offer reward kind pops the game.reward_kinds FIFO), the gold roll
+	# returns raw and enters the run through the ONE credit_gold funnel
+	# below (roadmap feature 5 phase decision, DA c1 A-2: the enum
 	# menu|playing|levelup|gameover|win is untouched).
 	for i in range(_world.chests.size() - 1, -1, -1):
 		var c: Dictionary = _world.chests[i]
 		if GameWorld._dist(c, game.player) < 16.0:
 			_world.chests.remove_at(i)
-			# T-M2u landed: union precedence > evolution (§D) — a chest
-			# performs the UNION when eligible, else the evolution (still
-			# exactly ONE weapon-transform per chest).
-			if UnionSystem.try_union(game) == "":
-				EvolutionSystem.try_evolve(game)
+			# M6 T-M6p: union precedence at the chest is now ABSOLUTE — the
+			# chest performs the UNION when eligible and NOTHING else (one
+			# weapon-transform per chest, still exactly at most one).
+			UnionSystem.try_union(game)
 			gold += ChestRewards.grant(game, c)
 	# The meta gold-rate (T-M1f) rides the ONE pickup funnel: collected raw
 	# gold enters the run only through GameState.credit_gold — identity with

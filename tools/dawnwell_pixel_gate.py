@@ -79,7 +79,9 @@ def gate(dir_path):
                                            "achievements_shot":
                                            "m5-achievements.png",
                                            "char_select_shot":
-                                           "m5-char-select.png"}[row["leg"]])
+                                           "m5-char-select.png",
+                                           "levelup_chips_shot":
+                                           "m6-levelup-chips.png"}[row["leg"]])
         shot = np.asarray(Image.open(img_path).convert("RGB"), dtype=np.int16)
         if shot.shape != base.shape:
             print("FAIL shot/baseline shape mismatch %s vs %s"
@@ -102,6 +104,13 @@ def gate(dir_path):
             # least one achieved row painted (the capture's seeded state)
             if not (row["rows"] == 20 and row["achieved"] >= 1):
                 print("FAIL achievements state wrong: %s" % row)
+                ok = False
+        elif row["leg"] == "levelup_chips_shot":
+            # M6 T-M6p E-5 (R3 additive, same floors): the three offered
+            # cards with the three partner chips painted (chips==partner-
+            # set, PS-E5; the generic ferocity row paints NO chip line).
+            if not (row["cards"] == 3 and row["chips"] == 3):
+                print("FAIL levelup chips state wrong: %s" % row)
                 ok = False
         elif row["leg"] == "char_select_shot":
             # M5 B-E6 (R3 additive, same floors): the nine SEL-C rows,

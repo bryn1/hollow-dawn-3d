@@ -215,7 +215,12 @@ def _footer_rows():
 
 def test_deviation_doc_footer_contract():
     rows = _footer_rows()
-    assert len(rows) == 16, "the ratified §9 REV-3 table is 16 channels"
+    # T-M6p RE-PIN (MC 11697, replace-not-delete): the T-M6p battery
+    # APPENDED five MEASURED rows to the footer (journey + the three
+    # fixture re-mints + the unchanged-channels row); the sixteen ratified
+    # §9 REV-3 rows stay byte-untouched above them (git diff = additions
+    # only). 16 + 6 = 22 (the sixth: the s8 re-select row, A1-contract).
+    assert len(rows) == 22, "the §9 table: 16 ratified + 6 measured (T-M6p)"
     verbatim = "Ibwant skeletons with movements. 2. Rec. 3. Ship. Ratufy"
     shifts = 0
     for r in rows:

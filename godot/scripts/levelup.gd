@@ -1,5 +1,14 @@
 # XP-driven level-up: builds the 3-card offer and applies the pick
 # (plan §5 pool: new weapon, weapon level+1, passive; passives cap at 5).
+# M6 T-M6p (MC 11697, M6-SPEC §3.1): THIS file's apply_offer carries the
+# ONE evolution call site — the tail of the "upgrade" and "passive" arms,
+# the two arms that can newly satisfy the L5+partner condition (the
+# "weapon"-pick arm cannot — level 1). The chest era's call at the
+# chest-open site is RETIRED (§4.4 R5). Zero RNG, zero phase change, zero
+# snapshot field; the hide_all → show_levelup drain seam in main.gd is
+# untouched. The card side grows the §3.3 connective UI (passive chips,
+# the Lv4→5 desc clause) at the ONE desc/chips source — screens.gd only
+# renders what these rows carry.
 class_name LevelUpDeck
 extends RefCounted
 
@@ -21,8 +30,15 @@ const PASSIVES := [
 	{"key": "tall-candles", "name": "Tall Candles", "desc": "+6% weapon area"},
 	{"key": "four-leaf-charm", "name": "Four-Leaf Charm", "desc": "+luck (M2)"},
 	{"key": "knotted-chain", "name": "Knotted Chain", "desc": "+8% proj duration"},
-	{"key": "loadstone", "name": "Loadstone", "desc": "+25% pickup radius"},
-	{"key": "rotten-plate", "name": "Rotten Plate", "desc": "-1 damage taken"},
+	# M6 T-M6p (MC 11697, M6-SPEC §6.1 TX-E1 audit pass): two shipped rows
+	# duplicated another kind's desc verbatim and one read a % the code
+	# never applied — REWRITTEN to honest, unique function lines in place
+	# (replace-not-delete): rotten-plate distinguishes its SEPARATE intake
+	# term from ward's (game_state.gd:136-137), loadstone states the +15 px
+	# OWN term it actually adds (drops.gd:154), not a "+25%" it never
+	# granted. The other rows keep their shipped desc (function-first).
+	{"key": "loadstone", "name": "Loadstone", "desc": "+15 px pull radius per stack"},
+	{"key": "rotten-plate", "name": "Rotten Plate", "desc": "-1 damage taken (plate)"},
 	{"key": "twin-runes", "name": "Twin Runes", "desc": "+1 projectile"},
 	{"key": "gall-vial", "name": "Gall Vial", "desc": "+8% weapon damage"},
 	{"key": "gilded-skull", "name": "Gilded Skull", "desc": "+8% xp gain"},
@@ -53,17 +69,60 @@ static func build_pool(game: GameState) -> Array:
 				pool.append({"kind": "weapon", "id": id, "name": meta.name,
 					"desc": meta.desc, "icon": meta.icon})
 		elif owned.level < WeaponSystem.MAX_LEVEL:
+			# M6 T-M6p (§3.3, F-4's no-second-text-source law): the Lv4→5
+			# UPGRADE card names its evolution when the partner is carried
+			# — ONE clause appended from the ONE TABLE (+ PASSIVES), the
+			# connective UI the owner's clause 8 asked for.
+			var desc: String = meta.desc
+			if owned.level + 1 == EvolutionSystem.EVO_LEVEL \
+					and EvolutionSystem.TABLE.has(id) \
+					and int(game.passives.get(
+							EvolutionSystem.TABLE[id].partner, 0)) >= 1:
+				desc += " — Lv%d + %s → %s" % [EvolutionSystem.EVO_LEVEL,
+					_passive_name(EvolutionSystem.TABLE[id].partner),
+					_evo_title(EvolutionSystem.TABLE[id].evo)]
 			pool.append({"kind": "upgrade", "id": id, "name": meta.name,
-				"desc": meta.desc, "icon": meta.icon, "to_level": owned.level + 1})
+				"desc": desc, "icon": meta.icon, "to_level": owned.level + 1})
 	for passive in PASSIVES:
 		var stacks: int = game.passives[passive.key]
 		if stacks >= MAX_PASSIVE_STACKS:
 			continue # the 5-stack cap per carried kind (unchanged)
 		if stacks == 0 and passive_kinds >= MAX_PASSIVE_KINDS:
 			continue # a NEW kind never breaks the 6-KIND carry cap
+		# M6 T-M6p (§3.3): the connective chips — the skills this passive
+		# affects, as icon names, read from the ONE tables (evolution
+		# partner column + union.gd's partner column; the four generic
+		# passives {ferocity, haste, ward, grip} have no table row and get
+		# the empty set — PS-E5's law is chips == the partner set, no fake
+		# chips on global passives).
 		pool.append({"kind": "passive", "key": passive.key,
-			"name": passive.name, "desc": passive.desc, "icon": ""})
+			"name": passive.name, "desc": passive.desc, "icon": "",
+			"chips": _chips_for(passive.key)})
 	return pool
+
+
+# §3.3 helpers — ALL table reads, zero new data homes.
+static func _chips_for(passive_key: String) -> Array:
+	var chips: Array = []
+	for wid in EvolutionSystem.affects_by_passive().get(passive_key, []):
+		chips.append("icon-" + wid) # the ONE naming convention (§j)
+	return chips
+
+
+static func _passive_name(key: String) -> String:
+	for p in PASSIVES:
+		if p.key == key:
+			return p.name
+	return key
+
+
+static func _evo_title(evo_id: String) -> String:
+	# Display name DERIVED from the evolved id (the one naming convention
+	# again — no second name table: red-wail → "Red Wail").
+	var words: PackedStringArray = evo_id.split("-", false)
+	for i in words.size():
+		words[i] = words[i].capitalize()
+	return " ".join(words)
 
 
 # Nothing left to grant (everything capped): offer a rich consolation.
@@ -88,7 +147,10 @@ const LIMIT_CARDS := [
 	{"kind": "limit", "key": "spd", "name": "LIMIT · HASTE",
 		"desc": "+3% move speed", "icon": "icon-dart-loop"},
 	{"kind": "limit", "key": "arm", "name": "LIMIT · BULWARK",
-		"desc": "-1 damage taken", "icon": "icon-plate"},
+		"desc": "-1 damage taken (limit)", "icon": "icon-plate"},
+	# M6 T-M6p (MC 11697, TX-E1 uniqueness over 31 kinds + the 3 LIMIT
+	# rows): BULWARK duplicated ward's desc verbatim; "(limit)" names the
+	# counter that grants it (game_state.gd:137 the ONE intake seam).
 ]
 
 
@@ -132,6 +194,10 @@ static func apply_offer(game: GameState, card: Dictionary) -> void:
 				if w.id == card.id and w.level < WeaponSystem.MAX_LEVEL:
 					w.level += 1
 					break
+			# M6 T-M6p §3.1: the MOVED evolution trigger — the pick that
+			# newly satisfies a TABLE row evolves at this pick (per-pick,
+			# zero RNG; the rule itself stays ONE entry in evolutions.gd).
+			EvolutionSystem.try_evolve(game)
 		"passive":
 			game.passives[card.key] += 1
 			if card.key == "cracked-heart":
@@ -140,6 +206,9 @@ static func apply_offer(game: GameState, card: Dictionary) -> void:
 				# Coin Cache bonus uses for its +10 hp (M1h partner row).
 				game.max_hp += 10.0
 				game.hp += 10.0
+			# M6 T-M6p §3.1: the twin arm — carrying a partner passive on
+			# a pick that lands an L5 weapon is the other new route.
+			EvolutionSystem.try_evolve(game)
 		"limit":
 			# M4 §3.1 (T-M4l): a LIMIT card pick bumps the run's counter —
 			# repeatable forever (the caps stay untouched; the exhaustion

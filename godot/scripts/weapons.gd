@@ -24,6 +24,14 @@
 # union.gd's table, never IDS/META (DA c3 C-2 math preserved), and their
 # branches are compositions of the existing halo/spike/ward classes: the
 # effect-class count stays SIX.
+# M6 T-M6p (MC 11697, M6-SPEC §3.2): _fire opens with the ONE effect()
+# resolution — evolved ids fire their FAMILY arm with the TABLE boosts at
+# the existing sites (the ':' no-op hole closes for them; unknown ids keep
+# the shipped no-op), every un-evolved fire rides the ×1.0/+0-flag
+# identity (IEEE-identical bytes — the corpus guard); the feat flags OR
+# onto the appended dicts through the EXISTING pierce/bounce/ret keys and
+# the extra-target count term. EDITED UNDER SERIAL: first-owned by T-M6d
+# (the §4.1 weapon-side retire), this card's edits land after its close.
 class_name WeaponSystem
 extends RefCounted
 
@@ -36,22 +44,26 @@ const IDS := ["talon", "ember", "cleaver", "halo", "ward", "spike",
 	# file stays, the evolve-table row retires at T-M6p).
 const MAX_LEVEL := 8
 
+# M6 F4 (MC 11697 T-M6p, M6-SPEC §6.1): the desc column IS the spec's
+# PINNED COPY — every pool weapon reads its FUNCTION line (shape +
+# seeking/targeting + the class the player sees), non-empty, unique,
+# ≤ 72 chars, pinned by tests/test_card_text.py (TX-E1).
 const META := {
-	"talon": {"name": "Talon Lash", "icon": "icon-talon", "desc": "Raking arc in front of you"},
-	"ember": {"name": "Ember Bolt", "icon": "icon-ember", "desc": "Bolts seek the nearest foe"},
-	"cleaver": {"name": "Bone Cleaver", "icon": "icon-cleaver", "desc": "Heavy arcing throws"},
-	"halo": {"name": "Cinder Halo", "icon": "icon-halo", "desc": "Cinders orbit around you"},
-	"ward": {"name": "Warding Aura", "icon": "icon-ward", "desc": "Sears all who come close"},
-	"spike": {"name": "Grave Spike", "icon": "icon-spike", "desc": "Bursts under the densest cluster"},
-	"bone-whip": {"name": "Bone Whip", "icon": "icon-bone-whip", "desc": "Piercing line ahead"},
-	"dart-loop": {"name": "Dart Loop", "icon": "icon-dart-loop", "desc": "Rapid faced darts"},
-	"hewn-axe": {"name": "Hewn Axe", "icon": "icon-hewn-axe", "desc": "Heavy axe throws"},
-	"pilgrim-cross": {"name": "Pilgrim Cross", "icon": "icon-pilgrim-cross", "desc": "Throw that comes back"},
-	"censer-of-hours": {"name": "Censer of Hours", "icon": "icon-censer-of-hours", "desc": "Cross-pattern volley"},
-	"rot-water": {"name": "Rot Water", "icon": "icon-rot-water", "desc": "Rot ring sears your feet"},
-	"spectral-disc": {"name": "Spectral Disc", "icon": "icon-spectral-disc", "desc": "Piercing bouncing disc"},
-	"storm-peal": {"name": "Storm Peal", "icon": "icon-storm-peal", "desc": "Strikes random foes"},
-	"fire-lash": {"name": "Fire Lash", "icon": "icon-fire-lash", "desc": "Heavy bolt, random foe"},
+	"talon": {"name": "Talon Lash", "icon": "icon-talon", "desc": "Arc in front of you — hits everything you face"},
+	"ember": {"name": "Ember Bolt", "icon": "icon-ember", "desc": "Seeking bolts — nearest foe first, more at higher Lv"},
+	"cleaver": {"name": "Bone Cleaver", "icon": "icon-cleaver", "desc": "Heavy arcing throw, one hit per landing"},
+	"halo": {"name": "Cinder Halo", "icon": "icon-halo", "desc": "Cinders orbit you — tick-damage on contact"},
+	"ward": {"name": "Warding Aura", "icon": "icon-ward", "desc": "Aura at your feet — continuous tick on everything close"},
+	"spike": {"name": "Grave Spike", "icon": "icon-spike", "desc": "Ground burst under the DENSEST cluster"},
+	"bone-whip": {"name": "Bone Whip", "icon": "icon-bone-whip", "desc": "Piercing line ahead — passes through with a tick cadence"},
+	"dart-loop": {"name": "Dart Loop", "icon": "icon-dart-loop", "desc": "Rapid facing darts — +1 per Twin Runes"},
+	"hewn-axe": {"name": "Hewn Axe", "icon": "icon-hewn-axe", "desc": "Heavy returning-free axe throw — pierces, ticking"},
+	"pilgrim-cross": {"name": "Pilgrim Cross", "icon": "icon-pilgrim-cross", "desc": "Throw that curves back home"},
+	"censer-of-hours": {"name": "Censer of Hours", "icon": "icon-censer-of-hours", "desc": "Cross volley — 4 bolts turning with you"},
+	"rot-water": {"name": "Rot Water", "icon": "icon-rot-water", "desc": "Rot ring at your feet — ticking zone"},
+	"spectral-disc": {"name": "Spectral Disc", "icon": "icon-spectral-disc", "desc": "Piercing disc — bounces off the playfield edge"},
+	"storm-peal": {"name": "Storm Peal", "icon": "icon-storm-peal", "desc": "Lightning at a RANDOM foe in the field"},
+	"fire-lash": {"name": "Fire Lash", "icon": "icon-fire-lash", "desc": "Heavy bolt at a random foe — +1 per Twin Runes"},
 	# M6 F6: the "doom-sigil" META row RETIRED with the id (pool 16→15, §4.1).
 }
 
@@ -98,6 +110,12 @@ static func rate(level: int, base: float) -> float:
 	return base * pow(0.96, level - 1)
 
 
+# M6 T-M6p §3.2: the extra-target feat term — +1 count for evolved rows
+# that carry it, EXACTLY +0 (int identity) for every un-evolved fire.
+static func _feat_extra(eff: Dictionary) -> int:
+	return 1 if eff.feat.has("extra") else 0
+
+
 func update(dt: float, game: GameState) -> void:
 	# §D unions ride the halo orbit class: the ONE halos list is recomputed
 	# every step — cleared ONCE here (it lived inside _update_halo, its
@@ -107,7 +125,12 @@ func update(dt: float, game: GameState) -> void:
 	# same step, exactly as before).
 	halos.clear()
 	for w in game.weapons:
-		if w.id == "halo" or w.id == "requiem-toll" or w.id == "dirge-eternal":
+		# M6 T-M6p §3.2: the orbit branch list keys through effect().base —
+		# the ONE resolution (un-evolved ids and the union ids are the
+		# identity; a halo-family EVOLVED id would ride the same branch).
+		var orbit_base: String = EvolutionSystem.effect(w.id).base
+		if orbit_base == "halo" or orbit_base == "requiem-toll" \
+				or orbit_base == "dirge-eternal":
 			_update_orbit(w, dt, game)
 			continue
 		w.cd -= dt
@@ -161,50 +184,63 @@ func _fire(w: Dictionary, game: GameState) -> void:
 	var p: Dictionary = game.player
 	var mul := game.damage_multiplier()
 	var l: int = w.level
-	match w.id:
+	# M6 T-M6p (M6-SPEC §3.2): the ONE resolution. An evolved id fires its
+	# FAMILY branch (eff.base) with the TABLE row's boosts consumed at the
+	# existing sites (mul × eff.dmg, radii/range × eff.area, cd × eff.cd,
+	# eff.feat ORed onto the appended dicts through the EXISTING flags).
+	# Un-evolved ids — and the union ids, whose behaviour already lives in
+	# the orbit branches — take the ×1.0/+0-flag identity, so every
+	# non-evolved weapon's math stays IEEE-identical (the limit-break
+	# precedent). The ':' no-op hole below is thereby closed for evolved
+	# ids: they resolve to their family arm HERE and FIRE (F-3's forced
+	# consequence); unknown ids keep the shipped no-op semantics (R1).
+	var eff := EvolutionSystem.effect(w.id)
+	match eff.base:
 		"talon":
-			w.cd = rate(l, 0.55)
+			w.cd = rate(l, 0.55) * eff.cd
 			var ang := atan2(p.dir_y, p.dir_x)
 			var half := 0.62
-			var range_px := 90.0 + 4.0 * l
+			var range_px: float = (90.0 + 4.0 * l) * eff.area
 			_hit({"x": p.x, "y": p.y, "r": range_px, "half": half, "ang": ang},
-				(6.0 + 3.0 * l) * mul)
+				(6.0 + 3.0 * l) * mul * eff.dmg)
 			arcs.append({"ang": ang, "half": half, "range": range_px, "life": 0.15, "max": 0.15})
 		"ember":
 			var targets := _nearest(game, 1 + int((l - 1) / 3))
 			if targets.is_empty():
 				w.cd = 0.0
 				return
-			w.cd = rate(l, 0.85)
+			w.cd = rate(l, 0.85) * eff.cd
 			for t in targets:
 				var d := maxf(sqrt(_dist2(t, p)), 1.0)
 				bolts.append({
 					"x": p.x, "y": p.y,
 					"vx": (t.x - p.x) / d * BOLT_SPEED,
 					"vy": (t.y - p.y) / d * BOLT_SPEED,
-					"dmg": (9.0 + 4.0 * l) * mul, "life": 1.1, "r": 9.0,
+					"dmg": (9.0 + 4.0 * l) * mul * eff.dmg, "life": 1.1,
+					"r": 9.0 * eff.area,
 				})
 		"cleaver":
 			var ctargets := _nearest(game, 1 + int((l - 1) / 4))
 			if ctargets.is_empty():
 				w.cd = 0.0
 				return
-			w.cd = rate(l, 1.15)
+			w.cd = rate(l, 1.15) * eff.cd
 			for t in ctargets:
 				var cd := maxf(sqrt(_dist2(t, p)), 1.0)
 				throws.append({
 					"x": p.x, "y": p.y,
 					"vx": (t.x - p.x) / cd * THROW_SPEED,
 					"vy": (t.y - p.y) / cd * THROW_SPEED,
-					"dmg": (15.0 + 6.0 * l) * mul, "life": cd / THROW_SPEED,
-					"travel": cd, "dist": 0.0, "r": 12.0,
+					"dmg": (15.0 + 6.0 * l) * mul * eff.dmg, "life": cd / THROW_SPEED,
+					"travel": cd, "dist": 0.0, "r": 12.0 * eff.area,
 				})
 		"ward":
-			w.cd = 0.45
-			_hit({"x": p.x, "y": p.y, "r": 80.0}, (4.0 + 2.0 * l) * mul, true)
-			rings.append({"r": 80.0, "life": 0.12, "max": 0.12})
+			w.cd = 0.45 * eff.cd
+			_hit({"x": p.x, "y": p.y, "r": 80.0 * eff.area},
+				(4.0 + 2.0 * l) * mul * eff.dmg, true)
+			rings.append({"r": 80.0 * eff.area, "life": 0.12, "max": 0.12})
 		"spike":
-			var burst_r := 56.0
+			var burst_r: float = 56.0 * eff.area
 			var best: Dictionary = {}
 			var best_n := 0
 			for cand in _world.enemies:
@@ -218,68 +254,84 @@ func _fire(w: Dictionary, game: GameState) -> void:
 			if best.is_empty():
 				w.cd = 0.0
 				return
-			w.cd = rate(l, 2.6)
-			_hit({"x": best.x, "y": best.y, "r": burst_r}, (18.0 + 7.0 * l) * mul)
+			w.cd = rate(l, 2.6) * eff.cd
+			_hit({"x": best.x, "y": best.y, "r": burst_r},
+				(18.0 + 7.0 * l) * mul * eff.dmg)
 			bursts.append({"x": best.x, "y": best.y, "r": burst_r, "life": 0.25, "max": 0.25})
 		# ---- feature-6 roster (T-M1h): the ten new weapons, each riding an
 		# EXISTING effect class — no new viz mechanism (family mapping table
 		# in the M1h capture). Partner passives read at the spawn math of
 		# THIS block (v1-era weapons' numbers are S4 byte-pins, STAY-GREEN).
 		"bone-whip": # class: talon arc — piercing (full-sector) line ahead
-			w.cd = rate(l, 0.75)
+			w.cd = rate(l, 0.75) * eff.cd
 			var wang := atan2(p.dir_y, p.dir_x)
 			var whalf := 0.30
-			var wrange: float = (100.0 + 4.0 * l) * game.area_mult()
+			var wrange: float = (100.0 + 4.0 * l) * game.area_mult() * eff.area
 			_hit({"x": p.x, "y": p.y, "r": wrange, "half": whalf, "ang": wang},
-				(7.0 + 3.0 * l) * mul)
+				(7.0 + 3.0 * l) * mul * eff.dmg)
 			arcs.append({"ang": wang, "half": whalf, "range": wrange,
 				"life": 0.18, "max": 0.18})
 		"dart-loop": # class: ember bolts — rapid faced shots
-			w.cd = rate(l, 0.42)
-			var dn := 1 + int((l - 1) / 3) + game.extra_projectiles()
+			w.cd = rate(l, 0.42) * eff.cd
+			var dn := 1 + int((l - 1) / 3) + game.extra_projectiles() \
+					+ _feat_extra(eff)
 			var dd2 := maxf(sqrt(p.dir_x * p.dir_x + p.dir_y * p.dir_y), 0.001)
 			var dsp: float = BOLT_SPEED * 1.2 * game.proj_speed_mult()
 			for di in dn:
 				bolts.append({
 					"x": p.x, "y": p.y,
 					"vx": p.dir_x / dd2 * dsp, "vy": p.dir_y / dd2 * dsp,
-					"dmg": (5.0 + 2.5 * l) * mul, "life": 0.8 * game.duration_mult(),
-					"r": 8.0,
+					"dmg": (5.0 + 2.5 * l) * mul * eff.dmg,
+					"life": 0.8 * game.duration_mult(),
+					"r": 8.0 * eff.area,
 				})
+				# M6 T-M6p feat OR (THOUSAND DARTS pierces; un-evolved dart
+				# loop takes the empty-feat identity — no key added, the
+				# shipped projectile dict is byte-unchanged).
+				if eff.feat.has("pierce"):
+					bolts.back().pierce = true
 		"hewn-axe": # class: cleaver throws — heavy axe throws
 			var xtargets := _nearest(game, 1 + int((l - 1) / 4) + game.extra_projectiles())
 			if xtargets.is_empty():
 				w.cd = 0.0
 				return
-			w.cd = rate(l, 1.7)
+			w.cd = rate(l, 1.7) * eff.cd
 			for t in xtargets:
 				var xd := maxf(sqrt(_dist2(t, p)), 1.0)
 				var xsp: float = THROW_SPEED * 1.1 * game.proj_speed_mult()
 				throws.append({
 					"x": p.x, "y": p.y,
 					"vx": (t.x - p.x) / xd * xsp, "vy": (t.y - p.y) / xd * xsp,
-					"dmg": (20.0 + 8.0 * l) * mul, "life": xd / xsp,
-					"travel": xd, "dist": 0.0, "r": 13.0,
+					"dmg": (20.0 + 8.0 * l) * mul * eff.dmg, "life": xd / xsp,
+					"travel": xd, "dist": 0.0, "r": 13.0 * eff.area,
 					"pierce": true, # roadmap "throws + pierce" (tick-paced)
 				})
+				# M6 T-M6p feat OR (ROT SPIRAL returns — the ONE return flag
+				# on the shipped stepper; base axe keeps returning-free).
+				if eff.feat.has("ret"):
+					throws.back().ret = true
 		"pilgrim-cross": # class: cleaver throws — boomerang return-throw
 			var ktargets := _nearest(game, 1 + game.extra_projectiles())
 			if ktargets.is_empty():
 				w.cd = 0.0
 				return
-			w.cd = rate(l, 2.2)
+			w.cd = rate(l, 2.2) * eff.cd
 			for t in ktargets:
 				var kd := maxf(sqrt(_dist2(t, p)), 1.0)
 				var ksp: float = THROW_SPEED * 1.1 * game.proj_speed_mult()
 				throws.append({
 					"x": p.x, "y": p.y,
 					"vx": (t.x - p.x) / kd * ksp, "vy": (t.y - p.y) / kd * ksp,
-					"dmg": (14.0 + 5.0 * l) * mul, "life": 2.5 * kd / ksp,
-					"travel": kd * 1.25, "dist": 0.0, "r": 11.0,
+					"dmg": (14.0 + 5.0 * l) * mul * eff.dmg,
+					"life": 2.5 * kd / ksp,
+					"travel": kd * 1.25, "dist": 0.0, "r": 11.0 * eff.area,
 					"ret": true, # the ONE return flag (step flips heading home)
 				})
+				# M6 T-M6p feat OR (JUDGEMENT CROSS pierces on the way).
+				if eff.feat.has("pierce"):
+					throws.back().pierce = true
 		"censer-of-hours": # class: ember bolts — cross-pattern volley
-			w.cd = rate(l, 1.3)
+			w.cd = rate(l, 1.3) * eff.cd
 			if not w.has("orbit"):
 				w.orbit = 0.0
 			w.orbit = fmod(w.orbit + 0.6, TAU)
@@ -289,53 +341,62 @@ func _fire(w: Dictionary, game: GameState) -> void:
 				bolts.append({
 					"x": p.x, "y": p.y,
 					"vx": cos(ca) * cvsp, "vy": sin(ca) * cvsp,
-					"dmg": (8.0 + 3.5 * l) * mul, "life": 1.0 * game.duration_mult(),
-					"r": 9.0,
+					"dmg": (8.0 + 3.5 * l) * mul * eff.dmg,
+					"life": 1.0 * game.duration_mult(),
+					"r": 9.0 * eff.area,
 				})
+				# M6 T-M6p feat OR (ETERNAL MATINS pierces the whole cross).
+				if eff.feat.has("pierce"):
+					bolts.back().pierce = true
 		"rot-water": # class: ward ring-tick — rotting zone at the feet
-			w.cd = 0.7
-			var zr: float = (60.0 + 3.0 * l) * game.area_mult()
-			_hit({"x": p.x, "y": p.y, "r": zr}, (3.0 + 1.6 * l) * mul, true)
+			w.cd = 0.7 * eff.cd
+			var zr: float = (60.0 + 3.0 * l) * game.area_mult() * eff.area
+			_hit({"x": p.x, "y": p.y, "r": zr}, (3.0 + 1.6 * l) * mul * eff.dmg, true)
 			rings.append({"r": zr, "life": 0.3, "max": 0.3})
 		"spectral-disc": # class: ember bolts — piercing, playfield-edge bounce
-			var stargets := _nearest(game, 1 + game.extra_projectiles())
+			var stargets := _nearest(game, 1 + game.extra_projectiles() \
+					+ _feat_extra(eff)) # GRAVE ORBIT: +1 disc (extra-target)
 			if stargets.is_empty():
 				w.cd = 0.0
 				return
-			w.cd = rate(l, 1.5)
+			w.cd = rate(l, 1.5) * eff.cd
 			var sspd: float = BOLT_SPEED * 0.8 * game.proj_speed_mult()
 			for t in stargets:
 				var sd := maxf(sqrt(_dist2(t, p)), 1.0)
 				bolts.append({
 					"x": p.x, "y": p.y,
 					"vx": (t.x - p.x) / sd * sspd, "vy": (t.y - p.y) / sd * sspd,
-					"dmg": (12.0 + 5.0 * l) * mul, "life": 2.5 * game.duration_mult(),
-					"r": 11.0, "pierce": true, "bounce": true,
+					"dmg": (12.0 + 5.0 * l) * mul * eff.dmg,
+					"life": 2.5 * game.duration_mult(),
+					"r": 11.0 * eff.area, "pierce": true, "bounce": true,
 				})
 		"storm-peal": # class: spike burst — strike at a RANDOM foe
 			if _world.enemies.is_empty():
 				w.cd = 0.0
 				return
 			var struck: Dictionary = _world.enemies[randi() % _world.enemies.size()]
-			w.cd = rate(l, 2.0)
-			var spr: float = 48.0 * game.area_mult()
-			_hit({"x": struck.x, "y": struck.y, "r": spr}, (12.0 + 5.0 * l) * mul)
+			w.cd = rate(l, 2.0) * eff.cd
+			var spr: float = 48.0 * game.area_mult() * eff.area
+			_hit({"x": struck.x, "y": struck.y, "r": spr},
+				(12.0 + 5.0 * l) * mul * eff.dmg)
 			bursts.append({"x": struck.x, "y": struck.y, "r": spr,
 				"life": 0.25, "max": 0.25})
 		"fire-lash": # class: ember bolts — heavy bolt at a random foe
 			if _world.enemies.is_empty():
 				w.cd = 0.0
 				return
-			w.cd = rate(l, 1.4)
+			w.cd = rate(l, 1.4) * eff.cd
 			var flsp: float = BOLT_SPEED * 0.75 * game.proj_speed_mult()
-			for fi in 1 + game.extra_projectiles():
+			for fi in 1 + game.extra_projectiles() + _feat_extra(eff):
+				# INFERNO LASH: extra-target = +1 heavy bolt (extra)
 				var pick: Dictionary = _world.enemies[randi() % _world.enemies.size()]
 				var fd := maxf(sqrt(_dist2(pick, p)), 1.0)
 				bolts.append({
 					"x": p.x, "y": p.y,
 					"vx": (pick.x - p.x) / fd * flsp, "vy": (pick.y - p.y) / fd * flsp,
-					"dmg": (16.0 + 6.0 * l) * mul, "life": 1.5 * game.duration_mult(),
-					"r": 13.0,
+					"dmg": (16.0 + 6.0 * l) * mul * eff.dmg,
+					"life": 1.5 * game.duration_mult(),
+					"r": 13.0 * eff.area,
 				})
 		_:
 			w.cd = 1.0 # evolved ids ride the T-M1e rule: fire no-ops unknown
@@ -363,7 +424,10 @@ func _update_orbit(w: Dictionary, dt: float, game: GameState) -> void:
 	var mul := game.damage_multiplier()
 	if not w.has("orbit"):
 		w.orbit = 0.0
-	match w.id:
+	# M6 T-M6p §3.2: the orbit arms key through the ONE effect() base
+	# (union ids and halo are the identity; halo-family evolutions would
+	# ride the `_:` arm — the same single expression as update()'s list).
+	match EvolutionSystem.effect(w.id).base:
 		"requiem-toll":
 			var rl: int = w.level
 			w.orbit = fmod(w.orbit + (2.4 + 0.08 * rl) * dt, TAU)

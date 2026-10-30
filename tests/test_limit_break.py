@@ -66,7 +66,7 @@ def test_c_e1_limit_rows_verbatim_and_separate_const():
     for key, name, desc, icon in [
             ("dmg", "LIMIT · FURY", "+4% weapon damage", "icon-cleaver"),
             ("spd", "LIMIT · HASTE", "+3% move speed", "icon-dart-loop"),
-            ("arm", "LIMIT · BULWARK", "-1 damage taken", "icon-plate")]:
+            ("arm", "LIMIT · BULWARK", "-1 damage taken (limit)", "icon-plate")]:
         m = re.search(r'\{"kind": "limit", "key": "%s", "name": "%s",\s*'
                       r'"desc": "%s", "icon": "%s"\}' % (key, re.escape(name),
                       re.escape(desc), icon), LEVELUP)
@@ -217,8 +217,13 @@ def test_c_e4_committed_bonus_rows_stay_probe():
     evolve = os.path.join(REPO, "tests", "fixtures", "chests-evolve-m1e.jsonl")
     assert any("bonus" in str(r.get("offers", ""))
                for r in conftest.jsonl_rows(tiers)), "chests-tiers bonus row gone"
-    assert any("bonus_card" in str(r.get("note", ""))
-               for r in conftest.jsonl_rows(evolve)), "chests-evolve bonus note gone"
+    # T-M6p RE-PIN (replace-not-delete): this fixture was RE-MINTED by the
+    # card that moved the evolve trigger (M6-SPEC §9 row 3 declared the
+    # channel); the old row's "bonus_card" note is gone with it, and the
+    # reward-at-the-open claim now rides the named dump checks.
+    assert any("reward_card_granted" in str(r.get("checks", ""))
+               for r in conftest.jsonl_rows(evolve)), \
+        "chests-evolve reward-at-open claim gone (RE-MINT carrier)"
 
 
 # ---- state law: Contract B stays the frozen twelve ------------------------------

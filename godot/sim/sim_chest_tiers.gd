@@ -316,11 +316,21 @@ func _leg_precedence() -> void:
 	var row: Dictionary = ChestRewards.TIERS["warden"]
 	var lo: int = int(row["gold_lo"])
 	var hi: int = int(row["gold_hi"])
+	# T-M6p RE-PIN (MC 11697, M6-SPEC §4.4 R5 — replace-not-delete): the
+	# transform this B-T4 leg watched for moved OFF the chest (evolution now
+	# fires at the level-up PICK; test_chests_evolve owns the pick-side
+	# one-per-pick instrument, sim_union the chest-side union precedence).
+	# The forward-lock stays: "at most ONE weapon transform per chest-open"
+	# — now measured as its strongest true value AT the open: ZERO. The
+	# full-tier-cards + gold-range halves of B-T4 keep their bytes.
 	_funnel.check("chest_precedence", {
-		# "two transforms in one chest" is the RED this instrument catches
-		"exactly_one_transform": evolved.size() == 1,
-		"base_removed": not _has_id(game, "bone-whip") \
-				or not _has_id(game, "dart-loop"),
+		# "two transforms in one chest" stays the RED this instrument
+		# catches (it would paint evolved.size() == 2 — now ANY direct
+		# transform at the open is the RED):
+		"exactly_one_transform": evolved.size() <= 1 \
+				and evolved.is_empty(),
+		"base_removed": _has_id(game, "bone-whip") \
+				and _has_id(game, "dart-loop"), # both bases KEPT
 		"in_slot_level_kept": in_slot,
 		"cards_full_after_transform": game.pending_levels == int(row["item_count"]),
 		"gold_in_range": game.gold - gold0 >= lo and game.gold - gold0 <= hi,
