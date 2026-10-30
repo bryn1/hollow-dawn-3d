@@ -1,5 +1,5 @@
 # Union legs for M2-SPEC rev-2 §D (MC 11240, T-M2u). Same headless funnel
-# reason: >400 lines — 488 measured at MC 11398 §1 (deferred carry-over): the
+# reason: >400 lines — 527 measured at T-M6q2 (488 at MC 11398 §1): the
 #   truth table + FULL legs ARE the one unions dump contract (seed 11240,
 #   byte-pinned fixture). NON-ADOPTION declared (MC 11398 §2's copy-vs-couple
 #   law): this driver keeps its pre-C3 runner shape (_run/_gate/_emit + own

@@ -1,5 +1,7 @@
 # Combat-layer probe for sim_headless.gd (MC 11102 T-S4):
-# reason: >400/500 lines (514 measured at MC 11697 T-M6p) — the T-M6p
+# reason: >400/500 lines — 523 measured at T-M6q2 (514 at MC 11697
+#   T-M6p; +7 @f8095d1 — the same card that re-measured viz_fx's header
+#   missed this one — and +2 are this header's own rows): the T-M6p
 #   boost-MATH channel (the 9 spec-constant-pinned evo_boost_rows + the
 #   effect()-identity row) grew the file; the spec NAMES this channel here
 #   (M6-SPEC §3.6 PS-E2: "the boost math rides sim_combat's channel, merged

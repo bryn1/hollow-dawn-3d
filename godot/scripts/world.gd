@@ -1,14 +1,14 @@
-# World entities + edge-spawn scaling (plan §5 numbers). The drop/pickup half
-# moved OUT at T-M6d to drops.gd (MC 11675, M6-SPEC §0 F-10 — the named
-# partition of the SCHEDULED split audit-2 carried: kill rolls, drop consts,
-# magnet, gem fold, touch funnel + the M6 sigil array ride drops.gd; every
-# call-through here keeps ALL callers byte-unchanged).
+# World entities + edge-spawn scaling (plan §5 numbers).
 # reason: >400 lines — what the F-10 partition LEAVES is the law that must
 #   stay in one file: the single spawn latch, the kill-funnel ENTRY (world.gd
 #   is the funnel — drops.gd is called THROUGH it, never beside it) and the
 #   ONE tier map CHEST_TIER_BY_SOURCE (splitting them would put spawn rules
 #   beside a second site). M4 grew it 419->548 (event cone, reaper latch,
 #   windows, MC 11398 §1.6); T-M6d's split cut it to the spawn/entity law.
+# The drop/pickup half moved OUT at T-M6d to drops.gd (MC 11675, M6-SPEC §0
+# F-10 — the named partition of the SCHEDULED split audit-2 carried: kill
+# rolls, drop consts, magnet, gem fold, touch funnel + the M6 sigil array
+# ride drops.gd; every call-through here keeps ALL callers byte-unchanged).
 class_name GameWorld
 extends RefCounted
 

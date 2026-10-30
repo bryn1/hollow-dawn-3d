@@ -1,10 +1,15 @@
 # Chest truth table + evolution legs for M6-SPEC §3 F3 (MC 11697 T-M6p;
 # the moved trigger of the M1 feature-5 line, MC 11209 T-M1e).
-# reason: >400/600 lines (640 measured at T-M6p) — the chest truth table + the FULL end-to-end legs +
-#   the reserve legs ARE the one evolve dump contract; a split would fork
-#   the table from its legs (the MC 11398 §1.5 header law, restated at the
-#   T-M6p rewrite; boost MATH rows live in sim_combat's spec channel per
-#   PS-E2 — the channel the spec names, merged into the journey dump).
+# reason: >400/600 lines (640 measured at T-M6p; 645 at T-M6q2 — the +5
+#   are this header's own band-watch rows below) —
+#   the chest truth table + the FULL end-to-end legs + the reserve legs
+#   ARE the one evolve dump contract; a split would fork the table from
+#   its legs (the MC 11398 §1.5 header law, restated at the T-M6p
+#   rewrite; boost MATH rows live in sim_combat's spec channel per PS-E2
+#   — the channel the spec names, merged into the journey dump).
+#   BAND-WATCH (audit-4 §1.6, the world.gd/strips_capture precedent
+#   wording): +185 @f376a4f made this M6's fastest single-file grower —
+#   the next touching card RE-MEASURES the band BEFORE adding lines.
 # Same headless funnel as sim_caps/sim_boss: the REAL Main.tscn, screens
 # stubbed, the run started through the real _start_game. Loadouts ride the
 # DECLARED-PIN construction channel (sim_boss.gd:215); the FULL legs

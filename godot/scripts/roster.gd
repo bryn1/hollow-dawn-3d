@@ -1,6 +1,17 @@
 # The character roster (M5-SPEC §2, T-M5c, MC 11422): the ONE CHARACTERS
 # table + the pure rules over it (powerups.gd contract — rules live HERE,
-# main holds the DawnWell object). SEL-C = 9 rows: the owner ruling "C"
+# main holds the DawnWell object).
+# reason: >400 lines — 416 measured at T-M6q2 (359->405 @91b371c, the
+#   T-M6r CLIP_SOURCE rig table + getter :161-183, a YOUNGER rider on
+#   audit-3 §1.3's still-standing ONE-table defence — not a second
+#   concern). SCHEDULED clause, named card: T-M6a-STATUE (the LEDGER-
+#   named statue->skinned ruling) carries the clip seam CLIP_SOURCE +
+#   clip_source() -> roster_clips.gd, the roster_select.gd/
+#   achievements_page.gd data-table precedent (CC3R) — the six null
+#   statue rows flipping to clip rows IS the clip table's own subject,
+#   so that card's touch is the split, per audit-4 §1.4. The +11 over
+#   the T-M6r number is this reason block itself (counted in the 416).
+# SEL-C = 9 rows: the owner ruling "C"
 # (2026-10-27, docs/M5-SPEC.md RULING line) over the §2.5 SEL table —
 # row 0 IS the shipped identity (game_state.gd's falsified talon row, the
 # IEEE-identity rule: every rule term rides an additive/multiplicative
