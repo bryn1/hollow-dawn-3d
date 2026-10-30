@@ -32,6 +32,14 @@
 # onto the appended dicts through the EXISTING pierce/bounce/ret keys and
 # the extra-target count term. EDITED UNDER SERIAL: first-owned by T-M6d
 # (the §4.1 weapon-side retire), this card's edits land after its close.
+# M6 T-M6f (MC 11705, M6-SPEC §2.1): every append dict gains ONE additive
+# field `wid: String` — the firing weapon's id (evolved ids carry theirs,
+# the union arms stamp theirs) at every append site (19). The renderer
+# (viz_fx.gd's SKILL_FX) reads it for the per-skill look; the sim never
+# does: array counts/caps UNTOUCHED (§2.1) — the field rides the dict keys
+# exactly like the T-M6p feat flags do (both _first_fire twins gain it,
+# the feat_flags diff-set math unaffected; the journey boost-tail key rows
+# carry the addition, declared MEASURED in docs/BYTE-DEVIATION-M6.md).
 class_name WeaponSystem
 extends RefCounted
 
@@ -203,7 +211,8 @@ func _fire(w: Dictionary, game: GameState) -> void:
 			var range_px: float = (90.0 + 4.0 * l) * eff.area
 			_hit({"x": p.x, "y": p.y, "r": range_px, "half": half, "ang": ang},
 				(6.0 + 3.0 * l) * mul * eff.dmg)
-			arcs.append({"ang": ang, "half": half, "range": range_px, "life": 0.15, "max": 0.15})
+			arcs.append({"ang": ang, "half": half, "range": range_px, "life": 0.15,
+				"max": 0.15, "wid": w.id})
 		"ember":
 			var targets := _nearest(game, 1 + int((l - 1) / 3))
 			if targets.is_empty():
@@ -217,7 +226,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"vx": (t.x - p.x) / d * BOLT_SPEED,
 					"vy": (t.y - p.y) / d * BOLT_SPEED,
 					"dmg": (9.0 + 4.0 * l) * mul * eff.dmg, "life": 1.1,
-					"r": 9.0 * eff.area,
+					"r": 9.0 * eff.area, "wid": w.id,
 				})
 		"cleaver":
 			var ctargets := _nearest(game, 1 + int((l - 1) / 4))
@@ -232,13 +241,14 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"vx": (t.x - p.x) / cd * THROW_SPEED,
 					"vy": (t.y - p.y) / cd * THROW_SPEED,
 					"dmg": (15.0 + 6.0 * l) * mul * eff.dmg, "life": cd / THROW_SPEED,
-					"travel": cd, "dist": 0.0, "r": 12.0 * eff.area,
+					"travel": cd, "dist": 0.0, "r": 12.0 * eff.area, "wid": w.id,
 				})
 		"ward":
 			w.cd = 0.45 * eff.cd
 			_hit({"x": p.x, "y": p.y, "r": 80.0 * eff.area},
 				(4.0 + 2.0 * l) * mul * eff.dmg, true)
-			rings.append({"r": 80.0 * eff.area, "life": 0.12, "max": 0.12})
+			rings.append({"r": 80.0 * eff.area, "life": 0.12, "max": 0.12,
+				"wid": w.id})
 		"spike":
 			var burst_r: float = 56.0 * eff.area
 			var best: Dictionary = {}
@@ -257,7 +267,8 @@ func _fire(w: Dictionary, game: GameState) -> void:
 			w.cd = rate(l, 2.6) * eff.cd
 			_hit({"x": best.x, "y": best.y, "r": burst_r},
 				(18.0 + 7.0 * l) * mul * eff.dmg)
-			bursts.append({"x": best.x, "y": best.y, "r": burst_r, "life": 0.25, "max": 0.25})
+			bursts.append({"x": best.x, "y": best.y, "r": burst_r, "life": 0.25,
+				"max": 0.25, "wid": w.id})
 		# ---- feature-6 roster (T-M1h): the ten new weapons, each riding an
 		# EXISTING effect class — no new viz mechanism (family mapping table
 		# in the M1h capture). Partner passives read at the spawn math of
@@ -270,7 +281,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 			_hit({"x": p.x, "y": p.y, "r": wrange, "half": whalf, "ang": wang},
 				(7.0 + 3.0 * l) * mul * eff.dmg)
 			arcs.append({"ang": wang, "half": whalf, "range": wrange,
-				"life": 0.18, "max": 0.18})
+				"life": 0.18, "max": 0.18, "wid": w.id})
 		"dart-loop": # class: ember bolts — rapid faced shots
 			w.cd = rate(l, 0.42) * eff.cd
 			var dn := 1 + int((l - 1) / 3) + game.extra_projectiles() \
@@ -283,7 +294,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"vx": p.dir_x / dd2 * dsp, "vy": p.dir_y / dd2 * dsp,
 					"dmg": (5.0 + 2.5 * l) * mul * eff.dmg,
 					"life": 0.8 * game.duration_mult(),
-					"r": 8.0 * eff.area,
+					"r": 8.0 * eff.area, "wid": w.id,
 				})
 				# M6 T-M6p feat OR (THOUSAND DARTS pierces; un-evolved dart
 				# loop takes the empty-feat identity — no key added, the
@@ -304,7 +315,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"vx": (t.x - p.x) / xd * xsp, "vy": (t.y - p.y) / xd * xsp,
 					"dmg": (20.0 + 8.0 * l) * mul * eff.dmg, "life": xd / xsp,
 					"travel": xd, "dist": 0.0, "r": 13.0 * eff.area,
-					"pierce": true, # roadmap "throws + pierce" (tick-paced)
+					"pierce": true, "wid": w.id, # roadmap "throws + pierce" (tick)
 				})
 				# M6 T-M6p feat OR (ROT SPIRAL returns — the ONE return flag
 				# on the shipped stepper; base axe keeps returning-free).
@@ -325,7 +336,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"dmg": (14.0 + 5.0 * l) * mul * eff.dmg,
 					"life": 2.5 * kd / ksp,
 					"travel": kd * 1.25, "dist": 0.0, "r": 11.0 * eff.area,
-					"ret": true, # the ONE return flag (step flips heading home)
+					"ret": true, "wid": w.id, # the ONE return flag (step flips home)
 				})
 				# M6 T-M6p feat OR (JUDGEMENT CROSS pierces on the way).
 				if eff.feat.has("pierce"):
@@ -343,7 +354,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"vx": cos(ca) * cvsp, "vy": sin(ca) * cvsp,
 					"dmg": (8.0 + 3.5 * l) * mul * eff.dmg,
 					"life": 1.0 * game.duration_mult(),
-					"r": 9.0 * eff.area,
+					"r": 9.0 * eff.area, "wid": w.id,
 				})
 				# M6 T-M6p feat OR (ETERNAL MATINS pierces the whole cross).
 				if eff.feat.has("pierce"):
@@ -352,7 +363,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 			w.cd = 0.7 * eff.cd
 			var zr: float = (60.0 + 3.0 * l) * game.area_mult() * eff.area
 			_hit({"x": p.x, "y": p.y, "r": zr}, (3.0 + 1.6 * l) * mul * eff.dmg, true)
-			rings.append({"r": zr, "life": 0.3, "max": 0.3})
+			rings.append({"r": zr, "life": 0.3, "max": 0.3, "wid": w.id})
 		"spectral-disc": # class: ember bolts — piercing, playfield-edge bounce
 			var stargets := _nearest(game, 1 + game.extra_projectiles() \
 					+ _feat_extra(eff)) # GRAVE ORBIT: +1 disc (extra-target)
@@ -369,6 +380,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"dmg": (12.0 + 5.0 * l) * mul * eff.dmg,
 					"life": 2.5 * game.duration_mult(),
 					"r": 11.0 * eff.area, "pierce": true, "bounce": true,
+					"wid": w.id,
 				})
 		"storm-peal": # class: spike burst — strike at a RANDOM foe
 			if _world.enemies.is_empty():
@@ -380,7 +392,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 			_hit({"x": struck.x, "y": struck.y, "r": spr},
 				(12.0 + 5.0 * l) * mul * eff.dmg)
 			bursts.append({"x": struck.x, "y": struck.y, "r": spr,
-				"life": 0.25, "max": 0.25})
+				"life": 0.25, "max": 0.25, "wid": w.id})
 		"fire-lash": # class: ember bolts — heavy bolt at a random foe
 			if _world.enemies.is_empty():
 				w.cd = 0.0
@@ -396,7 +408,7 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"vx": (pick.x - p.x) / fd * flsp, "vy": (pick.y - p.y) / fd * flsp,
 					"dmg": (16.0 + 6.0 * l) * mul * eff.dmg,
 					"life": 1.5 * game.duration_mult(),
-					"r": 13.0 * eff.area,
+					"r": 13.0 * eff.area, "wid": w.id,
 				})
 		_:
 			w.cd = 1.0 # evolved ids ride the T-M1e rule: fire no-ops unknown
@@ -438,7 +450,7 @@ func _update_orbit(w: Dictionary, dt: float, game: GameState) -> void:
 				var a: float = w.orbit + i * TAU / rc
 				var ox: float = p.x + cos(a) * rr
 				var oy: float = p.y + sin(a) * rr
-				halos.append({"x": ox, "y": oy})
+				halos.append({"x": ox, "y": oy, "wid": w.id})
 				_hit({"x": ox, "y": oy, "r": 17.0}, rd, true)
 			w.cd -= dt
 			if w.cd <= 0.0:
@@ -459,7 +471,7 @@ func _update_orbit(w: Dictionary, dt: float, game: GameState) -> void:
 				_hit({"x": best.x, "y": best.y, "r": burst_r},
 					(20.0 + 8.0 * rl) * mul)
 				bursts.append({"x": best.x, "y": best.y, "r": burst_r,
-					"life": 0.25, "max": 0.25})
+					"life": 0.25, "max": 0.25, "wid": w.id})
 		"dirge-eternal":
 			var dl: int = w.level
 			w.orbit = fmod(w.orbit + (1.8 + 0.06 * dl) * dt, TAU)
@@ -471,7 +483,7 @@ func _update_orbit(w: Dictionary, dt: float, game: GameState) -> void:
 				var da: float = w.orbit + i * TAU / dc
 				var ox2: float = p.x + cos(da) * dr
 				var oy2: float = p.y + sin(da) * dr
-				halos.append({"x": ox2, "y": oy2})
+				halos.append({"x": ox2, "y": oy2, "wid": w.id})
 				_hit({"x": ox2, "y": oy2, "r": dz}, dd, true)
 			w.cd -= dt
 			if w.cd <= 0.0:
@@ -479,7 +491,7 @@ func _update_orbit(w: Dictionary, dt: float, game: GameState) -> void:
 				var fz: float = dr + dz
 				_hit({"x": p.x, "y": p.y, "r": fz},
 					(4.0 + 1.5 * dl) * mul, true)
-				rings.append({"r": fz, "life": 0.5, "max": 0.5})
+				rings.append({"r": fz, "life": 0.5, "max": 0.5, "wid": w.id})
 		_:
 			w.orbit = fmod(w.orbit + (2.4 + 0.08 * w.level) * dt, TAU)
 			var count := 1 + int(ceil(w.level / 3.0))
@@ -489,7 +501,7 @@ func _update_orbit(w: Dictionary, dt: float, game: GameState) -> void:
 				var a2: float = w.orbit + i * TAU / count
 				var hx: float = p.x + cos(a2) * radius
 				var hy: float = p.y + sin(a2) * radius
-				halos.append({"x": hx, "y": hy})
+				halos.append({"x": hx, "y": hy, "wid": w.id})
 				_hit({"x": hx, "y": hy, "r": 17.0}, dmg, true)
 
 

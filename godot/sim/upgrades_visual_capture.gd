@@ -173,6 +173,25 @@ func _on_frame() -> void:
 			_wait = SETTLE_FRAMES
 			_advance(_stage + 1)
 		else:
+			# T-M6f (MC 11705, §2.2/§2.3): the ONE probe harness ADVANCES
+			# into SCENARIO C at the last family leg — per-SKILL windows
+			# for every fireable id (its palette method stays DEFENDED,
+			# untouched; the C legs ride the SAME StripsFxLeg pin pattern).
+			_skill_setup(0)
+			_wait = SETTLE_FRAMES
+			_advance(_stage + 1)
+		return
+	# Scenario-C stages (T-M6f): stage 21+ci saves skill leg ci (its leg was
+	# set up at the tail of the previous stage — ONE leg per stage, the s8
+	# capture lesson the B legs already carry).
+	var cb := _stage - (9 + FAMS.size() * LEVELS.size())
+	if cb >= 0 and cb < SKILL_IDS.size():
+		_save_skill_shot(cb)
+		if cb + 1 < SKILL_IDS.size():
+			_skill_setup(cb + 1)
+			_wait = SETTLE_FRAMES
+			_advance(_stage + 1)
+		else:
 			print("CAPTURE_OK")
 			quit()
 		return
@@ -356,6 +375,106 @@ func _save_fam_shot(li: int) -> void:
 	print("FAM fam=%s L=%d tick=%d t=%.3f arr=%d cx=%.1f cy=%.1f png=%s" % [
 		_fam_cur, _lvl_cur, _ticks_this, game.time,
 		_fam_array(_fam_cur).size(), sp.x, sp.y, png])
+	_save_png(png)
+
+
+# --- scenario C (T-M6f, MC 11705, M6-SPEC §2.2/§2.3) -------------------------
+# ONE leg per SKILL_FX row (the 26 fireable ids: 15 weapon-side + the 9
+# live evolved + the 2 union orbiters): the SAME declared-pin pattern as
+# scenario B (weapons pinned to the ONE firing id — the evolved ids pin
+# directly, the sim_boss-declared construction the §2.3 FX-E4 row names),
+# the SAME immortal frozen cast, the array-live + away gates. The SKILL
+# row carries what the probe's palette window judges: the row's own
+# sampled colour (printed FROM the table, the drift class the pytest pin
+# separately catches), the RENDERED rings/draws counts read off the
+# renderer (the flash leg: flash ids must show rings >= 1 through the
+# existing cap read; live_draws must stay <= FX_DRAWS_MAX — a planted
+# second MM goes RED here, FX-E4's red column).
+
+# The SKILL_FX row ids in table order (the §2.1 table's own order —
+# tests/test_skill_fx.py pins the leg list equals the table's keys).
+const SKILL_IDS := ["talon", "ember", "cleaver", "halo", "ward", "spike",
+	"bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross",
+	"censer-of-hours", "rot-water", "spectral-disc", "storm-peal",
+	"fire-lash", "red-wail", "thousand-darts", "rot-spiral",
+	"judgement-cross", "eternal-matins", "the-sluice", "grave-orbit",
+	"rolling-thunder", "inferno-lash", "requiem-toll", "dirge-eternal"]
+const SKILL_LEVEL := 5 # mid-level: the LOOK reads (colour/scale/band) are
+	# level-independent rows; level 5 sits inside the shipped count curves
+
+var _skill_cur := ""
+
+
+func _skill_setup(ci: int) -> void:
+	var wid: String = SKILL_IDS[ci]
+	var cls := String(WeaponFxViz.SKILL_FX[wid].cls)
+	_skill_cur = wid
+	_main._start_game() # real funnel clears world + FX transients
+	_main.game.weapons = [{"id": wid, "level": SKILL_LEVEL, "cd": 0.0}]
+	# DECLARED pin (scenario-B law): the evolved ids and union ids are
+	# PINNED directly into the weapon slot — a declared-pin construction,
+	# the §2.3 FX-E4 seam, never a pool offer (the pool never fires them).
+	for _i in TARGETS:
+		_main.world._spawn_enemy("wraith", _main.game, GameRenderer.VIEW)
+		var e: Dictionary = _main.world.enemies.back()
+		var a := float(_i) / float(TARGETS) * TAU
+		e.x = _main.game.player.x + cos(a) * TARGET_R
+		e.y = _main.game.player.y + sin(a) * TARGET_R
+		e.spd = 0.0 # FROZE cast (art_capture convention)
+		e.hp = 100000.0 # DECLARED immortal cast (scenario-B reading)
+		e.max_hp = 100000.0
+	_ticks_this = 0
+	var arr: Array = _fx_class_array(cls)
+	for n in FAM_CAP_TICKS:
+		_main.world.spawn_acc = 0.0 # DECLARED suppression (casts stay 6)
+		_main._step(DT)
+		_main.game.hp = _main.game.max_hp
+		_ticks_this += 1
+		if not arr.is_empty() and _away_cls(cls):
+			return
+	_fail = "skill %s: array never live within %d ticks" % [wid, FAM_CAP_TICKS]
+	_bail()
+
+
+func _away_cls(cls: String) -> bool:
+	match cls:
+		"bolts":
+			var p: Dictionary = _main.game.player
+			var b: Dictionary = _main.fx.bolts[-1]
+			return Vector2(b.x - p.x, b.y - p.y).length() >= AWAY_PX
+		"throws":
+			return _main.fx.throws[-1].dist >= AWAY_PX
+	return true
+
+
+func _fx_class_array(cls: String) -> Array:
+	match cls:
+		"arcs": return _main.fx.arcs
+		"bolts": return _main.fx.bolts
+		"throws": return _main.fx.throws
+		"halos": return _main.fx.halos
+		"rings": return _main.fx.rings
+		_: return _main.fx.bursts
+
+
+func _save_skill_shot(ci: int) -> void:
+	var row: Dictionary = WeaponFxViz.SKILL_FX[_skill_cur]
+	var col: Color = row.color
+	var cls := String(row.cls)
+	var counts: Dictionary = _main._fxv.fx_counts()
+	var game = _main.game
+	var p: Dictionary = game.player
+	var ctr := Vector2(p.x / CameraRig.PX_PER_M, p.y / CameraRig.PX_PER_M)
+	if cls == "bursts" and not _main.fx.bursts.is_empty():
+		var b: Dictionary = _main.fx.bursts[-1] # the spike reading, verbatim
+		ctr = Vector2(b.x, b.y) / CameraRig.PX_PER_M
+	var sp: Vector2 = _cam.unproject_position(Vector3(ctr.x, 0.05, ctr.y))
+	var png := "S-%s.png" % _skill_cur
+	print("SKILL id=%s cls=%s tick=%d t=%.3f arr=%d cx=%.1f cy=%.1f col=%.3f,%.3f,%.3f flash=%d rings=%d draws=%d png=%s" % [
+		_skill_cur, cls, _ticks_this, game.time,
+		_fx_class_array(cls).size(), sp.x, sp.y, col.r, col.g, col.b,
+		1 if bool(row.flash) else 0, int(counts.get("rings", 0)),
+		_main._fxv.live_draws(), png])
 	_save_png(png)
 
 

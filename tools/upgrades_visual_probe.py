@@ -37,6 +37,23 @@ Gate: >= 5 of 6 families scale (families whose ONLY per-level sim quantity
 is damage carry their declaration in viz_fx.gd's code comments; the honest
 mechanism there is level-as-intensity within the sim's true radius).
 
+Table 3 SKILLS (T-M6f, MC 11705, M6-SPEC §2.2/§2.3) — 26 legs, one per
+SKILL_FX row (15 weapon-side + 9 live evolved + 2 unions), the capture's
+scenario C (SAME declared-pin pattern as Table 2, the palette method
+DEFENDED and untouched: this table EXTENDS it, it does not replace it).
+Per leg, count pixels inside the per-class window that are LIT (additive
+FX over the dark moorland — max channel >= SKILL_LIT_MIN) AND direction-
+aligned with that row's OWN sampled colour (cosine of the normalised RGB
+vectors >= SKILL_COS_MIN): the per-skill identity measure. A writer that
+forgot the wid law paints the fallback colour (EMBER-row) — only rows
+whose colour sits in that direction can pass; every distinct row is RED.
+The row is GREEN at >= SKILL_PX_MIN px (MEASURED floors, tuned against
+this card's real frames), plus the structural flags the capture reads off
+the renderer: a flash row must show rings >= 1 (the evolved flash riding
+the EXISTING rings MM through the mini(size,1) cap read) and EVERY row
+must show live draws <= 7 (§b ONE-draw law — a planted second MM class is
+RED here, FX-E4).
+
 Usage:  python3 tools/upgrades_visual_probe.py            # capture + gate
         python3 tools/upgrades_visual_probe.py --gate DIR # gate a shot dir
                                                   # (real or planted-mutation
@@ -125,16 +142,44 @@ def _ichor(r, g, b):       # ICHOR additive spike shards
     return (g > r + 30) & (g > b + 40) & (g >= 110)
 
 
+# T-M6f RE-PIN (MC 11705, replace-not-delete): F2 RETIRED the constant
+# family colours (MOON/EMBER/BONE/ICHOR per-class albedos -> per-instance
+# SKILL_FX colours), so the three masks keyed to the RETIRED facts would
+# claim a product that no longer exists — a surviving claim is CONTRADICTED,
+# not debt. These signatures are re-tuned to the FAMILY row's SHIPPED sampled
+# colour against THIS card's real frames (same measured discipline the T-S18
+# header spells; separations re-checked on the wraith/speckle rejects the
+# original masks carried): the axe sage is a near-neutral warm grey the
+# wraith-blue and the green flecks both miss; the teal ring/shard bands ride
+# the wraith's b-r cap reject. talon/ember/halo keep their masks (their F2
+# colours land inside the same cones — re-measured GREEN, unchanged bytes).
+def _sage(r, g, b):        # cleaver axe: SKILL_FX.cleaver unshaded (~78,82,76)
+    return (r >= b - 6) & (r <= b + 8) & (g >= r) & (g >= b) & (b >= 40) \
+        & (g <= 120)
+
+
+def _ringteal(r, g, b):    # ward ring: SKILL_FX.ward additive teal band
+    return (b >= g - 8) & (b >= r + 6) & ((b - r) <= 40) & (b >= 24) \
+        & (g >= r + 4)
+
+
+def _shardteal(r, g, b):   # spike shards: SKILL_FX.spike additive teal-green
+    return (b >= g - 6) & (g >= r + 8) & ((b - r) <= 40) & (b >= 28)
+
+
 KIND_TEST = {"gems": _green, "coins": _gold, "heals": _red}
-FAM_TEST = {"talon": _moon, "ember": _ember, "cleaver": _bone,
-            "halo": _ember, "ward": _moon, "spike": _ichor}
+FAM_TEST = {"talon": _moon, "ember": _ember, "cleaver": _sage,
+            "halo": _ember, "ward": _ringteal, "spike": _shardteal}
 
 
 def capture(shots_dir):
     os.makedirs(shots_dir, exist_ok=True)
     log = os.path.join(shots_dir, "capture.log")
     r = capture_lib.run_capture(SCRIPT, {"HD3D_UV_SHOTS_DIR": shots_dir},
-                                timeout=1200)
+                                timeout=2400)  # T-M6f: scenario C's 26
+                                # per-SKILL legs extend the run; measured
+                                # budget on this card's llvmpipe box (the
+                                # 1200 s A/B budget predates them)
     out = r.stdout + r.stderr  # capture.log keeps the merged content the
     with open(log, "w") as fh:  # streamed run wrote (written post-run now)
         fh.write(out)
@@ -150,7 +195,7 @@ def capture(shots_dir):
 def parse_rows(out):
     """FIRSTKILL / A + PICK / FAM rows -> sidecar dict (the --gate copy path
     re-measures planted shots against the REAL run's coordinates)."""
-    rows = {"firstkill": None, "shots": {}, "fam": {}}
+    rows = {"firstkill": None, "shots": {}, "fam": {}, "skill": {}}
     cur = None
     for line in out.splitlines():
         if line.startswith("FIRSTKILL"):
@@ -168,6 +213,16 @@ def parse_rows(out):
                 "row": line.strip(), "png": parts["png"],
                 "cx": float(parts["cx"]), "cy": float(parts["cy"]),
                 "arr": int(parts["arr"])}
+        elif line.startswith("SKILL id="):
+            # T-M6f scenario-C rows (MC 11705, §2.3)
+            parts = dict(p.split("=", 1) for p in line.split()[1:])
+            rows["skill"][parts["id"]] = {
+                "row": line.strip(), "png": parts["png"],
+                "cls": parts["cls"],
+                "cx": float(parts["cx"]), "cy": float(parts["cy"]),
+                "col": [float(v) for v in parts["col"].split(",")],
+                "flash": int(parts["flash"]), "rings": int(parts["rings"]),
+                "draws": int(parts["draws"])}
     if rows["firstkill"] is None:
         sys.exit("no FIRSTKILL row in capture output")
     for png in PICK_SHOTS:
@@ -177,6 +232,9 @@ def parse_rows(out):
         for lv in (1, 8):
             if "%s-L%d" % (f, lv) not in rows["fam"]:
                 sys.exit("missing FAM row %s-L%d" % (f, lv))
+    missing = [i for i in skill_fx_ids() if i not in rows["skill"]]
+    if missing:
+        sys.exit("missing SKILL rows: %s" % missing)
     return rows
 
 
@@ -226,6 +284,67 @@ def blobs(mask, win_d):
             if size >= CC_MIN:
                 n += 1
     return n
+
+
+# ---- T-M6f Table 3 measures (MC 11705, M6-SPEC §2.2/§2.3) -------------------
+# THE LAW (measured, this card's real frames; header Table 3 carries the
+# contract): a window pixel BELONGS to its row's colour when (a) its DELTA
+# from the per-window median ambient has norm >= SKILL_NORM_MIN (24 — the
+# measured moorland noise floor), (b) every channel delta sits inside the
+# row's CLASS-ALPHA contribution box [−slack, hi_k·255·alpha·colour] — the
+# same per-class alpha constants the WRITER spells (arcs 0.35, bolts/halos/
+# throws-orbs 1.0, rings 0.25 with the FLASH_GAIN 2.2 headroom, bursts 0.6),
+# which is what kills the bright grass-fleck leak a bare hue test admits
+# (flecks' delta misses the dark rows' channel boxes), and (c) the delta
+# DIRECTION aligns with the sampled colour (cos >= SKILL_COS_MIN).
+# SKILL_PX_MIN (25) is the count floor the weakest real row clears with
+# 4.6x headroom (storm-peal 115 px measured across the 26-leg run).
+# Separation (the plant column): a writer that forgot the wid law paints
+# the EMBER fallback — 17 of 26 rows measure 0 aligned px (the gate needs
+# ALL, so the table is RED; the 9 warm-direction survivors are declared).
+SKILL_WIN = {"arcs": 130, "bolts": 90, "throws": 90, "halos": 100,
+             "rings": 95, "bursts": 80}
+# the writer's per-class alpha law (viz_fx.gd), one shared constant table:
+SKILL_CLASS_ALPHA = {"arcs": 0.35, "bolts": 1.0, "throws": 1.0,
+                     "halos": 1.0, "rings": 0.25 * 2.2, "bursts": 0.6}
+SKILL_NORM_MIN = 24.0
+SKILL_COS_MIN = 0.85
+SKILL_PX_MIN = 25
+SKILL_HI_K = 2.2 # box headroom (fades ride BELOW their peak; nothing
+SKILL_SLACK = 8.0 # painted sits BELOW the median ambient by more than this)
+
+
+def skill_fx_ids():
+    """The 26 row ids, parsed from the ONE table site (viz_fx.gd, §2.1) —
+    the probe never carries a second list."""
+    import re as _re
+    with open(os.path.join(REPO, "godot", "scripts", "viz_fx.gd")) as fh:
+        src = fh.read()
+    return _re.findall(
+        r'"([\w-]+)": \{"cls": "\w+", "color": Color\(', src)
+
+
+def skill_px(path, cx, cy, r, col, cls):
+    w, d = load_window(path, cx, cy, r)
+    px = w[d]
+    if px.size == 0:
+        return 0
+    amb = np.median(px, axis=0) # per-window self-calibrating ambient
+    dl = px - amb
+    n = np.linalg.norm(dl, axis=1)
+    s = dl[n >= SKILL_NORM_MIN]
+    if len(s) == 0:
+        return 0
+    cap = SKILL_HI_K * 255.0 * SKILL_CLASS_ALPHA[cls] * np.asarray(col) \
+        + SKILL_SLACK
+    keep = (s <= cap).all(axis=1) & (s >= -SKILL_SLACK).all(axis=1)
+    s = s[keep]
+    if len(s) == 0:
+        return 0
+    c = np.asarray(col)
+    c = c / (np.linalg.norm(c) + 1e-9)
+    cs = (s @ c) / (np.linalg.norm(s, axis=1) + 1e-9)
+    return int((cs >= SKILL_COS_MIN).sum())
 
 
 # ---- T-M2g BULK-GEM row (MC 11238, M2-SPEC rev-2 C-G4) -----------------------
@@ -379,6 +498,38 @@ def main():
     fam_ok = scaled >= FAM_GREEN_MIN
     ok = ok and fam_ok
     print("families scaled: %d/6 (gate >= %d)" % (scaled, FAM_GREEN_MIN))
+
+    # ---- Table 3: per-skill windows (T-M6f, MC 11705, §2.2/§2.3) -----------
+    print("== T-M6f per-skill FX (MC 11705) — delta px inside each row's "
+          "own class-alpha colour box, direction-aligned to its sampled "
+          "colour; GREEN at >= %d px "
+          "+ flash rings >= 1 + live draws <= 7 ==" % SKILL_PX_MIN)
+    print("%-18s %-7s %6s %6s %6s  verdict" % ("skill", "cls", "px",
+                                               "rings", "draws"))
+    all_ids = skill_fx_ids()
+    skills_green = 0
+    for sid in all_ids:
+        e = rows["skill"][sid]
+        path = os.path.join(shots, e["png"])
+        if not os.path.exists(path):
+            sys.exit("missing shot %s" % path)
+        px = skill_px(path, e["cx"], e["cy"], SKILL_WIN[e["cls"]], e["col"],
+                      e["cls"])
+        flash_ok = e["flash"] == 0 or e["rings"] >= 1
+        draws_ok = e["draws"] <= 7
+        green = px >= SKILL_PX_MIN and flash_ok and draws_ok
+        skills_green += 1 if green else 0
+        print("%-18s %-7s %6d %6d %6d  %s%s" % (
+            sid, e["cls"], px, e["rings"], e["draws"],
+            "GREEN" if green else "RED",
+            "" if green else (" flash-rings=%d" % e["rings"]
+                              if flash_ok is False else
+                              (" draws=%d" % e["draws"]
+                               if draws_ok is False else ""))))
+    sk_ok = skills_green == len(all_ids)
+    ok = ok and sk_ok
+    print("skills painted per-skill: %d/%d (gate: ALL)" % (
+        skills_green, len(all_ids)))
     print("GATE: %s" % ("ALL GREEN" if ok else "RED ROWS PRESENT"))
     return 0 if ok else 1
 

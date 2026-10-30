@@ -220,7 +220,12 @@ def test_deviation_doc_footer_contract():
     # fixture re-mints + the unchanged-channels row); the sixteen ratified
     # §9 REV-3 rows stay byte-untouched above them (git diff = additions
     # only). 16 + 6 = 22 (the sixth: the s8 re-select row, A1-contract).
-    assert len(rows) == 22, "the §9 table: 16 ratified + 6 measured (T-M6p)"
+    # T-M6f RE-PIN (MC 11705, same law): the F2 battery APPENDED four more
+    # MEASURED rows (journey additive-tail + the 13-fixture reproduce row +
+    # the strips RE-DERIVE re-mint row + the probe Table-3 NEW-legs row);
+    # every earlier row stays byte-untouched above (git diff = additions
+    # only). 22 + 4 = 26.
+    assert len(rows) == 26, "the §9 table: 16 ratified + 10 measured (T-M6f)"
     verbatim = "Ibwant skeletons with movements. 2. Rec. 3. Ship. Ratufy"
     shifts = 0
     for r in rows:

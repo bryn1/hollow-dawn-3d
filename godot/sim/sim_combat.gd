@@ -61,10 +61,17 @@ static func caps(game) -> Dictionary:
 			cl = w.level
 	var out := {"ember": 1 + int((el - 1) / 3), "cleaver": 1 + int((cl - 1) / 4)}
 	for w in game.weapons:
-		if WeaponFxViz.BOLT_ROSTER.has(w.id):
-			out.ember += WeaponFxViz.roster_one_cap(w.id, w.level)
-		elif WeaponFxViz.THROW_ROSTER.has(w.id):
-			out.cleaver += WeaponFxViz.roster_one_cap(w.id, w.level)
+		# M6 F2 (MC 11705, §2.1/§3.3 both-sites rule — mirrors viz_fx's
+		# _roster_cap verbatim): family membership resolves through
+		# effect()'s BASE map, so the evolved ids add their term THROUGH
+		# the base family at their own level; roster_one_cap stays keyed
+		# on the base id. Un-evolved ids resolve to themselves — the
+		# shipped sums evaluate identically (FX-E3 byte-equal re-derive).
+		var base := String(EvolutionSystem.effect(w.id).base)
+		if WeaponFxViz.BOLT_ROSTER.has(base):
+			out.ember += WeaponFxViz.roster_one_cap(base, w.level)
+		elif WeaponFxViz.THROW_ROSTER.has(base):
+			out.cleaver += WeaponFxViz.roster_one_cap(base, w.level)
 	return out
 
 

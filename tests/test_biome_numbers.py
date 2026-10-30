@@ -227,8 +227,14 @@ def test_ward_numbers():
                      WEAPONS)
     assert re.search(r"\(4\.0 \+ 2\.0 \* l\)", WEAPONS)
     # T-M6p RE-PIN: same byte, boost term riding (identity keeps it).
+    # T-M6f RE-PIN (MC 11705 §2.1, replace-not-delete): the formula byte
+    # stands; the wid stamp rides the SAME dict as ONE additive key (the
+    # array counts/caps are untouched — every _first_fire twin gains it and
+    # the feat-flag diff-set cancels it; the journey boost-tail rows are
+    # the measured evidence, docs/BYTE-DEVIATION-M6.md).
     assert re.search(r"rings\.append\(\{\"r\": 80\.0 \* eff\.area, "
-                     r"\"life\": 0\.12, \"max\": 0\.12\}\)", WEAPONS)
+                     r"\"life\": 0\.12, \"max\": 0\.12,\s*\"wid\": w\.id\}\)",
+                     WEAPONS)
 
 
 def test_spike_numbers():
