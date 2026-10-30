@@ -232,13 +232,17 @@ def test_snapshot_exact_12_limit_absent():
 
 # ---- R7: the s8 A7 doc-sync row (replace-not-delete, same commit) ---------------
 
-def test_r7_a7_text_names_the_fallbacks_beside_32():
+def test_r7_a7_text_names_the_fallbacks_beside_31():
+    # RETIRED+REPLACED at T-M6d (MC 11675, M6-SPEC §4.1): the pool is 31
+    # kinds since the doom-sigil weapon-side retirement (icons KEEPT) — the
+    # R7 row's fallback-offer claim beside the pool is UNCHANGED, the count
+    # it names moved with the code (replace-not-delete pin discipline).
     src = open(os.path.join(REPO, "tools", "s8_acceptance.py"),
                encoding="utf-8").read()
-    assert "all 32 pool kinds (16 weapons + 15 passives + 1 bonus)" in src, \
-        "the 32-pool-kind claim STAYS (replace-not-delete, not delete)"
+    assert "all 31 pool kinds (15 weapons + 15 passives + 1 bonus" in src, \
+        "the 31-pool-kind claim rides the T-M6d retirement (replace, delete never)"
     assert "NOT pool kinds" in src and "LIMIT" in src, \
-        "the R7 row must name the three fallback offers beside the 32"
+        "the R7 row must name the three fallback offers beside the pool"
 
 
 # ---- verdict row -----------------------------------------------------------------

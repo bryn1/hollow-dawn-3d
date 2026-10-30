@@ -246,7 +246,7 @@ def main():
         a6, "TESTED", "band_sample/band_flip rows of .tmp/hd3d-boss-s6-dump.jsonl"
         " + hud_3d.gd")
 
-    # ---- A7: all pool kinds with real icons (32 kinds since T-M1h; pytest gate, no capture re-run)
+    # ---- A7: all pool kinds with real icons (31 kinds since T-M6d; pytest gate, no capture re-run)
     # R7 (T-M4l, MC 11365) REPLACE-not-delete text row: the 32-pool-kind
     # claim STANDS — LIMIT_CARDS are pool-exhaustion FALLBACK offers, not
     # pool kinds, and ride the icon_path() `_:` catch-all with INLINE icon
@@ -259,10 +259,11 @@ def main():
                          ".tmp/s5-cards/cards-passives.png",
                          ".tmp/s5-cards/cards-bonus.png")
              if os.path.exists(os.path.join(REPO, p))]
-    row("A7", "all 32 pool kinds (16 weapons + 15 passives + 1 bonus) resolve a real"
+    row("A7", "all 31 pool kinds (15 weapons + 15 passives + 1 bonus, T-M6d:"
+        " doom-sigil retired weapon-side, icon KEEPT) resolve a real"
         " icon; card shots committed — beside them ride the 3 LIMIT-break fallback"
         " offers (LIMIT · FURY / HASTE / BULWARK, M4 T-M4l: exhaustion FALLBACKS,"
-        " NOT pool kinds — the pool kinds stay 32)",
+        " NOT pool kinds — the pool kinds stay 31)",
         rc == 0 and len(cards) == 3, "TESTED",
         "tests/test_card_icons.py (rerun rc=%d) + .tmp/s5-cards/" % rc)
 

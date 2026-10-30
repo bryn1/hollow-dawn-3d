@@ -91,7 +91,7 @@ func _pin_gems(world: GameWorld, n: int) -> Dictionary:
 		world.gems.append({"x": PIN_X + float(i % 13), "y": PIN_Y + float(i % 7),
 			"xp": xp})
 		sum_xp += xp
-		if i < GameWorld.GEM_MERGE_BATCH:
+		if i < Drops.GEM_MERGE_BATCH:
 			fold_xp += xp
 	return {"sum_xp": sum_xp, "fold_xp": fold_xp, "cx": _fold_cx(), "cy": _fold_cy()}
 
@@ -101,16 +101,16 @@ func _pin_gems(world: GameWorld, n: int) -> Dictionary:
 # arithmetic is part of the row (the merge always consumes exactly the batch).
 func _fold_cx() -> float:
 	var s := 0.0
-	for i in GameWorld.GEM_MERGE_BATCH:
+	for i in Drops.GEM_MERGE_BATCH:
 		s += PIN_X + float(i % 13)
-	return s / float(GameWorld.GEM_MERGE_BATCH)
+	return s / float(Drops.GEM_MERGE_BATCH)
 
 
 func _fold_cy() -> float:
 	var s := 0.0
-	for i in GameWorld.GEM_MERGE_BATCH:
+	for i in Drops.GEM_MERGE_BATCH:
 		s += PIN_Y + float(i % 7)
-	return s / float(GameWorld.GEM_MERGE_BATCH)
+	return s / float(Drops.GEM_MERGE_BATCH)
 
 
 # --- legs ---------------------------------------------------------------------
@@ -121,39 +121,41 @@ func _leg_boundary() -> void:
 	var world: GameWorld = run.world
 	var game = run.game
 	# 199: count held, no fold
-	var p199 := _pin_gems(world, GameWorld.GEM_MERGE_THRESHOLD - 1)
+	# M6 T-M6d (MC 11675): GEM_MERGE_* moved to drops.gd VERBATIM
+	# (F-10 partition); refs re-pointed, numbers unchanged (24 sites).
+	var p199 := _pin_gems(world, Drops.GEM_MERGE_THRESHOLD - 1)
 	world.update_entities(DT, game)
-	var held: bool = world.gems.size() == GameWorld.GEM_MERGE_THRESHOLD - 1 \
+	var held: bool = world.gems.size() == Drops.GEM_MERGE_THRESHOLD - 1 \
 			and not _has_bulk(world.gems)
 	# 200: exactly one bulk gem, count drops, fold checked byte-exact
 	world.gems.clear()
-	var p200 := _pin_gems(world, GameWorld.GEM_MERGE_THRESHOLD)
+	var p200 := _pin_gems(world, Drops.GEM_MERGE_THRESHOLD)
 	world.update_entities(DT, game)
 	var bulk: Dictionary = world.gems[world.gems.size() - 1] \
-			if world.gems.size() == GameWorld.GEM_MERGE_BATCH + 1 \
-					and world.gems.size() < GameWorld.GEM_MERGE_THRESHOLD else {}
+			if world.gems.size() == Drops.GEM_MERGE_BATCH + 1 \
+					and world.gems.size() < Drops.GEM_MERGE_THRESHOLD else {}
 	var sum200 := 0.0
 	for g in world.gems:
 		sum200 += g.xp
-	var merged200: bool = world.gems.size() == GameWorld.GEM_MERGE_BATCH + 1 \
+	var merged200: bool = world.gems.size() == Drops.GEM_MERGE_BATCH + 1 \
 			and bulk.get("big", false) == true \
 			and bulk.get("xp", -1.0) == p200.fold_xp \
 			and bulk.x == p200.cx and bulk.y == p200.cy \
 			and sum200 == p200.sum_xp
 	# 201: merges too — bounded, not "only at exactly 200"
 	world.gems.clear()
-	var p201 := _pin_gems(world, GameWorld.GEM_MERGE_THRESHOLD + 1)
+	var p201 := _pin_gems(world, Drops.GEM_MERGE_THRESHOLD + 1)
 	world.update_entities(DT, game)
-	var bounded201: bool = world.gems.size() == GameWorld.GEM_MERGE_BATCH + 2 \
+	var bounded201: bool = world.gems.size() == Drops.GEM_MERGE_BATCH + 2 \
 			and _has_bulk(world.gems)
 	_funnel.check("gem_boundary", {
 		"no_merge_at_199": held,
 		"merge_at_200_count_drops": merged200,
 		"merge_at_201_bounded": bounded201,
 		"no_merge_at_199_no_stale_bulk": held and p199.sum_xp > 0.0,
-	}, {"threshold": GameWorld.GEM_MERGE_THRESHOLD,
-		"batch": GameWorld.GEM_MERGE_BATCH,
-		"n199": GameWorld.GEM_MERGE_THRESHOLD - 1, "n200": 101, "n201": 102,
+	}, {"threshold": Drops.GEM_MERGE_THRESHOLD,
+		"batch": Drops.GEM_MERGE_BATCH,
+		"n199": Drops.GEM_MERGE_THRESHOLD - 1, "n200": 101, "n201": 102,
 		"bulk_xp_expected": p200.fold_xp, "bulk_xp_observed": bulk.get("xp", -1.0),
 		"declared": "synthetic pinned array (sim_caps synthetic-slot pattern); " +
 			"update_entities called directly = the product's own merge seam"})
@@ -181,7 +183,7 @@ func _leg_conservation() -> void:
 		# xp, never float noise: the planted-red margin is the dropped term
 		# itself, >= 0.5 against an exact-zero arithmetic noise floor)
 		var pre := 0.0
-		for i in GameWorld.GEM_MERGE_THRESHOLD:
+		for i in Drops.GEM_MERGE_THRESHOLD:
 			var xp := 0.5 + 0.25 * float(i % 7)
 			world.gems.append({"x": PIN_X + float(i % 13), "y": PIN_Y, "xp": xp})
 			pre += xp
@@ -212,20 +214,20 @@ func _leg_byte_equal() -> void:
 	# an EXACT float, which is why byte-equality CAN hold at m=1.0 (rev-2 P2-4
 	# — at m!=1.0 the same claim is false and is NOT made here).
 	var drops: Array = []
-	for i in GameWorld.GEM_MERGE_THRESHOLD:
+	for i in Drops.GEM_MERGE_THRESHOLD:
 		drops.append({"x": 4.0 + float(i % 9), "y": 3.0 + float(i % 5),
 			"xp": 1.0 + float(i % 4)}) # all inside the 16 px touch funnel
 	# OFF: two batches of BATCH, each fully collected before the next (the
 	# array never reaches the threshold -> no fold; the 200 total is fixed).
-	for i in GameWorld.GEM_MERGE_BATCH:
+	for i in Drops.GEM_MERGE_BATCH:
 		goff.gems.append(drops[i].duplicate())
 	goff.collect_pickups(off.game)
-	for i in range(GameWorld.GEM_MERGE_BATCH, 2 * GameWorld.GEM_MERGE_BATCH):
+	for i in range(Drops.GEM_MERGE_BATCH, 2 * Drops.GEM_MERGE_BATCH):
 		goff.gems.append(drops[i].duplicate())
 	goff.collect_pickups(off.game)
 	# ON: all 200 land, ONE real update_entities folds the oldest BATCH into a
 	# bulk gem, then the SAME collect funnel eats bulk + singles.
-	for i in 2 * GameWorld.GEM_MERGE_BATCH:
+	for i in 2 * Drops.GEM_MERGE_BATCH:
 		gon.gems.append(drops[i].duplicate())
 	gon.update_entities(DT, on.game)
 	var bulks := 0
@@ -264,11 +266,11 @@ func _leg_bounded_spam() -> void:
 		if g.get("big", false):
 			folds += 1
 	_funnel.check("gem_bounded_spam", {
-		"never_exceeds_threshold": max_seen <= GameWorld.GEM_MERGE_THRESHOLD,
+		"never_exceeds_threshold": max_seen <= Drops.GEM_MERGE_THRESHOLD,
 		"folds_happened": folds > 0,
 		"array_still_working": world.gems.size() > 0,
 	}, {"drops": SPAM_DROPS, "max_seen": max_seen, "bulk_now": folds,
-		"threshold": GameWorld.GEM_MERGE_THRESHOLD,
+		"threshold": Drops.GEM_MERGE_THRESHOLD,
 		"declared": "one real kill_enemy + one update per step (product rate); " +
 			"observation at the merge seam — a same-tick burst folds at the " +
 			"next update (world.gd's stated reading)"})

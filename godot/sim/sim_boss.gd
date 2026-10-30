@@ -205,9 +205,9 @@ func run_chest_leg(root: Window) -> Array:
 			"x": 0.0, "y": 0.0, "xp": 0.0, "boss": false, "miniboss": true})
 	var mb_chests: int = run.world.chests.size() - boss_chests
 	rows.append({"ev": "chest_drops", "t": _r3(run.game.time), "seed": 41110,
-		"boss_chance": GameWorld.CHEST_CHANCE_BOSS, "boss_kills": 1,
+		"boss_chance": Drops.CHEST_CHANCE_BOSS, "boss_kills": 1,
 		"boss_chests": boss_chests,
-		"miniboss_chance": GameWorld.CHEST_CHANCE_MINIBOSS,
+		"miniboss_chance": Drops.CHEST_CHANCE_MINIBOSS,
 		"miniboss_kills": mb_kills, "miniboss_chests": mb_chests,
 		"ok": boss_chests == 1 and mb_chests > 0 and mb_chests < mb_kills})
 	run.queue_free()

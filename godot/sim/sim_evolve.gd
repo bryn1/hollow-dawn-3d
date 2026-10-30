@@ -13,10 +13,15 @@
 # sim_boss:215). Two M1h legs: evo_pool_reachability proves the ONE pool
 # source (LevelUpDeck.build_pool) now offers every table base AND its
 # partner (the "sim can now acquire both parts" row — pool read, zero RNG);
-# evo_full_evolve lands 3 FULL evolutions end-to-end through the REAL
+# evo_full_evolve lands 2 FULL evolutions end-to-end through the REAL
 # offer funnel (every weapon/passive/upgrade entry taken by a real _pick —
-# no id pinned at all — bone-whip, rot-water, doom-sigil; all ten rows
-# were runtime-dead before T-M1h), then the real chest-open evolution.
+# no id pinned at all — bone-whip, rot-water; all ten rows were
+# runtime-dead before T-M1h), then the real chest-open evolution.
+# T-M6d (MC 11675, M6-SPEC §4.1): the doom-sigil POOL retirement — its
+# FULL leg RETIRED WITH THE POOL ENTRY (replace-not-delete note here, the
+# fixture rows RE-MINTED, declared channel); its reachability row flipped
+# to the retirement claim (base NOT offered, partner passive still is —
+# passives stay 15). The TABLE row itself is T-M6p's retirement.
 # Chests are PLACED THROUGH THE REAL DROP FUNNEL: a synthetic boss-flagged
 # kill dict (xp 0, real flag shape — the sim_boss chest-roll-leg shape) dies
 # by world.kill_enemy next to the pawn; CHEST_CHANCE_BOSS 1.0 short-circuits
@@ -115,7 +120,9 @@ func _run() -> void:
 	_leg_pool_reachability()
 	_leg_full_evolve("bone-whip")
 	_leg_full_evolve("rot-water")
-	_leg_full_evolve("doom-sigil")
+	# _leg_full_evolve("doom-sigil") RETIRED at T-M6d (MC 11675): the base
+	# left the pool, so no real _pick can ever acquire it — the leg would
+	# test a route the game no longer has.
 	_emit({"ev": "evolve_verdict", "ok": _ok})
 	for r in _rows:
 		_out.store_line(JSON.stringify(r))
@@ -306,10 +313,19 @@ func _leg_pool_reachability() -> void:
 				got_w = true
 			if card.kind == "passive" and card.key == partner:
 				got_p = true
+		if base == "doom-sigil":
+			# T-M6d (MC 11675): the retired base is NOT offerable (pool 16
+			# -> 15); the partner passive STAYS a pool kind (passives 15
+			# unchanged) — the retirement claim rides this row.
+			checks[base] = (not got_w) and got_p
+			lines.append("%s+%s offered=%s retired_base=%s" % [base, partner,
+					str(not got_w and got_p), "true"])
+			continue
 		checks[base] = got_w and got_p
 		lines.append("%s+%s offered=%s" % [base, partner, str(got_w and got_p)])
-	_gate("evo_pool_reachability", {"before": "canonical run"}, lines,
-		GATE_OK_T, checks, "build_pool offers every table base + partner")
+	_gate("evo_pool_reachability", {"before": "canonical run"}, lines, GATE_OK_T,
+		checks, "build_pool offers every table base + partner; the T-M6d "
+		+ "retired base doom-sigil is offered NO MORE (partner still is)")
 
 
 # Every part ACQUIRED through the real offer funnel (real make_offer cards,

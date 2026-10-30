@@ -135,8 +135,8 @@ func _run_ticks(n: int) -> void:
 # HERE, never silently in the pixels.
 func _feed_drops() -> void:
 	var p: Dictionary = _main.game.player
-	var batch: int = GameWorld.GEM_MERGE_BATCH
-	var thr: int = GameWorld.GEM_MERGE_THRESHOLD
+	var batch: int = Drops.GEM_MERGE_BATCH
+	var thr: int = Drops.GEM_MERGE_THRESHOLD
 	var kills := 0
 	while _main.world.gems.size() < batch and kills < FEED_CAP:
 		_kill_at(p.x + POSE_A_PX, p.y)

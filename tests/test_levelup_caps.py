@@ -146,10 +146,13 @@ def test_weapon_below_cap_leg():
     cards, gate = legs()["weapon_below_cap"]
     weapons, _, _ = _counts(cards)
     assert len(weapons) > 0
+    # T-M6d (MC 11675): "doom-sigil" RETIRED with the weapon — it can no
+    # longer appear in ANY offer leg; the below-cap set is the ten
+    # remaining carried below-cap weapons (pool 16→15, kinds 32→31).
     assert set(c["id"] for c in weapons) == {
         "spike", "bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross",
         "censer-of-hours", "rot-water", "spectral-disc", "storm-peal",
-        "fire-lash", "doom-sigil"}
+        "fire-lash"}
     assert gate["ok"] is True
 
 

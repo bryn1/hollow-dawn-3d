@@ -1,12 +1,19 @@
-# The sixteen auto-fire weapons (plan §5 six + PARITY-ROADMAP rev3 feature 6
-# reason: >400 lines — 474 measured at MC 11316 §1.1: ONE _fire dispatch is
+# The fifteen auto-fire weapons (plan §5 six + PARITY-ROADMAP rev3 feature 6
+# reason: >400 lines — 474 measured at MC 11316 §1.1; T-M6d (MC 11675)
+# net -13 code / retirement provenance notes (490 measured at close): ONE _fire dispatch is
 #   the ONE fire seam of the kill funnel (every weapon fires through _fire/
 #   _hit below); the split alternative would fork the projectile seam
 #   beside the fire dispatch and rides the RNG path — audit verdict: header.
 # ten, T-M1h): talon, ember, cleaver, halo, ward, spike + bone-whip,
 # dart-loop, hewn-axe, pilgrim-cross, censer-of-hours, rot-water, spectral-
-# disc, storm-peal, fire-lash, doom-sigil. All fire without player input;
-# level scales damage/count/rate. The ten NEW weapons reuse the SIX effect
+# disc, storm-peal, fire-lash. All fire without player input;
+# level scales damage/count/rate. M6 F6 (MC 11675, M6-SPEC §4.1/§4.4 R1): the
+# sixteenth, DOOM SIGIL, is RETIRED WEAPON-SIDE here — id + META row + _fire
+# arm out (offer universe 16→15, pool kinds 32→31; icons KEEP, per the icon
+# law the .png stays); its screen-clear rides PICKUP-side as the RIVEN SIGIL
+# counter-drop (drops.gd, §4.2). NF-8: that retirement also cuts the
+# evolution table 10→9 at T-M6p. The nine REMAINING feature-6 weapons reuse
+# the SIX effect
 # classes verbatim (arcs/bolts/throws/bursts/rings/halos — the M1h capture
 # carries the family mapping table); the brief's NO-NEW-VIZ-MECHANISM ruling
 # maps rot-water's lingering zone onto the ward ring-tick class (declared
@@ -22,7 +29,11 @@ extends RefCounted
 
 const IDS := ["talon", "ember", "cleaver", "halo", "ward", "spike",
 	"bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross", "censer-of-hours",
-	"rot-water", "spectral-disc", "storm-peal", "fire-lash", "doom-sigil"]
+	"rot-water", "spectral-disc", "storm-peal", "fire-lash"]
+	# M6 F6 (MC 11675): "doom-sigil" RETIRED here — weapon-side out of the
+	# offer universe (pool 16→15); its screen-clear rides drops.gd's RIVEN
+	# SIGIL counter-drop (§4.2); icon-doom-sigil.png KEEPS (icon law — the
+	# file stays, the evolve-table row retires at T-M6p).
 const MAX_LEVEL := 8
 
 const META := {
@@ -41,7 +52,7 @@ const META := {
 	"spectral-disc": {"name": "Spectral Disc", "icon": "icon-spectral-disc", "desc": "Piercing bouncing disc"},
 	"storm-peal": {"name": "Storm Peal", "icon": "icon-storm-peal", "desc": "Strikes random foes"},
 	"fire-lash": {"name": "Fire Lash", "icon": "icon-fire-lash", "desc": "Heavy bolt, random foe"},
-	"doom-sigil": {"name": "Doom Sigil", "icon": "icon-doom-sigil", "desc": "Rare screen-clear blast"},
+	# M6 F6: the "doom-sigil" META row RETIRED with the id (pool 16→15, §4.1).
 }
 
 const BOLT_SPEED := 300.0
@@ -66,6 +77,12 @@ var _game: GameState # late-bound by main at boot
 func bind(world: GameWorld, game: GameState) -> void:
 	_world = world
 	_game = game
+	# M6 F6 (MC 11675): the sigil clear's ONE ring mark rides THIS shipped
+	# rings transient — the weapon-side retirement MOVED the screen-clear
+	# moment to drops.gd, whose fx_rings seam is bound HERE, inside the
+	# shipped bind call (main.gd stays untouched; the clear arm never fires
+	# unless a sigil is touched, so this line changes no shipped behaviour).
+	_world.drops.bind_fx(rings)
 
 
 func clear_fx() -> void:
@@ -320,10 +337,6 @@ func _fire(w: Dictionary, game: GameState) -> void:
 					"dmg": (16.0 + 6.0 * l) * mul, "life": 1.5 * game.duration_mult(),
 					"r": 13.0,
 				})
-		"doom-sigil": # class: ward ring + ONE full-screen _hit — long cd
-			w.cd = rate(l, 12.0)
-			_hit({"x": p.x, "y": p.y, "r": 760.0}, (40.0 + 14.0 * l) * mul)
-			rings.append({"r": 760.0, "life": 0.5, "max": 0.5})
 		_:
 			w.cd = 1.0 # evolved ids ride the T-M1e rule: fire no-ops unknown
 			# ids until their own behavior card lands (sim_budget states this

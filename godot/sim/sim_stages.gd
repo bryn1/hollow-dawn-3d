@@ -51,7 +51,8 @@
 #       REDs a surge outside the ceiling (18/s); dwell_zero_rng REDs RNG.
 #       T-M3b RE-MINT (the 540 tick now latches): both twins fire their OWN
 #       boss, clear it, digests judge the HORDE stream; checks stand.
-#   draw_tally                 §7 row: pickup_viz draw tally 5/5/6 (the plate
+#   draw_tally                 §7 row: pickup_viz draw tally 6/6/7 (5/5/6
+#                              until T-M6d's sigil MM, MC 11675 §10) (the plate
 #       MM draws ONLY on its stage row) — C-E4 keeps DRAWS_PLANNED 40.
 #   unlock_chain               A-E5: level-9 stage-1 run end sets NOTHING;
 #       level-10 sets flags.stage2=1 on DISK (one funnel); a later stage-2
@@ -474,9 +475,13 @@ func _leg_draw_tally() -> void:
 		tally[run.game.stage] = run._pvz.draw_count()
 		run.queue_free()
 	_funnel.check("draw_tally", {
-		"stage1_five": tally["moor-vigil"] == 5,
-		"stage2_five": tally["sunken-chapel"] == 5,
-		"stage3_six": tally["ossuary-stair"] == 6,
+		# M6 T-M6d (MC 11675, M6-SPEC §10): the sigil MM joins the tally
+		# (pickups 5->6, §10 total 27->28) — every plate stage gains its
+		# sigil draw; keys RENAMED with the counts (replace-not-delete:
+		# the old five/five/six claim retired in-row, fixture RE-MINTED).
+		"stage1_six": tally["moor-vigil"] == 6,
+		"stage2_six": tally["sunken-chapel"] == 6,
+		"stage3_seven": tally["ossuary-stair"] == 7,
 	}, {"tally": tally})
 
 

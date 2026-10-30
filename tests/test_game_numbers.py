@@ -17,6 +17,7 @@ read = conftest.read_script  # MC 11317 C2 seam (raw script text)
 
 
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 GAME_STATE = read("game_state.gd")
 MAIN = read("main.gd")
 RENDER = read("render.gd")
@@ -58,17 +59,17 @@ def test_boss_gate_wired():
 # ---- heal drop ---------------------------------------------------------------
 
 def test_heal_drop_chance():
-    assert const("HEAL_DROP_CHANCE", WORLD) == 0.015
+    assert const("HEAL_DROP_CHANCE", DROPS) == 0.015
 
 
 def test_heal_amount():
-    assert const("HEAL_AMOUNT", WORLD) == 8.0
+    assert const("HEAL_AMOUNT", DROPS) == 8.0
 
 
 def test_heal_clamp_path_exists():
     # HP gain must be clamped at max_hp (plan: 'clamped to max_hp').
-    assert "max_hp" in WORLD
-    assert re.search(r"minf\(\s*game\.max_hp\s*,\s*game\.hp\s*\+\s*HEAL_AMOUNT\s*\)", WORLD), \
+    assert "max_hp" in DROPS # M6 T-M6d (MC 11675): the funnel moved VERBATIM
+    assert re.search(r"minf\(\s*game\.max_hp\s*,\s*game\.hp\s*\+\s*HEAL_AMOUNT\s*\)", DROPS), \
         "heal pickup path must clamp: minf(game.max_hp, game.hp + HEAL_AMOUNT)"
 
 

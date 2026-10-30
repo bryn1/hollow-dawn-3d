@@ -42,6 +42,7 @@ read = functools.partial(conftest.read_script,
 
 
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 MAIN = read("main.gd")
 RENDER = read("render.gd")
 HUD = read("hud_3d.gd")
@@ -213,7 +214,7 @@ def test_boss_has_exactly_one_hp_readout():
 
 def test_boss_death_gold_50():
     # N31: boss death +50 gold (world.gd:132), inside the single death funnel.
-    kill = block(WORLD, "func kill_enemy", "func collect_pickups")
+    kill = block(DROPS, "func roll", "func magnetize") # M6 T-M6d: drops.gd
     assert re.search(r"if enemy\.boss:\s*\n\s*game\.gold \+= 50\b", kill), \
         "kill_enemy must add exactly 50 gold for a boss"
 
@@ -221,17 +222,20 @@ def test_boss_death_gold_50():
 def test_dawnlight_guaranteed_on_boss_death_unconditionally():
     # N29: world.gd:137 — the boss branch SHORT-CIRCUITS the 1.5% roll, which
     # IS the guarantee; a normal death still rolls HEAL_DROP_CHANCE.
-    kill = block(WORLD, "func kill_enemy", "func collect_pickups")
+    kill = block(DROPS, "func roll", "func magnetize")
+    # M6 T-M6d (MC 11675, F-10 split): the drop ROLLS moved to drops.gd
+    # VERBATIM — the pin moved with the code (one home, replace-not-delete).
     assert re.search(r"if enemy\.boss or randf\(\) < HEAL_DROP_CHANCE:\s*\n"
-                     r"\s*heals\.append\(\{\"x\": enemy\.x, \"y\": enemy\.y\}\)", kill), \
+                     r"\s*_world\.heals\.append\(\{\"x\": enemy\.x, "
+                     r"\"y\": enemy\.y\}\)", kill), \
         "boss death must append a Dawnlight via the verbatim `or` rule"
-    assert const("HEAL_DROP_CHANCE", WORLD) == 0.015
+    assert const("HEAL_DROP_CHANCE", DROPS) == 0.015
 
 
 def test_no_dawnlight_taken_guard_invents_itself():
     # Stated reading (header): v1 has no "already taken" rule. Any guard that
     # makes the boss drop conditional goes red here.
-    kill = block(WORLD, "func kill_enemy", "func collect_pickups")
+    kill = block(DROPS, "func roll", "func magnetize")
     for banned in ("heals.size()", "heals.is_empty", "dawnlight_taken", "taken"):
         assert banned not in kill, "boss Dawnlight must stay unconditional: found %r" % banned
     assert kill.count("heals.append") == 1, "one heal-drop site only (the or-rule)"
@@ -288,7 +292,7 @@ def test_miniboss_schedule_600_780_exactly_once_each():
     # saw knight at 600.017 and deacon at 780.017 inside one latch walk.
     pairs = re.findall(r"\[([\d.]+),\s*\"([\w-]+)\"\]",
                        WORLD[WORLD.index("const MINIBOSS_AT"):
-                             WORLD.index("const HEAL_DROP_CHANCE")])
+                             WORLD.index("const ALIVE_CAP")])
     assert [(float(t), k) for t, k in pairs] == [
         (600.0, "hollow-knight"), (780.0, "hollow-deacon")], \
         "MINIBOSS_AT must be the doc schedule, in order"
@@ -326,14 +330,14 @@ def test_miniboss_flag_wired_into_spawned_enemies():
 def test_chest_drop_chances_pinned_and_wired():
     # M1 feature 4 (DA c1 B-3): named consts in the HEAL_DROP_CHANCE pattern;
     # the boss branch short-circuits its 1.0 roll — the guarantee IS the roll.
-    assert const("CHEST_CHANCE_BOSS", WORLD) == 1.0
-    assert const("CHEST_CHANCE_MINIBOSS", WORLD) == 0.6
+    assert const("CHEST_CHANCE_BOSS", DROPS) == 1.0
+    assert const("CHEST_CHANCE_MINIBOSS", DROPS) == 0.6
     assert re.search(r"var chests: Array = \[\]", WORLD), "chests array must exist"
     reset = block(WORLD, "func reset", "func _types_open")
     assert re.search(r"chests\.clear\(\)", reset), "chests must reset per run"
-    funnel = block(WORLD, "func kill_enemy", "func collect_pickups")
+    funnel = block(DROPS, "func roll", "func magnetize")
     assert re.search(r"if enemy\.boss and randf\(\) < CHEST_CHANCE_BOSS:\s*\n"
-                     r"\s*chests\.append", funnel)
+                     r"\s*_world\.chests\.append", funnel)
     assert re.search(r"elif enemy\.miniboss and randf\(\) < CHEST_CHANCE_MINIBOSS:\s*\n"
-                     r"\s*chests\.append", funnel)
+                     r"\s*_world\.chests\.append", funnel)
     assert funnel.count("chests.append") == 2, "exactly the two chest drop sites"

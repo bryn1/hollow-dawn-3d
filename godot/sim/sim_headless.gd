@@ -147,8 +147,23 @@ func _run_sim() -> void:
 	_run_win_gate()
 	_run_attribution()
 	_run_boss()
+	_run_sigil()
 	if _fx_bad > 0 or _hard_fail or _journey_failed:
 		_done = false
+
+
+# M6 (MC 11675): the Riven Sigil + coin-magnet ACCEPT legs (SD-E2 / SD-E3 /
+# MG-E1) run HERE — appended AFTER every S3/S4/S6 + boss row (the forward-lock
+# law: no pre-existing row shifts its bytes; the journey rows above move only
+# by the declared docs/BYTE-DEVIATION-M6.md §9 rows). The legs live in
+# SimCombat (T-M6d-owned; the sim_boss CHEST ROLL LEG pattern per the spec's
+# named shape); their ok flags gate rc != 0 exactly like the boss legs.
+func _run_sigil() -> void:
+	for row in [_combat.sigil_drops_leg(root), _combat.sigil_tapfree_leg(root),
+			_combat.sigil_clear_leg(root), _combat.magnet_coins_leg(root)]:
+		_emit(row)
+		if row.get("ok", false) == false:
+			_hard_fail = true
 
 
 # T-S6 boss rows (MC 11107, A5): SimBoss legs run AFTER the journey + the S4
@@ -214,9 +229,10 @@ func _run_attribution() -> void:
 
 
 # §b scene draw tally: ground 1 + horde node (class MMs + bar + blob) +
-# pawn 1 + FX worst case (§i 7) + pickups 4 (T-S18 MC 11201: §b's planned
-# gems/coins/dawnlight/dawn-glow rows, landed by PickupViz — the §b
-# plan-row always carried them). The renderer issues FEWER calls when a
+# pawn 1 + FX worst case (§i 7) + pickups 6 (T-S18 MC 11201: §b's planned
+# gems/coins/dawnlight/dawn-glow rows + the M1 chest MM + the M6 F6 RIVEN
+# SIGIL MM — docs/BYTE-DEVIATION-M6.md §9 draw row, the §10 re-tally
+# pickup 5→6, total 27→28). The renderer issues FEWER calls when a
 # class is empty — fx_live rides the FX rows.
 func _dump_draws() -> void:
 	var horde: int = _main._viz.draw_count()

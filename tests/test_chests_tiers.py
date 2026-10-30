@@ -80,6 +80,7 @@ def read_sim(name):
 
 REWARDS = read("chest_rewards.gd")
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 GAME_STATE = read("game_state.gd")
 LEVELUP = read("levelup.gd")
 MAIN = read("main.gd")
@@ -149,11 +150,13 @@ def test_drop_sites_stamp_tier_from_the_map():
     # KILLED TYPE (String(enemy.type)) — the one "warden" literal site is
     # retired; a hard-coded tier at the site breaks this row (the keyed-drop
     # planted-red) and every boss tier leg reads its OWN map row.
-    assert re.search(r'"tier": CHEST_TIER_BY_SOURCE\[String\(enemy\.type\)\]',
-                     WORLD)
+    assert re.search(r'"tier": GameWorld\.CHEST_TIER_BY_SOURCE\[String\(enemy\.type\)\]',
+                     DROPS) # M6 T-M6d: keyed roll moved; static ref to the
+                     # ONE map, which STAYS world-side (F-10 named partition)
     assert '"tier": CHEST_TIER_BY_SOURCE["warden"]' not in WORLD, \
         "the boss drop site is keyed by the killed type since T-M3b"
-    assert re.search(r'"tier": CHEST_TIER_BY_SOURCE\["miniboss"\]', WORLD)
+    assert re.search(r'"tier": GameWorld\.CHEST_TIER_BY_SOURCE\["miniboss"\]',
+                     DROPS)
     # the cycle-clear site (T-M2e) stays on the map too (A-E4 byte-pin too)
     assert re.search(r'"tier": CHEST_TIER_BY_SOURCE\["endless-cycle"\]',
                      WORLD)
@@ -161,7 +164,8 @@ def test_drop_sites_stamp_tier_from_the_map():
 
 def test_open_runs_transform_then_grant_in_the_one_funnel():
     assert re.search(r"EvolutionSystem\.try_evolve\(game\)\s*\n\s*gold \+="
-                     r" ChestRewards\.grant\(game, c\)", WORLD)
+                     r" ChestRewards\.grant\(game, c\)",
+                     DROPS) # M6 T-M6d: the chest arm moved VERBATIM
     # the grant module itself: strict tier key (unknown tier crashes, never
     # de-tiers), cards raise pending, roll returns raw for the credit funnel
     assert re.search(r'TIERS\[String\(chest\["tier"\]\)\]', REWARDS)
@@ -331,7 +335,7 @@ def test_tier_viz_scale_tint_no_new_mm_class():
     # reused) — ONE MultiMesh class, DRAWS stays 5
     assert re.search(r'_mm\(_quad\(\), _icon_mat\(CHEST_TIER_ICON\["ember"\]\), true\)',
                      PICKUP)
-    assert re.search(r"const DRAWS := 5", PICKUP)
+    assert re.search(r"const DRAWS := 6", PICKUP) # M6 T-M6d: sigil MM 5->6
     assert PICKUP.count("MultiMesh.new()") == 1  # the ONE mm factory
     # the tier icons ride the ONE icon-<id>.png convention (the §6 M2a batch;
     # their pixels reach the frame as the alpha-weighted mean tint)

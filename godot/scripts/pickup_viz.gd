@@ -81,11 +81,20 @@ const PLATE_PX := 40.0 # MEASURED at the A-E7 gate cycle 1: a 96 px flat
 	# still the larger feature between the 28 px chest row and the field
 const PLATE_Y := 0.04
 const PLATE_ICON := "res://assets/icons/icon-plate.png"
-const DRAWS := 5 # gem + coin + cross + dawn-glow (§b's planned rows) +
-	# chests 1 (M1 f5). The §b planned note stays 33 on purpose: the roadmap
-	# re-tallies the WORST-CASE LOADOUT draws to planned 40 on the feature-6
-	# card (that row names this chest MM by name) — note kept, never a gate;
-	# the hard 60 cap row below is the gate and 34 ≤ 60.
+# M6 F6 (MC 11675): the RIVEN SIGIL billboard row — the KEEPT weapon icon
+# (icon law: the weapon retired at §4.1, the .png stays) drawn on the coin's
+# ONE billboard mechanism; SIGIL_PX OUR value, between the 14 px coin row
+# and the 28 px chest/event row (a findable field rare, not an event).
+const SIGIL_ICON := "res://assets/icons/icon-doom-sigil.png"
+const SIGIL_PX := 20.0
+const DRAWS := 6 # gem + coin + cross + dawn-glow (§b's planned rows) +
+	# chests 1 (M1 f5) + THE RIVEN SIGIL 1 (M6 F6, MC 11675 — the §10 draw
+	# re-tally row: pickup 5→6, the §10 matrix total 27→28, worst case the
+	# hard-60 gate still clears with the plate at 7). The §b planned note
+	# stays 33 on purpose: the roadmap re-tallies the WORST-CASE LOADOUT
+	# draws to planned 40 on the feature-6 card (that row names this chest
+	# MM by name) — note kept, never a gate; the hard 60 cap row below is
+	# the gate.
 
 var game: GameState
 var world: GameWorld
@@ -95,6 +104,10 @@ var _coin: MultiMeshInstance3D
 var _cross: MultiMeshInstance3D
 var _glow: MultiMeshInstance3D
 var _chest: MultiMeshInstance3D
+var _sigil: MultiMeshInstance3D # M6 F6: the RIVEN SIGIL billboard (the 6th
+	# pickup-family draw; icon = the KEEPT icon-doom-sigil.png — §4.2 names
+	# it: the retired weapon-side sigil's own art, the icon law keeps the
+	# file, the draw moves to the pickup side)
 var _plate: MultiMeshInstance3D
 var _plate_stage := "" # stage whose rows are written into _plate now
 var _counts := {}
@@ -123,6 +136,14 @@ func _ready() -> void:
 	# M1 chest pixels keep byte-stability up to the tier the drop now carries.
 	_tier_tint = _sample_tier_tints()
 	_chest = _mm(_quad(), _icon_mat(CHEST_TIER_ICON["ember"]), true)
+	# M6 F6 (MC 11675): the RIVEN SIGIL slot — the shipped COIN mechanism
+	# verbatim (ONE unit quad + _icon_mat textured billboard, the file's
+	# ONE such mechanism), riding the KEEPT icon-doom-sigil.png (icon law:
+	# the weapon retired, the art stays — §4.2 names this icon). SIGIL_PX
+	# is OUR value: bigger than the 14 px coin row so the field rare is
+	# FINDABLE, below the 28 px chest/event row — it is a counter-drop,
+	# not an event. Reads world.drops.sigils only, never writes sim state.
+	_sigil = _mm(_quad(), _icon_mat(SIGIL_ICON))
 	_plate = _mm(_quad(), _icon_mat(PLATE_ICON) if ResourceLoader.exists(PLATE_ICON)
 		else _mat(GameRenderer.EMBER, 0.35))
 
@@ -148,6 +169,10 @@ func refresh() -> void:
 	# world.chests only, never writes sim state (opening stays world.gd's).
 	# T-M2t: the tiered write (per-instance scale + icon-sampled tint).
 	_write_items(_chest, world.chests, basis, CHEST_PX, CHEST_PX, 0.0, true)
+	# M6 F6 (MC 11675): the sigil write — the same coin billboard mechanism,
+	# reads world.drops.sigils only (the 5th pickup kind, touch-ONLY: it is
+	# deliberately NOT in the magnet set — §5.1).
+	_write_items(_sigil, world.drops.sigils, basis, SIGIL_PX, SIGIL_PX)
 	# v1 cross: two bars per Dawnlight (ARM x BAR + BAR x ARM), 1 MM 2 draws'
 	# worth of instances (the §b dawnlight-1 draw stays ONE call)
 	var mm: MultiMesh = _cross.multimesh
@@ -178,6 +203,7 @@ func refresh() -> void:
 	_counts.coins = world.coins.size()
 	_counts.heals = world.heals.size()
 	_counts.chests = world.chests.size()
+	_counts.sigils = world.drops.sigils.size() # M6 F6 (5th kind)
 
 
 # RENDERED instance counts per pickup slot from the last refresh.
@@ -188,10 +214,12 @@ func pickup_counts() -> Dictionary:
 # §b rows: the four MultiMeshInstance3D draws of this node (worst case;
 # empty slots cost no draw call at runtime).
 func draw_count() -> int:
-	# §b rows: the five MultiMeshInstance3D draws of this node (worst case;
-	# empty slots cost no draw call at runtime). M3 §7 (T-M3s): the plate
-	# slot joins the tally ONLY on a stage that actually draws it — stage 1
-	# stays the shipped 5 (byte corpus); ossuary-stair worst case is 6.
+	# §b rows: the six MultiMeshInstance3D draws of this node (worst case;
+	# empty slots cost no draw call at runtime). M6 F6 (MC 11675): the sigil
+	# slot is inside DRAWS (= 6, the §10 re-tally row). M3 §7 (T-M3s): the
+	# plate slot joins the tally ONLY on a stage that actually draws it —
+	# stage 1 stays the shipped 6 (byte corpus); ossuary-stair worst case
+	# is 7, the hard-60 row below stays the gate.
 	return DRAWS + (1 if _plate_stage != "" and _plate != null \
 		and _plate.multimesh.instance_count > 0 else 0)
 

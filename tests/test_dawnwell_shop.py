@@ -80,6 +80,7 @@ POWERUPS = read("powerups.gd")
 GAME_STATE = read("game_state.gd")
 GAME_STATE_CODE = read("game_state.gd", code_only=True)
 MAIN = read("main.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 SCREENS = read("screens.gd")
 WORLD = read("world.gd")
 SAVE = read("save.gd")
@@ -142,7 +143,7 @@ def test_consumption_seam_is_start_run():
     assert re.search(r"xp \+= amount \* \(1\.0 \+ 0\.15 \* passives\.insight\) "
                      r"\* meta_xp_mult", GAME_STATE)
     # gold-rate rides the ONE pickup funnel's return
-    assert re.search(r"return game\.credit_gold\(gold\)", WORLD)
+    assert re.search(r"return game\.credit_gold\(gold\)", DROPS) # M6 T-M6d: funnel moved
     # run gold only ever whole-coins: credit_gold floors the carry
     assert re.search(r"var whole := int\(floor\(gold_frac\)\)", GAME_STATE)
     # direction: GameState never touches persistence (code-only: the file's

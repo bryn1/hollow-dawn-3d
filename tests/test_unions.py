@@ -112,8 +112,10 @@ def test_union_ids_never_enter_meta_or_ids():
 # ---- the ONE seam: try_union ELSE try_evolve, at the chest-open site -------
 
 def test_chest_open_precedence_in_source():
-    body = re.search(r"for i in range\(chests\.size\(\) - 1, -1, -1\):"
-                     r"((?:.|\n)*?)gold \+= ChestRewards", WORLD).group(1)
+    body = re.search(r"for i in range\(_world\.chests\.size\(\) - 1, -1, -1\):"
+                     r"((?:.|\n)*?)gold \+= ChestRewards",
+                     # M6 T-M6d (MC 11675): the ONE funnel moved to drops.gd
+                     read(os.path.join(SCRIPTS, "drops.gd"))).group(1)
     assert re.search(r"if UnionSystem\.try_union\(game\) == \"\":", body)
     assert re.search(r"try_union\(game\) == \"\":\s*\n\s*EvolutionSystem"
                      r"\.try_evolve\(game\)", body), \

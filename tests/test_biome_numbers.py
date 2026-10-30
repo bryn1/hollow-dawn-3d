@@ -18,6 +18,7 @@ read = conftest.read_script  # MC 11317 C2 seam (raw script text)
 
 
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 GAME_STATE = read("game_state.gd")
 MAIN = read("main.gd")
 RENDER = read("render.gd")
@@ -146,8 +147,11 @@ def test_pickup_radius_16px():
     # by T-M1e (MC 11209, roadmap feature 7 replace-row discipline): the
     # 3-kind count predates the CHEST open funnel — chests ride the SAME
     # 16 px touch funnel, so the honest row is now 4 sites.
-    assert WORLD.count("< 16.0") == 4, \
-        "gems + coins + heals + chests each test 16.0"
+    # M6 T-M6d (MC 11675): the ONE funnel lives in drops.gd now and the
+    # RIVEN SIGIL joined it as the 5th kind — five 16 px touch sites.
+    assert DROPS.count("< 16.0") == 5, \
+        "gems + coins + heals + sigils + chests each test 16.0"
+    assert WORLD.count("< 16.0") == 0, "the funnel has ONE home (F-10)"
 
 
 def test_contact_radii():
@@ -162,17 +166,17 @@ def test_contact_radii():
 
 def test_boss_dawnlight_guaranteed():
     # world.gd:137: boss death drops Dawnlight unconditionally (>=1).
-    assert re.search(r"if enemy\.boss or randf\(\) < HEAL_DROP_CHANCE:", WORLD)
+    assert re.search(r"if enemy\.boss or randf\(\) < HEAL_DROP_CHANCE:", DROPS) # M6 T-M6d (MC 11675): pin moved with the code (drops.gd)
 
 
 def test_gem_coin_drop_rates():
-    assert re.search(r"randf\(\) < 0\.7", WORLD)
-    assert re.search(r"randf\(\) < 0\.06", WORLD)
-    assert re.search(r"gold\":\s*1 \+ randi\(\) % 3", WORLD)
+    assert re.search(r"randf\(\) < 0\.7", DROPS) # M6 T-M6d: drops.gd
+    assert re.search(r"randf\(\) < 0\.06", DROPS)
+    assert re.search(r"gold\":\s*1 \+ randi\(\) % 3", DROPS)
 
 
 def test_boss_death_gold():
-    assert re.search(r"game\.gold \+= 50", WORLD)
+    assert re.search(r"game\.gold \+= 50", DROPS) # M6 T-M6d (MC 11675): pin moved with the code (drops.gd)
 
 
 def test_enemy_hp_scaling():
@@ -188,8 +192,9 @@ def test_enemy_hp_scaling():
 
 
 def test_magnet_base_growth_and_pull():
-    assert re.search(r"60\.0 \* \(1\.0 \+ 0\.25 \* game\.passives\.grip\)", WORLD)
-    assert re.search(r"220\.0 \* dt", WORLD)
+    assert re.search(r"60\.0 \* \(1\.0 \+ 0\.25 \* game\.passives\.grip\)",
+                     DROPS) # M6 T-M6d: the ONE magnet source is drops.gd
+    assert re.search(r"220\.0 \* dt", DROPS)
 
 
 # ---- weapons (N34-N39 / N44 / N45) -----------------------------------------------
@@ -241,12 +246,19 @@ def test_sixteen_weapon_ids_and_meta():
     # rev3 M1 feature 7 row 3 (T-M1h, MC 11220): IDS + META are the 16-
     # weapon roster, verbatim order (the six originals first — the v1
     # card/HUD order — then the ten feature-6 weapons in table order).
+    # RETIRED AND REPLACED AGAIN at T-M6d (MC 11675, M6-SPEC §4.4 R1):
+    # DOOM SIGIL retired weapon-side (pool 16→15, kinds 32→31) — this row
+    # is the IDS/META pin named at §4.4; equal-or-stronger: the fifteen-id
+    # verbatim-order claim + the META-name-sequence claim both stand, the
+    # retired id is ABSENT (the §4.1 grep-universe twin in
+    # tests/test_sigil_drop.py SD-E5 proves zero live sites).
     ids = re.search(r"const IDS := \[((?:[^\]]|\n)*?)\]", WEAPONS).group(1)
     assert [s.strip().strip('"') for s in ids.split(",")] == [
         "talon", "ember", "cleaver", "halo", "ward", "spike",
         "bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross",
         "censer-of-hours", "rot-water", "spectral-disc", "storm-peal",
-        "fire-lash", "doom-sigil"]
+        "fire-lash"]
+    assert "doom-sigil" not in ids
     meta = WEAPONS[WEAPONS.index("const META"):]
     meta = meta[:meta.index("\n\n")]
     assert re.findall(r"\"name\":\s*\"([^\"]+)\"", meta) == [
@@ -254,7 +266,7 @@ def test_sixteen_weapon_ids_and_meta():
         "Warding Aura", "Grave Spike",
         "Bone Whip", "Dart Loop", "Hewn Axe", "Pilgrim Cross",
         "Censer of Hours", "Rot Water", "Spectral Disc", "Storm Peal",
-        "Fire Lash", "Doom Sigil"]
+        "Fire Lash"]
 
 
 # ---- levelup (N40) ---------------------------------------------------------------

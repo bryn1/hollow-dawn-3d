@@ -57,6 +57,7 @@ read = functools.partial(conftest.read_script,
 
 EVO = read("evolutions.gd")
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 MAIN = read("main.gd")
 HUD = read("hud_3d.gd")
 PICKUP = read("pickup_viz.gd")
@@ -76,7 +77,7 @@ def test_gate_const_600():
     assert const("GATE_T", EVO) == 600.0
     # the gate reads OPEN time, and the whole rule lives in the ONE entry
     assert re.search(r"if game\.time < GATE_T:\s*\n\s*return \"\"", EVO)
-    assert re.search(r"EvolutionSystem\.try_evolve\(game\)", WORLD)
+    assert re.search(r"EvolutionSystem\.try_evolve\(game\)", DROPS) # M6 T-M6d
 
 
 # ---- the evolution table (c3-C2: SEPARATE table, doc rows exact) ------------
@@ -102,6 +103,15 @@ def test_table_is_separate_evolved_never_in_meta():
     for base, (_, evo) in DOC_TABLE.items():
         assert '"%s"' % evo not in WEAPONS, \
             "evolved id %s must never ride META (DA c3 C-2)" % evo
+        if base == "doom-sigil":
+            # T-M6d (MC 11675, M6-SPEC §4.1): the POOL retirement — this
+            # one table base no longer rides IDS (it can never be carried
+            # again); the EVOLVE-side row is T-M6p's retirement, NOT this
+            # card's (replace-not-delete: the dead-pool base rides the
+            # table until the whole chest-evolve arm retires).
+            assert '"%s"' % base not in ids, \
+                "retired pool id must NOT ride IDS" % base
+            continue
         assert '"%s"' % base in ids, \
             "table base %s must ride IDS (TABLE is live since T-M1h)" % base
     assert "TABLE" not in WEAPONS
@@ -129,8 +139,8 @@ def test_chest_open_wired_in_collect_pickups():
     # + the gold line, §B.1) moved into ChestRewards.grant at the SAME ONE
     # site. The claim the row makes is unchanged — ONE open funnel, rule
     # first — the wiring it pins is the shipped tier grant.
-    collect = WORLD[WORLD.index("func collect_pickups"):]
-    assert re.search(r"for i in range\(chests\.size\(\) - 1, -1, -1\):", collect)
+    collect = DROPS[DROPS.index("func collect_pickups"):] # M6 T-M6d: moved VERBATIM
+    assert re.search(r"for i in range\(_world\.chests\.size\(\) - 1, -1, -1\):", collect)
     assert re.search(r"_dist\(c, game\.player\) < 16\.0", collect), \
         "chest touch range must be the same 16 px funnel as the other pickups"
     assert re.search(r"EvolutionSystem\.try_evolve\(game\)\s*\n"
@@ -163,7 +173,7 @@ def test_hud_resolves_evolved_ids_via_naming_convention():
 
 
 def test_pickup_viz_draws_chests():
-    assert const("DRAWS", PICKUP) == 5.0
+    assert const("DRAWS", PICKUP) == 6.0 # M6 T-M6d: sigil MM 5->6
     assert re.search(r"_write_items\(_chest, world\.chests", PICKUP)
     assert re.search(r"icon-chest\.png", PICKUP)
     # §b draw budget discipline: the note may not be bumped silently here
@@ -192,8 +202,11 @@ def test_dump_shape_and_verdict():
                     # T-M1h (MC 11220) APPENDED rows (existing rows stay
                     # byte-identical — the new legs run after them):
                     "evo_pool_reachability",
-                    "evo_full_bone-whip", "evo_full_rot-water",
-                    "evo_full_doom-sigil"]
+                    "evo_full_bone-whip", "evo_full_rot-water"]
+    # "evo_full_doom-sigil" RETIRED at T-M6d (MC 11675, M6-SPEC §4.1): the
+    # base left the pool, so no real _pick can acquire it — the leg row
+    # retired WITH THE POOL ENTRY (fixture RE-MINTED, declared channel;
+    # the reachability row now carries the retirement claim).
     assert all(g["ok"] for g in gates().values()), "committed dump has a RED leg"
     assert [r for r in rows if r["ev"] == "evolve_verdict"][-1]["ok"] is True
 
@@ -204,15 +217,23 @@ def test_pool_reachability_leg():
     g = gates()["evo_pool_reachability"]
     assert g["ok"] is True
     for base in DOC_TABLE:
+        if base == "doom-sigil":
+            # T-M6d: the check TRUE now means the RETIREMENT claim —
+            # sim_evolve asserts (not offered) AND partner offered.
+            assert g["checks"][base], \
+                "doom-sigil retirement claim broken (pool/partner)"
+            continue
         assert g["checks"][base], "pool cannot offer %s + partner" % base
 
 
 def test_full_evolve_legs():
-    # T-M1h: >= 3 FULL evolutions end-to-end — every weapon/passive/
-    # upgrade entry acquired through the REAL offer funnel (no id pinned),
-    # then the real chest evolves it IN-SLOT. All three rows were runtime-
-    # DEAD before T-M1h (their base/partner could not exist).
-    assert len([n for n in gates() if n.startswith("evo_full_")]) >= 3
+    # T-M1h: FULL evolutions end-to-end — every weapon/passive/upgrade
+    # entry acquired through the REAL offer funnel (no id pinned), then
+    # the real chest evolves it IN-SLOT. All three rows were runtime-DEAD
+    # before T-M1h (their base/partner could not exist).
+    # T-M6d (MC 11675): the doom-sigil FULL leg retired with the pool
+    # entry — the claim moved >=3 to ==2 (replace-not-delete pin law).
+    assert len([n for n in gates() if n.startswith("evo_full_")]) == 2
     for base, (partner, evo) in DOC_TABLE.items():
         name = "evo_full_" + base
         if name not in gates():

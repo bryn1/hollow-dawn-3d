@@ -20,6 +20,7 @@ read = conftest.read_script  # MC 11317 C2 seam (raw script text)
 
 
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 GAME_STATE = read("game_state.gd")
 MAIN = read("main.gd")
 WEAPONS = read("weapons.gd")
@@ -68,9 +69,10 @@ def test_xp_curve_rows():
 # ---- gold (N30/N31 + Coin Cache N40) -------------------------------------------
 
 def test_gold_rows():
-    assert re.search(r"game\.gold \+= 50", WORLD), "boss death +50 gold (N31)"
-    assert re.search(r"coins\.append\(\{\"x\": enemy\.x, \"y\": enemy\.y, \"gold\": 1 \+ randi\(\) % 3\}\)",
-                     WORLD), "coin drop 1-3 g (N30)"
+    assert re.search(r"game\.gold \+= 50", DROPS), "boss death +50 gold (N31)"
+    assert re.search(r"coins\.append\(\{\"x\": enemy\.x, \"y\": enemy\.y,\s*\n"
+                     r"\s*\"gold\": 1 \+ randi\(\) % 3\}\)",
+                     DROPS), "coin drop 1-3 g (N30)"
     assert re.search(r"game\.gold \+= 25", LEVELUP), "Coin Cache +25 gold (N40)"
 
 
@@ -128,11 +130,11 @@ def test_contact_damage():
 # ---- drop probabilities from the N-table (N5/N6/N29/N30) -----------------------
 
 def test_drop_probabilities():
-    assert re.search(r"randf\(\) < 0\.7", WORLD), "gem drop 70% (N30)"
-    assert re.search(r"randf\(\) < 0\.06", WORLD), "coin drop 6% (N30)"
-    assert const("HEAL_DROP_CHANCE", WORLD) == 0.015, "Dawnlight roll 1.5% (N5)"
-    assert const("HEAL_AMOUNT", WORLD) == 8.0, "heal amount 8 (N6)"
-    assert re.search(r"if enemy\.boss or randf\(\) < HEAL_DROP_CHANCE:", WORLD), \
+    assert re.search(r"randf\(\) < 0\.7", DROPS), "gem drop 70% (N30)"
+    assert re.search(r"randf\(\) < 0\.06", DROPS), "coin drop 6% (N30)"
+    assert const("HEAL_DROP_CHANCE", DROPS) == 0.015, "Dawnlight roll 1.5% (N5)"
+    assert const("HEAL_AMOUNT", DROPS) == 8.0, "heal amount 8 (N6)"
+    assert re.search(r"if enemy\.boss or randf\(\) < HEAL_DROP_CHANCE:", DROPS), \
         "boss Dawnlight guaranteed (N29)"
 
 

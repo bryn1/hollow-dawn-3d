@@ -56,6 +56,7 @@ read = functools.partial(conftest.read_script,
 
 
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 PICKUP = read("pickup_viz.gd")
 
 
@@ -72,20 +73,21 @@ def rows_of(ev):
 # ---- §C.1 the rule, in the ONE seams (source truth) ---------------------------
 
 def test_merge_consts_200_100():
-    assert const("GEM_MERGE_THRESHOLD", WORLD) == 200.0
-    assert const("GEM_MERGE_BATCH", WORLD) == 100.0
+    assert const("GEM_MERGE_THRESHOLD", DROPS) == 200.0
+    assert const("GEM_MERGE_BATCH", DROPS) == 100.0
 
 
 def test_merge_rides_the_one_entity_update_no_new_array():
     # the fold fires from update_entities (the entity/collect update after the
     # drop), NOT beside it — and only the gems array exists (no bulk array)
     upd = re.search(r"func update_entities.*?(?=\nfunc |\Z)", WORLD, re.S).group(0)
-    assert "_merge_gems()" in upd
-    m = re.search(r"func _merge_gems.*?(?=\nfunc |\Z)", WORLD, re.S).group(0)
-    assert "if gems.size() < GEM_MERGE_THRESHOLD" in m
-    assert "gems.remove_at(i)" in m
+    assert "drops.merge_gems()" in upd # M6 T-M6d (MC 11675, F-10): call-through
+    m = re.search(r"func merge_gems.*?(?=\nfunc |\Z)", DROPS, re.S).group(0)
+    assert "if _world.gems.size() < GEM_MERGE_THRESHOLD" in m
+    assert "_world.gems.remove_at(i)" in m
     # the ONE dict shape: centroid + SUM xp + the big flag, back on gems
-    assert re.search(r"gems\.append\(\{\"x\": cx / GEM_MERGE_BATCH, "
+    # (arrays STAY world-side; the writer reads through the bind — M6 T-M6d)
+    assert re.search(r"_world\.gems\.append\(\{\"x\": cx / GEM_MERGE_BATCH, "
                      r"\"y\": cy / GEM_MERGE_BATCH,\s*\"xp\": sxp, \"big\": true\}\)", m)
 
 
@@ -102,7 +104,7 @@ def test_pickup_viz_bulk_on_the_one_gem_mm():
     assert re.search(r"_write_items\(_gem, world\.gems, basis, GameRenderer\.SIZES\.gem,"
                      r"\s*\n\s*GameRenderer\.SIZES\.gem, GEM_BULK_SCALE\)", PICKUP)
     # ONE MM class per kind — the draw table is untouched (§7: no new class)
-    assert const("DRAWS", PICKUP) == 5.0
+    assert const("DRAWS", PICKUP) == 6.0 # M6 T-M6d: sigil MM 5->6
     # bulk_scale is passed by the GEM call only (coins/crosses/chests inert)
     assert PICKUP.count("GEM_BULK_SCALE") == 2  # the const + the ONE gem call
 

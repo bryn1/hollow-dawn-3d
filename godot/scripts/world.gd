@@ -1,10 +1,14 @@
-# World entities + edge-spawn scaling + drops (plan §5 numbers).
-# reason: >400 lines — the ONE world module: M1-M4 law keeps the single
-#   spawn latch, the single kill funnel and the ONE tier map in one file
-#   (splitting them would put drop rules beside a second spawn site). M4
-#   grew it 419->548 (event cone, reaper latch, windows, MC 11398 §1.6):
-#   the spawn/entity split stays SCHEDULED — the next card growing this
-#   file carries it, this header no longer absolves it.
+# World entities + edge-spawn scaling (plan §5 numbers). The drop/pickup half
+# moved OUT at T-M6d to drops.gd (MC 11675, M6-SPEC §0 F-10 — the named
+# partition of the SCHEDULED split audit-2 carried: kill rolls, drop consts,
+# magnet, gem fold, touch funnel + the M6 sigil array ride drops.gd; every
+# call-through here keeps ALL callers byte-unchanged).
+# reason: >400 lines — what the F-10 partition LEAVES is the law that must
+#   stay in one file: the single spawn latch, the kill-funnel ENTRY (world.gd
+#   is the funnel — drops.gd is called THROUGH it, never beside it) and the
+#   ONE tier map CHEST_TIER_BY_SOURCE (splitting them would put spawn rules
+#   beside a second site). M4 grew it 419->548 (event cone, reaper latch,
+#   windows, MC 11398 §1.6); T-M6d's split cut it to the spawn/entity law.
 class_name GameWorld
 extends RefCounted
 
@@ -13,24 +17,12 @@ const BOSS_AT := 540.0 # "The Hollow Warden" spawns at 9:00
 # M1 feature 4 row: "2 minibosses @ t=600, 780"); each spawns exactly once
 # through the latch below, same mechanism as BOSS_AT.
 const MINIBOSS_AT := [[600.0, "hollow-knight"], [780.0, "hollow-deacon"]]
-const HEAL_DROP_CHANCE := 0.015 # Dawnlight drop roll on a normal enemy death
-const HEAL_AMOUNT := 8.0 # hp restored, clamped to max_hp
-# Chest drop rolls at the kill funnel (M1 feature 4, DA c1 B-3): the Warden
-# always drops a chest (1.0 = guaranteed, S5 ~419 shape ref), a miniboss at
-# OUR pinned 0.6. Chest OPENING is M1 feature 5; these are the drop consts.
-const CHEST_CHANCE_BOSS := 1.0
-const CHEST_CHANCE_MINIBOSS := 0.6
+# The drop-roll consts (HEAL_DROP_CHANCE/HEAL_AMOUNT/CHEST_CHANCE_*) and the
+# gem-merge consts (GEM_MERGE_*) MOVED to drops.gd at T-M6d (MC 11675, the
+# F-10 named partition — drop consts ride the drop concern; the test pins
+# re-pointed to drops.gd same-commit, RETIRED+REPLACED rows noted there).
 const ALIVE_CAP := 400 # M1 hard rule (roadmap §b): spawns PAUSE at the cap in
 # the single spawn loop below — no accumulate-then-burst across a kill gap.
-
-# M2 pillar C (MC 11238 T-M2g, M2-SPEC §C.1): the field-merge rule's two consts,
-# OUR values — the threshold is a draw-budget tie (well under the 400 horde
-# cap, §7's "gem array additionally bounded <= 200"), the batch keeps the fold
-# coarse so bulk drops stay rare. VS-FEATURES §S8 shape ref (>400 gems => the
-# source folds into one red gem) with OUR numbers and OUR granularity; we never
-# lose XP — the fold carries the merged gems' xp SUM (the _merge_gems invariant).
-const GEM_MERGE_THRESHOLD := 200
-const GEM_MERGE_BATCH := 100
 
 # M2 pillar A (MC 11237 T-M2e, M2-SPEC §A.1): the three capped cycle scalars,
 # OUR numbers, in the ONE spawn/damage seams — not a second mechanism beside
@@ -190,6 +182,15 @@ var gems: Array = []
 var coins: Array = []
 var heals: Array = [] # Dawnlight pickups; +HEAL_AMOUNT hp, clamped to max_hp
 var chests: Array = [] # chest DROPS (M1 f4); opening rides collect_pickups (M1 f5)
+# T-M6d (MC 11675, M6-SPEC §0 F-10): the drop/pickup half of the old file —
+# the sigil array and all ride DROPS below; these four arrays stay the ONE
+# entity state (every consumer — pickup_viz, every sim leg — reads world.*
+# unchanged, drops.gd is bound to THIS world and writes through the bind).
+var drops := Drops.new()
+
+func _init() -> void:
+	drops.bind(self) # the bind pattern (WeaponSystem.bind, main.gd untouched)
+
 var spawn_acc := 0.0
 # M3 §3.1 (T-M3s): ONE latch index latches the stage row's bosses list in
 # schedule order (the STAGES column is the schedule's single source). This
@@ -222,6 +223,8 @@ func reset() -> void:
 	coins.clear()
 	heals.clear()
 	chests.clear()
+	drops.reset() # M6 F6: the sigil array + counter reset per run (the
+	# drop-array law; NOT game.kills, NOT a snapshot field — SD-E2 pin)
 	spawn_acc = 0.0
 	schedule_spawned = 0
 	reaper_spawned = 0
@@ -385,7 +388,9 @@ func update_spawns(dt: float, game: GameState, view: Vector2) -> void:
 		_spawn_enemy(open[randi() % open.size()], game, view, cone)
 
 
-# Swarmers home in on the survivor; gems magnet within Grip-scaled radius.
+# Swarmers home in on the survivor; the pickup magnet + gem fold ride the
+# drops.gd call-throughs below (T-M6d split — the call-throughs stay HERE,
+# in this ONE entity update, §5.1: "call-through at update_entities unchanged").
 func update_entities(dt: float, game: GameState) -> void:
 	var p: Dictionary = game.player
 	for e in enemies:
@@ -396,12 +401,10 @@ func update_entities(dt: float, game: GameState) -> void:
 		e.y += dy / d * e.spd * dt
 		if e.hit_cd > 0.0:
 			e.hit_cd -= dt
-	var magnet: float = 60.0 * (1.0 + 0.25 * game.passives.grip)
-	# Loadstone (feature-6 partner, T-M1h): +25% of the base magnet per
-	# stack, OWN term on the SAME magnet seam (the grip line is a byte-pin).
-	magnet += 15.0 * float(game.passives["loadstone"])
-	_magnetize(gems, p, magnet, dt)
-	_magnetize(heals, p, magnet, dt)
+	# M6 F5 + F-10 split: the ONE magnet source (grip + loadstone, gems +
+	# heals + NOW coins) moved with the pickup concern to drops.gd; the
+	# per-tick call-through below is byte-position-identical.
+	drops.magnetize(game, dt)
 	if p.iframes > 0.0:
 		p.iframes -= dt
 	# §C.1 field-merge rides this ONE entity update, after the drop (the drop
@@ -409,43 +412,7 @@ func update_entities(dt: float, game: GameState) -> void:
 	# tick, so the array leaves this seam at <= GEM_MERGE_THRESHOLD (the C-G3
 	# observation point; a same-tick kill burst can transiently sit above the
 	# threshold and is folded at the next update — stated reading).
-	_merge_gems()
-
-
-# Grip-scaled pull shared by every magnetised pickup kind (gems + Dawnlight).
-func _magnetize(items: Array, p: Dictionary, magnet: float, dt: float) -> void:
-	for g in items:
-		var gx: float = p.x - g.x
-		var gy: float = p.y - g.y
-		var gd := maxf(sqrt(gx * gx + gy * gy), 1.0)
-		if gd < magnet:
-			g.x += gx / gd * 220.0 * dt
-			g.y += gy / gd * 220.0 * dt
-
-
-# §C.1 field-merge: at the threshold the OLDEST GEM_MERGE_BATCH gems (append
-# order = drop order, so the array head) fold into ONE bulk gem at their
-# centroid carrying the SUM of their xp plus big:true (the ONE flag
-# pickup_viz.gd reads for the larger+brighter draw). The gem-array Σxp is
-# UNCHANGED across the fold — the unconditional XP-neutrality invariant
-# (rev-2 P2-4); the sum accumulates head-to-tail so the bulk's xp is a fixed
-# float result, independent of the fold's position in the tick. The bulk gem
-# is the same dict kind riding the same array: no new pickup kind, the magnet
-# path and the 16 px collect funnel below eat it like any gem.
-func _merge_gems() -> void:
-	if gems.size() < GEM_MERGE_THRESHOLD:
-		return
-	var cx := 0.0
-	var cy := 0.0
-	var sxp := 0.0
-	for i in GEM_MERGE_BATCH:
-		cx += gems[i].x
-		cy += gems[i].y
-		sxp += gems[i].xp
-	for i in range(GEM_MERGE_BATCH - 1, -1, -1):
-		gems.remove_at(i) # the oldest BATCH entries, tail-first (stable head)
-	gems.append({"x": cx / GEM_MERGE_BATCH, "y": cy / GEM_MERGE_BATCH,
-		"xp": sxp, "big": true})
+	drops.merge_gems()
 
 
 # M2 §A.1 cycle clear: the clear's ONE drop through the single drop array,
@@ -458,91 +425,23 @@ func cycle_clear(game: GameState) -> void:
 		"tier": CHEST_TIER_BY_SOURCE["endless-cycle"]})
 
 
-# Death payout: ~70% gem, 6% coin (1-3g); the Warden adds +50 gold.
-# Dawnlight heal: 1.5% roll on any death, guaranteed once from a boss.
-# Chest drop: boss 1.0 / miniboss CHEST_CHANCE_MINIBOSS (M1 f4 rows).
+# Death payout: the ONE kill-funnel ENTRY (F-10: every caller unchanged —
+# weapons.gd._hit, main.gd, every sim leg). The rolls moved to drops.gd at
+# T-M6d (the M6-F6 sigil counter rides THERE, after the reaper guard — the
+# rolls + counter body is drops.roll()'s, moved VERBATIM).
 func kill_enemy(game: GameState, enemy: Dictionary) -> void:
 	var i := enemies.find(enemy)
 	if i >= 0:
 		enemies.remove_at(i)
 	game.kills += 1
-	# M4 §2.1 DEATH GUARD (T-M4r, B-E6): a reaper death pays NOTHING — no
-	# chest roll (the ONE CHEST_TIER_BY_SOURCE stays 7 rows, F-3: a keyed
-	# read of "the-reaper" would be the missing-key SOFT-null that appends
-	# a phantom null-tier chest — the map-bypass law, first EXECUTED
-	# evidence rides the sim_reaper zero-drop-array-delta leg), no +50
-	# boss bounty at :347, no coin/heal rolls; `xp: 0` already means no
-	# gem. The kill counts; the drop arrays stay untouched. Planted
-	# removal RED-proves the delta leg (capture .tmp/m4r-reaper.txt).
-	if enemy.get("reaper", false):
-		return
-	if enemy.boss:
-		game.gold += 50
-	if enemy.xp > 0.0 and randf() < 0.7:
-		gems.append({"x": enemy.x, "y": enemy.y, "xp": enemy.xp})
-	if randf() < 0.06:
-		coins.append({"x": enemy.x, "y": enemy.y, "gold": 1 + randi() % 3})
-	if enemy.boss or randf() < HEAL_DROP_CHANCE:
-		heals.append({"x": enemy.x, "y": enemy.y})
-	# T-M2t §B.1: every drop carries its tier FROM THE MAP at the drop site
-	# (kill_enemy = the boss/miniboss sources; cycle_clear above = endless-
-	# cycle; the event row stays the §B.1 P4-1 forward-declared reservation).
-	# Strict map lookup: a bypassed source crashes at the drop, never silently
-	# de-tiered (the map-bypass planted-red rides this). M3 §3.1 P2-1: the
-	# boss line is keyed BY THE KILLED TYPE (String(enemy.type)) — the one
-	# literal "warden" site is retired, every boss class reads its own map
-	# row (the warden lands on the same "warden" row BY KEY, byte-identical).
-	if enemy.boss and randf() < CHEST_CHANCE_BOSS:
-		chests.append({"x": enemy.x, "y": enemy.y,
-			"tier": CHEST_TIER_BY_SOURCE[String(enemy.type)]})
-	elif enemy.miniboss and randf() < CHEST_CHANCE_MINIBOSS:
-		chests.append({"x": enemy.x, "y": enemy.y,
-			"tier": CHEST_TIER_BY_SOURCE["miniboss"]})
+	drops.roll(game, enemy)
 
 
 # Consume pickups inside touch range; returns gold picked up this step.
+# (the F-10 call-through — the touch funnel + the M6 F6 sigil arm live in
+# drops.collect_pickups; world.collect_pickups keeps the ONE caller seam).
 func collect_pickups(game: GameState) -> int:
-	var gold := 0
-	for i in range(gems.size() - 1, -1, -1):
-		var g: Dictionary = gems[i]
-		if _dist(g, game.player) < 16.0:
-			gems.remove_at(i)
-			game.add_xp(g.xp)
-	for i in range(coins.size() - 1, -1, -1):
-		var c: Dictionary = coins[i]
-		if _dist(c, game.player) < 16.0:
-			coins.remove_at(i)
-			gold += c.gold
-	for i in range(heals.size() - 1, -1, -1):
-		var h: Dictionary = heals[i]
-		if _dist(h, game.player) < 16.0:
-			heals.remove_at(i) # consumed even at full hp — never a wasted item
-			game.hp = minf(game.max_hp, game.hp + HEAL_AMOUNT)
-	# Chest OPENING (M1 feature 5): the same 16 px touch funnel. The M2 §B.1
-	# OPEN ORDER is exactly three lines: the ONE transform first (evolutions
-	# fire at OPEN time, the gate reads game.time here; since T-M2u the
-	# union pillar holds the try_union-else-try_evolve precedence slot at
-	# THIS site), then the tier cards + the gold line, both owned
-	# by chest_rewards.gd — the cards ride the frozen pending_levels ->
-	# _enter_levelup seam (each is one 3-card offer, the per-offer reward
-	# kind pops the game.reward_kinds FIFO), the gold roll returns raw and
-	# enters the run through the ONE credit_gold funnel below (roadmap
-	# feature 5 phase decision, DA c1 A-2: the enum
-	# menu|playing|levelup|gameover|win is untouched).
-	for i in range(chests.size() - 1, -1, -1):
-		var c: Dictionary = chests[i]
-		if _dist(c, game.player) < 16.0:
-			chests.remove_at(i)
-			# T-M2u landed: union precedence > evolution (§D) — a chest
-			# performs the UNION when eligible, else the evolution (still
-			# exactly ONE weapon-transform per chest).
-			if UnionSystem.try_union(game) == "":
-				EvolutionSystem.try_evolve(game)
-			gold += ChestRewards.grant(game, c)
-	# The meta gold-rate (T-M1f) rides the ONE pickup funnel: collected raw
-	# gold enters the run only through GameState.credit_gold — identity with
-	# no ranks bought, so every pre-shop dump byte stays identical.
-	return game.credit_gold(gold)
+	return drops.collect_pickups(game)
 
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:

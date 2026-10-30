@@ -5,8 +5,10 @@ as text — the offer dicts levelup.gd builds are mirrored here from the same
 source, and the icon resolver is the PASSIVE_ICONS table + path rule
 regexed out of screens.gd, so this file fails if either side drifts.
 
-Rows (DOD-ACCEPTANCE A7 + N45 + roadmap feature 7 REPLACE rows): the 32
-pool kinds = 16 weapon + 15 passive + bonus (16+15+1 = 32, the M1 count).
+Rows (DOD-ACCEPTANCE A7 + N45 + roadmap feature 7 REPLACE rows): the 31
+pool kinds = 15 weapon + 15 passive + bonus (15+15+1 = 31 — the M1 count was
+32; doom-sigil retired weapon-side at T-M6d, MC 11675, M6-SPEC §4.1: the
+offer-stream retirement, the icon KEEPT as the RIVEN SIGIL pickup billboard).
 The original 6 weapon icons + coin stay byte-identical REUSES of the v1
 static/assets PNGs (MANIFEST.md:28-33,35); the ten feature-6 weapon icons
 and all 15 passive icons are 3090 renders — 512x512 RGBA with embedded
@@ -14,7 +16,7 @@ prompt provenance (PIL .text), byte-identical to the assets/icons/new/ art
 sources (T-M1c manifest tools/vm100/icons-batch-m1c.tsv). The v1 blank-icon
 path (levelup.gd "icon": "") must be structurally unreachable: screens.gd
 has NO conditional guarding the icon TextureRect, the resolver is total
-over the 32 kinds, and PASSIVES == PASSIVE_ICONS keys is pinned here.
+over the 31 kinds, and PASSIVES == PASSIVE_ICONS keys is pinned here.
 """
 
 import hashlib
@@ -29,12 +31,14 @@ GODOT = os.path.join(conftest.REPO, "godot")
 V1_ASSETS = "/home/claudecode/Games/vampire_survivor/static/assets"
 NEW_SRC = os.path.join(conftest.REPO, "assets", "icons", "new")
 
-# 16 kinds = the 6 v1-reused originals + the 10 feature-6 renders; 15
+# 15 kinds = the 6 v1-reused originals + the 9 feature-6 renders (T-M6d
+# retired doom-sigil from the POOL; the .png stays and rides the sigil
+# pickup billboard in pickup_viz.gd — this file is the offer-stream universe); 15
 # passive keys = the 5 originals + the 10 partners (all renders).
 WEAPON_KEYS = ["talon", "ember", "cleaver", "halo", "ward", "spike",
                "bone-whip", "dart-loop", "hewn-axe", "pilgrim-cross",
                "censer-of-hours", "rot-water", "spectral-disc", "storm-peal",
-               "fire-lash", "doom-sigil"]
+               "fire-lash"]
 V1_WEAPON_KEYS = WEAPON_KEYS[:6]
 ROSTER_WEAPON_KEYS = WEAPON_KEYS[6:]
 NEW_KEYS = ["ferocity", "haste", "ward", "grip", "insight",
@@ -68,7 +72,7 @@ FALLBACK = re.search(r'const FALLBACK_ICON := "(res://[\w./-]+\.png)"', SCREENS)
 
 
 def resolve_icon(kind, key=None, icon=None):
-    """Mirror of screens.gd icon_path() for the 32 pool kinds."""
+    """Mirror of screens.gd icon_path() for the 31 pool kinds."""
     if ICON_PATH_RULE is None or FALLBACK is None:
         raise AssertionError("screens.gd lost its total icon resolver")
     if kind == "passive":
@@ -76,10 +80,10 @@ def resolve_icon(kind, key=None, icon=None):
     return res_to_fs(ICON_PATH_RULE.group(1) % icon)
 
 
-# ---- 32 kinds, straight out of the offer source ----
+# ---- 31 kinds, straight out of the offer source ----
 
 def meta_icons():
-    """weapons.gd META: {id: icon} for the 16 weapon kinds (kind weapon and
+    """weapons.gd META: {id: icon} for the 15 weapon kinds (kind weapon and
     kind upgrade share these icons, levelup.gd build_pool). Hyphen ids since
     T-M1h — the key class is [\\w-] (the six-key-era class would silently
     match zero roster rows)."""
@@ -128,14 +132,15 @@ def test_passives_table_pinned_to_pool():
 
 # ---- per-kind: file exists, non-empty, dims right, provenance kept ----
 
-def test_all_32_kinds_resolve_to_real_icons():
+def test_all_31_kinds_resolve_to_real_icons():
     rows = []
     for icon in meta_icons().values():
         rows.append(resolve_icon("weapon", icon=icon))
     for key in passive_keys():
         rows.append(resolve_icon("passive", key=key))
     rows.append(resolve_icon("bonus", icon=bonus_icon()))
-    assert len(rows) == 32  # 16 weapons + 15 passives + bonus (M1 count)
+    assert len(rows) == 31  # 15 weapons + 15 passives + bonus (T-M6d)
+    assert "doom-sigil" not in meta_icons()  # retired pool-side, KEEPT icon
     for path in rows:
         assert os.path.isfile(path), path
         assert os.path.getsize(path) > 0, path

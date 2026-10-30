@@ -378,8 +378,12 @@ def test_s7_plate_mm_draws_only_on_its_stage():
     # (capture .tmp/m3s-stages.txt carries both runs).
     assert const("PLATE_PX", VIZ) == 40.0
     tally = leg("draw_tally")["tally"]
-    assert tally == {"moor-vigil": 5, "sunken-chapel": 5, "ossuary-stair": 6}, \
-        "stage 1 keeps the shipped 5 draws; the plate joins only ossuary-stair"
+    # M6 T-M6d (MC 11675, M6-SPEC §10): the RIVEN SIGIL MM rides every
+    # stage's tally (pickups 5->6, total 27->28) — the old 5/5/6 claim is
+    # retired in-row, RE-MINTED fixture carries 6/6/7 (the sigil draws at
+    # every stage; the plate STILL joins only ossuary-stair, §S3 law).
+    assert tally == {"moor-vigil": 6, "sunken-chapel": 6, "ossuary-stair": 7}, \
+        "every stage gains the sigil draw; the plate joins only ossuary-stair"
     body = block(VIZ, "func draw_count", "\nfunc ")
     assert "DRAWS" in body and "_plate" in body
 

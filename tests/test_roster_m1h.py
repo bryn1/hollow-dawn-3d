@@ -30,6 +30,7 @@ WEAPONS = read("weapons.gd")
 GAME_STATE = read("game_state.gd")
 LEVELUP = read("levelup.gd")
 WORLD = read("world.gd")
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 FX = read("viz_fx.gd")
 
 PARTNER_KEYS = ["cracked-heart", "iron-wrap", "tall-candles", "four-leaf-charm",
@@ -91,10 +92,10 @@ def test_cracked_heart_applies_at_the_pick_seam():
 
 def test_loadstone_rides_the_magnet_seam():
     assert re.search(r"magnet \+= 15\.0 \* float\(game\.passives\[\"loadstone\"\]\)",
-                     WORLD)
+                     DROPS) # M6 T-M6d: the magnet seam moved to drops.gd
     # the v1 grip line untouched (STAY-GREEN byte-pin elsewhere)
     assert re.search(r"var magnet: float = 60\.0 \* \(1\.0 \+ 0\.25 \* "
-                     r"game\.passives\.grip\)", WORLD)
+                     r"game\.passives\.grip\)", DROPS)
 
 
 # ---- (2) the ten _fire arms: OUR stat rows, EXISTING classes ---------------
@@ -109,7 +110,10 @@ FIRE_ROWS = {
     "spectral-disc": (r"w\.cd = rate\(l, 1\.5\)", r"\(12\.0 \+ 5\.0 \* l\)", "bolts"),
     "storm-peal": (r"w\.cd = rate\(l, 2\.0\)", r"\(12\.0 \+ 5\.0 \* l\)", "bursts"),
     "fire-lash": (r"w\.cd = rate\(l, 1\.4\)", r"\(16\.0 \+ 6\.0 \* l\)", "bolts"),
-    "doom-sigil": (r"w\.cd = rate\(l, 12\.0\)", r"\(40\.0 \+ 14\.0 \* l\)", "rings"),
+    # "doom-sigil" RETIRED WITH THE WEAPON at T-M6d (MC 11675, M6-SPEC
+    # §4.4): the _fire arm is gone; the RINGS transient array STAYS (the
+    # RIVEN SIGIL screen-clear marks itself through it — sim_combat's
+    # sigil_clear leg pins the byte r 760 / life .5).
 }
 
 

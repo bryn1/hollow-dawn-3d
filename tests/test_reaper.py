@@ -42,6 +42,7 @@ import conftest
 REPO = conftest.REPO
 FIXTURE = os.path.join(REPO, "tests", "fixtures", "reaper-m4.jsonl")
 read = functools.partial(conftest.read_script, code_only=True)
+DROPS = read("drops.gd") # M6 T-M6d (MC 11675): the F-10 drops partition
 WORLD = read("world.gd")
 MAIN = read("main.gd")
 GAME_STATE = read("game_state.gd")
@@ -199,9 +200,15 @@ def test_b_e6_death_guard_zero_drop_delta():
         and row["gems_delta"] == 0 and row["heals_delta"] == 0 \
         and row["gold_delta"] == 0
     # The guard sits after remove_at + kills, BEFORE the boss drop block.
-    m = re.search(r"game\.kills \+= 1\s*\n\s*"
-                  r"if enemy\.get\(\"reaper\", false\):\s*\n\s*return\s*\n"
-                  r"\s*if enemy\.boss:", WORLD)
+    # M6 T-M6d (MC 11675, F-10 split): the kills increment stays the funnel
+    # ENTRY in world.gd; the guard + drops moved VERBATIM into drops.roll.
+    # The claim is unchanged — guard AFTER kills, BEFORE every drop — now
+    # read as the two seams it legally became.
+    assert re.search(r"game\.kills \+= 1\s*\n\s*drops\.roll\(game, enemy\)",
+                     WORLD), "kills count, then the ONE call-through"
+    m = re.search(r"if enemy\.get\(\"reaper\", false\):\s*\n\s*return\s*\n"
+                  r"(?:.|\n)*?\s*if enemy\.boss:",
+                  DROPS[DROPS.index("func roll"):])
     assert m, "the guard is the ONE named site between kills and drops"
 
 
