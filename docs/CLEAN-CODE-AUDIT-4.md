@@ -383,3 +383,90 @@ untouched v3.1.0 tree; Godot `--import` rc 0 on the worktree first, per
 brief).
 
 # VERDICT: FIX
+
+# REFACTOR-4 — executed over this fix-list (MC 11711 T-M6q2, code, 2026-10-30)
+
+W1..W4 landed as FOUR commits — one per W-group, file sets DISJOINT (per-commit
+name-only sets in capture [5]): W1 3f69d44, W2 771cbd0 (+W2-FIX a936c09),
+W3 18a9de4, W4 e470fb1. The ZERO-BEHAVIOR-CHANGE law executed: the pristine
+pre-edit base is a worktree this card created
+(`git worktree add .tmp/wt-m6q2-base --detach 801fea3`, proof recorded BEFORE
+the first edit in capture [0b]); first act in each worktree was
+`godot --headless --path godot --import` rc 0 (pinned 4.7.2). Fix-list
+interpretations named (brief over §-splits): the brief moves test_levelup_caps
+into W1 (§2 had it W4 — same fix); the three stale-LOC headers sit with the
+header group in W3; W4 = the mob_contrast vacuity alone. screens.gd's §1.1
+split-vs-ceiling decision: CEILING + reason + decision-row CARRIED (the fix-
+list itself prescribed re-word + naming, not execution; the priced split
+candidate lives in the header for the owner/next card).
+
+## MIRROR TABLE (per-finding, measured before -> after at this commit)
+
+| § | finding | status | measured (before -> after) |
+|---|---|---|---|
+| 1.1 | F-1 P1 screens.gd retired pool-16 claims ALIVE + >600 crossing un-narrated | CLOSED — comment-only re-word | screens.gd 601 -> 601 (line-neutral; delta script: "content edits, LOC unchanged"); nesting proxy 5 @541 -> 5 @541; "32 pool kinds"/"16 weapon kinds" grep-to-zero over the CODE universe (capture R1/R2) — measured truth re-derived HERE: 15 weapon + 15 passive + bonus = 31 kinds, icon-doom-sigil.png = KEEPT drop billboard (pickup_viz SIGIL_ICON :88); the 582->601 growth NAMED (@91b371c T-M6r chips, +19); decision row retained |
+| 2 | F-2 P1 test_levelup_caps.py:16 stale fixture provenance | CLOSED — re-dated | 203 -> 204; comment now states the measured truth: fixture RE-MINTED at T-M6d on the F6 pool 16->15, carries 15+15, 0 doom rows (grep-measured on the committed dump) |
+| 1.2 | F-3 P2 probe 538 MIXED (the tree's ONLY) | CLOSED — SPLIT EXECUTED (the audit's recommended option (a)) | probe 538 -> 397 (−141; LEAVES the concern_check ≥400 scan entirely — MIXED flags 1 -> 0 tree-wide); NEW tools/upgrades_visual_skill_fx.py 99 + tools/upgrades_visual_bulk.py 96 (both < 250); behavior-neutral PROVEN: synthetic 26-row gate run byte-identical base-vs-final + FRESH 45-shot captures rows.json BYTE-IDENTICAL + tables GREEN on BOTH trees (monolith vs split, same pixels) |
+| 1.2 | F-3b P2 SKILL_CLASS_ALPHA zero-pinned restatement | CLOSED — cross-language PIN | NEW suite leg test_probe_table3_alpha_law_pinned_to_the_writer re-derives every class alpha from viz_fx.gd's OWN constants and pins the table digit-for-digit; PLANTED-RED: 0.35->0.40 arcs writer edit -> leg RED; suite 380 -> 381 (replace-not-delete) |
+| 1.3 | F-4 P3 upgrades_visual_capture.gd 485 no reason | CLOSED — reason header | 485 -> 490 (+5 header rows, counted in the number it states); one-capture law named; non-comment diff vs base 0 (comment-only proven) |
+| 1.4 | F-5 P3 roster.gd 405 no reason | CLOSED — reason + SCHEDULED clause | 405 -> 416 (+11 = the reason block itself, counted + stated); names the T-M6r growth (359->405 @91b371c, CLIP_SOURCE rider :161-183) + the NAMED card T-M6a-STATUE carries clip seam -> roster_clips.gd (CC3R data-table precedent); nesting 3 @184 -> 3 @195 |
+| 1.5 | F-6 P3 world.gd reason outside the first-5 window | CLOSED — reorder only | 450 -> 450; reason :6 -> :2 (dod_hygiene._head_says reads [:5]); content verbatim; nesting 4 @371 unchanged |
+| 1.6 | P4 sim_evolve 640, M6's fastest grower | WATCH CARRIED (fix-list: RE-MEASURE + band row, defence unchanged) | 640 -> 645 (+5 = band-watch row itself, counted + stated); next touching card RE-MEASURES the band before adding lines (world.gd/strips_capture precedent wording); nesting 6 @378 -> 6 @383 |
+| 3-F-8 | P4 stale measured-LOC headers ×3 | CLOSED — re-measured, self-honest | sim_union header 488 -> 527 (file 527 -> 527, line-neutral); sim_headless 402 -> 436 (file 436 -> 436, line-neutral); sim_combat 514 -> 523 (file 521 -> 523: +7 @f8095d1 the card that re-measured viz_fx and MISSED this one, +2 = this header itself); every number == final post-edit wc -l |
+| 3-F-7 | P3 vacuous WHITE-seven fragment | CLOSED — made a real check | VACUITY PROVEN FIRST: white7 ⊆ ENEMY_TYPES (7/16) is entailed by the :228 grid==ENEMY_TYPES pin — can NEVER go RED independently — and its premise died at T-M6c (BOSS_TINTS rows knight+deacon -> live white is FIVE). test_mob_contrast.py 254 -> 274; the leg now DERIVES enemy_types − (ENEMY_TINTS|BIOME_TINTS|BOSS_TINTS) == render.gd's own F7 naming + the 5-count + coverage; PLANTED-RED: rename the-reaper in world.gd -> RED at :264 while the entailing pin passes |
+
+## GATE RE-RUN (the instruments that filed this audit)
+
+- dod_hygiene gate walk: 4 FINDING-400NOREASON rows -> 0 on the final tree;
+  both >600 files carry reasons (info-over600-reasoned only).
+- concern_check: MIXED 1 -> 0 (the probe split retired the tree's sole flag;
+  the probe now sits UNDER the scan).
+- suite 380 -> 381 PASSED both trees (base 380, final 381; +1 = the alpha
+  pin; replace-not-delete, zero legs removed).
+
+## BYTE-ANCHOR ROWS (base = the pristine 801fea3 worktree this card created; battery .tmp/m6q2-battery*.sh, transcript .tmp/m6q2.txt)
+
+- journey @HD3D_SEED=11101: BASE == FINAL BYTE-IDENTICAL — 5071 rows,
+  md5 5d863b8034018116a00a1015bf7ac1f6, EQUAL to the v3.1.0 release anchor
+  (the brief's "5020" was the pre-M6 corpus number; docs/BYTE-DEVIATION-M6
+  owns the declared shift).
+- Strict corpora × BOTH trees: 11 dumps + chests-evolve (on the driver's own
+  HD3D_EVO_DUMP env) + achv = 25 cmp legs BYTE-IDENTICAL; chars: fixture rows
+  ALL PRESENT (its fresh leg carries the documented clock field).
+- strips fresh captures BOTH trees on clean wells @ the SHIPPED 11112:
+  75 rows, gate ALL GREEN (19 checks) BOTH sides, DECLARED NORM
+  (.tmp/m6z-norm.py = the BYTE-DEVIATION-M6 channel) 0-diff vs committed on
+  BOTH trees AND base-vs-final; PNG outputs 0 differing files.
+- probe: capture.gd non-comment diff 0; FRESH capture + 3-table gate BOTH
+  trees rc=0 — Table-1 3/3, Table-2 6/6, Table-3 26/26 GREEN on both;
+  rows.json BYTE-IDENTICAL base-vs-final; 39/45 shot PNGs byte-identical,
+  6 outliers confined to the 149×18 HUD-ticker band (566,150)-(715,168),
+  ≤26/255 glyph-shaped — the real-clock HUD readout, same declared-jitter
+  family as _ms; every MEASURED number identical.
+- dawnwell_pixel_gate rc=0 BOTH trees, every count byte-identical (shop
+  60855 …); outputs equal after worktree-path normalization.
+- s8 A1 table 11/11 PASS rc=0 BOTH trees; outputs equal after the sha-header
+  row; tracked s8 records git-restored + cmp-clean after the runs.
+- roster_clip_gate GREEN both trees, outputs BYTE-EQUAL; committed CSVs
+  zero-diff.
+
+## HARNESS ROWS THE BATTERY EARNED (honest, each measured, zero product impact)
+
+- W2-FIX a936c09: the split left ONE bare skill_fx_ids() in probe parse_rows
+  (NameError, CAPTURE path only — invisible to the source-truth suite and the
+  --gate synthetic parity run; the battery's fresh-capture leg caught it LIVE
+  and re-proved GREEN after the fix). Runtime verification earned its keep.
+- The brief's "strips ATK_SEED 11114 = F-2 rc=0" was a STALE m6z-era number
+  (m6z reproduced it on its battery's already-warmed well; the card that
+  MINTED the committed dump, T-M6f, used the shipped 11112). Seed-scan on
+  THIS tree measured: 11112 rc=0/75 rows/halo-owned; 11114 rc=3 F-2 ABORT —
+  IDENTICALLY on both trees, so the base-vs-final law held either way.
+- Pass-1 evolve leg used HD3D_EVOLVE_DUMP; the driver's env is HD3D_EVO_DUMP
+  (the m6z capture itself named this rename). Failures were symmetric.
+
+CAPTURE: `.tmp/m6q2.txt` (main checkout, gitignored) — ends VERIFY_EXIT=0.
+Instruments run: pytest BOTH trees, byte battery × 3 passes (base vs pristine
+base), gate walk + nesting proxy + delta script before/after, concern_check,
+grep-zero rules, the F-7 entailing-math proof, planted reds ×2 (alpha pin +
+mob leg), synthetic + stale rows.json gate parity, fresh probe captures both
+trees, seed scan.
