@@ -37,15 +37,16 @@ event-free by the byte law), plus one dedicated event miniboss each (SUNKEN PREL
 STAIR ACOLYTE) latched onto the same schedule at 11:00. A **Reaper night flag** (a hidden
 Dawn Well flag, the endless precedent) rewrites the end of a night: survive to 15:00
 without endless and THE REAPER arrives, one more every minute, and its touch ENDS the
-run — with the flag off, the 900-second win stays byte-identical. When the 16+15+gold
+run — with the flag off, the 900-second win stays byte-identical. When the 15+15+gold
 level-up pool is exhausted, **limit-break-lite** hands out three repeatable stat cards
 (LIMIT · FURY / HASTE / BULWARK) riding the existing stat seams — a zero-identity
 fallback at the offer funnel, never a new pool. The BURNING DUNES band carries its
 promised **warm dune hue** now (a deterministic re-tone of the v2 tile inside the same
 luma envelope). Everything else rides the same spine as v1.3.0: two minibosses
 at 10:00 and 13:00, a 400-alive spawn cap, chests in THREE tiers (ember/warden/dawn
-stamped by source, weighted reward rolls), chest-driven weapon evolutions and TWO weapon
-unions (Requiem Toll, Dirge Eternal), a 16-weapon + 15-passive level-up pool under carry
+stamped by source, weighted reward rolls), level-5 weapon evolutions (fired at the level-up
+PICK — trigger moved at v3.1.0; chest opens carry the union precedence alone) and TWO weapon
+unions (Requiem Toll, Dirge Eternal), a 15-weapon + 15-passive level-up pool under carry
 caps (6 weapon slots + 6 passive kinds), ground-gem auto-merge (a 200-gem cap folds the
 oldest 100 into one bulk gem, never losing XP), ENDLESS mode — a Dawn Well flag that turns
 the 15-minute limit into wave cycles with capped per-cycle scaling and a persisted
@@ -62,7 +63,24 @@ Hunyuan3D models are EXCLUDED (their license terms do not apply in the EU/UK/SK 
 ships in the EU).
 
 ## Status
-v3.0.0 ("Roster & Legacy") is the current release; releases live on this repo. The
+v3.1.0 ("Feel & Fidelity") is the current release; releases live on this repo.
+It is the M6 milestone on the owner's feel-&-fidelity order, MINOR per the roadmap's
+own version law (M6 adds no new player-navigated surface — the level-up cards grow
+IN PLACE; owner ruling verbatim *"3. Ship."*, 2026-10-29, MC 11674). What shipped:
+**movement animation everywhere** (the M5-shipped clips are finally PLAYED through the
+one `CLIP_SOURCE` consumer; stride-tied horde gait bob+lean; procedural arms for the
+statue statics); **individual attack looks** — every fireable id's FX keyed to its own
+skill-icon colour, 26 SKILL_FX rows sampled at card time and gate re-derived; the
+**level-5 evolution** — evolutions now fire at the level-up PICK (weapon MAX + passive
+partner carried; chest opens keep the union precedence alone), passive cards show the
+skills they affect and their Lv5 hint as icon chips; **short skill text** on every
+offer, pinned to the spec; **coins ride the magnet**; the **DOOM SIGIL is retired as a
+skill → the RIVEN SIGIL**, a rare every-750th-kill pickup whose touch clears the
+screen, sparing bosses, minibosses and the reaper (owner carve *"2. Rec."*); and a
+**mob contrast floor** — the whole 44-row (band × class) readability grid GREEN. The
+six statue-class heroes ride declared procedural motion until the ruled re-rig batch
+T-M6a-STATUE lands (it waits on the owner's vm100 backup window; honest line in
+docs/RELEASE-v3.1.0.md). v3.0.0 ("Roster & Legacy") is the release before it. The
 M4-deferred roster tranche LANDED with it — v2.1.0's honest not-shipped line retires
 into this dated statement, replace-not-delete: **9 selectable characters** (SEL-C,
 owner ruling "C" 2026-10-27; row 0 THE VIGIL is the shipped identity byte-law; gold

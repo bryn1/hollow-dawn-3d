@@ -211,8 +211,12 @@ seams (`world.gd`, `main.gd`), and a `best_cycle` save field (no VERSION bump); 
 table + weighted picker live in the ONE new rule module `chest_rewards.gd`; ground gems
 merge at `GEM_MERGE_THRESHOLD 200` / `GEM_MERGE_BATCH 100` in the ONE entity update
 (`world.gd`), bulk gem on the ONE gem MM (color-instance format, rev-2 P4-5); unions are the
-ONE `union.gd` TABLE (`:33`, 2 rows) with precedence over evolution at the ONE chest-open
-funnel and a cross-time reserve rule for shared bases. §b draw budget: **0 new draw classes
+ONE `union.gd` TABLE (`:33`, 2 rows) with ~~precedence over evolution at the ONE chest-open
+funnel~~ and a cross-time reserve rule for shared bases. **M6 v3.1.0 SUPERSESSION (dated
+2026-10-30, T-M6z MC 11709): the chest-open funnel is UNION-ONLY now — the evolution
+trigger moved to the level-up PICK (no time term; M6-SPEC §3.1/§4.4 R5, the dated cells at
+PARITY gap rows 1/2 are the truth); the `:33` cite rides M6's re-greps. This paragraph is
+the M2 plan-of-record text, kept as written per the dated-review-record precedent.** §b draw budget: **0 new draw classes
 in all of M2** — tiers ride the chest MM, the bulk gem the gem MM, union FX `halos`/`bursts`
 /the ward ring-tick class; the measured 27 / plan 40 / hard 60 row re-ran UNCHANGED
 (`sim_budget` unions leg, D-U6). Contract B (12 fields) untouched by every pillar (F-3).
