@@ -1,27 +1,27 @@
 # Screens layer: the overlay DISPATCHER + the core panels (menu, level-up
 # reason: >400 lines — dispatcher + the ONE panel-style idiom (_overlay/
 #   _center_box/_label/_button — 54 call sites across the FAMILY: 44 HERE +
-#   10 in the two moved builders, measured MC 11573; no second style) is ONE
-#   concern. M5 grew this file 445->715 (crossed the 600 band, MC 11570
-#   §1.1 P2 — the split-vs-ceiling decision the audit + M5-SPEC-DA:135's
-#   broken 575<600 plan asked for): EXECUTED at MC 11573 T-CC3R — the
-#   roster select (SIXTH overlay, T-M5c) and its skin chips moved to
-#   roster_select.gd, the achievements page (SEVENTH, T-M5p) moved to
-#   achievements_page.gd, both builders calling THIS idiom through the
-#   passed-in instance (zero new UI mechanism; the overlays still open on
-#   THIS file's _overlay in _ready). The Dawn Well shop (T-M1f — FOURTH
-#   overlay) and the stage select (M3 §2, T-M3s — FIFTH overlay; the
-#   select surface is what earns v2.0.0, SEL-A §2) stay HERE. Mouse works
-#   for real users; keyboard picking is routed by main from the bridge
-#   press queue (Contract B), never from here.
-# §j (MC 11103): every card kind resolves to an icon file. v1's blank-icon
-# path (passives shipped icon: "", levelup.gd:35) is closed structurally:
-# _card() has NO conditional around the icon TextureRect, icon_path() is
-# total over the 32 pool kinds (T-M1h M1 count: 16 weapon + 16 upgrade via
-# the same 16 icons, 15 passives via PASSIVE_ICONS, bonus via coin), and
-# every branch asserts the file exists before load. An unmapped passive key
-# cannot reach a card (PASSIVES in levelup.gd is pinned == PASSIVE_ICONS by
-# tests/test_card_icons.py).
+#   10 in the two moved builders, measured MC 11573; no second style) is
+#   ONE concern. M5 grew it 445->715; the split-vs-ceiling decision
+#   (MC 11570 §1.1 P2) was EXECUTED at MC 11573 T-CC3R: roster select
+#   (SIXTH overlay) + skin chips moved to roster_select.gd, achievements
+#   page (SEVENTH) to achievements_page.gd, both calling THIS idiom
+#   through the passed-in instance (zero new UI mechanism; the overlays
+#   still open on THIS file's _overlay in _ready). The Dawn Well shop and
+#   the stage select stay HERE. Mouse works for real users; keyboard
+#   picking is routed by main from the bridge press queue (Contract B),
+#   never from here. M6 RE-CROSSED the band 582->601 (f376a4f: the +19
+#   level-up CHIPS block, riding the ONE icon_path resolver) — the split
+#   decision is DUE again and NOT made at T-M6q2 (MC 11711, render path):
+#   the named candidate is the _card + chips builder cluster (:275-end) —
+#   RosterSelect.build(self) precedent, dawnwell_pixel_gate its proof;
+#   until it lands the 601 ceiling stands accepted with this reason line.
+# §j (MC 11103): every card kind resolves to an icon file; v1's blank-icon
+# path is closed structurally — _card() has NO conditional around the
+# icon TextureRect and icon_path() is total over the 31 pool kinds
+# (F6 T-M6d pool 16→15: 15 weapon + 15 passive + the bonus coin; the
+# shipped tables, pinned by tests/test_card_icons.py), every branch
+# asserting the file exists before load (PASSIVES == PASSIVE_ICONS).
 extends CanvasLayer
 
 signal start_pressed
@@ -82,10 +82,10 @@ const PASSIVE_ICONS := {
 const FALLBACK_ICON := "res://assets/icons/coin.png"
 
 
-# Total resolver over the 32 pool kinds: weapons/upgrade carry the weapon
-# icon name in card.icon; the bonus carries "coin"; passives map by
-# key. The asserts are the in-code half of the no-blank guarantee (tests
-# assert the other half: the map is pinned and every file exists).
+# Total resolver over the 31 pool kinds (15 weapon + 15 passive + bonus;
+# the 16th weapon-side icon file, icon-doom-sigil, is the KEEPT drop
+# billboard — SIGIL_ICON — not a pool kind). card.icon carries the name
+# for weapons/upgrade/bonus; the asserts pin the no-blank guarantee.
 static func icon_path(card: Dictionary) -> String:
 	match card.kind:
 		"passive":

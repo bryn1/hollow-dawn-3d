@@ -13,8 +13,9 @@ append must sit on its own unguarded elif (a plant that gates upgrades too
 breaks exactly this pin, mirroring the sim's plant E).
 
 Behaviour rows are the committed dump (godot/sim/sim_caps.gd, seed-pinned
-11206, byte-stable, RE-DUMPED on the T-M1h enlarged pool: 16 weapon kinds +
-15 passive kinds). The two legs carrying a synthetic slot/kind pin are
+11206, byte-stable; RE-MINTED at T-M6d on the F6 pool 16→15, so its
+committed bytes carry 15 weapon kinds + 15 passive kinds, 0 doom rows).
+The two legs carrying a synthetic slot/kind pin are
 declared in their rows — the synthetic carriers keep the exact 6th-slot/
 6th-kind shape the T-M1b planted-red pair exercised; the new-kind cap side
 now has fully REAL legs too (passive_roster_kind: the 7th NEW kind never
