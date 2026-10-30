@@ -1,6 +1,11 @@
-# Tick-deterministic pickup + upgrade-visual capture (T-S18, MC 11201). Same
-# pinned capture mechanism as biome_readability_capture.gd (MC 11191 cycle 2
-# — the TICK-DETERMINISTIC pattern this card REUSES, no second harness): a
+# Tick-deterministic pickup + upgrade-visual capture (T-S18, MC 11201).
+# reason: >400 lines — 485 measured at T-M6q2 (366->485 @f8095d1: the +119
+#   26-leg SKILL_FX capture family): ONE capture harness, ONE concern
+#   (concern_check 1/1) — the biome_readability_capture-shaped carry: the
+#   ONE tick-deterministic capture law rides next to its probe (audit-4
+#   §1.3); splitting would fork the harness. Same pinned capture mechanism
+#   as biome_readability_capture.gd (MC 11191 cycle 2 — the
+#   TICK-DETERMINISTIC pattern this card REUSES, no second harness): a
 # real X11 window under xvfb (windowed -s keeps real GL output), main.gd's
 # own physics switched OFF at activation, and the clock advancing ONLY
 # through fixed-count _step(1/60) calls from a pinned seed (HD3D_SEED,

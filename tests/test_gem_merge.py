@@ -4,9 +4,11 @@ Suite convention (test_endless/test_chests_evolve header): source-truth pins
 over the .gd text + behaviour rows judged from the committed, seed-pinned dump
 (godot/sim/sim_gems.gd, seed 11238, byte-stable; the re-run byte-identity
 itself is the capture's job, the sim_evolve precedent). C-G4 is the pixel row:
-its gate is the T-M2g BULK table of tools/upgrades_visual_probe.py (the T-S18
-probe mechanism EXTENDED, no new capture mechanism — the capture is the
-chest_capture tick-deterministic recipe in godot/sim/gemmerge_capture.gd);
+its gate is the T-M2g BULK table of tools/upgrades_visual_bulk.py (the T-S18
+probe mechanism EXTENDED, no new capture mechanism — the section moved OUT of
+the probe at T-M6q2, MC 11711 audit-4 §1.2; the --bulk CLI stays in the
+probe; the capture is the chest_capture tick-deterministic recipe in
+godot/sim/gemmerge_capture.gd);
 the shot asset + the gate's floor + the capture's existence are pinned here,
 the pixels are proven by the probe run (both captured in .tmp/m2g-gems.txt).
 
@@ -49,6 +51,7 @@ FIXTURE = os.path.join(conftest.REPO, "tests", "fixtures", "gem-merge-m2g.jsonl"
 SHOT = os.path.join(conftest.REPO, "assets", "screens", "m2-gemmerge.png")
 CAPTURE = os.path.join(conftest.REPO, "godot", "sim", "gemmerge_capture.gd")
 PROBE = os.path.join(conftest.REPO, "tools", "upgrades_visual_probe.py")
+BULK = os.path.join(conftest.REPO, "tools", "upgrades_visual_bulk.py")
 
 
 read = functools.partial(conftest.read_script,
@@ -172,7 +175,10 @@ def test_dump_verdict_green():
 def test_cg4_shot_asset_and_gate_pins():
     assert os.path.exists(SHOT), "bulk-gem shot asset missing"
     assert os.path.exists(CAPTURE), "tick-deterministic capture (chest pattern) missing"
-    src = open(PROBE, encoding="utf-8").read()
+    # BULK_PX_MIN rides the moved-out section (tools/upgrades_visual_bulk.py,
+    # T-M6q2); the --bulk CLI stays in the probe — the mechanism, not a new
+    # tool, is what this pin protects.
+    src = open(BULK, encoding="utf-8").read()
     m = re.search(r"BULK_PX_MIN\s*=\s*(\d+)", src)
     assert m and int(m.group(1)) == 200, "the BULK floor is OUR 200-px shot family"
-    assert '"--bulk"' in src  # the T-S18 probe mechanism, extended (no new tool)
+    assert '"--bulk"' in open(PROBE, encoding="utf-8").read()

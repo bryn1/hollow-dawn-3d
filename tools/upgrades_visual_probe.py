@@ -38,40 +38,29 @@ is damage carry their declaration in viz_fx.gd's code comments; the honest
 mechanism there is level-as-intensity within the sim's true radius).
 
 Table 3 SKILLS (T-M6f, MC 11705, M6-SPEC §2.2/§2.3) — 26 legs, one per
-SKILL_FX row (15 weapon-side + 9 live evolved + 2 unions), the capture's
-scenario C (SAME declared-pin pattern as Table 2, the palette method
-DEFENDED and untouched: this table EXTENDS it, it does not replace it).
-Per leg, count pixels inside the per-class window that are LIT (additive
-FX over the dark moorland — max channel >= SKILL_LIT_MIN) AND direction-
-aligned with that row's OWN sampled colour (cosine of the normalised RGB
-vectors >= SKILL_COS_MIN): the per-skill identity measure. A writer that
-forgot the wid law paints the fallback colour (EMBER-row) — only rows
-whose colour sits in that direction can pass; every distinct row is RED.
-The row is GREEN at >= SKILL_PX_MIN px (MEASURED floors, tuned against
-this card's real frames), plus the structural flags the capture reads off
-the renderer: a flash row must show rings >= 1 (the evolved flash riding
-the EXISTING rings MM through the mini(size,1) cap read) and EVERY row
-must show live draws <= 7 (§b ONE-draw law — a planted second MM class is
-RED here, FX-E4).
+SKILL_FX row: the per-skill pixel LAW MOVED to
+tools/upgrades_visual_skill_fx.py at T-M6q2 (MC 11711, audit-4 §1.2
+split at the named seam); this file loads the row's window and calls
+skill_px() — the gate output below is unchanged.
 
 Usage:  python3 tools/upgrades_visual_probe.py            # capture + gate
         python3 tools/upgrades_visual_probe.py --gate DIR # gate a shot dir
                                                   # (real or planted-mutation
                                                   # copy — carries rows.json)
         python3 tools/upgrades_visual_probe.py --bulk     # T-M2g BULK-GEM row
-                                                  # (MC 11238, M2-SPEC C-G4):
-                                                  # capture via the REUSED
-                                                  # tick-deterministic chest
-                                                  # recipe (gemmerge_capture.
-                                                  # gd — NO new capture
-                                                  # mechanism) + gate below
+                                                  # (MC 11238, M2-SPEC C-G4) — capture +
+                                                  # gate; the row's MOVED-OUT law (T-M6q2)
+                                                  # lives in tools/upgrades_visual_bulk.py
         python3 tools/upgrades_visual_probe.py --bulk DIR # gate a bulk shot
-                                                  # dir (planted-mutation copy
-                                                  # carries rows.json)
+                                                  # dir (planted-mutation copy carries
+                                                  # rows.json)
 Env:    HD3D_GODOT (godot binary), HD3D_SEED (capture seed).
 Seam:   both capture launches go through tools/capture_lib.py (MC 11317
         C1); the palette/blob measures stay HERE — audit §2.3 defends them
-        as a different contract from the pixel-delta seam.
+        as a different contract from the pixel-delta seam. T-M6q2 (MC
+        11711) moved the Table-3 law (upgrades_visual_skill_fx.py) and
+        the BULK-GEM row (upgrades_visual_bulk.py) OUT; the CLI wires
+        them, the capture/parse/palette/window machinery stays one file.
 """
 import json
 import os
@@ -81,6 +70,8 @@ import numpy as np
 from PIL import Image
 
 import capture_lib
+import upgrades_visual_bulk as bulk_gem
+import upgrades_visual_skill_fx as skill_fx
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHOTS_DIR = os.path.join(REPO, ".tmp", "upgrades-visual-shots")
@@ -286,150 +277,15 @@ def blobs(mask, win_d):
     return n
 
 
-# ---- T-M6f Table 3 measures (MC 11705, M6-SPEC §2.2/§2.3) -------------------
-# THE LAW (measured, this card's real frames; header Table 3 carries the
-# contract): a window pixel BELONGS to its row's colour when (a) its DELTA
-# from the per-window median ambient has norm >= SKILL_NORM_MIN (24 — the
-# measured moorland noise floor), (b) every channel delta sits inside the
-# row's CLASS-ALPHA contribution box [−slack, hi_k·255·alpha·colour] — the
-# same per-class alpha constants the WRITER spells (arcs 0.35, bolts/halos/
-# throws-orbs 1.0, rings 0.25 with the FLASH_GAIN 2.2 headroom, bursts 0.6),
-# which is what kills the bright grass-fleck leak a bare hue test admits
-# (flecks' delta misses the dark rows' channel boxes), and (c) the delta
-# DIRECTION aligns with the sampled colour (cos >= SKILL_COS_MIN).
-# SKILL_PX_MIN (25) is the count floor the weakest real row clears with
-# 4.6x headroom (storm-peal 115 px measured across the 26-leg run).
-# Separation (the plant column): a writer that forgot the wid law paints
-# the EMBER fallback — 17 of 26 rows measure 0 aligned px (the gate needs
-# ALL, so the table is RED; the 9 warm-direction survivors are declared).
-SKILL_WIN = {"arcs": 130, "bolts": 90, "throws": 90, "halos": 100,
-             "rings": 95, "bursts": 80}
-# the writer's per-class alpha law (viz_fx.gd), one shared constant table:
-SKILL_CLASS_ALPHA = {"arcs": 0.35, "bolts": 1.0, "throws": 1.0,
-                     "halos": 1.0, "rings": 0.25 * 2.2, "bursts": 0.6}
-SKILL_NORM_MIN = 24.0
-SKILL_COS_MIN = 0.85
-SKILL_PX_MIN = 25
-SKILL_HI_K = 2.2 # box headroom (fades ride BELOW their peak; nothing
-SKILL_SLACK = 8.0 # painted sits BELOW the median ambient by more than this)
-
-
-def skill_fx_ids():
-    """The 26 row ids, parsed from the ONE table site (viz_fx.gd, §2.1) —
-    the probe never carries a second list."""
-    import re as _re
-    with open(os.path.join(REPO, "godot", "scripts", "viz_fx.gd")) as fh:
-        src = fh.read()
-    return _re.findall(
-        r'"([\w-]+)": \{"cls": "\w+", "color": Color\(', src)
-
-
-def skill_px(path, cx, cy, r, col, cls):
-    w, d = load_window(path, cx, cy, r)
-    px = w[d]
-    if px.size == 0:
-        return 0
-    amb = np.median(px, axis=0) # per-window self-calibrating ambient
-    dl = px - amb
-    n = np.linalg.norm(dl, axis=1)
-    s = dl[n >= SKILL_NORM_MIN]
-    if len(s) == 0:
-        return 0
-    cap = SKILL_HI_K * 255.0 * SKILL_CLASS_ALPHA[cls] * np.asarray(col) \
-        + SKILL_SLACK
-    keep = (s <= cap).all(axis=1) & (s >= -SKILL_SLACK).all(axis=1)
-    s = s[keep]
-    if len(s) == 0:
-        return 0
-    c = np.asarray(col)
-    c = c / (np.linalg.norm(c) + 1e-9)
-    cs = (s @ c) / (np.linalg.norm(s, axis=1) + 1e-9)
-    return int((cs >= SKILL_COS_MIN).sum())
-
-
-# ---- T-M2g BULK-GEM row (MC 11238, M2-SPEC rev-2 C-G4) -----------------------
-# The bulk gem the REAL merge drew (godot/sim/gemmerge_capture.gd — the
-# chest_capture TICK-deterministic recipe REUSED, no new capture mechanism;
-# baseline = the SAME ticked state with bulk cleared, the S8 hidden-UI
-# pattern). Two crops on the GEMMERGE row's centre, both at the existing
-# window machinery (load_window's round +-BULK_WIN window):
-#   * DELTA px  — pixels whose max-channel difference from the baseline beats
-#     BULK_DELTA: the bulk's DRAWN footprint. Measured separations on this
-#     card's shots: a 28 px bulk quad = 588 px, a 14 px normal-gem quad =
-#     ~147 px, bulk suppressed = 0 px.
-#   * PALETTE px — count_palette over the shot with the BULK chroma test, the
-#     Table-1 mechanism: brighter ICHOR measured (153,244,93) = GEM_BULK_TINT
-#     x the gem material (pickup_viz.gd); the NORMAL gem's g≈200 and the
-#     grass flecks' g≈137 both fail g >= 220 — only a bulk passes, so this
-#     crop IS the "brighter" half of the row.
-# The floor is OUR number 200 px on BOTH crops — the repo's shot-floor family
-# (m1-chest's "non-bg pixels >= 200 vs empty baseline"); measured headroom is
-# 2.9x and BOTH a bulk suppressed to ground AND a bulk that forgot to grow or
-# forgot to brighten score at or below it — the C-G4 red column. Baseline-vs-
-# itself (the planted-mutation copy) scores 0 on both.
-BULK_DIR = os.path.join(REPO, ".tmp", "gemmerge-shots")
-BULK_SCRIPT = "res://sim/gemmerge_capture.gd"
-BULK_PNG = "m2-gemmerge.png"
-BULK_BASE_PNG = "m2-gemmerge-baseline.png"
-BULK_WIN = 40 # round crop radius on the projected centre (px)
-BULK_DELTA = 12 # per-pixel max-channel delta class (chest-gate family)
-BULK_PX_MIN = 200 # OUR floor per crop row (header: measured, floor family)
-
-
-def _bulk_green(r, g, b): # bulk ICHOR (material x GEM_BULK_TINT, measured)
-    return (g >= 220) & (g >= r + 45) & (g >= b + 70)
-
-
-def bulk_capture():
-    os.makedirs(BULK_DIR, exist_ok=True)
-    r = capture_lib.run_capture(BULK_SCRIPT, {"HD3D_GM_SHOTS_DIR": BULK_DIR})
-    print(r.stdout[-2000:])
-    if "CAPTURE_OK" not in r.stdout or r.returncode != 0:
-        print(r.stderr[-2000:])
-        sys.exit("CAPTURE FAILED (no CAPTURE_OK from %s)" % BULK_SCRIPT)
-
-
-def bulk_gate(dir_path):
-    with open(os.path.join(dir_path, "rows.json")) as fh:
-        row = json.load(fh)[0]
-    assert row["leg"] == "bulk_gem_shot"
-    ok = True
-    if not row["in_frame"]:
-        print("FAIL bulk projected outside the frame: %s" % row)
-        ok = False
-    shot = np.asarray(Image.open(os.path.join(dir_path, BULK_PNG))
-                      .convert("RGB"), dtype=np.int16)
-    base = np.asarray(Image.open(os.path.join(dir_path, BULK_BASE_PNG))
-                      .convert("RGB"), dtype=np.int16)
-    if shot.shape != base.shape:
-        sys.exit("%s: shot/baseline shape mismatch %s vs %s"
-                 % (dir_path, shot.shape, base.shape))
-    cx, cy = int(round(row["cx"])), int(round(row["cy"]))
-    x0, y0 = max(cx - BULK_WIN, 0), max(cy - BULK_WIN, 0)
-    x1 = min(cx + BULK_WIN + 1, shot.shape[1])
-    y1 = min(cy + BULK_WIN + 1, shot.shape[0])
-    yy, xx = np.mgrid[y0:y1, x0:x1]
-    win = np.hypot(xx - cx, yy - cy) <= BULK_WIN
-    diff = np.abs(shot - base).max(axis=2)[y0:y1, x0:x1]
-    delta_px = int((win & (diff > BULK_DELTA)).sum())
-    w = shot[y0:y1, x0:x1].astype(np.float64)
-    pal_px = int((win & _bulk_green(w[..., 0], w[..., 1], w[..., 2])).sum())
-    green = delta_px >= BULK_PX_MIN and pal_px >= BULK_PX_MIN
-    print("BULK-GEM leg=%s cx=%d cy=%d delta_px=%d palette_px=%d "
-          "(floor %d each) %s" % (row["leg"], cx, cy, delta_px, pal_px,
-                                  BULK_PX_MIN, "GREEN" if green else "RED"))
-    return ok and green
-
-
 def main():
     args = sys.argv[1:]
-    if args[:1] == ["--bulk"]: # T-M2g C-G4 row (see the BULK section above)
+    if args[:1] == ["--bulk"]: # T-M2g C-G4 row (law: upgrades_visual_bulk.py)
         if len(args) == 2:
-            sys.exit(0 if bulk_gate(args[1]) else 1)
+            sys.exit(0 if bulk_gem.bulk_gate(args[1]) else 1)
         if len(args) > 2:
             sys.exit("usage: --bulk [DIR]")
-        bulk_capture()
-        sys.exit(0 if bulk_gate(BULK_DIR) else 1)
+        bulk_gem.bulk_capture()
+        sys.exit(0 if bulk_gem.bulk_gate(bulk_gem.BULK_DIR) else 1)
     shots = SHOTS_DIR
     if args[:1] == ["--gate"]:
         if len(args) != 2:
@@ -500,24 +356,27 @@ def main():
     print("families scaled: %d/6 (gate >= %d)" % (scaled, FAM_GREEN_MIN))
 
     # ---- Table 3: per-skill windows (T-M6f, MC 11705, §2.2/§2.3) -----------
+    # the measure law + windows ride upgrades_visual_skill_fx.py (T-M6q2);
+    # the window machinery (load_window) stays HERE, the ONE window seam.
     print("== T-M6f per-skill FX (MC 11705) — delta px inside each row's "
           "own class-alpha colour box, direction-aligned to its sampled "
           "colour; GREEN at >= %d px "
-          "+ flash rings >= 1 + live draws <= 7 ==" % SKILL_PX_MIN)
+          "+ flash rings >= 1 + live draws <= 7 ==" % skill_fx.SKILL_PX_MIN)
     print("%-18s %-7s %6s %6s %6s  verdict" % ("skill", "cls", "px",
                                                "rings", "draws"))
-    all_ids = skill_fx_ids()
+    all_ids = skill_fx.skill_fx_ids()
     skills_green = 0
     for sid in all_ids:
         e = rows["skill"][sid]
         path = os.path.join(shots, e["png"])
         if not os.path.exists(path):
             sys.exit("missing shot %s" % path)
-        px = skill_px(path, e["cx"], e["cy"], SKILL_WIN[e["cls"]], e["col"],
-                      e["cls"])
+        w, d = load_window(path, e["cx"], e["cy"],
+                           skill_fx.SKILL_WIN[e["cls"]])
+        px = skill_fx.skill_px(w[d], e["col"], e["cls"])
         flash_ok = e["flash"] == 0 or e["rings"] >= 1
         draws_ok = e["draws"] <= 7
-        green = px >= SKILL_PX_MIN and flash_ok and draws_ok
+        green = px >= skill_fx.SKILL_PX_MIN and flash_ok and draws_ok
         skills_green += 1 if green else 0
         print("%-18s %-7s %6d %6d %6d  %s%s" % (
             sid, e["cls"], px, e["rings"], e["draws"],

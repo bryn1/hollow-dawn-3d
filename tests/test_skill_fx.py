@@ -39,6 +39,7 @@ ICONS = os.path.join(REPO, "godot", "assets", "icons")
 
 sys.path.insert(0, os.path.join(REPO, "tools"))
 import skill_fx_sample  # the ONE sampling method (§2.1)
+import upgrades_visual_skill_fx as sfx  # the Table-3 measure law (T-M6q2)
 
 # --- the table, parsed from the ONE site --------------------------------------
 
@@ -235,3 +236,30 @@ def test_caps_family_sum_resolves_through_the_base_map_both_sites():
     # roster_one_cap stays keyed on the BASE id (spelling the same arm
     # math — the evolved id adds its term THROUGH the base family):
     assert '"dart-loop":' in VIZ_CODE and "roster_one_cap(base, w.level)" in sim
+
+
+# --- T-M6q2 (audit-4 F-3 sub-row): the cross-boundary alpha pin --------------
+
+def test_probe_table3_alpha_law_pinned_to_the_writer():
+    """audit-4 F-3: the Table-3 colour box (upgrades_visual_skill_fx.py,
+    moved out of the probe at T-M6q2) restates the WRITER's per-class
+    alpha law across the language boundary — the file audit called it
+    ZERO-PINNED ("a writer-side alpha edit desyncs the pixel box
+    silently"). The pin closes it HERE: every SKILL_CLASS_ALPHA member is
+    re-derived from viz_fx.gd's OWN constants (the three fade
+    coefficients, the FLASH_GAIN headroom, the constant-alpha material
+    default), digit-for-digit. Planted-red: edit one writer coefficient
+    in viz_fx.gd => this leg goes RED, not the next card-time probe run."""
+    gain = float(re.search(r"const FLASH_GAIN := ([\d.]+)", VIZ_CODE).group(1))
+    writer = {
+        "arcs": float(re.search(r"([\d.]+) \* sim\.arcs", VIZ_CODE).group(1)),
+        "rings": float(re.search(r"([\d.]+) \* r\.life",
+                                 VIZ_CODE).group(1)) * gain,
+        "bursts": float(re.search(r"([\d.]+) \* b\.life", VIZ_CODE).group(1)),
+    }
+    # bolts/throws/halos ride the constant-alpha rows (no fade term): the
+    # _mat() default, verified at source:
+    assert "alpha := 1.0" in VIZ_CODE
+    for cls in ("bolts", "throws", "halos"):
+        writer[cls] = 1.0
+    assert sfx.SKILL_CLASS_ALPHA == writer, (sfx.SKILL_CLASS_ALPHA, writer)
