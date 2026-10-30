@@ -1,5 +1,57 @@
 # 3DR-SPEC — hollow-dawn-3d "3D REMAKE" milestone (v4.0.0 proposed) — build-depth spec for the DA gate
 
+- **REV 4, 2026-10-31, MC 11749 (`design`) — DA c3 CAP-fold, OWNER-APPROVED.** Owner artifact,
+  literal and quoted (never corrected): **"Approve"** (2026-10-31, orchestrator chat) — approving
+  EXACTLY: apply `docs/3DR-SPEC-DA-c3.md`'s WHAT-SHIPS-FIX section (the 5 exact spec-TEXT deltas)
+  as REV 4, verified by RE-RUNNING c3's OWN instruments at the REV-4 tree (a FOLD-CHECK, not a
+  new adversarial cycle). Target verdict: `docs/3DR-SPEC-DA-c3.md` @ `324e456` (CAP cycle 3/3,
+  VERDICT FIX, 2P1/1P2/1P3/1P4; ALL THREE DA docs IMMUTABLE — `git diff 324e456..HEAD` over them
+  = 0 lines, capture LEG-6). Base: `origin/master = 324e456`; the `93f2825 → 324e456` delta is
+  docs-only (the c3 doc alone), so every REV-3 code cite is judged identically at both SHAs.
+  **ALL FIVE DELTAS APPLIED, 0 rebuttals, design text UNTOUCHED outside them** (diff-audit
+  classification table: every changed line classifies to delta 1–5 or fold mechanics, capture
+  LEG-7); the c3 P1-1 lesson BINDS the verification: a proof executed at one base and committed
+  at another is the class that dies — **every number below was RE-MEASURED at the COMMITTED
+  REV-4 tree** (capture `.tmp/3drspec4.txt`, VERIFY_EXIT=0). **FOLD LEDGER (delta → section →
+  transcript; full table at doc end): (1) A-11** — the id-extraction command NAMED+TRIMMED (a
+  real `sed 's/^ *//;s/ *$//'` trim step; the awk-gsub-trims claim STRUCK dated — the as-written
+  pattern matches a whole `" | "` field, not leading/trailing spaces), third dated citation
+  exclusion `docs/3DR-SPEC.md`, BOTH legs re-measured at the committed REV-4 tree: trimmed
+  extraction **232 names / 172 multi-word**, zero-hits grep **EMPTY (rc 1)** — and the DA gate
+  docs added to the dated exclusion list under a DECLARED READING (stated per the stop
+  condition): c3 named only `3DR-SPEC.md`, but the re-run proved the IMMUTABLE `3DR-SPEC-DA-c3`
+  doc quotes the same four archetype names inside its own quoted P1-1 transcript
+  (`docs/3DR-SPEC-DA-c3.md:57-60` — the ONLY hits the three-exclusion shape left), the same
+  cited-lineage class as the spec's own mentions; the DA docs cannot be edited (immutability is
+  the owner-quoted law) and c3 itself REJECTED the grep-proof-reword alternative, so the
+  exclusion — the mechanism the row already uses — extends one dated line; full-universe noise
+  re-measured with the full dated exclusion set: **21 text hits** (REV-3's 32 carried the older
+  two-exclusion shape — struck dated, pinned to `324e456` + docs-only) → A-11, §10, REV-3 ledger
+  P3-1 row. **(2) mesh paths** — `godot/` prefix on all TWELVE mesh/twin OWNED cells (§5.1 A row
+  six + R row six — `exists=True` for the six current meshes under the `godot/` prefix, the
+  twins are files-to-be, capture LEG-2), §5.5's transcription annotated, §3.3's New-files
+  literals fixed, §1.1's ART row SPLIT into the two real dirs (`godot/assets/glb/*.glb` — the
+  43 live; `assets/glb/` + `assets/glb/superseded/` — provenance copies + archive, where A's
+  superseded moves land), + the ONE path law: **`res://assets/glb/ == godot/assets/glb/`**
+  (`res://` maps to `godot/`, roster.gd:41) → §1.1, §3.3, §5.1, §5.5. **(3) counts** — 28 →
+  **29** in all five occurrences + 24 → **25**, the completeness count PINNED to base `324e456`
+  (re-run at REV-4: 102-file `tests tools` universe, 29 hits = 18 tests + 11 tools; 29 − 4
+  readers = 25 rule-side) → header, §5.5, §10, REV-3 ledger + counts. **(4) never-three** — the
+  §5.3 duplicate-table leg's prose is REPLACED by the TWO NAMED greps: `grep -l "const
+  CLIP_SOURCE" godot/scripts/*.gd` = exactly ONE file (ONE table; at base `roster.gd`, post-
+  split `roster_clips.gd`) and `grep -l "Roster.clip_source(" godot/scripts/*.gd` = exactly ONE
+  file (ONE consumer, `hero_pawn.gd`); `roster.gd`'s reason-header comment mentions are the
+  SCHEDULED-split's LINEAGE, NOT homes (the reading the replace-not-delete law forces — the
+  as-worded naive file-wise grep false-REDD on comments, c3 LEG-9g) — both greps EXECUTED at the
+  base (transcripts in capture LEG-4) → §5.3, §9.3. **(5) "verbatim" → "reproduced for the same
+  reasons (threshold + channel universe)"** (c3 P4-1: the counterfactual's messages are the
+  REV-3 patch's OWN wording — the failure REASONS reproduce, the strings differ) → §2.4
+  EXECUTED-PROOF, A-5, REV-3 ledger P1-2 row. OWNED matrix RE-DERIVED post-cell-rename: all six
+  pairs **∅** + owned-by-ONE + the completeness grep BOTH halves + glob expansions re-counted
+  (`assets/art-src/` 68, `assets/concepts/` 43, `godot/export/` ABSENT — capture LEG-5); fixture
+  arithmetic UNTOUCHED-but-RE-CHECKED (**13** jsonl / **2** CSVs / art-s2i **31** rows /
+  roster-clips **55** lines / suite **381** collected); NOISE: nothing under `.audits/*/out`;
+  GPU untouched; :8123 untouched; NO SPAWNING (one design-profile leaf).
 - **REV 3, 2026-10-30, MC 11739 (`design`) — DA c2 fold (FINAL fold before cap-cycle c3).**
   Target verdict: `docs/3DR-SPEC-DA-c2.md` @ `79543fa` (VERDICT FIX, 2P1/2P2/1P3/1P4; BOTH DA
   docs IMMUTABLE — the M2–M6 precedent, this doc revises IN PLACE). Base: `origin/master =
@@ -15,7 +67,9 @@
   state lands IN the flip card, dated, with its own planted-red (the MV-E4 static-names-a-walk-clip
   legs stay untouched, §5.3/A-4 reuse them, they survive any flip); the WHOLE flip-path
   COMPLETENESS GREP was EXECUTED, universe NAMED (every committed file under `tests/`+`tools/`
-  via `git ls-files`; pattern `CLIP_SOURCE|clip_source|roster|statue`; 28 hits) — 4
+  via `git ls-files`; pattern `CLIP_SOURCE|clip_source|roster|statue`; ~~28 hits~~ **29 (REV 4
+  re-measure — c3 P2-1: the fold's OWN capture list carries 29, 18 tests + 11 tools; pinned to
+  `324e456` + docs-only, capture LEG-3)**) — 4
   flip-surface readers: `test_art_integration.py` + `test_skins.py` (already C) + `test_motion.py`
   (→ C by this fold) + `tools/mocap/README.md` (dated EXEMPTION row: prose pointer, zero
   executable assertions, true after any flip) → §0 F-2, §5.1, §5.2, §5.3, §5.5, §10.
@@ -54,6 +108,10 @@
   godot/ docs/` ⇒ **EMPTY** (rc 1); the full-name universe measured NOISY (32 text hits, all
   generic single-word names inside OUR OWN composite names) — triaged in-row, single-word
   residue policed by the composite-name law + the `test_card_icons` v1-byte pin → A-11.
+  **REV 4 DATED NOTE (c3 P1-1, 2026-10-31): this row's execution was TRUE at its measured base
+  `79543fa` and FALSE on the tree it committed (`93f2825` — the row's own text added a hit; the
+  named awk also did not trim), and the c3 re-run's numbers supersede the two commands quoted
+  in this row: use the REV-4 A-11 row's — DO NOT USE this row's command form as a close leg.**
   **P4-1 ADOPTED** — §5.5's sentence now states WHERE each glob's ∅ comes from: the A cells are
   DIR cells measured at base (`assets/art-src/` 68 files, `assets/concepts/` 43 — no other
   OWNED cell names any path under them: expansion ∅ by construction, verified this session;
@@ -219,7 +277,15 @@ milestone — rejected, §7.3-R1).
 |---|---|---|
 | **SIM (byte-anchored truth)** | `scripts/game_state.gd` 314, `scripts/world.gd` 450, `scripts/drops.gd` 263, `scripts/weapons.gd`, `scripts/levelup.gd`, `scripts/evolutions.gd`, `scripts/union.gd`, `scripts/chest_rewards.gd`, `scripts/powerups.gd`, `scripts/achievements.gd`, `scripts/save.gd`, `scripts/bridge.gd`; rule side of `scripts/roster.gd` (CHARACTERS/SKINS/rules); all of `sim/sim_*.gd` dump drivers + `sim/sim_funnel.gd` (the shared seam, kb MC 11317) | **ZERO BYTES** — the strongest acceptance row (§8 A-1) is the journey + strict corpus `cmp`-identical proof that this stayed true |
 | **RENDER (the 3D truth)** | `scripts/camera_rig.gd` 33, `scripts/ground.gd` 54 + `shaders/ground.gdshader`, `scripts/class_mesh.gd` 112, `scripts/horde_viz.gd` 392, `scripts/hero_pawn.gd` 255, `scripts/pickup_viz.gd` 351, `scripts/viz_fx.gd` 571, `scripts/hud_3d.gd` 290, `scripts/render.gd` 231 (data module), `scripts/main.gd` 599 (wiring); UI: `scripts/screens.gd` 601, `roster_select.gd`, `achievements_page.gd` | touched ONLY through §5's card-ownership matrix; `hero_pawn.gd` and `horde_viz.gd` stay ZERO-EDIT (§1.3, §3.5 — `hero_pawn.gd` under the DATED comment-only exception, §1.3, P2-1 fold) |
-| **ART** | `assets/glb/*.glb` (43 live + superseded archive dirs), `assets/art-src/` (turntable refs), `assets/concepts/`, `assets/anim/maps/*.json`, `assets/biomes/` | §3's coverage table + the art gates |
+| **ART** | ~~`assets/glb/*.glb` (43 live + superseded archive dirs)~~ **SPLIT 2026-10-31 (REV 4, c3 P1-2 — the row collapsed TWO real dirs into one name: the repo has both)**: `godot/assets/glb/*.glb` — **the 43 LIVE meshes, the runtime family** (`char-coinhound.glb` …, `player-rigged.glb` the proven twin pattern) — + `assets/glb/` (top-level: the four committed provenance copies — `player.glb`, `player-alt.glb`, `player-rigged.glb`, `boss-warden-rigged.glb`) + `assets/glb/superseded/` (the archive dir — where §5.1 A's "superseded moves" land), `assets/art-src/` (turntable refs), `assets/concepts/`, `assets/anim/maps/*.json`, `assets/biomes/` | §3's coverage table + the art gates |
+
+**PATH LAW (REV 4, dated 2026-10-31, c3 P1-2 fold — one line so the shorthand cannot recur):
+`res://assets/glb/` == `godot/assets/glb/`** — `res://` maps to the `godot/` dir (roster.gd:41
+names "the GLB family under res://assets/glb/", which the game loads from repo path
+`godot/assets/glb/`); a mesh/twin cell written WITHOUT the `godot/` prefix resolves to the
+top-level provenance+archive dir the game never loads — every OWNED-cell mesh/twin path below is
+therefore the full `godot/assets/glb/…` literal (the §5.5 proof runs on NAMES, and a name that
+resolves to the dead dir proves nothing).
 
 ### 1.2 The declared 3D render path (each line = DESIGN-3D law → the live file this session)
 
@@ -429,8 +495,13 @@ declared shift: roster-clips-m5-framediff.csv` with the verbatim-quote message m
 ABSENT (edit 5 works for the right reason); leg (iii) M6 entry in the same matrix run against
 the COMMITTED doc ⇒ **`9 passed in 0.04s`**, `docs/BYTE-DEVIATION-M6.md` byte-untouched
 (`git status --porcelain` empty). The 5-EDIT COUNTERFACTUAL (edits 6+7 re-hardcoded to M6
-values) re-executed on the real file ⇒ **`2 failed, 7 passed`**, both c2 messages reproduced
-verbatim. The REV-2 probe `.tmp/3drspec2-probe.py` is **RETIRED IN-ROW** (dated 2026-10-30):
+values) re-executed on the real file ⇒ **`2 failed, 7 passed`**, both c2 messages ~~reproduced
+verbatim~~ **reproduced for the same reasons (threshold + channel universe)** (c3 P4-1 struck
+dated 2026-10-31: the printed messages are the REV-3 patch's OWN wording — a parameterised leg
+re-words its own messages; c2's literals were `assert 1 >= 5` and "channel journey missing from
+CAPTURE-DEVIATION-3DR" — the failure REASONS (the `:242` threshold, the `:250` channel universe)
+reproduce, the strings differ; c3's re-authored patch re-confirmed both reasons byte-shown). The
+REV-2 probe `.tmp/3drspec2-probe.py` is **RETIRED IN-ROW** (dated 2026-10-30):
 its `PROBE_RESULT: PASS` proved a hand-typed COPY whose contract dropped the shipped
 `assert shifts >= 5` (c2: grep 0 hits) — a GREEN-proof-of-a-copy is not a proof; the T-3DR-c
 capture runs A-5 against this file, not a transcription.
@@ -502,9 +573,12 @@ LEAD, not a promise). THE LAWS:
   SOLID, UniRig RIG_VALID (skins=1), post-merge tri dump, VISUAL validate, aspect gates,
   `tools/mocap/04_validate_glb.py`; PERMANENCE rows per asset (the imagegen/art permanence
   law), `assets/art-src/` refs committed.
-- **New files land NEW:** re-mastered meshes `assets/glb/<class>.glb` (v3, the live literal —
-  prior versions move to the superseded archive dirs, the shipped convention) + rig twins
-  `assets/glb/<class>-rigged.glb` + `assets/anim/maps/<class>.json` (the ONE maps dir) —
+- **New files land NEW:** re-mastered meshes `godot/assets/glb/<class>.glb` (v3, the live
+  literal — REV 4 path law, c3 P1-2: the `godot/` prefix IS the live dir per §1.1's
+  `res://assets/glb/ == godot/assets/glb/` line; prior versions move to the superseded archive
+  dir `assets/glb/superseded/` — the top-level archive, the shipped convention) + rig twins
+  `godot/assets/glb/<class>-rigged.glb` + `assets/anim/maps/<class>.json` (the ONE maps dir —
+  measured correct as written, c3 LEG-8: the top-level dir exists, 9 committed maps) —
   CLIP_SOURCE rows gain the `visual` twin key per the player-row pattern (`roster.gd:162-163`).
 
 ### 3.4 The flip + the SCHEDULED seam (file-level)
@@ -549,8 +623,8 @@ the closing commit appends its own LEDGER row; disjointness is proven over ALL o
 
 | card | subject / windows | OWNS (exclusive) |
 |---|---|---|
-| **T-3DR-a** (GPU, art) | six re-MASTER refs (imagegen, the riggable-wording family §3.3) + TRELLIS.2 mesh gen, one single-row window per attempt, per-character TWO-FAIL STOP, reserve law | `assets/art-src/*` (the six refs + rejected shots), `assets/concepts/*` (six), `assets/glb/char-coinhound.glb`, `char-tallow-seer.glb`, `char-shroud-saint.glb`, `char-hoard-wretch.glb`, `skin-tide.glb`, `skin-void.glb` (+ their superseded moves), `tools/vm100/art-batch-3dr.tsv` (manifest), `.tmp/3dra.txt` capture |
-| **T-3DR-r** (GPU, rig) | UniRig-2D rig + skin-merge + `tools/mocap/05/06` CMU retarget walk+attack per ACCEPTED mesh, single-row windows, same STOP; mesh-side permanence rows included here (last art-side card, serial after a); OWNED twins/maps NAMED, not globbed — the REV-1 glob `assets/glb/*-rigged.glb` pattern-covered the two HOLD twins and the §5.5 proof runs on names (DA P4-5 fold) | `assets/glb/char-coinhound-rigged.glb`, `char-tallow-seer-rigged.glb`, `char-shroud-saint-rigged.glb`, `char-hoard-wretch-rigged.glb`, `skin-tide-rigged.glb`, `skin-void-rigged.glb` (six NEW twins), `assets/anim/maps/char-coinhound.json`, `char-tallow-seer.json`, `char-shroud-saint.json`, `char-hoard-wretch.json`, `skin-tide.json`, `skin-void.json` (six NEW, one dir), `docs/RIG-DEVIATION-3DR.md` NEW, `docs/RIG-DEVIATION-SEL-C.md` (dated supersession row only), `docs/PERMANENCE.md`, `.tmp/3drr.txt` capture |
+| **T-3DR-a** (GPU, art) | six re-MASTER refs (imagegen, the riggable-wording family §3.3) + TRELLIS.2 mesh gen, one single-row window per attempt, per-character TWO-FAIL STOP, reserve law | `assets/art-src/*` (the six refs + rejected shots), `assets/concepts/*` (six), `godot/assets/glb/char-coinhound.glb`, `godot/assets/glb/char-tallow-seer.glb`, `godot/assets/glb/char-shroud-saint.glb`, `godot/assets/glb/char-hoard-wretch.glb`, `godot/assets/glb/skin-tide.glb`, `godot/assets/glb/skin-void.glb` (six — full godot/ literals REV 4, c3 P1-2: the live runtime dir, §1.1's path law; + their superseded moves to the top-level archive dir assets/glb/superseded/ — named in §1.1's ART row, not an OWNED cell), `tools/vm100/art-batch-3dr.tsv` (manifest), `.tmp/3dra.txt` capture |
+| **T-3DR-r** (GPU, rig) | UniRig-2D rig + skin-merge + `tools/mocap/05/06` CMU retarget walk+attack per ACCEPTED mesh, single-row windows, same STOP; mesh-side permanence rows included here (last art-side card, serial after a); OWNED twins/maps NAMED, not globbed — the REV-1 glob `assets/glb/*-rigged.glb` pattern-covered the two HOLD twins and the §5.5 proof runs on names (DA P4-5 fold) | `godot/assets/glb/char-coinhound-rigged.glb`, `godot/assets/glb/char-tallow-seer-rigged.glb`, `godot/assets/glb/char-shroud-saint-rigged.glb`, `godot/assets/glb/char-hoard-wretch-rigged.glb`, `godot/assets/glb/skin-tide-rigged.glb`, `godot/assets/glb/skin-void-rigged.glb` (six NEW twins — full godot/ literals REV 4, c3 P1-2: twins land in the dir the runtime loads, the proven player-rigged.glb pattern), `assets/anim/maps/char-coinhound.json`, `char-tallow-seer.json`, `char-shroud-saint.json`, `char-hoard-wretch.json`, `skin-tide.json`, `skin-void.json` (six NEW, one dir), `docs/RIG-DEVIATION-3DR.md` NEW, `docs/RIG-DEVIATION-SEL-C.md` (dated supersession row only), `docs/PERMANENCE.md`, `.tmp/3drr.txt` capture |
 | **T-3DR-c** (ZERO GPU, repo) | the flip + the seam + the corpus + **the §2.4 parse parameterisation**: `docs/CAPTURE-DEVIATION-3DR.md` FIRST commit (§2.4), seam split, row flips per the pin doc, CSV REMINT, test re-pins, the **seven** §2.4 parse edits (REV 3, c2 P1-2 — the five struck dated) + regression leg, the `hero_pawn.gd:22` comment re-word under the §1.3 exception, the `test_motion.py` statics re-pin (c2 P1-1) | `docs/CAPTURE-DEVIATION-3DR.md` NEW, `godot/scripts/roster_clips.gd` NEW, `godot/scripts/roster.gd` (seam only), `tests/test_characters.py`, `tests/test_skins.py`, `tests/test_art_integration.py`, **`tests/test_sigil_drop.py`** (the **seven** §2.4 parameterisation edits, REV 3 — DA P1-2 fold + c2 P1-2 fold: the file was owned by NO card while A-5's instrument lives there; a separate T-3DR-p parse-pin card REJECTED — edits in the card's own battery file cannot parallelize under the serial chain either way), `tests/fixtures/roster-clips-m5-framediff.csv`, `tests/fixtures/art-s2i-probe.jsonl`, **`godot/scripts/hero_pawn.gd`** (COMMENT lines only, §1.3 dated exception + pin leg — DA P2-1 fold), **`tests/test_motion.py`** (the statics-count re-pin — c2 P1-1 fold, dated 2026-10-30: `test_clip_source_static_rows_name_no_clip` `:93-98` parses the LIVE `CLIP_SOURCE` and asserts exactly 6 null statics (measured 6 at this base), so every flip REDS it at close; the file was OWNED by NO card while the flip made the card's own "suite green" DoD unsatisfiable; SAME-CARD UPDATE RULE: the expected-count re-pin to the measured post-flip state (6 − k, k = flipped classes, dated) lands IN THIS CARD with its own planted-red — the MV-E4 static-names-a-clip legs `:99-103` stay UNTOUCHED and planted-red-capable, §5.3/A-4 reuses them and they survive any flip), `.tmp/3drc.txt` capture |
 | **T-3DR-z** (ZERO GPU, release) | the full battery, VM120 + browser + describe-image rows (§8 B), version per §6 RULED value, the Release Trio, README/roadmap de-stale | `docs/RELEASE-v<VER>.md` NEW, `README.md`, `docs/PARITY-ROADMAP.md`, `godot/project.godot` (+version), `godot/export/**` rebuilt artifacts, `.tmp/3drz.txt` capture |
 | **T-3DR-q pair** (after GA, NOT wave-gating) | the clean-code pair the doctrine requires BEFORE any M7 spec (owner 2026-10-25; the MC 11316/11317 pattern): T-3DR-q-AUDIT findings-only → T-3DR-q-REFACTOR (byte-anchor corpora unchanged, suite green, zero behavior, before/after measurements) | filed at GA; ownership matrix at filing (the T-M6q pattern) |
@@ -581,8 +655,16 @@ alone twice let a required-edit file sit owned-by-none**).
   skins=1 + textures survive + post-merge tri dump; framediff-measured motion on each rigged
   twin; capture VERIFY_EXIT=0; channels: skinned s2r CSV HOLD-confirmed.
 - **T-3DR-c DoD:** deviation doc FIRST commit; seam split (ONE table, ONE getter — the
-  duplicate-table grep: `CLIP_SOURCE` still TWO script homes at close — roster_clips.gd +
-  hero_pawn.gd, NEVER three; roster.gd's delegator keeps the ONE read path); flips land per the
+  duplicate-table leg, NAMED REV 4 (c3 P3-1 — the ~~`CLIP_SOURCE` still TWO script homes at
+  close — roster_clips.gd + hero_pawn.gd, NEVER three~~ prose struck dated 2026-10-31: unnamed
+  instrument, and file-wise it false-REDS on the roster.gd reason-header COMMENT mentions,
+  which replace-not-delete keeps as the SCHEDULED-split's lineage — comments are lineage, NOT
+  homes, declared reading): **`grep -l "const CLIP_SOURCE" godot/scripts/*.gd` = exactly ONE
+  file — the ONE const home/table: `roster_clips.gd` after this card's split (at the base:
+  exactly `godot/scripts/roster.gd`, executed 2026-10-31 capture LEG-4) — NEVER two tables**;
+  **`grep -l "Roster.clip_source(" godot/scripts/*.gd` = exactly ONE file — the ONE consumer:
+  `godot/scripts/hero_pawn.gd` (executed at the base, same LEG-4)**; roster.gd's delegator
+  keeps the ONE read path); flips land per the
   pin doc; **byte-law channel battery: the §2.1 HOLD table ~~(journey + 13)~~ (journey + 12 —
   P1-1 fold; the journey leg is md5-vs-the-RECORDED-digest per §2.1, the 12 strict jsonl
   `cmp`-identical), the §2.2 REMINTs measured + row-diffed into the doc, empty-cell RED leg
@@ -622,8 +704,11 @@ every 3DR capture carries these as greppable rows)
 below are the post-fold sets**)
 
 Cards (files sets — names everywhere except the two DIR cells stated as such below): A={DIR
-`assets/art-src/`, DIR `assets/concepts/`, six glbs NAMED, tools/vm100 tsv}, R={six rigged glbs
-NAMED, six anim maps NAMED, RIG-DEVIATION-3DR, SEL-C supersession row, PERMANENCE}, C={CAPTURE-
+`assets/art-src/`, DIR `assets/concepts/`, six glbs NAMED at full `godot/assets/glb/…` literals
+(REV 4 path-law transcription, c3 P1-2 — the cells are the six meshes of §5.1 verbatim),
+tools/vm100 tsv}, R={six rigged glbs NAMED at full `godot/assets/glb/…-rigged.glb` literals
+(same REV 4
+transcription), six anim maps NAMED, RIG-DEVIATION-3DR, SEL-C supersession row, PERMANENCE}, C={CAPTURE-
 DEVIATION-3DR, roster_clips.gd, roster.gd seam, **5** tests (characters/skins/art_integration/
 **sigil_drop**/**motion** — the fifth is the c2 P1-1 fold), 2 fixtures, **hero_pawn.gd
 (comment-only)**} = 11 files + capture = 12 entries, Z={RELEASE, README, ROADMAP,
@@ -646,11 +731,16 @@ expanded or narrowed before the pairwise check; a glob-vs-glob row pair is VACUO
 **COMPLETENESS LEG (c2 P1-1 fold, binding — disjointness proves the sets don't collide, NOT
 that every required file is owned; the leg c1 named and REV 2 re-missed):** the universe is
 EVERY committed file under `tests/` + `tools/` (`git ls-files tests tools`), the pattern is
-`CLIP_SOURCE|clip_source|roster|statue`; executed at this fold: 28 hits, of which the four
+`CLIP_SOURCE|clip_source|roster|statue`; ~~executed at this fold: 28 hits~~ **RE-EXECUTED REV 4
+(c3 P2-1 — the fold row's quoted 28 contradicted its own capture's list; the count is PINNED to
+the named base, not to "this fold"): at `324e456` + the REV-4 docs-only delta (the tests/+tools/
+universe is unchanged) the grep gives 102 files in the universe, **29 hits = 18 tests + 11 tools**
+(capture LEG-3),** of which the four
 FLIP-SURFACE readers (read/cite the live seam) resolve as — `tests/test_art_integration.py`
 (C ✓), `tests/test_skins.py` (C ✓), `tests/test_motion.py` (C ✓ by THIS fold), and
 `tools/mocap/README.md` — the one DATED EXEMPTION: a prose pointer ("Roster.CLIP_SOURCE is the
-ONE seam"), ZERO executable assertions, true after any flip; the 24 rule-side/manifest/prose
+ONE seam"), ZERO executable assertions, true after any flip; the ~~24~~ **25** (REV 4: 29 − the 4
+readers) rule-side/manifest/prose
 hits (roster rule table, band rosters, batch TSVs, capture drivers — `tools/roster_clip_gate.py`
 reads the LIVE seam VIA `roster_capture.gd` state, its CSV fixture is C-owned, the driver's
 law is count-agnostic) cannot change verdict on a rig-state flip and need no owner (the suite-
@@ -760,13 +850,13 @@ concrete command so a stranger re-runs it; the rest are repo-runnable**)
 | A-2 | suite green: pytest 380+ (count at base: ~~380 at T-M6z~~ **381** — LEDGER T-M6q2 "suite 380 -> 381"; re-measured THIS session `python3 -m pytest --collect-only -q` → 381 collected, P4-2 fold; the exact number re-measured at T-3DR-c) on the pinned engine (tools/VERSIONS.txt pins) | pytest, `HD3D_GODOT` seat path |
 | A-3 | the B-E8-family pin parses `docs/RIG-DEVIATION-3DR.md`: ratification line asserted, reason cells on every static row, rigged rows measured >= 2px framediff, static rows EXCUSED-0 — PLANTED RED (doc flip ⇒ test RED, the MC 11440 planted-red pattern) | `tests/test_characters.py` (C's edits) |
 | A-4 | the MV-E4-family validator leg: a CLIP_SOURCE row naming "walk" on a clip-less file ⇒ RED | shipped validator, reused verbatim |
-| A-5 | the §2.4 ratification gate, THREE legs (P1-2 fold; REV 3 transcripts, c2 P1-2): (i) the 3DR footer shape + a valid package reply ⇒ GREEN — executed on the REAL patched file: **`9 passed in 0.06s`** (scratch 3DR footer COPY; a scratch reply stands in until the owner answer lands); (ii) the 3DR footer shape + an EMPTY cell on a declared REMINT row ⇒ RED **for the empty-cell reason** — executed: `AssertionError: EMPTY owner-ratification cell on a declared shift: roster-clips-m5-framediff.csv`, the verbatim-quote message measured ABSENT in the run (edit 5 fires for the right reason; proved on a COPY); (iii) **M6 regression:** the same matrix parses `docs/BYTE-DEVIATION-M6.md` GREEN, byte-untouched — executed: **`9 passed in 0.04s`** + `git status` empty on the doc (26 rows / 5-col header / 2026-10-29 literals protected). 5-edit COUNTERFACTUAL executed too: `2 failed, 7 passed` ("3DR: only 2 shifting rows" + "channel journey missing from 3DR") | the SD-E6 parse AFTER the **SEVEN** §2.4 parameterisation edits — path / verbatim / date / row-count / independent empty-cell assert / **shifting threshold** / **channel universe** (`tests/test_sigil_drop.py`, T-3DR-c's) — three-leg proof DRIVING THE REAL FILE in the card capture; a hand-typed copy-probe does NOT satisfy the leg (the 5-edit wording was unbuildable-as-described TWO cycles running: REV 1's one-liner, then REV 2's five edits missing :242 + :250 — the §2.4 EXECUTED-PROOF block + `.tmp/3drspec3.txt` LEG-3 carry the real-file shape) |
+| A-5 | the §2.4 ratification gate, THREE legs (P1-2 fold; REV 3 transcripts, c2 P1-2): (i) the 3DR footer shape + a valid package reply ⇒ GREEN — executed on the REAL patched file: **`9 passed in 0.06s`** (scratch 3DR footer COPY; a scratch reply stands in until the owner answer lands); (ii) the 3DR footer shape + an EMPTY cell on a declared REMINT row ⇒ RED **for the empty-cell reason** — executed: `AssertionError: EMPTY owner-ratification cell on a declared shift: roster-clips-m5-framediff.csv`, the verbatim-quote message measured ABSENT in the run (edit 5 fires for the right reason; proved on a COPY); (iii) **M6 regression:** the same matrix parses `docs/BYTE-DEVIATION-M6.md` GREEN, byte-untouched — executed: **`9 passed in 0.04s`** + `git status` empty on the doc (26 rows / 5-col header / 2026-10-29 literals protected). 5-edit COUNTERFACTUAL executed too: `2 failed, 7 passed` ("3DR: only 2 shifting rows" + "channel journey missing from 3DR" — both reproduced FOR THE SAME REASONS, threshold + channel universe; the strings are the REV-3 patch's own wording, c3 P4-1 dated 2026-10-31) | the SD-E6 parse AFTER the **SEVEN** §2.4 parameterisation edits — path / verbatim / date / row-count / independent empty-cell assert / **shifting threshold** / **channel universe** (`tests/test_sigil_drop.py`, T-3DR-c's) — three-leg proof DRIVING THE REAL FILE in the card capture; a hand-typed copy-probe does NOT satisfy the leg (the 5-edit wording was unbuildable-as-described TWO cycles running: REV 1's one-liner, then REV 2's five edits missing :242 + :250 — the §2.4 EXECUTED-PROOF block + `.tmp/3drspec3.txt` LEG-3 carry the real-file shape) |
 | A-6 | roster-clips driver: twice-cmp across independent xvfb runs, all 55 rows gate (rigged >= 2px, static EXCUSED), laws green; PLANTED RED (frame-clone ⇒ motion min = 0 ⇒ rc 1) | `tools/roster_clip_gate.py` |
 | A-7 | FX distinctness: probe Tables 3/3 + 6/6 + 26/26 GREEN on the final tree; alpha-law pin leg byte-true | `tools/upgrades_visual_*.py` trio |
 | A-8 | readability: mob grid 44 windows >= RATIO_MIN 2.0 (ONE const, unchanged); 9/9 anchor grid | `tools/biome_readability.py` |
 | A-9 | draw-budget tally re-run: measured <= plan 40 (baseline 28; the flipped pawns add ZERO draws — the pawn stays 1 draw, visible mutual-exclusion law MV-E5 reused) | horde_viz `draw_count` + sim_budget legs |
 | A-10 | art gates per shipped validator: tri budgets, extent/fill, 4-yaw SOLID, RIG_VALID skins=1, post-merge tri, aspect, mocap validate | the §3.3 battery (LAW-ARTIFACTS) |
-| A-11 | clean-room: VS corpus zero-hits law unchanged — ~~the shipped grep gate~~ ~~`grep -rniE "<v1 id list>" …`~~ **DECLARED instrument, seat-runnable, with the REAL id list — the c2 P3-1 placeholder struck dated 2026-10-30. TWO named commands, both EXECUTED this session (capture LEG-6). (1) THE ID LIST comes FROM THE SHIPPED POOL TABLE — `docs/VS-FEATURES.md` §S1 weapon rows: `sed -n '/^## S1 WEAPONS/,/^## S2/p' docs/VS-FEATURES.md \| awk -F'\|' '/^\| *[0-9]+ *\|/ {gsub(/^ +\| +$/,"",$3); print $3}' \| grep -v '^$' \| sort -u > .tmp/vsids.txt` (every `\|` rendered here is a RAW pipe escaped for this table — the verbatim bytes live in the capture LEG-6 header; the awk gsub trims leading/trailing spaces) → **232 names** at this base (incl. [DLC] rows — the whole shipped inventory universe, no curated hole). (2) THE ZERO-HITS LEG runs the distinctive multi-word subset: `grep ' ' .tmp/vsids.txt > .tmp/vsids-multi.txt` (**172 names**), then `grep -rnwIF -f .tmp/vsids-multi.txt --exclude=VS-FEATURES.md --exclude=PARITY-ROADMAP.md godot/ docs/` → **EMPTY output (rc 1)** — executed at `79543fa`; the two exclusions are the repo's declared clean-room citation surfaces: the inventory doc itself + PARITY-ROADMAP's archetype map (its 4 multi-word hits King Bible/Santa Water/Lightning Ring/Fire Wand ARE the declared lineage rows). HONEST SCOPE NOTE (measured, why the leg is scoped): the FULL 232-name universe is NOISY — **32 text hits** at base, ALL generic single-word v1 names (Whip/Axe/Cross/Bone/Knife…) inside OUR OWN composite names (Bone Whip, Hewn Axe, Pilgrim Cross, Bone Market…) + binary matches; the single-word residue is policed by the composite-name law (every shipped META name differs from every v1 name — the archetype map is the declared lineage) and the asset side by `test_card_icons`'s v1-byte pin. At every card close: run both legs, paste the real output into the capture — EMPTY output means PASS** | card-capture greps (the two commands above, in-row) + the shipped `test_card_icons` v1-byte pin |
+| A-11 | clean-room: VS corpus zero-hits law unchanged — ~~the shipped grep gate~~ ~~`grep -rniE "<v1 id list>" …`~~ **DECLARED instrument, seat-runnable, with the REAL id list — the c2 P3-1 placeholder struck dated 2026-10-30. ~~REV-3 form — TWO named commands, both EXECUTED this session (capture LEG-6). (1) THE ID LIST comes FROM THE SHIPPED POOL TABLE — `docs/VS-FEATURES.md` §S1 weapon rows: `sed -n '/^## S1 WEAPONS/,/^## S2/p' docs/VS-FEATURES.md \| awk -F'\|' '/^\| *[0-9]+ *\|/ {gsub(/^ +\| +$/,"",$3); print $3}' \| grep -v '^$' \| sort -u > .tmp/vsids.txt` (claim: "the awk gsub trims leading/trailing spaces") → 232 names. (2) `grep ' ' .tmp/vsids.txt > .tmp/vsids-multi.txt` (claim: 172 names), then `grep -rnwIF -f .tmp/vsids-multi.txt --exclude=VS-FEATURES.md --exclude=PARITY-ROADMAP.md godot/ docs/` ⇒ "EMPTY (rc 1) executed at 79543fa".~~ **STRUCK DATED 2026-10-31 (c3 P1-1, owner-approved "Approve" fold): the row BROKE ITS OWN LEG — the gsub pattern matches a WHOLE `" \| "` field, not leading/trailing spaces, so the extraction did NOT trim (the named `grep ' '` yields the FULL 232, not 172 — the fold ran a different, trimming command it did not name); UNTRIMMED `-f` patterns are FALSE-NEGATIVE (a leading-space pattern drops a match preceded by a word char — green-that-masks, the worse direction); AND the zero-hits leg RED-ed on the tree the fold COMMITTED (`93f2825`: 1 hit — this row's own quoted archetype names).** REV-4 FORM — THE TWO COMMANDS EVERY CARD RUNS, RE-EXECUTED AT THE COMMITTED REV-4 TREE (capture `.tmp/3drspec4.txt` LEG-1): (1) THE ID LIST comes FROM THE SHIPPED POOL TABLE — `docs/VS-FEATURES.md` §S1 weapon rows: `sed -n '/^## S1 WEAPONS/,/^## S2/p' docs/VS-FEATURES.md \| awk -F'\|' '/^\| *[0-9]+ *\|/ {print $3}' \| sed 's/^ *//;s/ *$//' \| grep -v '^$' \| sort -u > .tmp/vsids.txt` (every `\|` rendered here is a RAW pipe escaped for this table; **THE TRIM IS THE NAMED SED STEP** — the awk-gsub trim claim is the struck defect, not this command) → **232 names** re-measured at the REV-4 base (incl. [DLC] rows — the whole shipped inventory universe, no curated hole). (2) THE ZERO-HITS LEG runs the distinctive multi-word subset: `grep ' ' .tmp/vsids.txt > .tmp/vsids-multi.txt` (**172 names** re-measured WITH the trim) then `grep -rnwIF -f .tmp/vsids-multi.txt --exclude=VS-FEATURES.md --exclude=PARITY-ROADMAP.md --exclude=3DR-SPEC.md --exclude=3DR-SPEC-DA.md --exclude=3DR-SPEC-DA-c2.md --exclude=3DR-SPEC-DA-c3.md godot/ docs/` ⇒ **EMPTY output (rc 1) — RE-EXECUTED AT THE COMMITTED REV-4 TREE** (paste the real output; the three-exclusion shape left exactly 3 hit-lines, all inside the IMMUTABLE `3DR-SPEC-DA-c3` doc's own quoted P1-1 transcript, `docs/3DR-SPEC-DA-c3.md:57-60`). THE EXCLUSIONS are the repo's declared clean-room citation surfaces, each dated: `VS-FEATURES.md` (the inventory doc itself) + `PARITY-ROADMAP.md`'s archetype map (its 4 multi-word hits King Bible/Santa Water/Lightning Ring/Fire Wand ARE the declared lineage rows) — 2026-10-30; **`3DR-SPEC.md`** (this spec's own declared-lineage mentions — the archetype-map law of THIS row; c3 P1-1 fix (ii), dated 2026-10-31); **+ the three DA gate docs** (dated 2026-10-31, DECLARED READING stated in the REV-4 header — the immutable gate cycles quote the same four names inside quoted transcripts, the same cited-lineage class as the spec's own mentions; they CANNOT be edited (DA immutability) and c3 itself rejected the grep-proof-reword alternative, so the dated exclusion — the mechanism this row already uses — extends; a FUTURE DA doc must be added HERE when it lands). HONEST SCOPE NOTE (re-measured at the REV-4 base, why the leg is scoped): the FULL 232-name universe is NOISY — with THIS row's full dated exclusion set: **21 text hits** (~~32 text hits at base~~ struck dated — that count rode the older two-exclusion shape; REV 4 re-run pins the count to `324e456` + docs-only delta, hit-by-hit triage in capture LEG-1), ALL generic single-word v1 names (Whip/Axe/Cross/Bone/Knife…) inside OUR OWN composite names (Bone Whip, Hewn Axe, Pilgrim Cross, Bone Market…) + binary matches; the single-word residue is policed by the composite-name law (every shipped META name differs from every v1 name — the archetype map is the declared lineage) and the asset side by `test_card_icons`'s v1-byte pin. At every card close: run both legs, paste the real output into the capture — EMPTY output means PASS** | card-capture greps (the two commands above, in-row) + the shipped `test_card_icons` v1-byte pin |
 | A-12 | boot smoke both targets from the tagged tree + VM350 playwright 0 console errors + 0 failed requests (the v2.0.0/v3.1.0 rows, one-click autopilot leg reused) — ~~playwright probe on the shipped build~~ **DECLARED instrument, seat-runnable (P4-3 fold: no committed playwright script exists; the v1.1.0 precedent ran it ad-hoc from the seat, LEDGER T-S11): the fleet browser MCP (Playwright, `browser_*`) driven against the served tag's WASM build, one command per leg (load → console_messages + failed requests read-back), outputs pasted into `.tmp/3drz.txt` verbatim so the leg is re-runnable by a stranger** | fleet browser MCP at the seat + the pasted console/network read-back in the capture |
 
 ### 8.2 DECLARED (non-executable per D3 — the owner's eyes are the instrument)
@@ -801,8 +891,9 @@ reserve law (§3.3).
    list is a lie).
 3. **The ONE-consumer claim (F-1/§1.3)** — re-grep `CLIP_SOURCE` (two script homes at base;
    roster_clips.gd after C; hero_pawn stays (CODE stays — a dated comment re-word is under the
-   §1.3 P2-1 exception + pin leg; the comment lines are not a consumer); NEVER three — the
-   duplicate-table grep at A/C).
+   §1.3 P2-1 exception + pin leg; the comment lines are not a consumer); ~~NEVER three — the
+   duplicate-table grep at A/C~~ **the §5.3 NAMED greps (REV 4, c3 P3-1): ONE `const CLIP_SOURCE`
+   home + ONE `Roster.clip_source(` consumer; comment mentions are lineage, not homes**).
 4. **The seam ownership (§3.4)** — the split is SCHEDULED by roster.gd's own header to the
    statue ruling; 3DR-C owning it is the dated plan, not scope creep; `hero_pawn.gd` zero-edit
    is the load-bearing check.
@@ -829,7 +920,13 @@ reserve law (§3.3).
   hardcode) read at the source; the committed M6 footer parsed row-by-row (26 rows — BOTH
   cells 11 / VERDICT-only 2 / CLASS-only 2 / neither 11); VS-FEATURES §S1 pool table
   extracted (232 names; 172 multi-word); the full-universe grep's 32 hits eyeballed
-  hit-by-hit — all generic words inside our own composite names.**
+  hit-by-hit — all generic words inside our own composite names. REV 4 (c3 P1-1/P2-1 fold, all
+  re-measured at the COMMITTED REV-4 tree, capture `.tmp/3drspec4.txt` LEG-1/LEG-3): the
+  trimmed extraction REPRODUCES 232 / 172; the zero-hits leg is **EMPTY (rc 1)** at the
+  committed REV-4 tree with the row's full dated exclusion set; the full-universe noise with
+  that set is **21** hits, triaged hit-by-hit (same verdict: generic words inside our own
+  composites); the completeness grep: 102-file universe, **29** hits (18 tests + 11 tools,
+  pinned to `324e456` + docs-only).**
 - [x] mechanism-monogamy: one animation consumer (F-1), one gait law, one SKILL_FX table, one
   deviation-doc mechanism (SD-E6 parse extended by doc-path — **REV 2, P1-2: honest wording =
   ONE parse function + a per-doc parameters matrix, NOT "path-only"; REV 3, c2 P1-2: the matrix
@@ -855,8 +952,11 @@ reserve law (§3.3).
   `.tmp/3drspec2.txt`. REV 3 (c2 P1-1): RE-DERIVED AGAIN post-fold — C = 12 entries (+
   test_motion.py), all six pairs ∅ + glob-expansion ∅ measured (A/Z DIR cells) + owned-by-ONE
   checks, AND the COMPLETENESS leg now runs as the second half of the §5.5 instrument
-  (28 pattern hits over the committed tests/+tools/ universe, flip-surface readers all resolved)
-  — instrument + output in `.tmp/3drspec3.txt`.**
+  (~~28~~ **29 (REV 4 re-measure, pinned to `324e456` + docs-only — c3 P2-1)** pattern hits
+  over the committed tests/+tools/ universe, flip-surface readers all resolved)
+  — instrument + output in `.tmp/3drspec3.txt`; REV 4 re-derived BOTH halves AFTER the cell
+  rename: six pairs ∅ + expansion ∅ + owned-by-ONE + 29 hits, capture `.tmp/3drspec4.txt`
+  LEG-5.**
 - [x] NOISE: nothing under `.audits/*/out` written (this job writes only docs/3DR-SPEC.md +
   the LEDGER row + `.tmp/3drspec.txt`; **REV 2/MC 11727: only docs/3DR-SPEC.md + the LEDGER
   row + `.tmp/3drspec2.txt` (+ the scratch `.tmp/3drspec2-probe.py` parse-probe, .tmp is
@@ -864,7 +964,11 @@ reserve law (§3.3).
   only docs/3DR-SPEC.md + the LEDGER row + `.tmp/3drspec3.txt` + worktree `.tmp/` scratch
   (patch script, footer copies, drivers — every scratch patch cp+cmp restored:
   test_sigil_drop.py + hero_pawn.gd byte-exact vs the committed blobs, plant commits destroyed
-  by reset, never pushed)**); GPU untouched (:8123 untouched; zero windows opened);
+  by reset, never pushed**. REV 4/MC 11749: only docs/3DR-SPEC.md + the LEDGER row +
+  `.tmp/3drspec4.txt` + worktree `.tmp/` scratch (the id lists + noise/completeness triage
+  lists — this fold ran NO scratch patch on any test file: the five deltas are spec-TEXT and
+  every re-run instrument is a read-only grep, so the RESTORE LAW had nothing to restore —
+  `git status --porcelain` between the two owned files, capture LEG-7)**); GPU untouched (:8123 untouched; zero windows opened);
   NO SPAWNING (this is one design-profile leaf).
 
 ## DA GATE (this doc's own cycle ledger)
@@ -882,6 +986,17 @@ the SAME failure class as c1's P1s: the close-battery could not go green as writ
 REAL-instrument transcripts (the c2 lesson binding — no GREEN-proof-of-a-copy anywhere in this
 fold; the REV-2 copy-probe retired in-row). Ready for DA c3 (CAP CYCLE — c3 re-checks the fold
 rows against the real tree; a FIX verdict past c3 escalates to the owner per the M6 cap law).
+**c3 LANDED 2026-10-30** (`docs/3DR-SPEC-DA-c3.md` @ `324e456`, CAP cycle 3/3, VERDICT FIX,
+2P1/1P2/1P3/1P4 — the two P1s: the A-11 fold row broke its own zero-hits leg on the committed
+tree, and twelve mesh/twin OWNED cells named a dir the runtime is not in) → per the M6 cap law
+the ORCHESTRATOR ESCALATED PACKAGE-BLOCKED and the OWNER RULED, literal artifact quoted:
+**"Approve" (2026-10-31)** — exactly c3's WHAT-SHIPS-FIX section (the 5 spec-TEXT deltas) as
+REV 4, verified by re-running c3's own instruments at the REV-4 tree (fold-check, NOT a new
+adversarial cycle) → **REV 4 filed 2026-10-31 (MC 11749)** — 5/5 deltas, 0 rebuttals, every
+fold number re-measured AT THE COMMITTED REV-4 TREE (the c3 P1-1 class dies when proof-base and
+commit-base differ — this fold holds proof and commit at ONE tree). The CAP law is spent: the
+gate cycle ends here; the wave STILL cannot start until the owner package (§2.4 ask text +
+§6.1 version row) is answered — REV 4 unblocks the package, not the wave.
 After DA SHIP: the owner package (§2.4 ask text + §6.1 version row) → re-confirmed spec →
 T-3DR-a behind the LAW-GATE.
 
@@ -927,18 +1042,49 @@ or reset-and-cmp verified in the capture. Rows 1-6, 6/6:
 
 | finding | sev | disposition | what changed (WHERE → HOW) + REAL-instrument transcript | sections touched |
 |---|---|---|---|---|
-| **P1-1** | P1 | ADOPTED | `tests/test_motion.py` added to T-3DR-c's OWNED set (§5.1 cell, the 12th entry) with the flip's effect DECLARED via the same-card update rule: `:93-98` asserts `len(statics) == 6` on the LIVE `CLIP_SOURCE` (null-row count measured **6** at base), so the re-pin to the measured post-flip count (6 − k, dated) lands in the flip card WITH its own planted-red; the MV-E4 static-names-a-clip legs stay untouched and red-capable (§5.3/A-4). THE COMPLETENESS GREP EXECUTED, universe named (committed `tests/`+`tools/` via `git ls-files`; pattern `CLIP_SOURCE\|clip_source\|roster\|statue`): 28 hits; flip-surface readers = art_integration ✓C / skins ✓C / **motion → C by this fold** / `tools/mocap/README.md` = dated prose-pointer EXEMPTION (zero executable assertions, true after any flip); §5.5 carries the leg as half 2 of the proof instrument, §5.3's DoD re-runs it at close | §0 F-2 (dated note), §5.1 C row, §5.2, §5.3, §5.5, §10, header |
-| **P1-2** | P1 | ADOPTED | The five edits are **SEVEN** (REV-2 "five" struck dated): +edit 6 the `shifts >= 5` threshold (`:242`) → per-doc parameter (M6 ≥5, measured 13 shifting; 3DR pins its honest §2.2 count **2** — RE-MEASURE/STAY carry no shifting keyword); +edit 7 the channel universe (`("journey","strips","s8 capture")`, `:250`) → per-doc parameter (3DR names `roster-clips`+`art-s2i`); the PENDING rule stays universal. EXECUTED as a scratch patch on the REAL `tests/test_sigil_drop.py` (preflight committed-blob cmp; restore cp+cmp + blob cmp + git-clean): leg (i) **`9 passed in 0.06s`**; leg (ii) RED **for the empty-cell reason** (`EMPTY owner-ratification cell on a declared shift: roster-clips-m5-framediff.csv`; verbatim-quote message measured ABSENT); leg (iii) **`9 passed in 0.04s`**, M6 doc byte-untouched; the 5-edit COUNTERFACTUAL re-executed **`2 failed, 7 passed`** ("3DR: only 2 shifting rows" + "channel journey missing from 3DR"). The REV-2 `.tmp/3drspec2-probe.py` RETIRED in-row (GREEN-proof-of-a-copy) | §2.4 (edits 6+7 + EXECUTED-PROOF block + regression-leg wording), §5.3 parse battery, A-5, §10, header |
+| **P1-1** | P1 | ADOPTED | `tests/test_motion.py` added to T-3DR-c's OWNED set (§5.1 cell, the 12th entry) with the flip's effect DECLARED via the same-card update rule: `:93-98` asserts `len(statics) == 6` on the LIVE `CLIP_SOURCE` (null-row count measured **6** at base), so the re-pin to the measured post-flip count (6 − k, dated) lands in the flip card WITH its own planted-red; the MV-E4 static-names-a-clip legs stay untouched and red-capable (§5.3/A-4). THE COMPLETENESS GREP EXECUTED, universe named (committed `tests/`+`tools/` via `git ls-files`; pattern `CLIP_SOURCE\|clip_source\|roster\|statue`): ~~28 hits~~ **29 (REV 4, c3 P2-1 — the fold's own capture LIST carries 29: 18 tests + 11 tools; the quoted count was the row's arithmetic error; re-measured + pinned to `324e456` + docs-only, capture LEG-3)**; flip-surface readers = art_integration ✓C / skins ✓C / **motion → C by this fold** / `tools/mocap/README.md` = dated prose-pointer EXEMPTION (zero executable assertions, true after any flip); §5.5 carries the leg as half 2 of the proof instrument, §5.3's DoD re-runs it at close | §0 F-2 (dated note), §5.1 C row, §5.2, §5.3, §5.5, §10, header |
+| **P1-2** | P1 | ADOPTED | The five edits are **SEVEN** (REV-2 "five" struck dated): +edit 6 the `shifts >= 5` threshold (`:242`) → per-doc parameter (M6 ≥5, measured 13 shifting; 3DR pins its honest §2.2 count **2** — RE-MEASURE/STAY carry no shifting keyword); +edit 7 the channel universe (`("journey","strips","s8 capture")`, `:250`) → per-doc parameter (3DR names `roster-clips`+`art-s2i`); the PENDING rule stays universal. EXECUTED as a scratch patch on the REAL `tests/test_sigil_drop.py` (preflight committed-blob cmp; restore cp+cmp + blob cmp + git-clean): leg (i) **`9 passed in 0.06s`**; leg (ii) RED **for the empty-cell reason** (`EMPTY owner-ratification cell on a declared shift: roster-clips-m5-framediff.csv`; verbatim-quote message measured ABSENT); leg (iii) **`9 passed in 0.04s`**, M6 doc byte-untouched; the 5-edit COUNTERFACTUAL re-executed **`2 failed, 7 passed`** ("3DR: only 2 shifting rows" + "channel journey missing from 3DR" — REV 4, c3 P4-1 dated 2026-10-31: these strings are the REV-3 patch's OWN wording, reproduced FOR THE SAME REASONS (the :242 threshold + the :250 channel universe), not verbatim). The REV-2 `.tmp/3drspec2-probe.py` RETIRED in-row (GREEN-proof-of-a-copy) | §2.4 (edits 6+7 + EXECUTED-PROOF block + regression-leg wording), §5.3 parse battery, A-5, §10, header |
 | **P2-1** | P2 | ADOPTED | Pin leg now reads **committed-vs-committed against the NAMED BASE** (`git diff <accepted base of T-3DR-c>..HEAD -- godot/scripts/hero_pawn.gd`) + **NON-EMPTY-DIFF-REQUIRED** (empty diff = the owed `:22` re-word missing; the bare-`git diff` wording struck dated — c2 scenario-C vacuous GREEN structurally gone). PLANT-TESTED BOTH WAYS this fold (LEG-4): scenario 0 pre-re-word empty diff ⇒ RED rc=1; comment-only re-word COMMITTED ⇒ GREEN (2 lines, all comments); code char (`minf`→`maxf`) COMMITTED ⇒ RED rc=1; scratch plant commits destroyed by `reset --hard`, never pushed, `hero_pawn.gd` restore-cmp byte-exact. Fail-closed-on-blank-line direction stated; `#`-after-strip sound (zero `"""` in the file, c2 measured) | §1.3 pin leg, §5.3, §6.2 cross-ref (wording already rode §5.3), header |
 | **P2-2** | P2 | ADOPTED | The REV-2 P3-1 fold row's rationale STRUCK dated and replaced by the measured parse of the COMMITTED M6 footer (shipped instrument shape, LEG-5): 26 rows — keyword in BOTH cells **11**, VERDICT-only **2**, CLASS-only **2**, neither 11; the s8 counterexample quoted IN-ROW (`class=STAY-expected`, `verdict="MEASURED SHIFT — …"`, owner `n/a — no shift` — law-legal NON-EMPTY, never the verbatim answer); the 3DR `class` cell-of-record re-labelled a DECLARED CHOICE (never an M6 fact) + 3DR rows carry the keyword in BOTH cells by law, so the choice never bites; §2.4 + the REV-2 ledger row both carry the dated strike | §2.4 cell-of-record, REV-2 ledger P3-1 row, header |
-| **P3-1** | P3 | ADOPTED | A-11 de-placeholdered with the REAL id list FROM THE SHIPPED POOL TABLE, both commands executed (LEG-6): extraction `sed -n '/^## S1 WEAPONS/,/^## S2/p' docs/VS-FEATURES.md \| awk …` → **232 names**; leg on the distinctive multi-word subset (**172**) `grep -rnwIF -f .tmp/vsids-multi.txt --exclude=VS-FEATURES.md --exclude=PARITY-ROADMAP.md godot/ docs/` ⇒ **EMPTY (rc 1)**; the full-universe **32** noisy hits measured + triaged in-row (generic words inside our own composites) with the composite-name law + `test_card_icons` byte-pin named as the single-word/asset-side police | A-11, header |
+| **P3-1** | P3 | ADOPTED | A-11 de-placeholdered with the REAL id list FROM THE SHIPPED POOL TABLE, both commands executed (LEG-6): extraction `sed -n '/^## S1 WEAPONS/,/^## S2/p' docs/VS-FEATURES.md \| awk …` → **232 names**; leg on the distinctive multi-word subset (**172**) `grep -rnwIF -f .tmp/vsids-multi.txt --exclude=VS-FEATURES.md --exclude=PARITY-ROADMAP.md godot/ docs/` ⇒ **EMPTY (rc 1)**; the full-universe **32** noisy hits measured + triaged in-row (generic words inside our own composites) with the composite-name law + `test_card_icons` byte-pin named as the single-word/asset-side police. **REV 4 CORRECTION (c3 P1-1, dated 2026-10-31): this row's execution was TRUE at its measured base `79543fa` and FALSE at the tree it committed (`93f2825`, 1 hit — the row's own text); the named extraction command did not trim. The REV-4 A-11 row supersedes the command form quoted HERE — DO NOT USE this row's commands as a close leg; both legs re-measured EMPTY(172-trimmed/232) at the committed REV-4 tree, capture `.tmp/3drspec4.txt` LEG-1** | A-11, header |
 | **P4-1** | P4 | ADOPTED | §5.5 header sentence corrected: the "all names, no globs" claim struck dated — the A cells own two real dirs (measured: `assets/art-src/` **68** files, `assets/concepts/` **43** files), `godot/export/` ABSENT (dir-to-be); NO other OWNED cell names any path under them, so the pairs are ∅ BY CONSTRUCTION under expansion — measured this session (LEG-7/LEG-8), stated as such instead of an overstated universal compliance claim | §5.5 GLOB LAW paragraph, header |
 
 **Counts after the fold:** findings folded **6/6** (2 P1 + 2 P2 + 1 P3 + 1 P4, the DA's own
 ranking, none rebutted); §5.1 T-3DR-c OWNED set **11 → 12 entries** (gains `tests/test_motion.py`);
 §5.5 pairwise ∅ **6/6 re-proved on the REV-3 sets + glob-expansion ∅ + owned-by-ONE + the
-COMPLETENESS leg** (28 hits resolved); §2.4 parse edits **7**; A-5 three legs REAL-FILE executed
+COMPLETENESS leg** (~~28~~ **29 (REV 4)** hits resolved); §2.4 parse edits **7**; A-5 three legs REAL-FILE executed
 (`9 passed / RED-for-empty-cell / 9 passed`) with the 5-edit counterfactual reproduced;
 fixture arithmetic untouched-but-re-checked (**13/2/31/55, suite 381**); HOLD channel count
 unchanged at 14 — no §2/§3 substance moved; both DA docs IMMUTABLE; the c3 cap-cycle re-checks
 THESE rows.
+
+## REV-4 FOLD LEDGER (DA c3 `docs/3DR-SPEC-DA-c3.md` @ `324e456` WHAT-SHIPS-FIX + owner
+"Approve" 2026-10-31 → this REV; delta → change → transcript; every number RE-MEASURED AT THE
+COMMITTED REV-4 TREE, capture `.tmp/3drspec4.txt`, VERIFY_EXIT=0)
+
+All five deltas APPLIED, 0 rebuttals, 0 design changes (owner approval scope, quoted: the 5
+exact spec-TEXT deltas of the c3 WHAT-SHIPS-FIX section; verification = re-running c3's OWN
+instruments at the REV-4 tree — a fold-check, not a new adversarial cycle). Rows 1-5, 5/5:
+
+| delta | c3 sev | disposition | what changed (WHERE → HOW) + REV-4 transcript (committed tree) | sections touched |
+|---|---|---|---|---|
+| **1 (P1-1 A-11)** | P1 | APPLIED (exclusion extension DECLARED, stated in the REV-4 header) | The row RE-AUTHORED: extraction command NAMED+TRIMMED (`sed 's/^ *//;s/ *$//'` step before `sort -u`; the awk-gsub-trims claim struck dated — the pattern matched a whole `" \| "` field), third dated exclusion `3DR-SPEC.md`, DA gate docs added under the same dated cited-lineage class (measured: with only the three c3 named exclusions the sole remaining hits were `docs/3DR-SPEC-DA-c3.md:57-60` — the immutable doc's own quoted transcript; c3 rejected the reword alternative, exclusion is the row's mechanism). TRANSCRIPT (LEG-1, committed REV-4 tree): 232 names / multi-word **172** / zero-hits grep **EMPTY rc=1** / full-universe noise with the full dated exclusion set **21**, triaged hit-by-hit (generic single-word names inside OUR composites) | A-11, header (REV-4 bullet + REV-3 P3-1 row note), §10 cite row, REV-3 ledger P3-1 row |
+| **2 (P1-2 mesh paths)** | P1 | APPLIED | `godot/` prefix on all TWELVE mesh/twin OWNED cells as full literals (§5.1 A six meshes + R six twins), the §5.5 transcription annotated to the new literals, §3.3's New-files literals + superseded-archive naming, §1.1's ART row SPLIT (`godot/assets/glb/*.glb` 43 live vs `assets/glb/` provenance + `assets/glb/superseded/` archive), + the ONE path law `res://assets/glb/ == godot/assets/glb/`. TRANSCRIPT (LEG-2): the six current meshes `exists=True` under the prefix (`godot/assets/glb/char-coinhound.glb` …; 43 files in the dir), the six twins correctly ABSENT (files-to-be), `player-rigged.glb` proven pattern lives in `godot/assets/glb/` (+ top-level provenance copies + `superseded/` — 4 names + dir), `assets/anim/maps/` 9 committed maps (cells stay as written, c3-measured correct) | §1.1 ART row + path law, §3.3, §5.1 A+R rows, §5.5 transcription |
+| **3 (P2-1 counts)** | P2 | APPLIED | 28 → **29** in ALL FIVE occurrences (header P1-1 row, §5.5 leg, §10 checklist, REV-3 ledger P1-1 row, counts row), 24 → **25** (§5.5 rule-side = 29 − 4 readers), the count PINNED to base `324e456` + docs-only delta (file lists grow with commits — pinned to a SHA, not to "this fold"). TRANSCRIPT (LEG-3): `git ls-files tests tools` = **102** files; pattern grep -liE = **29** files = **18 tests + 11 tools**; flip-surface readers re-verified at the four named files (no 5th); 29 − 4 = **25** rule-side | header, §5.5, §10, REV-3 ledger P1-1 row + counts row |
+| **4 (P3-1 never-three)** | P3 | APPLIED | §5.3's duplicate-table leg RE-READ as TWO NAMED greps — `grep -l "const CLIP_SOURCE" godot/scripts/*.gd` = ONE const home (ONE table; post-split `roster_clips.gd`) + `grep -l "Roster.clip_source(" godot/scripts/*.gd` = ONE consumer (`hero_pawn.gd`) — the NEVER-three prose struck dated (unnamed + comment-fragile: the roster.gd reason-header comments are the SCHEDULED-split's LINEAGE, not homes — replace-not-delete keeps them, declared reading); §9.3's pointer follows. TRANSCRIPT (LEG-4, base tree — the leg's target state is post-C): const-grep → exactly `godot/scripts/roster.gd` (1 file); consumer-grep → exactly `godot/scripts/hero_pawn.gd` (1 file) — the instrument discriminates TODAY | §5.3, §9.3, header |
+| **5 (P4-1 one word)** | P4 | APPLIED | "reproduced verbatim" → "reproduced for the same reasons (threshold + channel universe)" — the counterfactual's messages are the REV-3 patch's own wording (a parameterised leg re-words its messages); the failure REASONS (`:242` threshold, `:250` channel universe) reproduce, c3's re-authored patch byte-confirmed both. TRANSCRIPT: wording audit LEG-7 — the phrase greps ZERO as a live-reading claim at the REV-4 tree (its one surviving occurrence is this ledger line quoting the replaced wording; the §2.4 occurrence sits inside the dated strike; c3's own doc quotes it as its finding target and is immutable) | §2.4 EXECUTED-PROOF, A-5, REV-3 ledger P1-2 row |
+
+**Counts after the fold:** deltas applied **5/5** (2 P1 + 1 P2 + 1 P3 + 1 P4, c3's own ranking,
+none rebutted); OWNED matrix RE-DERIVED post-cell-rename (LEG-5): all six pairs **∅** (the
+mesh/twin rename keeps mesh-vs-twin name distinctness over the FULL literals), glob-expansion
+∅ re-counted (`assets/art-src/` **68**, `assets/concepts/` **43**, `godot/export/` **ABSENT**,
+no other OWNED name under any DIR cell), owned-by-ONE re-checked (`test_motion.py`,
+`test_sigil_drop.py`, `hero_pawn.gd`, `roster.gd` — single), C = **12** entries unchanged, the
+completeness grep re-run BOTH halves (LEG-3); fixture arithmetic UNTOUCHED-but-RE-CHECKED
+(LEG-1: **13** jsonl / **2** CSVs / art-s2i **31** rows / roster-clips **55** lines / suite
+**381** collected); design text UNTOUCHED outside the 5 deltas (LEG-7 diff-audit: every changed
+line classifies to delta 1-5 or fold mechanics — header/DA-gate/ledger/LEDGER row, mandated by
+the fold's own DoD); DA docs c1/c2/c3 IMMUTABLE (LEG-6: `git diff 324e456..HEAD` over the three
+= **0 lines**); HOLD channel count unchanged at 14; the wave stays BLOCKED behind the owner
+package (§2.4 ask + §6.1 version row) exactly as before this fold — the approval covered the
+fold, not the wave.
