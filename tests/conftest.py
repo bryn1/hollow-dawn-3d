@@ -14,10 +14,13 @@ no static/; the PARITY-ROADMAP row-13 leaderboard claim rides the vendored
 v1 server, NOT this suite. The stale "REAL server as a subprocess" docstring
 goes with it (audit §4.2 folded row).
 """
+import atexit
 import json
 import os
 import re
+import shutil
 import subprocess
+import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPTS = os.path.join(REPO, "godot", "scripts")
@@ -30,6 +33,29 @@ GODOT = os.environ.get(
 
 CLASS_CACHE = os.path.join(REPO, "godot", ".godot",
                            "global_script_class_cache.cfg")
+
+# ---- HOME-well immunity: the ONE harness seam (MC 11706 T-M6H-XDG; T-M6p
+# finding (a), the s8 row of docs/BYTE-DEVIATION-M6.md) -----------------------
+# godot's user:// resolves to $XDG_DATA_HOME/godot/app_userdata/<project>
+# and FALLS BACK TO $HOME/.local/share when XDG_DATA_HOME is unset — so an
+# UNRESET sim inherits the machine's PLAY HISTORY as meta-power (measured at
+# card time on this seat's HOME: gold 164, stage2, counters.kills_total
+# 2512) and the suite silently pass/fails on it. The immunity lives HERE, at
+# the ONE shared bootstrap every test file already imports: a throwaway well
+# per pytest RUN, pointed at XDG_DATA_HOME at MODULE-IMPORT time — before
+# any probe boot or the --import leg runs — so every subprocess child
+# inherits it regardless of author diligence (the suite launches nothing
+# outside this process's env). The probes that judge their own user:// FILES
+# (save/shop/skins/chars/achv) keep passing their private scratch dirs ON
+# TOP of this floor: those are per-test file workspaces, not an immunity
+# mechanism — this stays the one seam, none beside it. What it REPLACES is
+# the per-card manual "re-run every leg under a throwaway XDG_DATA_HOME"
+# step (the T-M6p s8 leg) — no card re-runs that ritual again. Cleaned at
+# process exit. Measured by tests/test_xdg_hygiene.py (X-E1 planted-HOME
+# red-before/green-after, X-E2 floor-resolution leg).
+XDG_WELL = tempfile.mkdtemp(prefix="hd3d-well-")
+os.environ["XDG_DATA_HOME"] = XDG_WELL
+atexit.register(shutil.rmtree, XDG_WELL, True)
 
 
 def ensure_class_cache():
