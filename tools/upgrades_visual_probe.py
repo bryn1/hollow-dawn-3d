@@ -223,7 +223,7 @@ def parse_rows(out):
         for lv in (1, 8):
             if "%s-L%d" % (f, lv) not in rows["fam"]:
                 sys.exit("missing FAM row %s-L%d" % (f, lv))
-    missing = [i for i in skill_fx_ids() if i not in rows["skill"]]
+    missing = [i for i in skill_fx.skill_fx_ids() if i not in rows["skill"]]
     if missing:
         sys.exit("missing SKILL rows: %s" % missing)
     return rows
