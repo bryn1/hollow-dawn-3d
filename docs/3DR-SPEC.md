@@ -21,10 +21,7 @@
 
 ## OWNER ORDER (verbatim, binding)
 
-1. **The founding ruling (MC 11094, 2026-10-21), verbatim — typos intact, the artifact is
-   quoted, never corrected:** *"a 3d remake. Same type of viduals, top down, but with
-   chatacter animations, movements. 3090 only with best possible model doing the word
-   regardless of time taken."* (Quoted identically at DESIGN-3D:4-5 and RESEARCH-3D-3090:3-5.)
+1. **The founding ruling (MC 11094, 2026-10-21), verbatim — typos intact, the artifact is quoted, never corrected, the WHOLE quote on ONE line so the pin-greps match it whole (the SD-E6 quote-cell law):** *"a 3d remake. Same type of viduals, top down, but with chatacter animations, movements. 3090 only with best possible model doing the word regardless of time taken."* (Quoted identically at DESIGN-3D:4-5 and RESEARCH-3D-3090:3-5.)
 2. **The re-confirmed order (2026-10-30), verbatim:** *"3d remake first then m7"* →
    3DR runs BEFORE M7; the M7 trio (§7) is named, never scheduled here.
 3. **The statue-class ruling already on the record (M6 owner package, 2026-10-29), verbatim:**
