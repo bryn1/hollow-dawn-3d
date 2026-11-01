@@ -13,3 +13,5 @@ here, per-asset v-N naming: char-coinhound-v2.glb (live: godot/assets/glb/
 char-coinhound.glb, PERMANENCE §3DR-a row).
 char-tallow-seer-v2.glb (live: godot/assets/glb/char-tallow-seer.glb, PERMANENCE
 §3DR-a row).
+char-shroud-saint-v1.glb (live: godot/assets/glb/char-shroud-saint.glb, PERMANENCE
+§3DR-a row).
