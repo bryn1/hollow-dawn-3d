@@ -18,3 +18,4 @@ char-shroud-saint-v1.glb (live: godot/assets/glb/char-shroud-saint.glb, PERMANEN
 char-hoard-wretch-v1.glb (live: godot/assets/glb/char-hoard-wretch.glb, PERMANENCE
 §3DR-a row).
 skin-tide-v1.glb (live: godot/assets/glb/skin-tide.glb, PERMANENCE §3DR-a row).
+skin-void-v1.glb (live: godot/assets/glb/skin-void.glb, PERMANENCE §3DR-a row).
