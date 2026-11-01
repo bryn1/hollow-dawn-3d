@@ -11,3 +11,5 @@ SUPERSEDED 2026-11-01 (MC 11772, T-3DR-a): 3DR-a statue re-MASTER batch (3DR-SPE
 REV-4 §3.3, riggable-wording re-MASTERs) archives the superseded rig-law statics
 here, per-asset v-N naming: char-coinhound-v2.glb (live: godot/assets/glb/
 char-coinhound.glb, PERMANENCE §3DR-a row).
+char-tallow-seer-v2.glb (live: godot/assets/glb/char-tallow-seer.glb, PERMANENCE
+§3DR-a row).
