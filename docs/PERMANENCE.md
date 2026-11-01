@@ -346,7 +346,7 @@ ONE row per window; player class: tri <= 8000, aspect_gate --target 1.67
 |---|---|---|---|---|---|---|
 | char-emberwright | art-src/char-emberwright-ref-v2.png | 801 FIRST SEED (ref v1 seed 701 REJECTED) | 7891 / 8000 | 1.67 / 0.55 | ee42597b6d7ee084 | concepts/char-emberwright-render.png |
 | char-grave-ward | art-src/char-grave-ward-ref-v2.png | 802 FIRST SEED (ref v1 seed 702 REJECTED) | 7670 / 8000 | 1.68 / 0.54 | c70e8b9d8a32fdea | concepts/char-grave-ward-render.png |
-| char-coinhound | art-src/char-coinhound-ref.png | 803 FIRST SEED (ref v1 seed 703 ACCEPTED first draw) | 7947 / 8000 | 1.67 / 0.74 | e6310d5c531361fc | concepts/char-coinhound-render.png |
+| char-coinhound | art-src/char-coinhound-ref.png | 803 FIRST SEED (ref v1 seed 703 ACCEPTED first draw) | 7947 / 8000 | 1.67 / 0.74 | e6310d5c531361fc | concepts/char-coinhound-render.png — **SUPERSEDED 2026-11-01 (MC 11772 T-3DR-a): rig-law re-MASTER, file at assets/glb/superseded/char-coinhound-v2.glb, live row in the 3DR-a section below** |
 | char-duskrunner | art-src/char-duskrunner-ref-v2.png | 804 FIRST SEED (ref v1 seed 704 REJECTED) | 7689 / 8000 | 1.67 / 0.57 | 813fdfca83f153af | concepts/char-duskrunner-render.png |
 | char-tallow-seer | art-src/char-tallow-seer-ref-v2.png | 805 FIRST SEED (ref v1 seed 705 REJECTED) | 7966 / 8000 | 1.67 / 0.44 | 91c387871885f8a4 | concepts/char-tallow-seer-render.png |
 | char-iron-penitent | art-src/char-iron-penitent-ref-v2.png | 806 FIRST SEED (ref v1 seed 706 REJECTED) | 7948 / 8000 | 1.67 / 0.51 | b82821662ba11348 | concepts/char-iron-penitent-render.png |
@@ -457,3 +457,22 @@ motion_capture.gd; planted reds (rig-dead -> MOVING legs 0px, both-draws ->
 draws=2, randf wave -> determinism pin RED, game.time-only key -> phase pin RED,
 static-file-claims-walk -> validator RED) all executed RED, cp+cmp restored
 (capture `.tmp/m6r.txt`).
+
+## 3DR-a — statue re-MASTER batch (T-3DR-a, MC 11772, 2026-11-01)
+
+Six rig-law statics (docs/RIG-DEVIATION-SEL-C.md, owner "Rec") re-MASTERed per
+3DR-SPEC REV-4 §3.3 option (c): NEW reference artwork carrying the riggable-wording
+family ("arms flat at sides, two legs visible (robe opening), censer/props carved
+flush as relief" + the fused-lantern bell-robe line for the skins). Refs: imagegen
+MCP Qwen-Image-Edit-2511 (vm100 3090), ONE asset per window, identity anchored on
+the live-mesh concept renders + portrait icons (M5 "keep unless clear mismatch"
+law); every ref sha16 row + seed in tools/vm100/art-batch-3dr.tsv. Meshes: TRELLIS.2-4B
+fp16 pipeline_type=1024, BiRefNet MIT substitution (MC 11096 law), char budget 9500
+(§3.3), seed = the class M5 lineage seed, ONE row per window, drain barrier +
+serving-proved open/close per window (capture `.tmp/3dra.txt`). TWO-FAIL STOP:
+first seed + ONE reserve per class; NO third burn, a fourth needs a new owner word
+(§3.3 reserve law carried). Superseded v-files at assets/glb/superseded/.
+
+| asset | re-MASTER ref | seed | tris / budget | norm_h / aspect_w_h | sha256(glb)[:16] | render |
+|---|---|---|---|---|---|---|
+| char-coinhound | assets/art-src/char-coinhound-ref-v3.png (ref seed 1771) | 803 FIRST SEED (ref v1 703 + ruling-1 remaster double-failed at RIG stage pre-3DR; 3DR ref-v3 riggable wording, mesh FIRST SEED — reserve UNBURNED) | 8998 / 9500 | 1.67 / 0.42 (INFLATION 1.67, gates ≤2.0 PASS; ext 0.416,0.998,0.380 fill non-watertight PASS) | e0146f71d4e9fd5c | concepts/char-coinhound-render.png |

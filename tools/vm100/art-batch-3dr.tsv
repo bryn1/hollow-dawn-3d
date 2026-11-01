@@ -1,0 +1,33 @@
+# MC 11772 T-3DR-a manifest — 3DR GPU ART: six statue re-MASTER refs + TRELLIS mesh specs
+# (spec §5.1 A-row owned manifest; ONE manifest, extend-don't-duplicate — M5 two-file art-src
+# + roster-batch precedent folded into one file for this card, the §5.1 cell names THIS name).
+# REFS: imagegen MCP local Qwen-Image-Edit-2511 on vm100 (edit mode, identity anchors = the
+# current live-mesh concept renders + the roster/vigil portrait icons — M5 identity law "keep
+# unless clear mismatch"), opaque 1024x1536, ONE asset per imagegen window, manual close
+# rc=0 + llama-swap serving PROVEN at every close (imagegen close output, capture §1).
+# Seeds 1771-1778 (seed, variant) per row below. Every raw carries its EXACT prompt in tEXt
+# impeccable:prompt (PIL PngInfo route — same as M5); sha16 = sha256(prompt) hex[:16] of the
+# embedded text; manifest sha16 == embedded == tool prompt_sent, legs re-checked this card.
+# Rejected variants documented + committed (art-src-m1c..m5 convention).
+# TWO-FAIL STOP + reserve law (§3.3, declared reading): per class = first seed + ONE reserve
+# (seed+1); NO class burns a third mesh attempt on this card; a fourth needs a new owner word.
+# §3.3 riggable-wording family carried verbatim: "arms flat at sides, two legs visible (robe
+# opening), censer/props carved flush as relief" + fused-lantern bell-robe line for the skins.
+# --- ref variants: variant id<TAB>repo dest<TAB>seed<TAB>prompt-sha16<TAB># note ---
+char-coinhound	assets/art-src/char-coinhound-ref-v3.png	1771	86cf56e29bcb1065	# ACCEPT input char-coinhound.glb (3DR): upright hound-knight, TWO leg columns visible, block arms welded flat at sides, chain collar + coin medallion raised relief, gold seams (identity: hound head/collar/medallion kept)
+char-tallow-seer	assets/art-src/char-tallow-seer-ref-v3.png	1772	dbe7c8215b336d84	# ACCEPT input char-tallow-seer.glb (3DR): robe opening, two legs+feet visible, censer block fused flush at chest, shoulder candle columns relief, amber seams (hooded-seer + censer identity kept)
+char-shroud-saint	assets/art-src/char-shroud-saint-ref-v3.png	1773	1989e3be635e8a52	# ACCEPT input char-shroud-saint.glb (3DR): sealed-bell class CHANGED — shroud drape slab open at front, two legs visible to feet, block hands welded at sides, recessed veil + burial-green seams kept
+char-hoard-wretch	assets/art-src/char-hoard-wretch-ref-v6.png	1774	35e49939ce98a8d8	# REJECT: edit model raised WINGS from the winged mesh-render anchor + left open claw-finger hands on the coffer — the exact M5 rig-collapse geometry class (wings-as-arms, claw fans); ref-stage journey, no mesh burn
+char-hoard-wretch-v7	assets/art-src/char-hoard-wretch-ref-v7.png	1775	19d308c6255e16fd	# ACCEPT input char-hoard-wretch.glb (3DR): portrait-only anchor (no winged silhouette), two thick leg columns, block fists welded flat at sides, coffer fused belly relief, folded wings sealed FLAT into the back slab, dull-gold seams
+skin-tide	assets/art-src/skin-tide-ref-v5.png	1776	0c54b6a3b22c8a85	# ACCEPT input skin-tide.glb (3DR): bell robe open at front, two legs visible, arms fused into robe at sides, block lantern fused flush at raised right forearm (fused-lantern bell-robe line), teal palette + wave relief kept
+skin-void	assets/art-src/skin-void-ref-v5.png	1777	800ee8d1887903bc	# REJECT: bell robe RE-FUSED to a sealed slab (legs hidden, shoe bumps only) — the 3-bone collapse class that killed tide/void at rig; ref-stage journey, no mesh burn
+skin-void-v6	assets/art-src/skin-void-ref-v6.png	1778	00b23044f6fbb929	# ACCEPT input skin-void.glb (3DR): robe split with visible dark gap between TWO stone leg columns, block fists fused at sides, lantern fused flush at raised forearm, pointed cowl + star-point seams kept
+# --- mesh specs (staged vm100 /opt/imagegen/tmp/mc11772/spec-<stem>.tsv, path-prefixed there):
+# name<TAB>input.png<TAB>tri_budget<TAB>base_seed (§3.3 char budget 9500; seed = M5 class seed
+# for lineage: 803/805/807/808/813/815; reserve retry seed = base+1; ONE row per window) ---
+char-coinhound	assets/art-src/char-coinhound-ref-v3.png	9500	803
+char-tallow-seer	assets/art-src/char-tallow-seer-ref-v3.png	9500	805
+char-shroud-saint	assets/art-src/char-shroud-saint-ref-v3.png	9500	807
+char-hoard-wretch	assets/art-src/char-hoard-wretch-ref-v7.png	9500	808
+skin-tide	assets/art-src/skin-tide-ref-v5.png	9500	813
+skin-void	assets/art-src/skin-void-ref-v6.png	9500	815
