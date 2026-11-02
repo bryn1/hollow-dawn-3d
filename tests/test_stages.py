@@ -348,11 +348,13 @@ def test_a_e8_enter_guard_and_choice_recheck():
         raw = fh.read()
     assert re.search(r"and not _screens\.shop_visible\(\) \\\s*\n"
                      r"\t*and not _screens\.stages_visible\(\) and not "
-                     r"_screens\.chars_visible\(\):", raw), \
+                     r"_screens\.chars_visible\(\) \\\s*\n"
+                     r"\t*and not _screens\.settings_visible\(\):", raw), \
         "Enter is gated by the stage panel too — and since T-M5c (MC " \
         "11422, same-commit re-pin, equal-or-stronger) by the roster " \
-        "select as well: the shipped guard stays a prefix of the matched " \
-        "guard text"
+        "select, and since T-M7A (MC 11626, same-commit re-pin, equal-or-" \
+        "stronger) by the SETTINGS overlay: the shipped guard stays a " \
+        "prefix of the matched guard text"
     choose = block(MAIN, "func _stage_chosen", "\nfunc ")
     assert re.search(r"_dawnwell\.flags\.get\(String\(row\.unlock_flag\), 0\)",
                      choose) or "unlock_flag" in choose, \

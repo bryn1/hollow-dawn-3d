@@ -16,6 +16,11 @@
 #   the named candidate is the _card + chips builder cluster (:275-end) —
 #   RosterSelect.build(self) precedent, dawnwell_pixel_gate its proof;
 #   until it lands the 601 ceiling stands accepted with this reason line.
+#   T-M7A (MC 11626) grew it AGAIN 601->657: the EIGHTH overlay's
+#   DISPATCHER half only (signals + menu seam + show/close/visible; the
+#   builder moved OUT to settings_page.gd per the same split law) — the
+#   named _card-cluster split candidate STAYS open; the growth is the
+#   dispatcher family, the reduction is still the scheduled move.
 # §j (MC 11103): every card kind resolves to an icon file; v1's blank-icon
 # path is closed structurally — _card() has NO conditional around the
 # icon TextureRect and icon_path() is total over the 31 pool kinds
@@ -44,12 +49,20 @@ signal char_selected(id: String)
 # (F-8's "not a third surface" reading — no eighth overlay, spec §3.2).
 signal skin_bought(id: String)
 signal skin_selected(id: String)
+# Settings (T-M7A, MC 11626): the EIGHTH overlay, same verbs-only contract
+# — the panel emits; main's _settings_value owns the well write + the ONE
+# funnel; settings_closed routes the Back (the achievements shape: main's
+# thin wrappers, no mutation on this side).
+signal settings_requested
+signal settings_value(key: String, value: int)
+signal settings_closed
 
 # MC 11573 T-CC3R (audit-3 §1.1 P2 split): the M5 overlays' builders moved
 # out (see header); the signals ABOVE stay here — main connects to them on
 # this node, and the moved emitters emit through the passed-in instance.
 const RosterSelect := preload("res://scripts/roster_select.gd")
 const AchievementsPage := preload("res://scripts/achievements_page.gd")
+const SettingsPage := preload("res://scripts/settings_page.gd")
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -131,6 +144,14 @@ var _achv_rows: VBoxContainer
 var _chars: Control
 var _chars_rows: VBoxContainer
 var _chars_gold: Label
+# Settings (T-M7A): the EIGHTH overlay's state lives HERE (dispatcher law —
+# the builder only touches it through the passed-in instance). The widget
+# registries are key -> control maps the builder fills and refresh() pushes
+# the well into; the panel never rebuilds rows (stateful widgets keep
+# their drag position, the shop's per-open rebuild law does not apply).
+var _settings: Control
+var _settings_sliders := {}
+var _settings_checks := {}
 
 
 func _ready() -> void:
@@ -149,6 +170,8 @@ func _ready() -> void:
 	RosterSelect.build(self) # builder in roster_select.gd (MC 11573 split)
 	_achv = _overlay() # on top of the select (added last), same dim idiom
 	AchievementsPage.build(self) # builder in achievements_page.gd
+	_settings = _overlay() # the EIGHTH overlay (T-M7A), same dim idiom,
+	SettingsPage.build(self) # builder in settings_page.gd (same law)
 	show_menu()
 
 
@@ -159,6 +182,7 @@ func show_menu() -> void:
 	_stages.visible = false
 	_chars.visible = false
 	_achv.visible = false
+	_settings.visible = false
 	_menu.visible = true
 
 
@@ -170,6 +194,7 @@ func hide_all() -> void:
 	_stages.visible = false
 	_chars.visible = false
 	_achv.visible = false
+	_settings.visible = false
 
 
 func show_levelup(offer: Array) -> void:
@@ -233,6 +258,9 @@ func _build_menu() -> void:
 	# M5 §1.1: the achievements seam, same idiom (the page is display-only,
 	# so its only verb is the open; the panel's Back owns the close).
 	box.add_child(_button("Achievements", _on_achievements))
+	# T-M7A (MC 11626): the settings seam, same idiom — the owner's
+	# honest-absent playthrough row (MC 11446), closed.
+	box.add_child(_button("Settings", _on_settings))
 
 
 func _build_levelup() -> void:
@@ -349,6 +377,10 @@ func _on_achievements() -> void:
 
 func _on_characters() -> void:
 	characters_requested.emit()
+
+
+func _on_settings() -> void:
+	settings_requested.emit()
 
 
 # --- Dawn Well shop (T-M1f): the fourth overlay in the ONE panel style ----
@@ -599,3 +631,27 @@ func close_characters() -> void:
 
 func refresh_characters() -> void:
 	RosterSelect.refresh(self)
+
+
+# --- Settings (T-M7A, MC 11626): the EIGHTH overlay's dispatcher half.
+# The builder lives in settings_page.gd (the RosterSelect/AchievementsPage
+# law); THIS half routes show/close/visible exactly like the achievements
+# page, and the Back lands on show_menu (every overlay close's law).
+# Refresh is PUSH-side only (widgets receive the well; they emit verbs on
+# user action only — the shop's rebuild-per-open does not apply to stateful
+# widgets, the panel never rebuilds its five rows).
+
+func show_settings(well: DawnWell) -> void:
+	_well = well
+	_menu.visible = false
+	_settings.visible = true
+	SettingsPage.refresh(self)
+
+
+func settings_visible() -> bool:
+	return _settings.visible
+
+
+func close_settings() -> void:
+	_settings.visible = false
+	show_menu()

@@ -250,10 +250,16 @@ def test_buy_and_save_roundtrip(probe):
     # falsified-by-design + replaced, LEDGER rows; the shop card's own rule
     # (rank 1 @ 40, gold 960) is the row's point and is UNTOUCHED (no shop
     # verb moves a counter — the {} here is the fresh-well default, the 0
-    # char the fresh-well roster default too).
+    # char the fresh-well roster default too). GROWS AGAIN at T-M7A (MC
+    # 11626, the in-series law for the THIRD time on this reader): the
+    # five settings rows join the exact set at their shipped defaults
+    # (100/100/100/0/0) — no shop verb moves them; same-commit re-pin,
+    # replace-not-delete, LEDGER row.
     assert disk == {"version": 1, "gold": 960, "ranks": {"vitality": 1},
                     "flags": {}, "best_cycle": 0, "stage": 1,
-                    "counters": {}, "char": 0, "skin": 0}
+                    "counters": {}, "char": 0, "skin": 0,
+                    "vol_master": 100, "vol_music": 100, "vol_sfx": 100,
+                    "fullscreen": 0, "pause_lose_focus": 0}
 
 
 def test_poor_buy_declines(probe):

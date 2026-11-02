@@ -6,6 +6,9 @@
 #   whole game (DESIGN-3D §d v1-verbatim); splitting it would fork the loop.
 # M5 GROWTH NAMED (audit-3 §1.2, the C1 world.gd shape): 472 -> 596 in M5,
 #   503/566/596 @T-M5p/c/k; verb blocks :530/:553-596 = the wire-graph proof.
+# T-M7A (MC 11626) grew it 599 -> 668: the settings verb family (boot
+#   apply + the ONE value verb + the focus-pause law), the wire-graph
+#   proof extended — the phase-router-split law unchanged.
 # The simulation loop below is v1 main.gd VERBATIM (DESIGN-3D §d): same
 # constants, same WIN_TIME gate, same score formula; only the visible layer
 # wiring is 3D (the v1 Node2D renderer body is deleted, §f — render.gd
@@ -21,6 +24,17 @@ const VIEW := Vector2(1280, 720)
 # cycle-0 raw == base dmg (DMG_CYC(0) = 1.0) is never capped — flag-off
 # byte-stable.
 const MAX_CONTACT_DMG := 20.0
+
+# T-M7A (MC 11626): the ONE settings applier (bus volumes + window mode),
+# no class_name — preloaded like the screens' builder consts (the global
+# class cache stays byte-untouched, the sim-boot law).
+const Settings := preload("res://scripts/settings.gd")
+
+# The settings whitelist (T-M7A): the stale-panel law of _stage_chosen and
+# _char_select rides INSIDE the verb — an out-of-table key can never reach
+# Object.set on the well (a blind set() would write arbitrary members).
+const SETTINGS_KEYS := ["vol_master", "vol_music", "vol_sfx", "fullscreen",
+	"pause_lose_focus"]
 
 var game: GameState
 var world: GameWorld
@@ -56,6 +70,12 @@ func _ready() -> void:
 	# every mutation lands through the _meta_changed funnel below, and run
 	# gold stays run-local until the run ends (_end_run cashes it out).
 	_dawnwell = DawnWell.load_save()
+	# T-M7A (MC 11626): the PERSISTED settings land at boot through the ONE
+	# audio path + window applier (settings.gd) — bus volumes from the well,
+	# window mode behind the headless/web guard (a sim boot applies ONLY the
+	# buses; zero sim state reads — the byte law: the sim consumes NOTHING
+	# new). Defaults 100/100/100/0 = the shipped loud windowed state.
+	Settings.apply(_dawnwell)
 
 	# Visible layer (DESIGN-3D §a/§b): every node reads game/world/fx each
 	# frame; the sim stays 2D px and the viz converts to metres (S = 24).
@@ -143,6 +163,12 @@ func _ready() -> void:
 	_screens.char_selected.connect(_char_select)
 	_screens.skin_bought.connect(_char_buy_skin)
 	_screens.skin_selected.connect(_char_select_skin)
+	# Settings (T-M7A, MC 11626): the EIGHTH overlay — open/close route like
+	# the achievements wrappers; the ONE value verb mutates the well below
+	# (the shop's no-op-no-write law) and persists through the ONE funnel.
+	_screens.settings_requested.connect(_open_settings)
+	_screens.settings_value.connect(_settings_value)
+	_screens.settings_closed.connect(_close_settings)
 
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
@@ -198,8 +224,10 @@ func _handle_presses() -> void:
 		# The shop and the stage select are menu-phase UI: while either is
 		# open the Enter that would start a run is inert (the panel's own
 		# mouse buttons own input — A-E8, shop-guard parity, MC 11282).
+		# T-M7A (MC 11626): the settings overlay rides the SAME guard.
 		elif game.phase == "menu" and bridge.is_enter(code) and not _screens.shop_visible() \
-			and not _screens.stages_visible() and not _screens.chars_visible():
+			and not _screens.stages_visible() and not _screens.chars_visible() \
+			and not _screens.settings_visible():
 			_start_game()
 		elif game.phase == "levelup":
 			if code == "Digit1":
@@ -597,3 +625,44 @@ func _char_select_skin(skin_id: String) -> void:
 	if Roster.skin_select(_dawnwell, Roster.skin_pos_of_id(skin_id)):
 		_meta_changed()
 	_screens.refresh_characters()
+
+
+# --- Settings verbs (T-M7A, MC 11626) ----------------------------------------
+# The shop/stage/roster contract verbatim: the panel displays + emits, main
+# owns the well write, the engine application (settings.gd, the ONE audio
+# path + window applier) and the ONE _meta_changed funnel. The whitelist +
+# the real-change guard ride INSIDE the verb (the _stage_chosen stale-panel
+# and B-E5 no-op-no-write laws): an unknown key or a same-value echo writes
+# NOTHING and reaches no disk. The funnel occurrence set grows by exactly
+# this ONE site (test_achievements.py re-pin, same commit, 11 -> 12).
+
+func _open_settings() -> void:
+	_screens.show_settings(_dawnwell)
+
+
+func _close_settings() -> void:
+	_screens.close_settings()
+
+
+func _settings_value(key: String, value: int) -> void:
+	if not SETTINGS_KEYS.has(key):
+		return # stale/garbage panel: the well has no such row
+	if int(_dawnwell.get(key)) == value:
+		return # no-op writes nothing (the B-E5 disk law)
+	_dawnwell.set(key, value)
+	Settings.apply(_dawnwell)
+	_meta_changed()
+
+
+# The pause-on-focus-loss law (T-M7A, MC 11626 — the card's pause-option
+# row, DECLARED READING in the capture: the overlay ships a persisted
+# OPTION, the Esc freeze itself stays shipped). Focus-out pauses a PLAYING
+# run only, iff the well row is on; flag off = the branch is a pure
+# fallthrough (the byte law). It sets the shipped game.paused flag — the
+# ONE pause state the HUD label and the sim loop already read; no new
+# phase, no new surface.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and _dawnwell != null \
+			and game != null and game.phase == "playing" \
+			and int(_dawnwell.pause_lose_focus) == 1:
+		game.paused = true

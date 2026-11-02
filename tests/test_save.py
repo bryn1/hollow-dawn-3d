@@ -181,13 +181,24 @@ def test_valid_roundtrip(probe):
     # restatement of the best_cycle/stage migration proof). LANDED: the
     # FIFTH move is THIS card T-M5k (M5-SPEC §3.1 skin — the worn-skin
     # group position; the serial pair's promise kept in the same commit
-    # the save row ships, replace-not-delete, LEDGER row).
+    # the save row ships, replace-not-delete, LEDGER row). LANDED THE
+    # SIXTH: T-M7A (MC 11626) rides the settings rows vol_master/
+    # vol_music/vol_sfx/fullscreen/pause_lose_focus onto the SAME field-
+    # by-field law — the exact set grows by five again, VERSION stays 1,
+    # and the equality row below carries the shipped DEFAULTS (100/100/
+    # 100/0/0 = the loud windowed no-auto-pause state the older keys
+    # roundtrip beside, verbatim; the settings probe owns the moved-value
+    # legs, tests/test_settings.py).
     assert set(disk) == {"version", "gold", "ranks", "flags", "best_cycle",
-                         "stage", "counters", "char", "skin"}, \
-        "on-disk keys must be exactly the roadmap's four + best_cycle + stage + counters + char + skin"
+                         "stage", "counters", "char", "skin", "vol_master",
+                         "vol_music", "vol_sfx", "fullscreen",
+                         "pause_lose_focus"}, \
+        "on-disk keys must be exactly the roadmap's four + best_cycle + stage + counters + char + skin + the five settings rows"
     assert disk == {"version": 1, "gold": 123, "ranks": {"might": 2},
                     "flags": {"stage2": 1}, "best_cycle": 3, "stage": 3,
-                    "counters": {}, "char": 0, "skin": 0}
+                    "counters": {}, "char": 0, "skin": 0,
+                    "vol_master": 100, "vol_music": 100, "vol_sfx": 100,
+                    "fullscreen": 0, "pause_lose_focus": 0}
     assert rows["reload"] == {"gold": 123, "ranks": 2, "flags": 1,
                               "version": 1, "best_cycle": 3, "stage": 3}
     # a stale torn temp must not block the atomic rename (recreate from garbage)

@@ -176,8 +176,11 @@ def test_p_e3_whole_scripts_save_pin():
     # M5-SPEC §3.1 — every skin mutation persists through this ONE
     # funnel), 10 sites + the definition == 11; the MAIN-scoped `.save(`
     # count stays 1 (the funnel body — the loop above re-proves it every
-    # run, this card included).
-    assert MAIN.count("_meta_changed(") == 11, \
+    # run, this card included). RE-COUNTED AGAIN by T-M7A (MC 11626):
+    # the settings verb is ONE MORE funnel call SITE (the shop's no-op-
+    # no-write pattern, one generic _settings_value for all five rows),
+    # 11 sites + the definition == 12 (the test_settings.py S-E4 twin).
+    assert MAIN.count("_meta_changed(") == 12, \
         "the funnel occurrence set moved without a retire row"
 
 

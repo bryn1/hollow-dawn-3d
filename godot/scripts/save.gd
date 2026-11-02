@@ -5,7 +5,10 @@
 # MC 11282) + M5 §1.1's counters:{name:int} (T-M5p, MC 11421) + M5 §2.1's
 # char:int (T-M5c, MC 11422) + M5 §3.1's skin:int (T-M5k, MC 11423) —
 # field-by-field ADDED rows, VERSION unchanged (1) exactly as each spec
-# pins it.
+# pins it — + T-M7A's settings rows vol_master/vol_music/vol_sfx/int per
+# cent, fullscreen, pause_lose_focus int 0/1 (MC 11626), the same law
+# again: a missing field defaults (100/100/100/0/0 = the shipped loud
+# windowed no-auto-pause state), a HIGHER-version save still quarantines.
 # Recovery rules (all observables, roadmap reset table): missing file -> fresh
 # defaults; undecodable -> quarantine (rename to dawnwell.corrupt.json kept +
 # stderr `SAVE_LOAD_FAIL path=...`) + defaults; version newer than this code
@@ -68,6 +71,19 @@ var char := 0
 # moves AGAIN in test_save.py same-commit (the serial pair T-M5c named;
 # replace-not-delete, equal-or-stronger; LEDGER row).
 var skin := 0
+# T-M7A (MC 11626): the SETTINGS rows — three volume percents (0..100, the
+# Settings overlay's slider domain; Settings.pct_to_db maps them to bus dB),
+# fullscreen (1 = the window mode applied at boot by Settings.apply_window)
+# and pause_lose_focus (1 = focus-out pauses a playing run, main's
+# _notification law). SIX more field-by-field ADDED rows, VERSION unchanged
+# (the best_cycle/stage/counters/char/skin proof verbatim); the defaults
+# 100/100/100/0/0 are the shipped state — an older save keeps every byte of
+# behaviour.
+var vol_master := 100
+var vol_music := 100
+var vol_sfx := 100
+var fullscreen := 0
+var pause_lose_focus := 0
 
 
 # Boot load: missing file is NOT a failure — fresh defaults, silent.
@@ -98,6 +114,13 @@ static func load_save() -> DawnWell:
 	well.counters = _int_dict(data.get("counters", {})) # §1.1 M5: older saves -> {}
 	well.char = int(data.get("char", 0)) # §2.1 M5: older saves -> 0 (row 0)
 	well.skin = int(data.get("skin", 0)) # §3.1 M5: older saves -> 0 (default)
+	# T-M7A settings rows: older saves -> the shipped state (full volume,
+	# windowed, no auto-pause) — the same field-by-field migration law.
+	well.vol_master = int(data.get("vol_master", 100))
+	well.vol_music = int(data.get("vol_music", 100))
+	well.vol_sfx = int(data.get("vol_sfx", 100))
+	well.fullscreen = int(data.get("fullscreen", 0))
+	well.pause_lose_focus = int(data.get("pause_lose_focus", 0))
 	return well
 
 
@@ -131,6 +154,11 @@ func reset() -> void:
 	counters = {}
 	char = 0
 	skin = 0
+	vol_master = 100
+	vol_music = 100
+	vol_sfx = 100
+	fullscreen = 0
+	pause_lose_focus = 0
 	var dir := DirAccess.open("user://")
 	if dir != null and dir.file_exists(SAVE_PATH.trim_prefix("user://")):
 		dir.remove(SAVE_PATH.trim_prefix("user://"))
@@ -152,7 +180,9 @@ static func quarantine(reason: String) -> void:
 func as_data() -> Dictionary:
 	return {"version": version, "gold": gold, "ranks": ranks, "flags": flags,
 		"best_cycle": best_cycle, "stage": stage, "counters": counters,
-		"char": char, "skin": skin}
+		"char": char, "skin": skin, "vol_master": vol_master,
+		"vol_music": vol_music, "vol_sfx": vol_sfx, "fullscreen": fullscreen,
+		"pause_lose_focus": pause_lose_focus}
 
 
 static func _int_dict(src: Variant) -> Dictionary:

@@ -47,6 +47,12 @@ func chars_visible() -> bool:
 	return false
 
 
+# T-M7A surface parity: the menu Enter guard also asks the settings overlay
+# (the same contract as shop/stages/chars above — the sim never opens one).
+func settings_visible() -> bool:
+	return false
+
+
 func show_characters(_well: DawnWell) -> void:
 	pass
 

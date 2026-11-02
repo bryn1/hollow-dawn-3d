@@ -349,9 +349,12 @@ def test_b_e6_overlay_source_pins():
     assert re.search(r"assert\(ResourceLoader\.exists\(path\)\)\s*\n"
                      r"\t*portrait\.texture = load\(path\)", ROSTER_SELECT)
     # the Enter guard extension (the stages A-E8 parity; test_stages pin
-    # re-pointed same commit, equal-or-stronger).
+    # re-pointed same commit, equal-or-stronger). GROWS AGAIN at T-M7A
+    # (MC 11626): the settings overlay joins the guard chain — the
+    # chars_visible term re-pointed to its shipped continuation.
     assert re.search(r"stages_visible\(\) and not _screens\.chars_visible"
-                     r"\(\):", MAIN)
+                     r"\(\) \\\s*\n\t*and not _screens\.settings_visible\(\):",
+                     MAIN)
 
 
 # ---- B-E7: the new meshes live on the pawn ----------------------------------
@@ -556,12 +559,16 @@ def test_b_e9_save_rows_ship_char_then_skin_end_state():
     # pin is replaced by the END-STATE it promised: BOTH rows ship, each
     # field-by-field added, VERSION unchanged (the R1 in-series law — the
     # disk exact-set readers in test_save.py/test_dawnwell_shop.py carry
-    # the grown set same-commit).
+    # the grown set same-commit). GROWS AGAIN at T-M7A (MC 11626): the
+    # FIVE settings rows append after skin on the SAME end-state law
+    # (field-by-field, VERSION unchanged) — the tail regex re-pointed to
+    # the new serialization end, the char/skin bytes themselves verbatim.
     assert re.search(r"var char := 0", SAVE)
     assert re.search(r'well\.char = int\(data\.get\("char", 0\)\)', SAVE)
     assert re.search(r"var skin := 0", SAVE)
     assert re.search(r'well\.skin = int\(data\.get\("skin", 0\)\)', SAVE)
-    assert re.search(r'"char": char, "skin": skin\}', SAVE)
+    assert re.search(r'"char": char, "skin": skin, "vol_master": vol_master',
+                     SAVE)
     assert re.search(r"const VERSION := 1", SAVE), \
         "the serial pair ships WITHOUT a version bump (the migration law)"
 
