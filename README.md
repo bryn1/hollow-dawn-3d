@@ -63,7 +63,18 @@ Hunyuan3D models are EXCLUDED (their license terms do not apply in the EU/UK/SK 
 ships in the EU).
 
 ## Status
-v3.1.0 ("Feel & Fidelity") is the current release; releases live on this repo.
+v4.0.0 ("3D Remake Wave 1") is the current release; releases live on this repo. It CLOSES
+the founding 3D-remake order's "chatacter animations, movements" line (MC 11094, verbatim
+above) with measured facts: the six statue-class heroes went through the ruled re-master +
+re-rig wave (TRELLIS.2 v3 meshes 6/6 FIRST SEED; UniRig at seed-fixed 12345 with the
+TWO-FAIL STOP — rig-yield 3/6). char-tallow-seer, skin-tide and skin-void now walk on real
+clips through the ONE `CLIP_SOURCE` consumer (committed frame-diff floors >=117183 px walk
+/ >=60877 px attack, every frozen control 0 px; roster clip gate GREEN 66/66); the three
+double-fail classes stay static under the OWNER-RATIFIED procedural fallback (owner "Rec"
+2026-10-31, package item 3). MAJOR v4.0.0 per the owner's RULED stamp —
+docs/RELEASE-v4.0.0.md carries the RATIFICATION block verbatim. The sim did not move:
+journey-5071 @11101 byte-identical across the whole wave (HOLD law). v3.1.0 ("Feel &
+Fidelity") is the release before it.
 It is the M6 milestone on the owner's feel-&-fidelity order, MINOR per the roadmap's
 own version law (M6 adds no new player-navigated surface — the level-up cards grow
 IN PLACE; owner ruling verbatim *"3. Ship."*, 2026-10-29, MC 11674). What shipped:
@@ -77,10 +88,12 @@ skills they affect and their Lv5 hint as icon chips; **short skill text** on eve
 offer, pinned to the spec; **coins ride the magnet**; the **DOOM SIGIL is retired as a
 skill → the RIVEN SIGIL**, a rare every-750th-kill pickup whose touch clears the
 screen, sparing bosses, minibosses and the reaper (owner carve *"2. Rec."*); and a
-**mob contrast floor** — the whole 44-row (band × class) readability grid GREEN. The
-six statue-class heroes ride declared procedural motion until the ruled re-rig batch
-T-M6a-STATUE lands (it waits on the owner's vm100 backup window; honest line in
-docs/RELEASE-v3.1.0.md). v3.0.0 ("Roster & Legacy") is the release before it. The
+**mob contrast floor** — the whole 44-row (band × class) readability grid GREEN. (The
+v3.1.0-era line "the six statue-class heroes ride declared procedural motion until the
+ruled re-rig batch T-M6a-STATUE lands" is SUPERSEDED 2026-11-02 at v4.0.0: the ruled wave
+landed as the 3DR serial — THREE heroes flipped onto clips, THREE carry the
+owner-ratified static fallback; docs/RELEASE-v3.1.0.md keeps its dated row as lineage.)
+v3.0.0 ("Roster & Legacy") is the release before that. The
 M4-deferred roster tranche LANDED with it — v2.1.0's honest not-shipped line retires
 into this dated statement, replace-not-delete: **9 selectable characters** (SEL-C,
 owner ruling "C" 2026-10-27; row 0 THE VIGIL is the shipped identity byte-law; gold
@@ -97,6 +110,10 @@ tiers (M2-SPEC §8.1), roster expansion +8/+5 (M2-SPEC §8.5), the unlock-flag s
 gating the LEVEL-UP POOL, a settings/options screen (Esc-pause + M-mute is all
 this build carries — no audio yet), and the VS 4th level-up option (our level-up
 overlay offers exactly THREE cards; the special-conditions fourth is not a
-mechanism here). Of the 13 SEL-C meshes **7 ship rigged+clipped and 6 ship
-STATIC** (statue-class deterministic rig failures — owner ratification verbatim
-"Rec" to OPTION A, MC 11440; the per-asset table is docs/RIG-DEVIATION-SEL-C.md).
+mechanism here). Of the 13 SEL-C meshes **10 ship rigged+clipped and 3 ship STATIC** at
+this tag — measured: `CLIP_SOURCE` 14 rows = 11 clip rows (incl. row-0 the Vigil) + 3 null
+statics, the set asserted by `tests/test_motion.py`; the v3.0.0-era "7 ship rigged+clipped
+and 6 ship STATIC" split is SUPERSEDED 2026-11-02 by the 3DR wave (three statue
+double-fails under the owner-ratified fallback, "Rec" 2026-10-31 package item 3). The
+per-asset table is docs/RIG-DEVIATION-3DR.md; docs/RIG-DEVIATION-SEL-C.md stays as dated
+lineage.

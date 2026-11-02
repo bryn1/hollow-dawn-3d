@@ -393,7 +393,13 @@ tools/mocap chain, CMU 07_01/02_05) and **6 ship STATIC** — deterministic UniR
 bone-collapse failures, the statue-class deviation the owner ratified verbatim
 **"Rec"** (MC 11440, 2026-10-27, OPTION A); the per-asset table + per-mesh reasons
 is `docs/RIG-DEVIATION-SEL-C.md`, PINNED — `test_b_e8` parses the table, the pin
-artifact is load-bearing). Version: **MAJOR v3.0.0** per the law at `:63-66` — TWO
+artifact is load-bearing). **SUPERSEDED for the rig split 2026-11-02 (3DR wave, v4.0.0,
+MC 11772-3-4/11775):** after the owner-ruled re-master + re-rig (option (c), "Rec"
+2026-10-31), **10 of the 13 ship RIGGED / 3 ship STATIC** — measured: `CLIP_SOURCE` 14
+rows = 11 clip (incl. row-0 the Vigil) + 3 null statics, the set asserted by
+`tests/test_motion.py`; the pin table `test_b_e8` parses is now `docs/RIG-DEVIATION-3DR.md`
+(SEL-C kept as dated lineage). This 7/6 cell stays as the v3.0.0-era truth
+(replace-not-delete). Version: **MAJOR v3.0.0** per the law at `:63-66` — TWO
 new player-navigated surfaces (character select + achievements page); the M4 landing
 note's promised SEL version decision LANDED: the owner ratified 2026-10-28 — the
 verbatim row rides `docs/RELEASE-v3.0.0.md`. Assets (M5): 13 character-class meshes
