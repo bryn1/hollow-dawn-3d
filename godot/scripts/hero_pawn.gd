@@ -19,7 +19,10 @@
 # drawn INSTEAD of self (§b ONE draw kept, never both — the MV-E5 mutual-
 # exclusion pin). _process plays "walk" at the stride-tied gait rate while
 # the pawn moves and returns it to seek(0) at rest (the static-era frame);
-# static rows (CLIP_SOURCE null, the six owner-"Rec" statue classes) take
+# static rows (CLIP_SOURCE null — since the 3DR flip 2026-11-02, MC 11774,
+# the THREE rig-stage double-fail statue classes, the owner-ratified static
+# fallback: package item 3, owner "Rec" 2026-10-31, reason rows in
+# docs/RIG-DEVIATION-3DR.md) take
 # the §1.3 procedural bob+lean of the ONE HordeViz.gait_wave law. Byte
 # law: the pos assignment below (:94-95 lineage) stays VERBATIM, the
 # motion block never writes sim state — it only READS game.player.

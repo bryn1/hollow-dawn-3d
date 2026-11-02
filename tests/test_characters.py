@@ -379,10 +379,16 @@ def test_b_e7_mesh_files_and_budget():
     # turntable-solid eyeball + tri budget: the committed m5-art manifest
     # carries a row per mesh (the asset card's own eyeball); the tris
     # budget row reads the GLB JSON accessor table (the S2r idiom).
+    # RE-PIN (T-3DR-c, MC 11774, dated 2026-11-02): 1..8000 -> 1..9500 =
+    # the §3.3 TRELLIS CHAR budget (docs/3DR-SPEC.md §3.3 ART GATES:
+    # "player 8000 / char 9500"). The three re-mastered statue meshes land
+    # in THIS loop (char-tallow-seer 9465 / char-hoard-wretch 9208 /
+    # char-shroud-saint 9047 / char-coinhound 8998 measured); the player
+    # row is OUTSIDE it (ROWS[1:], the §a 8000 player budget untouched).
     for _, mesh, _, _, _, _ in ROWS[1:]:
         tris = _tri_count(os.path.join(GLB_DIR, mesh))
-        assert 0 < tris <= 8000, "%s carries %d tris (budget: 1..8000)" \
-            % (mesh, tris)
+        assert 0 < tris <= 9500, "%s carries %d tris (budget: 1..9500, " \
+            "the §3.3 char row)" % (mesh, tris)
 
 
 def _glb_json(path):
@@ -417,16 +423,18 @@ CLIPS_CSV = os.path.join(os.path.dirname(__file__), "fixtures",
 
 
 RIG_DOC = os.path.join(os.path.dirname(__file__), os.pardir,
-                       "docs", "RIG-DEVIATION-SEL-C.md")
+                       "docs", "RIG-DEVIATION-3DR.md")
 
 
 def _rig_states():
     # the PIN ARTIFACT is the table, not a hardcoded list: docs/
-    # RIG-DEVIATION-SEL-C.md (MC 11440, owner ratification verbatim
-    # "Rec" to OPTION A static-shipping). Returns {char_id: "rigged"|"
-    # static"} parsed from the "| char-<id>.glb | RIGGED/STATIC |" rows.
+    # RIG-DEVIATION-3DR.md (RE-PIN T-3DR-c, MC 11774, dated 2026-11-02 —
+    # the 3DR statue re-master set; docs/RIG-DEVIATION-SEL-C.md stays as
+    # dated lineage with its supersession row, MC 11440). Returns
+    # {char_id: "rigged"|"static"} parsed from the "| char-<id>.glb |
+    # RIGGED/STATIC |" rows.
     txt = open(os.path.join(os.path.dirname(__file__), os.pardir, "docs",
-                            "RIG-DEVIATION-SEL-C.md")).read()
+                            "RIG-DEVIATION-3DR.md")).read()
     assert '\"Rec\"' in txt, "owner ratification line gone from pin doc"
     states = {}
     for m in re.finditer(r"\| (\d+) \| char-([\w-]+)\.glb \| "
@@ -448,7 +456,8 @@ def test_b_e8_clips_move_pixels():
     # that MUST keep diff_px 0 (EXCUSED-not-removed: the row is present
     # and pinned; a static mesh silently GAINING motion changes shape
     # without a doc row goes RED on the state check below). The state
-    # set here is measured from docs/RIG-DEVIATION-SEL-C.md — every
+    # set here is measured from docs/RIG-DEVIATION-3DR.md (T-3DR-c
+    # RE-PIN, MC 11774) — every
     # roster mesh must appear in the table (no ghost rigs, no deleted
     # statics). Row 0 the-vigil rides the S2r player-rigged CSV.
     states = _rig_states()

@@ -22,6 +22,13 @@ import struct
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROSTER = open(os.path.join(REPO, "godot", "scripts", "roster.gd"),
               encoding="utf-8").read()
+# T-3DR-c (MC 11774) dated re-pin: the seam split moved the ONE
+# CLIP_SOURCE const home roster.gd -> roster_clips.gd (3DR-SPEC §3.4,
+# roster.gd's own SCHEDULED clause; the §5.3 ONE-table grep measures
+# roster_clips.gd). The parse law is UNCHANGED — only the file home
+# moved; Roster.clip_source() delegates, so the consumer contract rides.
+CLIPS = open(os.path.join(REPO, "godot", "scripts", "roster_clips.gd"),
+             encoding="utf-8").read()
 HERO = open(os.path.join(REPO, "godot", "scripts", "hero_pawn.gd"),
             encoding="utf-8").read()
 VIZ = open(os.path.join(REPO, "godot", "scripts", "horde_viz.gd"),
@@ -36,9 +43,9 @@ def clip_source_rows():
     optional visual) | None. Text-parsed — GDScript consts are not
     importable; the parse is strict (a row that will not parse is a
     test error, never a silent skip)."""
-    block = re.search(r"const CLIP_SOURCE := \{(.*?)\n\}", ROSTER,
+    block = re.search(r"const CLIP_SOURCE := \{(.*?)\n\}", CLIPS,
                       re.S)
-    assert block, "roster.gd lost the CLIP_SOURCE const"
+    assert block, "roster_clips.gd lost the CLIP_SOURCE const"
     rows = {}
     for m in re.finditer(
             r'"([\w.-]+\.glb)":\s*(null|\{[^}]*\})', block.group(1)):
@@ -93,9 +100,19 @@ def test_clip_source_shape_and_rigged_rows_validate():
 def test_clip_source_static_rows_name_no_clip():
     rows = clip_source_rows()
     statics = sorted(f for f, s in rows.items() if s is None)
-    assert len(statics) == 6, (
-        "the six owner-'Rec' statue classes stay static; found %d"
-        % len(statics))
+    # T-3DR-c (MC 11774) same-card re-pin, dated 2026-11-02: 6 -> 3. The
+    # flip moved char-tallow-seer / skin-tide / skin-void to their rigged
+    # twins (docs/RIG-DEVIATION-3DR.md 9-rigged/4-static state); the
+    # three rig-stage DOUBLE-FAIL classes stay static under the owner-
+    # ratified fallback (package item 3, owner "Rec" 2026-10-31) — the
+    # count is the MEASURED post-flip null count, not the M6-era six.
+    assert len(statics) == 3, (
+        "the three 3DR rig-stage double-fail statue classes stay static; "
+        "found %d" % len(statics))
+    assert statics == sorted(["char-coinhound.glb", "char-shroud-saint.glb",
+                              "char-hoard-wretch.glb"]), (
+        "static set drifted from the docs/RIG-DEVIATION-3DR.md double-fail "
+        "rows: %s" % statics)
     for f in statics:
         anims = glb_animations(os.path.join(GLB_DIR, f))
         assert "walk" not in anims, (

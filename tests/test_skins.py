@@ -23,7 +23,9 @@ reads; the planted reds fire on the FINAL tree in the card capture
        row verbatim) + the chip-icon family file-exists.
   K-E3 clips per skin          the committed roster clips CSV (re-minted
        by tools/roster_clip_gate.py, MC 11573), the skin
-       rows judged against the PIN DOC docs/RIG-DEVIATION-SEL-C.md — the
+       rows judged against the PIN DOC docs/RIG-DEVIATION-3DR.md (the 3DR
+       statue re-master pin; SEL-C moved to dated lineage — RE-PIN
+       T-3DR-c, MC 11774) — the
        B-E8 pattern RE-RIDDEN (the doc PARSED, not a hardcoded list:
        owner ratification verbatim "Rec" asserted, static rows require a
        reason, RIGGED measured at frame-diff >= 2 px walk/attack +
@@ -114,7 +116,9 @@ ROSTER_SELECT = read("roster_select.gd")
 SAVE = read("save.gd")
 
 # THE table (M5-SPEC §3.1 verbatim): 5 rows, prices 200/400/600/800/1000,
-# ids = the committed GLBs, rig state per docs/RIG-DEVIATION-SEL-C.md.
+# ids = the committed GLBs, rig state per docs/RIG-DEVIATION-3DR.md
+# (RE-PIN T-3DR-c, MC 11774, dated 2026-11-02 — the SEL-C doc row moved
+# with the pin doc; SEL-C stays as dated lineage).
 SKIN_ROWS = [
     ("skin-ash", "skin-ash.glb", 200),
     ("skin-marrow", "skin-marrow.glb", 400),
@@ -122,8 +126,12 @@ SKIN_ROWS = [
     ("skin-relic", "skin-relic.glb", 800),
     ("skin-void", "skin-void.glb", 1000),
 ]
-RIGGED = {"skin-ash", "skin-marrow", "skin-relic"}      # doc rows 9/10/12
-STATIC = {"skin-tide", "skin-void"}                     # doc rows 11/13
+# 3DR FLIP row (T-3DR-c, MC 11774): skin-tide + skin-void flipped from the
+# M5 statics to their rigged twins (docs/RIG-DEVIATION-3DR.md rows 11/13);
+# the whole SKINS family now rides the rigged branch — the K-E3 doc-judge
+# reads the DOC, this pair is the shipped-files mirror of it.
+RIGGED = {"skin-ash", "skin-marrow", "skin-tide", "skin-relic", "skin-void"}
+STATIC = set()                                           # was rows 11/13
 
 
 # ---- the probe: one REAL headless run on a throwaway user:// ----------------
@@ -215,8 +223,13 @@ def test_k_e2_mesh_files_and_tri_budget():
         assert os.path.isfile(path), "missing godot/assets/glb/%s" % mesh
         assert os.path.getsize(path) > 1000, "%s is stub-sized" % mesh
         tris = tc._tri_count(path)  # the ONE tri reader (C2 home)
-        assert 0 < tris <= 8000, "%s carries %d tris (budget: 1..8000)" \
-            % (mesh, tris)
+        # RE-PIN (T-3DR-c, MC 11774, dated 2026-11-02): 1..8000 ->
+        # 1..9500 — the §3.3 TRELLIS CHAR budget (3DR-SPEC §3.3 ART GATES
+        # "player 8000 / char 9500"; the SKINS rows are the CHAR-family
+        # meshes: skin-tide v3 9191 + skin-void v6 9287 measured, the
+        # M5-era skins stay well under it, same re-pin as test_b_e7).
+        assert 0 < tris <= 9500, "%s carries %d tris (budget: 1..9500, " \
+            "the §3.3 char row)" % (mesh, tris)
     # the §j chip family: every row's icon file exists (resolver pinned
     # at K-E5; the draw site asserts before load, screens.gd).
     for sid, _, _ in SKIN_ROWS:

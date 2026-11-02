@@ -74,17 +74,37 @@ func _initialize() -> void:
 		# byte corpus — the §7.1 byte law rides the journey/fixtures.
 		for row in Roster.CHARACTERS:
 			if String(row.mesh) != "player.glb":
+				# 3DR-T-c (MC 11774) dated seam read: a job's source is
+				# the RUNTIME visual the pawn actually draws — the mesh
+				# literal, or its rigged twin where Roster.clip_source
+				# carries a "visual" key (the flipped rows; the ONE
+				# seam, the same getter the consumer uses — the capture
+				# measures what the player sees, not a frozen path).
 				_jobs.append({"rig": String(row.id),
-				              "glb": "res://assets/glb/" + String(row.mesh)})
+				              "glb": _seam_src(String(row.mesh))})
 		for srow in Roster.SKINS:
 			_jobs.append({"rig": String(srow.id),
-			              "glb": "res://assets/glb/" + String(srow.mesh)})
+			              "glb": _seam_src(String(srow.mesh))})
 	assert(not _jobs.is_empty() and _out_dir != "", "need glb args + --out")
 	DirAccess.make_dir_recursive_absolute(_out_dir + "/frames")
 	_manifest = FileAccess.open(_out_dir + "/manifest.jsonl", FileAccess.WRITE)
 	root.size = VIEW
 	_next_job()
 	RenderingServer.frame_post_draw.connect(_tick, CONNECT_ONE_SHOT)
+
+
+# The seam read (3DR-T-c, MC 11774): a roster/skins mesh literal resolves
+# to the RUNTIME visual — the rigged twin where Roster.clip_source carries
+# a "visual" key, else the literal itself. ONE getter, the consumer's own
+# seam; the capture measures what the pawn draws (rig STATE stays
+# MEASURED from the loaded file — a twin without named clips still goes
+# loud here, never silently).
+static func _seam_src(mesh: String) -> String:
+	var clip = Roster.clip_source(mesh)
+	if clip != null and typeof(clip) == TYPE_DICTIONARY \
+			and clip.has("visual"):
+		return "res://assets/glb/" + String(clip.visual)
+	return "res://assets/glb/" + mesh
 
 
 func _next_job() -> bool:
