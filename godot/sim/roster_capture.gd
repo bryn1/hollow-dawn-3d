@@ -76,10 +76,11 @@ func _initialize() -> void:
 			if String(row.mesh) != "player.glb":
 				# 3DR-T-c (MC 11774) dated seam read: a job's source is
 				# the RUNTIME visual the pawn actually draws — the mesh
-				# literal, or its rigged twin where Roster.clip_source
+				# literal, or its rigged twin where the CLIP_SOURCE row
 				# carries a "visual" key (the flipped rows; the ONE
-				# seam, the same getter the consumer uses — the capture
-				# measures what the player sees, not a frozen path).
+				# resolution _seam_src delegates to, the same site the
+				# consumer calls — the capture measures what the player
+				# sees, not a frozen path).
 				_jobs.append({"rig": String(row.id),
 				              "glb": _seam_src(String(row.mesh))})
 		for srow in Roster.SKINS:
@@ -93,18 +94,17 @@ func _initialize() -> void:
 	RenderingServer.frame_post_draw.connect(_tick, CONNECT_ONE_SHOT)
 
 
-# The seam read (3DR-T-c, MC 11774): a roster/skins mesh literal resolves
-# to the RUNTIME visual — the rigged twin where Roster.clip_source carries
-# a "visual" key, else the literal itself. ONE getter, the consumer's own
-# seam; the capture measures what the pawn draws (rig STATE stays
-# MEASURED from the loaded file — a twin without named clips still goes
-# loud here, never silently).
+# The seam read (3DR-T-c, MC 11774; T-3DR-CC2 hoist, MC 11918, CC1 F-3): a
+# roster/skins mesh literal resolves to the RUNTIME visual — the rigged
+# twin where the CLIP_SOURCE row carries a "visual" key, else the literal
+# itself. The resolution lives ONCE at the table home (RosterClips.
+# visual_for through the Roster.visual_for delegating getter) — the pawn
+# and this capture call the SAME site, byte-equal to the inlined getter
+# this function carried; the capture measures what the pawn draws (rig
+# STATE stays MEASURED from the loaded file — a twin without named clips
+# still goes loud here, never silently).
 static func _seam_src(mesh: String) -> String:
-	var clip = Roster.clip_source(mesh)
-	if clip != null and typeof(clip) == TYPE_DICTIONARY \
-			and clip.has("visual"):
-		return "res://assets/glb/" + String(clip.visual)
-	return "res://assets/glb/" + mesh
+	return "res://assets/glb/" + Roster.visual_for(mesh)
 
 
 func _next_job() -> bool:

@@ -136,6 +136,47 @@ def test_row0_visual_is_the_promoted_byte_copy():
     assert "walk" in glb_animations(b), "promoted copy lost its clips"
 
 
+def test_row_visual_resolution_is_the_one_mechanism():
+    """T-3DR-CC2 (MC 11918, CC1 audit F-3): the row->visual-twin question
+    ("which FILE does row X draw") resolves ONCE — RosterClips.visual_for
+    is the sole definition and BOTH named consumers ride it through the
+    Roster delegating getter. The flip wave left it resolved TWICE (the
+    pawn's inline clip.get + the capture's own _seam_src getter); a
+    re-inlined reader beside the mechanism is the planted red this leg
+    names — a drifting second resolution would make the capture measure a
+    file the pawn does NOT draw, defeating the seam's stated law."""
+    capture = open(os.path.join(REPO, "godot", "sim",
+                                "roster_capture.gd"),
+                   encoding="utf-8").read()
+    assert CLIPS.count("static func visual_for(") == 1, \
+        "the row->visual resolution must exist exactly once (roster_clips.gd)"
+    assert "static func visual_for(" in ROSTER \
+        and "RosterClips.visual_for(" in ROSTER, \
+        "roster.gd lost the delegating getter — every consumer rides it"
+    for name, src in (("hero_pawn.gd", HERO), ("roster_capture.gd", capture)):
+        assert "Roster.visual_for(" in src, \
+            name + " must call the ONE resolution, not re-implement it"
+        assert 'clip.get("visual"' not in src and "clip.visual" not in src, \
+            name + " re-inlines the visual-twin read beside the mechanism " \
+            "(CC1 F-3 planted red: the second resolution drifts)"
+    # the widened-universe consumer set (the CC1 F-1 blind spot, closed):
+    # exactly the TWO named consumers call the delegating getter — over
+    # ALL of godot/ incl. godot/sim/ (the test_skill_fx os.walk idiom).
+    consumers = []
+    for root, dirs, files in os.walk(os.path.join(REPO, "godot")):
+        dirs[:] = [d for d in dirs if d not in (".godot", ".imports")]
+        for f in files:
+            if f.endswith(".gd"):
+                p = os.path.join(root, f)
+                if "Roster.visual_for(" in open(p,
+                                                encoding="utf-8").read():
+                    consumers.append(os.path.relpath(p, REPO))
+    assert sorted(consumers) == sorted(
+        ["godot/scripts/hero_pawn.gd", "godot/sim/roster_capture.gd"]), \
+        "the named seam consumers drifted (widened grep universe): %s" \
+        % consumers
+
+
 # ---- MV-E2 law pins: ONE wave, position-keyed phase, velocity gate ------
 
 def test_one_gait_wave_and_spawn_phase_law():

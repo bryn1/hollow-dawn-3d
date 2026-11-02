@@ -1,10 +1,20 @@
 # The clip seam (3DR-SPEC §3.4, T-3DR-c, MC 11774): the CLIP_SOURCE table +
-# its ONE getter, MOVED byte-faithfully out of roster.gd under roster.gd's
-# own SCHEDULED clause (the T-M6q2 reason header, named card, audit-4 §1.4,
-# the roster_select.gd/achievements_page.gd data-table CC3R precedent).
-# Roster's clip_source getter is the delegating read — every consumer keeps
-# the ONE call path (the §5.3 ONE-consumer grep: hero_pawn.gd stays the
-# single caller; this file is the single const home).
+# its ONE getter + the ONE row->visual-twin resolution (visual_for, below),
+# MOVED byte-faithfully out of roster.gd under roster.gd's own SCHEDULED
+# clause (the T-M6q2 reason header, named card, audit-4 §1.4, the
+# roster_select.gd/achievements_page.gd data-table CC3R precedent).
+# THE LAW (T-3DR-CC2 re-word honest, MC 11918, CC1 audit F-1+F-3 pair):
+# Roster's clip_source/visual_for getters are the delegating reads — every
+# consumer keeps the ONE call path. Consumers MEASURED over godot/**/*.gd
+# (universe WIDENED to cover godot/sim/ — the §5.3 law grep as first
+# written ran over godot/scripts/*.gd only, blind to the capture leg: the
+# CC1 audit's named blind spot, its grep rules 3/4): TWO honest named
+# consumers of the seam — godot/scripts/hero_pawn.gd (the runtime player:
+# static-arm read + walk/clip_node fields + the visual read) and
+# godot/sim/roster_capture.gd (the dated capture seam read, MC 11774).
+# This file is the single const + resolution home: the row->visual
+# question resolves ONCE, here, never re-implemented at a reader
+# (test_motion.test_row_visual_resolution_is_the_one_mechanism pins it).
 class_name RosterClips
 extends RefCounted
 
@@ -67,3 +77,18 @@ const CLIP_SOURCE := {
 # "clip_node" + "walk") or null (static / unmapped — the procedural arm).
 static func clip_source(glb_file: String): # Dictionary | null
 	return CLIP_SOURCE.get(glb_file)
+
+
+# The ONE row->visual-twin resolution (T-3DR-CC2 hoist, MC 11918, CC1 F-3):
+# the FILE a row DRAWS — the rigged twin where the row carries a "visual"
+# key (the row-0 pattern above), else the map key itself. Hoisted from the
+# TWO inline readers the flip wave left behind (hero_pawn._grow_visual's
+# clip.get and the capture's _seam_src getter); BOTH named consumers call
+# this ONE site through the Roster.visual_for delegating getter. The
+# returned string is byte-equal to what each reader produced before — the
+# CC1 capture legs prove the same bytes execute (zero behavior change).
+static func visual_for(glb_file: String) -> String:
+	var clip = CLIP_SOURCE.get(glb_file)
+	if clip is Dictionary and clip.has("visual"):
+		return String(clip.visual)
+	return glb_file

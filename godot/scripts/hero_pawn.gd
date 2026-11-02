@@ -179,7 +179,10 @@ func _grow_visual() -> void:
 		set_surface_override_material(0, null) # static arm: restore the
 		return # live-surface draw, no child, no clip (§1.3 rides _process)
 	var clip: Dictionary = clip_v
-	var vis := String(clip.get("visual", _player_glb()))
+	# The ONE row->visual resolution (T-3DR-CC2 hoist, MC 11918, CC1 F-3):
+	# the twin read rides RosterClips.visual_for through the delegating
+	# getter — byte-equal to the inlined clip.get this line carried.
+	var vis := Roster.visual_for(_player_glb())
 	var inst := ClassMesh.scene_for(vis).instantiate()
 	var rest := ClassMesh.scene_rest_height(vis)
 	inst.scale = Vector3.ONE * (HordeViz.MODEL_H_PLAYER / rest) \

@@ -4,6 +4,8 @@
 # (no reason line needed: 385 measured at T-3DR-c — the clip seam SPLIT
 #   LANDED 2026-11-02 (MC 11774) per the clause below, moving the rig table
 #   + getter to roster_clips.gd; the file is back under the 400 ceiling.
+#   Re-measured by T-3DR-CC2 the same day: 398 with the visual_for delegating
+#   getter — still under 400, the no-reason reading stands.)
 #   SCHEDULED clause, kept as dated lineage: T-M6q2's reason header named
 #   the statue-ruling card as the split's owner (CLIP_SOURCE +
 #   clip_source() -> roster_clips.gd, the roster_select.gd/
@@ -145,11 +147,22 @@ const CHARACTERS := [
 # new home). The 3DR flip landed INSIDE the moved table: THREE statue rows
 # flipped to their rigged twins, THREE carry a reason row in
 # docs/RIG-DEVIATION-3DR.md (the statics' owner-ratified fallback, package
-# item 3, owner "Rec" 2026-10-31). The clip_source getter below is the
-# delegating read — every consumer (hero_pawn.gd, the ONE caller) keeps
-# this exact call path; the getter is the ONE seam, not a second one.
+# item 3, owner "Rec" 2026-10-31). The clip_source/visual_for getters below
+# are the delegating reads — every consumer keeps the ONE call path; the
+# getters are the ONE seam, not a second one. Consumers measured over
+# godot/**/*.gd (the T-3DR-CC2 widened grep, MC 11918 — CC1 audit F-1):
+# hero_pawn.gd + sim/roster_capture.gd, named honest in the table home's
+# law header; visual_for hoists the row->visual-twin resolution (CC1 F-3).
 static func clip_source(glb_file: String): # Dictionary | null
 	return RosterClips.clip_source(glb_file)
+
+
+# The delegating row->visual-twin read (T-3DR-CC2, MC 11918): the ONE
+# resolution lives at the table home (RosterClips.visual_for); every
+# consumer — the runtime pawn and the capture seam read — rides THIS call
+# path, byte-equal to the readers' inlined pre-hoist strings.
+static func visual_for(glb_file: String) -> String:
+	return RosterClips.visual_for(glb_file)
 
 
 # Clamp the well row through the table (the stage out_of_range_clamps
