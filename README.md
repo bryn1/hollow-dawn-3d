@@ -115,5 +115,6 @@ this tag — measured: `CLIP_SOURCE` 14 rows = 11 clip rows (incl. row-0 the Vig
 statics, the set asserted by `tests/test_motion.py`; the v3.0.0-era "7 ship rigged+clipped
 and 6 ship STATIC" split is SUPERSEDED 2026-11-02 by the 3DR wave (three statue
 double-fails under the owner-ratified fallback, "Rec" 2026-10-31 package item 3). The
-per-asset table is docs/RIG-DEVIATION-3DR.md; docs/RIG-DEVIATION-SEL-C.md stays as dated
-lineage.
+per-asset table is docs/RIG-DEVIATION-3DR-2.md (REV-2 supersession 2026-11-02, MC 11918 —
+measured 10/3 claims; the retired T-3DR-r copy is archived docs/superseded/);
+docs/RIG-DEVIATION-SEL-C.md stays as dated lineage.

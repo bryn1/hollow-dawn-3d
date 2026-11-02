@@ -1,3 +1,5 @@
+SUPERSEDED 2026-11-02 (MC 11918 T-3DR-CC2): DO NOT USE — live version: docs/RIG-DEVIATION-3DR-2.md (off-by-one CLAIM rows — header/FINAL read "9 RIGGED / 4 STATIC" against its own 10/3 table; the 13-row table is carried verbatim into the live REV-2; versioned-truth doctrine, owner ruling 2026-10-22).
+
 # RIG-DEVIATION — 3DR statue re-master set, T-3DR-r rig+clip pass (MC 11773, 2026-11-01)
 
 PIN ARTIFACT for builders/testers (B-E8 / K-E3 / MV-E4 re-pin family, the flip card

@@ -4,7 +4,7 @@
 # (no reason line needed: 385 measured at T-3DR-c — the clip seam SPLIT
 #   LANDED 2026-11-02 (MC 11774) per the clause below, moving the rig table
 #   + getter to roster_clips.gd; the file is back under the 400 ceiling.
-#   Re-measured by T-3DR-CC2 the same day: 398 with the visual_for delegating
+#   Re-measured by T-3DR-CC2 the same day: 399 with the visual_for delegating
 #   getter — still under 400, the no-reason reading stands.)
 #   SCHEDULED clause, kept as dated lineage: T-M6q2's reason header named
 #   the statue-ruling card as the split's owner (CLIP_SOURCE +
@@ -12,7 +12,7 @@
 #   achievements_page.gd data-table precedent (CC3R), audit-4 §1.4) — the
 #   statue rows flipping to clip rows WAS the clip table's own subject;
 #   under 3DR three flipped, three stay static with reason rows in
-#   docs/RIG-DEVIATION-3DR.md.)
+#   docs/RIG-DEVIATION-3DR-2.md, REV-2 home of the pin, MC 11918.)
 # SEL-C = 9 rows: the owner ruling "C"
 # (2026-10-27, docs/M5-SPEC.md RULING line) over the §2.5 SEL table —
 # row 0 IS the shipped identity (game_state.gd's falsified talon row, the
@@ -146,8 +146,9 @@ const CHARACTERS := [
 # row-0 "visual" law and the read-only contract are restated at the ONE
 # new home). The 3DR flip landed INSIDE the moved table: THREE statue rows
 # flipped to their rigged twins, THREE carry a reason row in
-# docs/RIG-DEVIATION-3DR.md (the statics' owner-ratified fallback, package
-# item 3, owner "Rec" 2026-10-31). The clip_source/visual_for getters below
+# docs/RIG-DEVIATION-3DR-2.md (the statics' owner-ratified fallback,
+# package item 3, owner "Rec" 2026-10-31). The clip_source/visual_for
+# getters below
 # are the delegating reads — every consumer keeps the ONE call path; the
 # getters are the ONE seam, not a second one. Consumers measured over
 # godot/**/*.gd (the T-3DR-CC2 widened grep, MC 11918 — CC1 audit F-1):

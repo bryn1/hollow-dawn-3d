@@ -22,7 +22,8 @@ extends RefCounted
 # Per mesh file under res://assets/glb/, the SKINNED runtime consumer's
 # clip row, or null = STATIC. The law this table pins (docs/
 # RIG-DEVIATION-SEL-C.md, owner "Rec" 2026-10-27, MC 11440; state re-pinned
-# by docs/RIG-DEVIATION-3DR.md, MC 11773/11774): the RIGGED rows carry the
+# by docs/RIG-DEVIATION-3DR-2.md (REV-2, MC 11918 — the home of the MC
+# 11773/11774 pin): the RIGGED rows carry the
 # named clips the mocap chain shipped (walk + attack); the statue-class
 # rows that DOUBLE-FAILED the rig stage stay static EXCUSED-not-removed
 # and take the §1.3 procedural arm — they name NO clip here (null), under
@@ -33,7 +34,7 @@ extends RefCounted
 # statue rows flipped to their rigged twins (char-tallow-seer, skin-tide,
 # skin-void — the 3DR-a meshes + 3DR-r rig pass, rig-yield 3/6); the other
 # three (char-coinhound, char-shroud-saint, char-hoard-wretch) STAY static
-# with the reason rows in docs/RIG-DEVIATION-3DR.md. clip_node
+# with the reason rows in docs/RIG-DEVIATION-3DR-2.md. clip_node
 # = the AnimationPlayer node name inside the IMPORTED GLB scene (the
 # pinned import pass ships it; the runtime-GLTFDocument route stays
 # harness-side, §1.1); walk = the clip the pawn plays while moving. The

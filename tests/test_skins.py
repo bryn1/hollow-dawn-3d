@@ -23,8 +23,9 @@ reads; the planted reds fire on the FINAL tree in the card capture
        row verbatim) + the chip-icon family file-exists.
   K-E3 clips per skin          the committed roster clips CSV (re-minted
        by tools/roster_clip_gate.py, MC 11573), the skin
-       rows judged against the PIN DOC docs/RIG-DEVIATION-3DR.md (the 3DR
-       statue re-master pin; SEL-C moved to dated lineage — RE-PIN
+       rows judged against the PIN DOC docs/RIG-DEVIATION-3DR-2.md (the
+       3DR statue re-master pin, REV-2 home T-3DR-CC2 MC 11918 dated
+       2026-11-02; SEL-C moved to dated lineage — RE-PIN
        T-3DR-c, MC 11774) — the
        B-E8 pattern RE-RIDDEN (the doc PARSED, not a hardcoded list:
        owner ratification verbatim "Rec" asserted, static rows require a
@@ -116,9 +117,10 @@ ROSTER_SELECT = read("roster_select.gd")
 SAVE = read("save.gd")
 
 # THE table (M5-SPEC §3.1 verbatim): 5 rows, prices 200/400/600/800/1000,
-# ids = the committed GLBs, rig state per docs/RIG-DEVIATION-3DR.md
-# (RE-PIN T-3DR-c, MC 11774, dated 2026-11-02 — the SEL-C doc row moved
-# with the pin doc; SEL-C stays as dated lineage).
+# ids = the committed GLBs, rig state per docs/RIG-DEVIATION-3DR-2.md
+# (RE-PIN T-3DR-c, MC 11774, REV-2 home T-3DR-CC2 MC 11918, all dated
+# 2026-11-02 — the SEL-C doc row moved with the pin doc; SEL-C stays as
+# dated lineage).
 SKIN_ROWS = [
     ("skin-ash", "skin-ash.glb", 200),
     ("skin-marrow", "skin-marrow.glb", 400),
@@ -127,7 +129,8 @@ SKIN_ROWS = [
     ("skin-void", "skin-void.glb", 1000),
 ]
 # 3DR FLIP row (T-3DR-c, MC 11774): skin-tide + skin-void flipped from the
-# M5 statics to their rigged twins (docs/RIG-DEVIATION-3DR.md rows 11/13);
+# M5 statics to their rigged twins (docs/RIG-DEVIATION-3DR-2.md rows
+# 11/13 — home re-pinned T-3DR-CC2, MC 11918);
 # the whole SKINS family now rides the rigged branch — the K-E3 doc-judge
 # reads the DOC, this pair is the shipped-files mirror of it.
 RIGGED = {"skin-ash", "skin-marrow", "skin-tide", "skin-relic", "skin-void"}

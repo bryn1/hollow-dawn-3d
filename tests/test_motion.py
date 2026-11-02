@@ -102,7 +102,9 @@ def test_clip_source_static_rows_name_no_clip():
     statics = sorted(f for f, s in rows.items() if s is None)
     # T-3DR-c (MC 11774) same-card re-pin, dated 2026-11-02: 6 -> 3. The
     # flip moved char-tallow-seer / skin-tide / skin-void to their rigged
-    # twins (docs/RIG-DEVIATION-3DR.md 9-rigged/4-static state); the
+    # twins (docs/RIG-DEVIATION-3DR-2.md 10-rigged/3-static measured
+    # state — REV-2 home, T-3DR-CC2 MC 11918; the retired T-3DR-r header
+    # claim 9/4 was an off-by-one against its own table, superseded); the
     # three rig-stage DOUBLE-FAIL classes stay static under the owner-
     # ratified fallback (package item 3, owner "Rec" 2026-10-31) — the
     # count is the MEASURED post-flip null count, not the M6-era six.
@@ -111,7 +113,7 @@ def test_clip_source_static_rows_name_no_clip():
         "found %d" % len(statics))
     assert statics == sorted(["char-coinhound.glb", "char-shroud-saint.glb",
                               "char-hoard-wretch.glb"]), (
-        "static set drifted from the docs/RIG-DEVIATION-3DR.md double-fail "
+        "static set drifted from the docs/RIG-DEVIATION-3DR-2.md double-fail "
         "rows: %s" % statics)
     for f in statics:
         anims = glb_animations(os.path.join(GLB_DIR, f))
@@ -175,6 +177,52 @@ def test_row_visual_resolution_is_the_one_mechanism():
         ["godot/scripts/hero_pawn.gd", "godot/sim/roster_capture.gd"]), \
         "the named seam consumers drifted (widened grep universe): %s" \
         % consumers
+
+
+def test_rig_pin_doc_claim_matches_its_table():
+    """T-3DR-CC2 (MC 11918, CC1 audit F-2 — the versioned-truth path): the
+    LIVE rig pin doc is docs/RIG-DEVIATION-3DR-2.md (REV-2 supersedes the
+    T-3DR-r copy, whose header/FINAL CLAIM rows read 9 RIGGED / 4 STATIC
+    against their own table measuring 10/3 — off-by-one, never true of
+    any tree state). This leg pins header-claim == FINAL-claim == the
+    table's own MEASURED count: an off-by-one claim row is RED here, the
+    permanent instrument for the class. The superseded copy carries the
+    doctrine's DO-NOT-USE marker as its FIRST LINE, and NO live code/
+    test file reads the retired path (dated lineage docs are exempt by
+    class — the classifier rows ride the capture)."""
+    doc = open(os.path.join(REPO, "docs", "RIG-DEVIATION-3DR-2.md"),
+               encoding="utf-8").read()
+    hdr = re.search(r"\*\*(\d+) RIGGED / (\d+) STATIC\*\*", doc)
+    fin = re.search(r"\*\*(\d+) rigged / (\d+) static\*\*", doc)
+    assert hdr and fin, "the pin doc lost its header/FINAL state-claim rows"
+    rigged = len(re.findall(r"\|\s*RIGGED\b", doc))
+    static = len(re.findall(r"\|\s*STATIC\b", doc))
+    assert (rigged, static) == (10, 3), \
+        "the pin doc's TABLE moved (measured %d/%d) — re-measure every " \
+        "claim row with it" % (rigged, static)
+    assert (int(hdr.group(1)), int(hdr.group(2))) == (rigged, static), \
+        "header claim != table — the F-2 off-by-one class is back " \
+        "(planted red: re-write 10 -> 9 in the header goes RED here)"
+    assert (int(fin.group(1)), int(fin.group(2))) == (rigged, static), \
+        "FINAL claim != table — the F-2 off-by-one class is back"
+    first = open(os.path.join(REPO, "docs", "superseded",
+                              "RIG-DEVIATION-3DR.md"),
+                 encoding="utf-8").read().splitlines()[0]
+    assert first.startswith("SUPERSEDED 2026-11-02 (MC 11918") \
+        and "DO NOT USE" in first and "RIG-DEVIATION-3DR-2.md" in first, \
+        "the superseded copy lost its versioned-truth marker (doctrine)"
+    retired = os.path.join("docs", "RIG-DEVIATION-3DR.md")
+    for sub in ("tests", "tools", "godot"):
+        for root, dirs, files in os.walk(os.path.join(REPO, sub)):
+            dirs[:] = [d for d in dirs
+                       if d not in (".godot", ".imports", "__pycache__")]
+            for f in files:
+                if f.endswith((".py", ".gd")):
+                    src = open(os.path.join(root, f),
+                               encoding="utf-8", errors="ignore").read()
+                    assert retired not in src, \
+                        "live file %s still reads the RETIRED pin-doc " \
+                        "path: %s" % (f, retired)
 
 
 # ---- MV-E2 law pins: ONE wave, position-keyed phase, velocity gate ------

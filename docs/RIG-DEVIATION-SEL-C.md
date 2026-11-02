@@ -4,7 +4,9 @@
 > 3DR statue re-master (docs/3DR-SPEC.md REV 4 §3.3 option (c), owner ruling 2026-10-29
 > "Ibwant skeletons with movements...") re-rigged the six statue classes on NEW meshes;
 > three M5 statics FLIPPED to RIGGED (char-tallow-seer, skin-tide, skin-void). The LIVE
-> rig-state pin is now **docs/RIG-DEVIATION-3DR.md** (3DR-era state: 9 rigged / 4 static);
+> rig-state pin is now **docs/RIG-DEVIATION-3DR-2.md** (3DR-era state MEASURED:
+> 10 rigged / 3 static — the T-3DR-r pin header's "9 rigged / 4 static" was an
+> off-by-one against its own table, superseded 2026-11-02, MC 11918 T-3DR-CC2);
 > this doc's rows STAY as measured M5 lineage, its table is byte-unchanged, and its
 > "Final table" line is struck in place below. The B-E8/K-E3 test re-pin to the new doc
 > rides T-3DR-c per §3.4.
@@ -41,8 +43,9 @@ the robe opening) regenerated GREEN (seed 805: 7962/8000 tris, ext/fill PASS,
 VISUAL PASS, aspect 1.67/0.45 PASS, static 4-yaw SOLID); its rig pass (15:05Z
 window) then collapsed 3-bone AGAIN + skin-stage crash -> DOUBLE-FAIL stop clause,
 STATIC with the v2 file. Final table: ~~**7 rigged / 6 static**~~ **(3DR-era live state
-9 rigged / 4 static — pinned in docs/RIG-DEVIATION-3DR.md; struck dated 2026-11-01, MC
-11773)** (window evidence + per-mesh gates in `.tmp/m5-rig.txt`). Portrait icons: coinhound + tallow-seer busts
+10 rigged / 3 static — pinned in docs/RIG-DEVIATION-3DR-2.md; the struck 2026-11-01
+row (MC 11773) carried an off-by-one "9 rigged / 4 static" claim against its own
+table, itself superseded dated 2026-11-02, MC 11918 T-3DR-CC2)** (window evidence + per-mesh gates in `.tmp/m5-rig.txt`). Portrait icons: coinhound + tallow-seer busts
 depict no stance and keep the re-mastered identities (chain+coin medallion / hooded
 seer) -> KEPT, stated per ruling ("keep unless clear mismatch"; none measured).
 

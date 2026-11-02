@@ -494,7 +494,9 @@ CLOSED); validators 04-validate-glb rigged mode + VISUAL + dump_render turntable
 80-tri importer ghost law carried, M5r row). GPU windows vm100 runid mc11773; LAW rows +
 transcripts in capture `.tmp/3dr.txt`. TWO-FAIL STOP: rig attempt + ONE retry per class,
 then the OWNER-RATIFIED static+procedural fallback (package item 3 "Rec" 2026-10-31;
-never a broken animation). Rig states + reasons: docs/RIG-DEVIATION-3DR.md (the pin).
+never a broken animation). Rig states + reasons: docs/RIG-DEVIATION-3DR-2.md (the
+pin, REV-2 dated 2026-11-02 MC 11918; the retired T-3DR-r copy archived
+docs/superseded/ with its DO-NOT-USE marker).
 
 | asset | twin glb (NEW) | rig | clips | map | sha256(twin)[:16] | state |
 |---|---|---|---|---|---|---|

@@ -422,19 +422,25 @@ CLIPS_CSV = os.path.join(os.path.dirname(__file__), "fixtures",
                          "roster-clips-m5-framediff.csv")
 
 
+# RIG_DOC home: docs/RIG-DEVIATION-3DR-2.md (RE-PIN T-3DR-CC2, MC 11918,
+# dated 2026-11-02 — the REV-2 supersession of the T-3DR-r pin, whose
+# CLAIM rows read 9/4 against its own 10/3 table; the 13-row TABLE moved
+# VERBATIM (byte-unchanged, parse legs GREEN — capture .tmp/cc2.txt); the
+# retired copy is archived docs/superseded/ with its DO-NOT-USE marker).
 RIG_DOC = os.path.join(os.path.dirname(__file__), os.pardir,
-                       "docs", "RIG-DEVIATION-3DR.md")
+                       "docs", "RIG-DEVIATION-3DR-2.md")
 
 
 def _rig_states():
     # the PIN ARTIFACT is the table, not a hardcoded list: docs/
-    # RIG-DEVIATION-3DR.md (RE-PIN T-3DR-c, MC 11774, dated 2026-11-02 —
-    # the 3DR statue re-master set; docs/RIG-DEVIATION-SEL-C.md stays as
-    # dated lineage with its supersession row, MC 11440). Returns
+    # RIG-DEVIATION-3DR-2.md (RE-PIN T-3DR-c, MC 11774, re-home T-3DR-CC2
+    # MC 11918, both dated 2026-11-02 — the 3DR statue re-master set;
+    # docs/RIG-DEVIATION-SEL-C.md stays as dated lineage with its
+    # supersession row, MC 11440). Returns
     # {char_id: "rigged"|"static"} parsed from the "| char-<id>.glb |
     # RIGGED/STATIC |" rows.
     txt = open(os.path.join(os.path.dirname(__file__), os.pardir, "docs",
-                            "RIG-DEVIATION-3DR.md")).read()
+                            "RIG-DEVIATION-3DR-2.md")).read()
     assert '\"Rec\"' in txt, "owner ratification line gone from pin doc"
     states = {}
     for m in re.finditer(r"\| (\d+) \| char-([\w-]+)\.glb \| "
@@ -456,8 +462,8 @@ def test_b_e8_clips_move_pixels():
     # that MUST keep diff_px 0 (EXCUSED-not-removed: the row is present
     # and pinned; a static mesh silently GAINING motion changes shape
     # without a doc row goes RED on the state check below). The state
-    # set here is measured from docs/RIG-DEVIATION-3DR.md (T-3DR-c
-    # RE-PIN, MC 11774) — every
+    # set here is measured from docs/RIG-DEVIATION-3DR-2.md (T-3DR-c
+    # RE-PIN, MC 11774; REV-2 home T-3DR-CC2 MC 11918) — every
     # roster mesh must appear in the table (no ghost rigs, no deleted
     # statics). Row 0 the-vigil rides the S2r player-rigged CSV.
     states = _rig_states()
