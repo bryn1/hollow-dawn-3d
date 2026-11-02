@@ -117,6 +117,25 @@ def stages_row(ev):
     return rows[0]
 
 
+# ---- LEG-row parser (T-M7B, MC 11627: replaces the local copy
+# test_settings.py kept — the conftest seam law; the body is byte-identical
+# to that donor, which now delegates here; `LEG <name> k=v` is the
+# settings_probe/shop_probe row convention every behavioral probe rides) ----
+
+def parse_legs(stdout):
+    """`LEG <name> k=v ...` lines -> {name: {k: int-or-str}} (last wins)."""
+    rows = {}
+    for line in stdout.splitlines():
+        if line.startswith("LEG "):
+            parts = line.split()
+            kv = {}
+            for tok in parts[2:]:
+                k, _, v = tok.partition("=")
+                kv[k] = int(v) if re.fullmatch(r"-?\d+", v) else v
+            rows[parts[1]] = kv
+    return rows
+
+
 # ---- source pins (audit §2.5: replaces read x16 / const x11 / block x2) ----
 
 def read_text(path, code_only=False):

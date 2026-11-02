@@ -86,16 +86,8 @@ def _run_probe(scratch, mode):
         env=env, capture_output=True, text=True, timeout=600)
     assert r.returncode == 0 and "PROBE_DONE" in r.stdout, \
         "probe (%s) failed:\n%s\n%s" % (mode, r.stdout[-2000:], r.stderr[-2000:])
-    rows = {}
-    for line in r.stdout.splitlines():
-        if line.startswith("LEG "):
-            parts = line.split()
-            kv = {}
-            for tok in parts[2:]:
-                k, _, v = tok.partition("=")
-                kv[k] = int(v) if re.fullmatch(r"-?\d+", v) else v
-            rows[parts[1]] = kv
-    return rows
+    return conftest.parse_legs(r.stdout)  # T-M7B: parser moved to conftest
+                                         # (the seam law, byte-identical)
 
 
 @pytest.fixture(scope="module")

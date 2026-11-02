@@ -9,6 +9,9 @@
 # T-M7A (MC 11626) grew it 599 -> 668: the settings verb family (boot
 #   apply + the ONE value verb + the focus-pause law), the wire-graph
 #   proof extended — the phase-router-split law unchanged.
+# T-M7B (MC 11627) grew it 668 -> 680: the touch overlay's HUD-family
+#   wiring (one preload + one wire + zero verbs, touch_hud.gd owns the
+#   paint); the touch itself rides the BRIDGE's _input, never this file.
 # The simulation loop below is v1 main.gd VERBATIM (DESIGN-3D §d): same
 # constants, same WIN_TIME gate, same score formula; only the visible layer
 # wiring is 3D (the v1 Node2D renderer body is deleted, §f — render.gd
@@ -49,6 +52,7 @@ var _pvz: Node3D # T-S18 pickup layer (MC 11201), reads world pickup arrays only
 var _pawn: Node3D
 var _hud: CanvasLayer
 var _screens: CanvasLayer
+var _thud: CanvasLayer # T-M7B touch overlay (MC 11627), HUD-family sibling
 var _current_offer: Array = []
 var _web := false
 var _js: Object # the JavaScriptBridge singleton, web builds only
@@ -173,6 +177,14 @@ func _ready() -> void:
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
 	add_child(bridge)
+	# T-M7B (MC 11627): the touch overlay, HUD-family sibling (DECLARED
+	# reading in touch_hud.gd) — a pure READ of the bridge's presence law:
+	# it paints the joystick iff a phone has sent a touch, so the desktop
+	# pixel path and the sim (which feeds bridge.on_key only, never an
+	# _input touch) stay byte-unchanged. No signals, no verbs, no funnel.
+	_thud = preload("res://scripts/touch_hud.gd").new()
+	_thud.bridge = bridge
+	add_child(_thud)
 	if _web:
 		_js = Engine.get_singleton("JavaScriptBridge")
 		if _js != null:
