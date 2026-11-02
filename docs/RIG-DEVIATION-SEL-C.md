@@ -1,5 +1,14 @@
 # RIG-DEVIATION — SEL-C asset set, T-M5r rig+clip pass (MC 11440, 2026-10-27)
 
+> **DATED SUPERSESSION ROW (2026-11-01, MC 11773 T-3DR-r — replace-not-delete):** the
+> 3DR statue re-master (docs/3DR-SPEC.md REV 4 §3.3 option (c), owner ruling 2026-10-29
+> "Ibwant skeletons with movements...") re-rigged the six statue classes on NEW meshes;
+> three M5 statics FLIPPED to RIGGED (char-tallow-seer, skin-tide, skin-void). The LIVE
+> rig-state pin is now **docs/RIG-DEVIATION-3DR.md** (3DR-era state: 9 rigged / 4 static);
+> this doc's rows STAY as measured M5 lineage, its table is byte-unchanged, and its
+> "Final table" line is struck in place below. The B-E8/K-E3 test re-pin to the new doc
+> rides T-3DR-c per §3.4.
+
 Pin artifact for builders/testers (B-E8 / K-E3): of the 13 SEL-C meshes, **7 ship
 rigged+clipped** (walk + attack named glTF animations, CMU 07_01 / 02_05 retargeted
 by the existing `tools/mocap` chain, `assets/anim/maps/<name>.json` committed per
@@ -31,8 +40,9 @@ TABLE-FOOTER (char-tallow-seer): v1 sealed-robe mesh collapsed deterministically
 the robe opening) regenerated GREEN (seed 805: 7962/8000 tris, ext/fill PASS,
 VISUAL PASS, aspect 1.67/0.45 PASS, static 4-yaw SOLID); its rig pass (15:05Z
 window) then collapsed 3-bone AGAIN + skin-stage crash -> DOUBLE-FAIL stop clause,
-STATIC with the v2 file. Final table: **7 rigged / 6 static** (window evidence +
-per-mesh gates in `.tmp/m5-rig.txt`). Portrait icons: coinhound + tallow-seer busts
+STATIC with the v2 file. Final table: ~~**7 rigged / 6 static**~~ **(3DR-era live state
+9 rigged / 4 static — pinned in docs/RIG-DEVIATION-3DR.md; struck dated 2026-11-01, MC
+11773)** (window evidence + per-mesh gates in `.tmp/m5-rig.txt`). Portrait icons: coinhound + tallow-seer busts
 depict no stance and keep the re-mastered identities (chain+coin medallion / hooded
 seer) -> KEPT, stated per ruling ("keep unless clear mismatch"; none measured).
 

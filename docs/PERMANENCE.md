@@ -481,3 +481,31 @@ first seed + ONE reserve per class; NO third burn, a fourth needs a new owner wo
 | char-hoard-wretch | assets/art-src/char-hoard-wretch-ref-v7.png (ref seed 1775; ref-v6 seed 1774 REJECTED — raised wings + open claw hands) | 808 FIRST SEED (M5-era collapsed 41-bones-no-legs wings-as-arms; 3DR ref-v7 folds the wings FLAT into the back slab, block fists welded, two thick legs, mesh FIRST SEED — reserve UNBURNED) | 9208 / 9500 | 1.67 / 0.53 (INFLATION 1.67, gates ≤2.0 PASS; ext 0.531,0.999,0.431 fill non-watertight PASS) | 453a357ba0aabe5a | concepts/char-hoard-wretch-render.png |
 | skin-tide | assets/art-src/skin-tide-ref-v5.png (ref seed 1776, fused-lantern bell-robe line + robe opening wording) | 813 FIRST SEED (M5-era 3-bone collapse on the sealed bell; 3DR ref-v5 opens the robe on two legs, mesh FIRST SEED — reserve UNBURNED) | 9191 / 9500 | 1.67 / 0.48 (INFLATION 1.67, gates ≤2.0 PASS; ext 0.484,1.000,0.389 fill non-watertight PASS) | 5a7cb50bf03d36db | concepts/skin-tide-render.png |
 | skin-void | assets/art-src/skin-void-ref-v6.png (ref seed 1778; ref-v5 seed 1777 REJECTED — bell robe re-fused, legs hidden) | 815 FIRST SEED (M5-era 3-bone collapse on the sealed bell; 3DR ref-v6 splits the robe on two leg columns, lantern fused flush, mesh FIRST SEED — reserve UNBURNED) | 9287 / 9500 | 1.68 / 0.42 (INFLATION 1.68, gates ≤2.0 PASS; ext 0.422,0.996,0.300 fill non-watertight PASS) | 7b7640da7c3aff75 | concepts/skin-void-render.png |
+
+## 3DR RIG — T-3DR-r UniRig + CMU clip pass (MC 11773, 2026-11-01)
+
+STACK (all MIT/repo-shipped, RESEARCH-3D-3090 law, ZERO new mechanism): UniRig-2D
+generate_skeleton/generate_skin/merge via the committed tools/vm100/run-unirig-inner.sh,
+seed 12345 FLEET LAW (deterministic, §3.3), row driver mirrors the shipped MC 11440
+m5rig-row.sh (single-row window, drain_barrier inside, trap-close rc, serving-proved
+pre+post); CMU 07_01/02_05 clips (MC 11108 fetch, sha256 -c re-verified per row) through
+committed tools/mocap/05-map-rig.py + 06-retarget-rig.py (bpy headless, CPU, window
+CLOSED); validators 04-validate-glb rigged mode + VISUAL + dump_render turntables (the
+80-tri importer ghost law carried, M5r row). GPU windows vm100 runid mc11773; LAW rows +
+transcripts in capture `.tmp/3dr.txt`. TWO-FAIL STOP: rig attempt + ONE retry per class,
+then the OWNER-RATIFIED static+procedural fallback (package item 3 "Rec" 2026-10-31;
+never a broken animation). Rig states + reasons: docs/RIG-DEVIATION-3DR.md (the pin).
+
+| asset | twin glb (NEW) | rig | clips | map | sha256(twin)[:16] | state |
+|---|---|---|---|---|---|---|
+| char-tallow-seer | godot/assets/glb/char-tallow-seer-rigged.glb | seed 12345, map 22/22/0 | walk+attack (132 ch) | assets/anim/maps/char-tallow-seer.json | 8082ac0f62af0d24 | RIGGED, framediff walk 124289/137187 attack 60877/69390 px, frozen 0/0 |
+| skin-tide | godot/assets/glb/skin-tide-rigged.glb | seed 12345, map 28/22/6 | walk+attack (168 ch) | assets/anim/maps/skin-tide.json | b46195bd34ecff37 | RIGGED, framediff walk 137454/150212 attack 79156/85519 px, frozen 0/0 |
+| skin-void | godot/assets/glb/skin-void-rigged.glb | seed 12345, map 34/22/12 | walk+attack (204 ch) | assets/anim/maps/skin-void.json | 77a4958ef5791e8f | RIGGED, framediff walk 117183/129995 attack 65739/75838 px, frozen 0/0 |
+| char-coinhound | — (no twin) | seed 12345 x2: 30-joint quadruped topology, 05 LeftShoulder double-map x2 | — | — | — | STATIC FALLBACK (TWO-FAIL STOP, owner item 3) |
+| char-shroud-saint | — (no twin) | seed 12345 x2: 15-joint bell slab, toe stubs under hips, 06 parent-chain fail x2 | — | — | — | STATIC FALLBACK (TWO-FAIL STOP, owner item 3) |
+| char-hoard-wretch | — (no twin) | seed 12345 x2: 44-joint mis-read, no leg chain (UpLeg absent), claw fans x2 | — | — | — | STATIC FALLBACK (TWO-FAIL STOP, owner item 3) |
+
+Mesh-side finality (this card is the LAST art-side card of the wave, §5.1): the six
+accepted A-cell meshes are the live literals — no twin overwrites an A-cell file (A∩R=∅
+by names); a fourth mesh burn was NEVER asked (reserve UNBURNED; the two M5-era ratified
+re-masters stay 2/3, the third HELD — no new owner word arose this card).
