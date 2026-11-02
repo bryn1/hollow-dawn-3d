@@ -1,5 +1,6 @@
 # Tick-deterministic pickup + upgrade-visual capture (T-S18, MC 11201).
-# reason: >400 lines — 485 measured at T-M6q2 (366->485 @f8095d1: the +119
+# reason: >400 lines — 485 measured at T-M6q2, re-measured 491, 2026-11-02,
+#   MC 11918 T-3DR-CC2 audit F-4 (366->485 @f8095d1: the +119
 #   26-leg SKILL_FX capture family): ONE capture harness, ONE concern
 #   (concern_check 1/1) — the biome_readability_capture-shaped carry: the
 #   ONE tick-deterministic capture law rides next to its probe (audit-4

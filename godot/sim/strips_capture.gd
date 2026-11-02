@@ -1,8 +1,10 @@
-# reason: >400 lines — 591 measured at MC 11398 §1.3, the twice-deferred row
+# reason: >400 lines — 591 measured at MC 11398 §1.3, re-measured 598,
+#   2026-11-02, MC 11918 T-3DR-CC2 audit F-4, the twice-deferred row
 #   whose "next touching card" is THIS one (MC 11401 C1): one capture rig,
 #   four legs (walk/frozen-control/attack/FX) sharing ONE live Main.tscn +
 #   the frozen-control red law; the split is BYTE-RISK on the shot stream
-#   and the audit files the header as the honest close (5 lines from 600).
+#   and the audit files the header as the honest close (5 lines from 600 at
+#   that measure; 2 at the T-3DR-CC2 re-measure above).
 # Route-A gait-strip + A4-FX capture for MC 11112 T-S2h (DOD-ACCEPTANCE S2
 # row / A3 / A4, DESIGN-3D §c). Run windowed under Xvfb — a real GL window
 # proves the frames exist, which --headless cannot (S5 cards_capture.gd

@@ -1,4 +1,5 @@
-# reason: >400 lines — 533 measured at MC 11398 §1 (new in M4): the seven-leg
+# reason: >400 lines — 533 measured at MC 11398 §1, re-measured 538, 2026-11-02,
+#   MC 11918 T-3DR-CC2 audit F-4 (new in M4): the seven-leg
 #   truth table + the cone/surge/rng-twin/miniboss legs ARE the one events
 #   dump contract (sim_chest_tiers precedent); a legs split would fork that
 #   contract for no gate win — the split is the audit's declared DEFERRAL.

@@ -1,6 +1,7 @@
 # The fifteen auto-fire weapons (plan §5 six + PARITY-ROADMAP rev3 feature 6
 # reason: >400 lines — 474 measured at MC 11316 §1.1; T-M6d (MC 11675)
-# net -13 code / retirement provenance notes (490 measured at close): ONE _fire dispatch is
+# net -13 code / retirement provenance notes (490 measured at close — STALE
+#   tail: re-measured 568, 2026-11-02, MC 11918 T-3DR-CC2, audit CC1 F-4): ONE _fire dispatch is
 #   the ONE fire seam of the kill funnel (every weapon fires through _fire/
 #   _hit below); the split alternative would fork the projectile seam
 #   beside the fire dispatch and rides the RNG path — audit verdict: header.

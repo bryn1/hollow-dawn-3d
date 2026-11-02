@@ -1,5 +1,6 @@
 # WORST-CASE LOADOUT budget legs (T-M1g, MC 11211; PARITY-ROADMAP rev3 §2
-# reason: >400 lines — 472 measured at MC 11398 §1 (grew 330->472 in the M4
+# reason: >400 lines — 472 measured at MC 11398 §1, re-measured 467, 2026-11-02,
+#   MC 11918 T-3DR-CC2 audit F-4 (grew 330->472 in the M4
 #   window, the growth class rule (h2) exists to catch): every leg shares the
 #   ONE pinned LOADOUT/PARTNERS arrays and the ONE draw_count() verdict — a
 #   split would fork the loadout beside its own tally. Audit verdict: header.
