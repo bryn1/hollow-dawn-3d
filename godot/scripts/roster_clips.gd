@@ -2,9 +2,9 @@
 # its ONE getter, MOVED byte-faithfully out of roster.gd under roster.gd's
 # own SCHEDULED clause (the T-M6q2 reason header, named card, audit-4 §1.4,
 # the roster_select.gd/achievements_page.gd data-table CC3R precedent).
-# Roster.clip_source() is the delegating read — every consumer keeps the
-# ONE `Roster.clip_source(...)` call path (the §5.3 ONE-consumer grep:
-# hero_pawn.gd stays the single caller; this file is the single const home).
+# Roster's clip_source getter is the delegating read — every consumer keeps
+# the ONE call path (the §5.3 ONE-consumer grep: hero_pawn.gd stays the
+# single caller; this file is the single const home).
 class_name RosterClips
 extends RefCounted
 

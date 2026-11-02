@@ -145,7 +145,7 @@ const CHARACTERS := [
 # new home). The 3DR flip landed INSIDE the moved table: THREE statue rows
 # flipped to their rigged twins, THREE carry a reason row in
 # docs/RIG-DEVIATION-3DR.md (the statics' owner-ratified fallback, package
-# item 3, owner "Rec" 2026-10-31). Roster.clip_source() below is the
+# item 3, owner "Rec" 2026-10-31). The clip_source getter below is the
 # delegating read — every consumer (hero_pawn.gd, the ONE caller) keeps
 # this exact call path; the getter is the ONE seam, not a second one.
 static func clip_source(glb_file: String): # Dictionary | null
