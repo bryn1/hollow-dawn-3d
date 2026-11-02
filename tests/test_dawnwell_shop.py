@@ -254,12 +254,18 @@ def test_buy_and_save_roundtrip(probe):
     # 11626, the in-series law for the THIRD time on this reader): the
     # five settings rows join the exact set at their shipped defaults
     # (100/100/100/0/0) — no shop verb moves them; same-commit re-pin,
+    # replace-not-delete, LEDGER row. GROWS AGAIN at T-M7C (MC 11628, the
+    # in-series law for the FOURTH time on this reader): the LOCAL best-
+    # runs board row best_runs joins the exact set at its shipped default
+    # ({}, the no-runs-yet board — no shop verb records a run; recording
+    # is the run-end handler's, main._end_run) — same-commit re-pin,
     # replace-not-delete, LEDGER row.
     assert disk == {"version": 1, "gold": 960, "ranks": {"vitality": 1},
                     "flags": {}, "best_cycle": 0, "stage": 1,
                     "counters": {}, "char": 0, "skin": 0,
                     "vol_master": 100, "vol_music": 100, "vol_sfx": 100,
-                    "fullscreen": 0, "pause_lose_focus": 0}
+                    "fullscreen": 0, "pause_lose_focus": 0,
+                    "best_runs": {}}
 
 
 def test_poor_buy_declines(probe):

@@ -281,7 +281,11 @@ byte-identical. Measured against this tree at the v2.1.0 cut: no `server/` and n
 dir exist, and `git log --all -- server/` returns ZERO commits — the copy was never executed.
 A claim that was never true is retired like one that died: the old claim stands named in the
 previous sentence; the truth stands here. The leaderboard itself is **EXCLUDED**
-(PARITY-ROADMAP row 13 — a v1-server platform feature, see §3). v1 server facts stay cited
+(PARITY-ROADMAP row 13 — a v1-server platform feature, see §3). LANDED 2026-11-02
+(MC 11628), replace-not-delete: what ships instead is the **LOCAL per-hero best-runs
+board** — top-5 runs per hero on the `user://` Dawn Well save (the save's `best_runs`
+field, a menu Best-Runs overlay), this machine only; no server, no network — this
+section's EXCLUDED ruling for anything SERVER-side stands UNTOUCHED. v1 server facts stay cited
 v1-relative by this doc's declared convention (`:9`): stdlib-only Python + `/api/health` +
 `/api/highscores` (`ARCHITECTURE.md:37-42` @ `5dc7679`) — v1's server is unaffected by a 3D
 client, it just never moved here. The one vestige of the original plan — the v1-server harness

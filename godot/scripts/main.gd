@@ -12,6 +12,11 @@
 # T-M7B (MC 11627) grew it 668 -> 680: the touch overlay's HUD-family
 #   wiring (one preload + one wire + zero verbs, touch_hud.gd owns the
 #   paint); the touch itself rides the BRIDGE's _input, never this file.
+# T-M7C (MC 11628) grew it 680 -> 721: the META-side best-runs recording
+#   block at _end_run (zero funnel sites — the P-E3 count holds at 12),
+#   the NINTH overlay's two display-only wrappers + connects, and the
+#   Enter guard's bestruns_visible term (the A-E8 same-commit re-pin);
+#   the phase-router-split law unchanged.
 # The simulation loop below is v1 main.gd VERBATIM (DESIGN-3D §d): same
 # constants, same WIN_TIME gate, same score formula; only the visible layer
 # wiring is 3D (the v1 Node2D renderer body is deleted, §f — render.gd
@@ -173,6 +178,11 @@ func _ready() -> void:
 	_screens.settings_requested.connect(_open_settings)
 	_screens.settings_value.connect(_settings_value)
 	_screens.settings_closed.connect(_close_settings)
+	# Best-runs board (T-M7C, MC 11628): the NINTH overlay — open/close
+	# route like the achievements wrappers (display-only: zero verb
+	# writes, zero new funnel sites, the P-E3 count holds at 12).
+	_screens.bestruns_requested.connect(_open_bestruns)
+	_screens.bestruns_closed.connect(_close_bestruns)
 
 	bridge = preload("res://scripts/bridge.gd").new()
 	bridge.name = "VSHost"
@@ -237,9 +247,13 @@ func _handle_presses() -> void:
 		# open the Enter that would start a run is inert (the panel's own
 		# mouse buttons own input — A-E8, shop-guard parity, MC 11282).
 		# T-M7A (MC 11626): the settings overlay rides the SAME guard.
+		# T-M7C (MC 11628): the best-runs board rides it TOO — the DECLARED
+		# READING: the settings precedent (the same M7 wave, the same
+		# open-Back page) extends the guard; the test_stages A-E8 pin is
+		# re-pinned SAME-COMMIT, equal-or-stronger (replace-not-delete).
 		elif game.phase == "menu" and bridge.is_enter(code) and not _screens.shop_visible() \
 			and not _screens.stages_visible() and not _screens.chars_visible() \
-			and not _screens.settings_visible():
+			and not _screens.settings_visible() and not _screens.bestruns_visible():
 			_start_game()
 		elif game.phase == "levelup":
 			if code == "Digit1":
@@ -462,6 +476,17 @@ func _end_run(result: String) -> void:
 	# neither save() nor the funnel below — the ONE persisting call under
 	# the gold line covers it with the cash-out (P-E3 PIN-HOLD).
 	Achievements.update(_dawnwell, game, world)
+	# T-M7C (MC 11628) LOCAL best-runs board: the ONE run-end recording
+	# site, riding the same META-side position as the achievements block —
+	# outside the sim step's math, pure int reads of the frozen stats dict
+	# + the SAME _score the panel prints below (ONE formula home), zero
+	# RNG, zero game/world writes: godot/sim/ consumes NOTHING new, the
+	# byte law (the journey dump's death already walks this line). Rows
+	# land in _dawnwell.best_runs (in-memory only); the ONE persisting
+	# call under the gold line covers them — this block adds NO
+	# _meta_changed and NO save call (the P-E3 PIN-HOLD shape verbatim).
+	BestRuns.record(_dawnwell, game.char_id,
+			int(floor(game.stats.time)), game.stats.kills, _score(game.stats))
 	# M3 §1.1/§2 unlock chain (T-M3s): riding the EXISTING flags dict — a
 	# run of stage S at level >= the next row's unlock_level SETS that row's
 	# flag (SET only; death never unset anything, the flag dict is write-1
@@ -654,6 +679,22 @@ func _open_settings() -> void:
 
 func _close_settings() -> void:
 	_screens.close_settings()
+
+
+# --- Best-runs board verbs (T-M7C, MC 11628) -----------------------------------
+# The achievements verb contract verbatim: the page is display-only (the
+# rows were recorded at the run end by the block in _end_run and
+# persisted by the ONE funnel below the gold line), so these are pure
+# routing wrappers, zero meta mutation and zero persisting calls — the
+# P-E3 whole-scripts funnel occurrence count holds at 12 (this card adds
+# NO funnel site; the honest serial row: the count did NOT move).
+
+func _open_bestruns() -> void:
+	_screens.show_bestruns(_dawnwell)
+
+
+func _close_bestruns() -> void:
+	_screens.close_bestruns()
 
 
 func _settings_value(key: String, value: int) -> void:

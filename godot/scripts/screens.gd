@@ -21,6 +21,10 @@
 #   builder moved OUT to settings_page.gd per the same split law) — the
 #   named _card-cluster split candidate STAYS open; the growth is the
 #   dispatcher family, the reduction is still the scheduled move.
+#   T-M7C (MC 11628) grew it 657->711 the SAME way: the NINTH overlay's
+#   dispatcher half only (best-runs board; builder OUT to
+#   bestruns_page.gd, same law) — the split decision stays the scheduled
+#   _card-cluster move, untouched by this card.
 # §j (MC 11103): every card kind resolves to an icon file; v1's blank-icon
 # path is closed structurally — _card() has NO conditional around the
 # icon TextureRect and icon_path() is total over the 31 pool kinds
@@ -56,6 +60,13 @@ signal skin_selected(id: String)
 signal settings_requested
 signal settings_value(key: String, value: int)
 signal settings_closed
+# Best-runs board (T-M7C, MC 11628): the NINTH overlay, the DISPLAY-ONLY
+# contract of the achievements page — the rows were recorded + persisted
+# at the run end by the ONE funnel; the panel emits open/close ONLY,
+# main's thin wrappers route them, zero mutation and zero new funnel
+# sites (the P-E3 occurrence count holds at 12).
+signal bestruns_requested
+signal bestruns_closed
 
 # MC 11573 T-CC3R (audit-3 §1.1 P2 split): the M5 overlays' builders moved
 # out (see header); the signals ABOVE stay here — main connects to them on
@@ -63,6 +74,7 @@ signal settings_closed
 const RosterSelect := preload("res://scripts/roster_select.gd")
 const AchievementsPage := preload("res://scripts/achievements_page.gd")
 const SettingsPage := preload("res://scripts/settings_page.gd")
+const BestRunsPage := preload("res://scripts/bestruns_page.gd")
 
 const BONE := Color8(0xd8, 0xd2, 0xc0)
 const MOON := Color8(0xae, 0xbd, 0xd4)
@@ -152,6 +164,12 @@ var _chars_gold: Label
 var _settings: Control
 var _settings_sliders := {}
 var _settings_checks := {}
+# Best-runs board (T-M7C): the NINTH overlay's state lives HERE
+# (dispatcher law — the builder only touches it through the passed-in
+# instance). Rows rebuild per open (the achievements/shop law — the page
+# is stateless display, NOT the settings' stateful-widget shape).
+var _bestruns: Control
+var _bestruns_rows: VBoxContainer
 
 
 func _ready() -> void:
@@ -172,6 +190,8 @@ func _ready() -> void:
 	AchievementsPage.build(self) # builder in achievements_page.gd
 	_settings = _overlay() # the EIGHTH overlay (T-M7A), same dim idiom,
 	SettingsPage.build(self) # builder in settings_page.gd (same law)
+	_bestruns = _overlay() # the NINTH overlay (T-M7C), same dim idiom,
+	BestRunsPage.build(self) # builder in bestruns_page.gd (same law)
 	show_menu()
 
 
@@ -183,6 +203,7 @@ func show_menu() -> void:
 	_chars.visible = false
 	_achv.visible = false
 	_settings.visible = false
+	_bestruns.visible = false
 	_menu.visible = true
 
 
@@ -195,6 +216,7 @@ func hide_all() -> void:
 	_chars.visible = false
 	_achv.visible = false
 	_settings.visible = false
+	_bestruns.visible = false
 
 
 func show_levelup(offer: Array) -> void:
@@ -261,6 +283,11 @@ func _build_menu() -> void:
 	# T-M7A (MC 11626): the settings seam, same idiom — the owner's
 	# honest-absent playthrough row (MC 11446), closed.
 	box.add_child(_button("Settings", _on_settings))
+	# T-M7C (MC 11628): the best-runs seam, same idiom — the LOCAL board
+	# that REPLACES the retired global-leaderboard doc claim with the real
+	# thing (display-only like Achievements: the only verb is the open,
+	# Back owns the close; mouse-only, the owner plays desktop).
+	box.add_child(_button("Best Runs", _on_bestruns))
 
 
 func _build_levelup() -> void:
@@ -381,6 +408,10 @@ func _on_characters() -> void:
 
 func _on_settings() -> void:
 	settings_requested.emit()
+
+
+func _on_bestruns() -> void:
+	bestruns_requested.emit()
 
 
 # --- Dawn Well shop (T-M1f): the fourth overlay in the ONE panel style ----
@@ -654,4 +685,27 @@ func settings_visible() -> bool:
 
 func close_settings() -> void:
 	_settings.visible = false
+	show_menu()
+
+
+# --- Best-runs board (T-M7C, MC 11628): the NINTH overlay's dispatcher
+# half. The builder lives in bestruns_page.gd (the RosterSelect/
+# AchievementsPage/SettingsPage law); THIS half routes show/close/visible
+# exactly like the achievements page (the DISPLAY-ONLY shape: the rows
+# were recorded + persisted at the run end by the ONE funnel — nothing on
+# this side mutates), and the Back lands on show_menu (family law).
+
+func show_bestruns(well: DawnWell) -> void:
+	_well = well
+	_menu.visible = false
+	_bestruns.visible = true
+	BestRunsPage.refresh(self)
+
+
+func bestruns_visible() -> bool:
+	return _bestruns.visible
+
+
+func close_bestruns() -> void:
+	_bestruns.visible = false
 	show_menu()

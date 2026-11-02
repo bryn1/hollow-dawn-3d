@@ -8,7 +8,14 @@
 # pins it — + T-M7A's settings rows vol_master/vol_music/vol_sfx/int per
 # cent, fullscreen, pause_lose_focus int 0/1 (MC 11626), the same law
 # again: a missing field defaults (100/100/100/0/0 = the shipped loud
-# windowed no-auto-pause state), a HIGHER-version save still quarantines.
+# windowed no-auto-pause state), a HIGHER-version save still quarantines
+# + T-M7C's best_runs dict (MC 11628): "<char_index>" -> the hero's top-5
+# best-run rows ({"survived","kills","score"} ints) — the same law once
+# more: a missing field defaults {} (no board yet = the shipped state for
+# every older save), a HIGHER-version save still quarantines; the shape
+# is SANITIZED field-by-shape on load (_runs_map: non-dict sources and
+# malformed rows read as absent, int() lands the JSON-float rows exactly
+# like every int field above; the rank/truncation law is BestRuns' own).
 # Recovery rules (all observables, roadmap reset table): missing file -> fresh
 # defaults; undecodable -> quarantine (rename to dawnwell.corrupt.json kept +
 # stderr `SAVE_LOAD_FAIL path=...`) + defaults; version newer than this code
@@ -84,6 +91,14 @@ var vol_music := 100
 var vol_sfx := 100
 var fullscreen := 0
 var pause_lose_focus := 0
+# T-M7C (MC 11628): the LOCAL best-runs board — hero index (String key,
+# the JSON law) -> at most BestRuns.TOP rank-ordered run rows. ANOTHER
+# field-by-field ADDED row, VERSION unchanged (the best_cycle/stage/
+# counters/char/skin/settings proof verbatim); {} = the shipped no-runs-
+# yet state for every older save. The R1 disk-key-set pins ride the
+# growth same-commit (test_save.py + the test_dawnwell_shop.py second
+# reader, replace-not-delete, equal-or-stronger; LEDGER row).
+var best_runs: Dictionary = {}
 
 
 # Boot load: missing file is NOT a failure — fresh defaults, silent.
@@ -121,6 +136,9 @@ static func load_save() -> DawnWell:
 	well.vol_sfx = int(data.get("vol_sfx", 100))
 	well.fullscreen = int(data.get("fullscreen", 0))
 	well.pause_lose_focus = int(data.get("pause_lose_focus", 0))
+	# T-M7C best_runs: older saves -> {} = no board yet — the same
+	# field-by-field migration law; the shape is sanitized, not trusted.
+	well.best_runs = _runs_map(data.get("best_runs", {}))
 	return well
 
 
@@ -159,6 +177,7 @@ func reset() -> void:
 	vol_sfx = 100
 	fullscreen = 0
 	pause_lose_focus = 0
+	best_runs = {}
 	var dir := DirAccess.open("user://")
 	if dir != null and dir.file_exists(SAVE_PATH.trim_prefix("user://")):
 		dir.remove(SAVE_PATH.trim_prefix("user://"))
@@ -182,7 +201,7 @@ func as_data() -> Dictionary:
 		"best_cycle": best_cycle, "stage": stage, "counters": counters,
 		"char": char, "skin": skin, "vol_master": vol_master,
 		"vol_music": vol_music, "vol_sfx": vol_sfx, "fullscreen": fullscreen,
-		"pause_lose_focus": pause_lose_focus}
+		"pause_lose_focus": pause_lose_focus, "best_runs": best_runs}
 
 
 static func _int_dict(src: Variant) -> Dictionary:
@@ -190,4 +209,41 @@ static func _int_dict(src: Variant) -> Dictionary:
 	if typeof(src) == TYPE_DICTIONARY:
 		for k in src:
 			out[String(k)] = int(src[k])
+	return out
+
+
+# The best_runs shape law (T-M7C, MC 11628) — the _int_dict shape twin:
+# a non-dict source reads {} (never a crash, never a quarantine — the
+# field-by-field default law); keys must be ints (String-num or JSON-
+# float, int() lands both) or the bucket is dropped; values must be
+# Arrays of well-formed {"survived","kills","score"} dicts — a malformed
+# row reads as absent, and a bucket past BestRuns.TOP truncates to the
+# rank prefix (a hand-rolled disk can grow the board past the law; the
+# load reads the LAW, not the blob).
+static func _runs_map(src: Variant) -> Dictionary:
+	var out := {}
+	if typeof(src) != TYPE_DICTIONARY:
+		return out
+	for k in src:
+		var ks := String(str(k)) # str(): JSON keys arrive String;
+		if not ks.is_valid_int():
+			continue # non-numeric key: the bucket is dropped (the
+			# int("abc")==0 alias would otherwise LAND it on hero 0 —
+			# measured live on the probe's mixed-leg first run)
+		var idx := ks.to_int()
+		if idx < 0 or idx >= Roster.CHARACTERS.size():
+			continue # no such hero: the bucket is dropped
+		if typeof(src[k]) != TYPE_ARRAY:
+			continue
+		var rows: Array = []
+		for row in src[k]:
+			if typeof(row) != TYPE_DICTIONARY or not row.has("score") \
+					or not row.has("survived") or not row.has("kills"):
+				continue
+			rows.append({"survived": int(row.survived), "kills": int(row.kills),
+				"score": int(row.score)})
+			if rows.size() == BestRuns.TOP:
+				break
+		if not rows.is_empty():
+			out[String.num_int64(idx)] = rows
 	return out

@@ -53,6 +53,14 @@ func settings_visible() -> bool:
 	return false
 
 
+# T-M7C surface parity: the menu Enter guard also asks the best-runs board
+# (the settings contract verbatim — the sim never opens one; the reader
+# consumes NOTHING: it returns the shipped false, and the byte-identical
+# journey dump proves the sim path never grows past it, MC 11628).
+func bestruns_visible() -> bool:
+	return false
+
+
 func show_characters(_well: DawnWell) -> void:
 	pass
 

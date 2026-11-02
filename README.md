@@ -10,11 +10,16 @@ then a 3d remake. Same type of viduals, top down, but with chatacter animations,
 
 ## What it is
 Top-down survivor arena (core loop and tuned numbers inherited from v1: 4 biome bands,
-per-band enemy rosters, weapons, boss; a leaderboard claim this line once carried
+per-band enemy rosters, weapons, boss; the GLOBAL leaderboard claim this line once carried
 was retired at MC 11401 — it described no mechanism of this repo: no leaderboard
 server exists here and none ever did, zero commits ever touched `server/`
-(measured, MC 11398 §4.1); the v1 leaderboard stays a v1-server feature, EXCLUDED
-here per [PARITY-ROADMAP row 13](docs/PARITY-ROADMAP.md)) rebuilt with **real 3D
+(measured, MC 11398 §4.1). LANDED 2026-11-02 (MC 11628), replace-not-delete: the real
+local thing now ships — a **LOCAL per-hero best-runs board**: each hero's five best
+nights (survived / kills / score, scored by the end panel's own formula), recorded at
+every run end, persisted on the Dawn Well save on this machine, shown from the menu's
+**Best Runs** overlay (the ninth in the one panel style). A *server* leaderboard stays a
+v1-server feature, EXCLUDED here per [PARITY-ROADMAP row 13](docs/PARITY-ROADMAP.md))
+rebuilt with **real 3D
 models and animated movement** under a top-down camera, in the same dark-gothic art
 direction. As of v2.1.0 there are **THREE selectable stages** — Moor Vigil, Sunken Chapel
 and Ossuary Stair — chosen from a stage-select overlay ("Choose your night") and persisted

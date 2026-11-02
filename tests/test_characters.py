@@ -351,9 +351,13 @@ def test_b_e6_overlay_source_pins():
     # the Enter guard extension (the stages A-E8 parity; test_stages pin
     # re-pointed same commit, equal-or-stronger). GROWS AGAIN at T-M7A
     # (MC 11626): the settings overlay joins the guard chain — the
-    # chars_visible term re-pointed to its shipped continuation.
+    # chars_visible term re-pointed to its shipped continuation. GROWS
+    # AGAIN at T-M7C (MC 11628): the best-runs board joins the chain —
+    # the settings_visible term re-pointed to its shipped continuation
+    # again, the same-commit re-pin law, equal-or-stronger.
     assert re.search(r"stages_visible\(\) and not _screens\.chars_visible"
-                     r"\(\) \\\s*\n\t*and not _screens\.settings_visible\(\):",
+                     r"\(\) \\\s*\n\t*and not _screens\.settings_visible"
+                     r"\(\) and not _screens\.bestruns_visible\(\):",
                      MAIN)
 
 
