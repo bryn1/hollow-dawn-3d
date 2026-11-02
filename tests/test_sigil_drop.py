@@ -190,13 +190,76 @@ def test_weapon_side_grep_to_zero():
 
 # ---- SD-E6: the deviation doc PARSES as a contract (deviation-doc-as-pin) ----
 # The doc is the card's honest break; the footer table is machine-read here:
-# 16 channel rows, and EVERY SHIFTS/REMINT/RE-DERIVE row carries the owner
-# ratification verbatim (the REV-4 §9 binding cell format — non-empty is the
-# gate contract, the verbatim quote is the content). A RED planted on a COPY
-# (emptied cell) is proven in the card capture; the parse lives here.
+# EVERY SHIFTS/REMINT/RE-DERIVE row carries the owner ratification verbatim
+# (the REV-4 §9 binding cell format — non-empty is the gate contract, the
+# verbatim quote is the content). A RED planted on a COPY (emptied cell) is
+# proven in the card capture; the parse lives here.
+#
+# THE SEVEN 3DR-SPEC §2.4 PARAMETERISATION EDITS (T-3DR-c, MC 11774 — the
+# numbered list EXECUTED here; replace-not-delete: every M6 literal SURVIVES
+# as the M6 ENTRY's parameter, the doc itself byte-untouched by 3DR):
+#  E1 _footer_rows() takes the DOC PATH as a parameter (was: one global).
+#  E2 the verbatim string is a per-entry PARAMETER (M6 keeps its literal
+#     verbatim; the 3DR entry pins THIS milestone's owner-package answer,
+#     pasted never corrected, plus the '"Rec"' marker + date — §2.4 law).
+#  E3 the ruling DATE is a per-entry PARAMETER.
+#  E4 the footer ROW COUNT is a per-entry PARAMETER (M6: 26, pinned byte-
+#     true; the T-M6p/T-M6f re-pin lineage comments MOVED to the M6 entry).
+#  E5 the shifting branch asserts the owner cell NON-EMPTY as its OWN
+#     reason BEFORE the verbatim leg (a planted empty cell REDS for the
+#     EMPTY-CELL reason, never via the quote side effect — §8.1 A-5).
+#  E6 the shifting THRESHOLD is a per-entry PARAMETER (M6 ≥5 byte-true;
+#     3DR pins its honest §2.2 count: 2).
+#  E7 the CHANNEL UNIVERSE is a per-entry PARAMETER; the PENDING close-time
+#     rule stays UNIVERSAL law — shared, unparameterised.
 
-def _footer_rows():
-    text = open(DEVIATION_DOC, encoding="utf-8").read()
+# The footer PARSE CONTRACT — the shipped 5-col header, unchanged:
+# `channel | class | verdict | mechanism | owner-ratification` (3DR-SPEC
+# §2.4 FOOTER CONTRACT REVISED cell; the M6 doc already obeys it; the 3DR
+# doc lands under the same law; test_footer_header_shape REDS on any drift).
+DEVIATION_DOCS = [
+    {
+        "path": DEVIATION_DOC,  # docs/BYTE-DEVIATION-M6.md — ZERO 3DR bytes
+        "verbatim": ("Ibwant skeletons with movements. 2. Rec. 3. Ship. "
+                     "Ratufy",),
+        "date": "2026-10-29",
+        # T-M6p RE-PIN (MC 11697, replace-not-delete): the T-M6p battery
+        # APPENDED five MEASURED rows to the footer (journey + the three
+        # fixture re-mints + the unchanged-channels row); the sixteen
+        # ratified §9 REV-3 rows stay byte-untouched above them (git diff =
+        # additions only). 16 + 6 = 22 (the sixth: the s8 re-select row,
+        # A1-contract). T-M6f RE-PIN (MC 11705, same law): the F2 battery
+        # APPENDED four more MEASURED rows (journey additive-tail + the
+        # 13-fixture reproduce row + the strips RE-DERIVE re-mint row + the
+        # probe Table-3 NEW-legs row); every earlier row byte-untouched
+        # (git diff = additions only). 22 + 4 = 26. (E4 fold 2026-11-02:
+        # the literals moved HERE, values UNCHANGED — the entry parameter
+        # IS the pin.)
+        "rows": 26,
+        "shifts_min": 5,
+        "channels": ("journey", "strips", "s8 capture"),
+    },
+    {
+        # 3DR (T-3DR-c, MC 11774): pinned to the MEASURED footer of the
+        # capture-deviation doc (rows/threshold measured at battery time,
+        # never pre-written green). E2: the verbatim pasted never corrected
+        # — the MC 11773 package item 3 answer + the owner "Rec" marker.
+        "path": os.path.join(REPO, "docs", "CAPTURE-DEVIATION-3DR.md"),
+        "verbatim": (
+            "UniRig seed 12345, TWO-FAIL STOP per char -> static+procedural "
+            "fallback, never a broken animation; fallback rows named in docs",
+            '"Rec"',
+        ),
+        "date": "2026-10-31",
+        "rows": 5,
+        "shifts_min": 2,
+        "channels": ("roster-clips", "art-s2i"),
+    },
+]
+
+
+def _footer_rows(path):  # E1: the path is a parameter
+    text = open(path, encoding="utf-8").read()
     table = text[text.index("## OWNER-RATIFICATION FOOTER"):]
     rows = [ln for ln in table.splitlines() if ln.startswith("|")]
     header = rows[0]
@@ -213,43 +276,62 @@ def _footer_rows():
     return out
 
 
-def test_deviation_doc_footer_contract():
-    rows = _footer_rows()
-    # T-M6p RE-PIN (MC 11697, replace-not-delete): the T-M6p battery
-    # APPENDED five MEASURED rows to the footer (journey + the three
-    # fixture re-mints + the unchanged-channels row); the sixteen ratified
-    # §9 REV-3 rows stay byte-untouched above them (git diff = additions
-    # only). 16 + 6 = 22 (the sixth: the s8 re-select row, A1-contract).
-    # T-M6f RE-PIN (MC 11705, same law): the F2 battery APPENDED four more
-    # MEASURED rows (journey additive-tail + the 13-fixture reproduce row +
-    # the strips RE-DERIVE re-mint row + the probe Table-3 NEW-legs row);
-    # every earlier row stays byte-untouched above (git diff = additions
-    # only). 22 + 4 = 26.
-    assert len(rows) == 26, "the §9 table: 16 ratified + 10 measured (T-M6f)"
-    verbatim = "Ibwant skeletons with movements. 2. Rec. 3. Ship. Ratufy"
+def _judge_footer(entry):
+    rows = _footer_rows(entry["path"])
+    assert len(rows) == entry["rows"], \
+        "%s: footer carries %d rows, the pinned count is %d" \
+        % (entry["path"], len(rows), entry["rows"])  # E4
     shifts = 0
     for r in rows:
         cls = r["class"].upper()
         shifting = any(k in cls for k in ("SHIFT", "REMINT", "RE-DERIVE"))
         if shifting:
             shifts += 1
-            assert verbatim in r["owner"], \
-                "declared-shift cell must carry the owner reply VERBATIM: %s" \
+            # E5: the INDEPENDENT non-empty reason BEFORE the verbatim leg.
+            assert r["owner"], \
+                "EMPTY owner-ratification cell on a declared shift — the " \
+                "shifting-card rule (no unratified shift closes green): %s" \
                 % r["channel"]
-            assert "2026-10-29" in r["owner"], "the ruling date rides the cell"
+            for v in entry["verbatim"]:  # E2
+                assert v in r["owner"], \
+                    "declared-shift cell must carry the owner reply " \
+                    "VERBATIM: %s" % r["channel"]
+            assert entry["date"] in r["owner"], "the ruling date rides the " \
+                "cell"  # E3
         else:
             assert r["owner"], "no empty cells anywhere in the contract"
-    assert shifts >= 5, "every declared SHIFTS/REMINT/RE-DERIVE row carries it"
+    assert shifts >= entry["shifts_min"], \
+        "every declared SHIFTS/REMINT/RE-DERIVE row carries it (entry " \
+        "threshold %d, found %d)" % (entry["shifts_min"], shifts)  # E6
+
+
+def test_deviation_doc_footer_contract():
+    for entry in DEVIATION_DOCS:
+        _judge_footer(entry)
+
+
+def test_footer_header_shape():
+    # 3DR-SPEC §2.4 FOOTER CONTRACT REVISED (MC 11774): the parse lives in
+    # ONE function; the 5-col contract holds over EVERY matrix doc (the
+    # 3DR doc lands under the same header the M6 doc already obeys).
+    for entry in DEVIATION_DOCS:
+        _footer_rows(entry["path"])  # the header assert rides the parser
 
 
 def test_deviation_doc_names_the_at_risk_channels():
     # The AT-RISK channels get MEASURED honest verdicts in the doc body
-    # (honest per-channel rows are this card's DoD; the footer verdict cells
-    # are filled from the battery, never pre-written green).
-    text = open(DEVIATION_DOC, encoding="utf-8").read()
-    for ch in ("journey", "strips", "s8 capture"):
-        assert ch in text, "channel %s missing from the deviation doc" % ch
-    # the battery must FILL the verdicts: no PENDING may survive at close —
-    # this assert is the close-time gate (it went red until the battery ran).
-    assert "PENDING-measure" not in text and "MEASURED: PENDING" not in text, \
-        "the battery owed honest MEASURED rows — doc not closed"
+    # (honest per-channel rows are each card's DoD; the footer verdict
+    # cells are filled from the battery, never pre-written green). E7: the
+    # channel universe is per-entry; the PENDING rule below stays SHARED
+    # universal law over every matrix doc.
+    for entry in DEVIATION_DOCS:
+        text = open(entry["path"], encoding="utf-8").read()
+        for ch in entry["channels"]:
+            assert ch in text, "channel %s missing from %s" % (
+                ch, entry["path"])
+        # the battery must FILL the verdicts: no PENDING may survive at
+        # close — this assert is the close-time gate (it went red until
+        # the battery ran). UNIVERSAL law (E7), never parameterised.
+        assert ("PENDING-measure" not in text
+                and "MEASURED: PENDING" not in text), \
+            "the battery owed honest MEASURED rows — doc not closed"
