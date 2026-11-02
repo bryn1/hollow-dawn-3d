@@ -68,7 +68,21 @@ Hunyuan3D models are EXCLUDED (their license terms do not apply in the EU/UK/SK 
 ships in the EU).
 
 ## Status
-v4.0.0 ("3D Remake Wave 1") is the current release; releases live on this repo. It CLOSES
+v4.1.0 ("Owner Menu Trio") is the current release; releases live on this repo. It ships the
+owner's menu A/B/C verbatim (the backlog cards the owner's menu filed 2026-10-28, MC
+11626/11627/11628): the **SETTINGS SCREEN — volume, window/fullscreen, pause options** (the
+eighth overlay on the one panel style; ONE audio path — Master/Music/SFX buses, persisted
+through the Dawn Well save); **TOUCH CONTROLS for the web build (virtual joystick + pause tap;
+phones/tablets)** — the touch move vector rides the SAME input seam keys/mouse already share,
+byte-identical to the key-pair vectors by construction; and **LEADERBOARD DONE RIGHT — the
+LOCAL best-runs board per hero** (each hero's five best nights — survived/kills/score —
+persisted save-side, shown as the ninth overlay; the real local thing that makes the retired
+global-leaderboard claim truthful again; a *server* leaderboard stays EXCLUDED). The sim did
+not move across the trio: journey-5071 @11101 byte-identical at every card and at this tag
+(HOLD law), and the playable WASM + Windows pair ships ON this tag — v4.0.0's named open
+re-export row is CLOSED (docs/RELEASE-v4.1.0.md).
+v4.0.0 ("3D Remake Wave 1") is the release before it — dated demotion 2026-11-02 at the v4.1.0
+cut, replace-not-delete. It CLOSES
 the founding 3D-remake order's "chatacter animations, movements" line (MC 11094, verbatim
 above) with measured facts: the six statue-class heroes went through the ruled re-master +
 re-rig wave (TRELLIS.2 v3 meshes 6/6 FIRST SEED; UniRig at seed-fixed 12345 with the
@@ -112,8 +126,12 @@ v3.0.0 release notes). The end-of-run panel now exposes **The Dawn Well +
 Back to the menu** (MC 11497) — spend your run's gold where you died, then hand
 back to the menu. Still tracked, not silent (docs/PARITY-ROADMAP.md): coin-bag
 tiers (M2-SPEC §8.1), roster expansion +8/+5 (M2-SPEC §8.5), the unlock-flag store
-gating the LEVEL-UP POOL, a settings/options screen (Esc-pause + M-mute is all
-this build carries — no audio yet), and the VS 4th level-up option (our level-up
+gating the LEVEL-UP POOL, a settings/options screen (SUPERSEDED 2026-11-02 at v4.1.0,
+MC 11626 — the SETTINGS overlay ships: three persisted volume sliders on the one audio
+path, window/fullscreen and the focus-pause option; the retired wording "Esc-pause +
+M-mute is all this build carries" is kept here as dated lineage — and its "no audio yet"
+half stays TRUE of CONTENT: the buses and sliders ship, audio EMITTERS do not exist yet,
+named open in docs/RELEASE-v4.1.0.md), and the VS 4th level-up option (our level-up
 overlay offers exactly THREE cards; the special-conditions fourth is not a
 mechanism here). Of the 13 SEL-C meshes **10 ship rigged+clipped and 3 ship STATIC** at
 this tag — measured: `CLIP_SOURCE` 14 rows = 11 clip rows (incl. row-0 the Vigil) + 3 null

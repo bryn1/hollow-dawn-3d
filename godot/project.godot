@@ -10,7 +10,7 @@ buses/default_bus_layout="res://default_bus_layout.tres"
 [application]
 
 config/name="Hollow Dawn"
-config/version="4.0.0"
+config/version="4.1.0"
 run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 

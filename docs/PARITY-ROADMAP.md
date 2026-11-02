@@ -409,7 +409,11 @@ verbatim row rides `docs/RELEASE-v3.0.0.md`. Assets (M5): 13 character-class mes
 ratified re-masters, PERMANENCE rows written replace-not-delete). NOT LANDED
 (named+tracked, not silence): the unlock-flag store's POOL-GATING half (the level-up
 offer funnel reads no flag — named follow-on), a settings/options screen (Esc-pause +
-M-mute is all this build carries; no audio yet), the VS 4th level-up option (our
+M-mute is all this build carries; no audio yet) — SUPERSEDED 2026-11-02 at v4.1.0
+(MC 11626): the SETTINGS overlay LANDED — three persisted volume sliders on the one
+audio path, window/fullscreen, focus-pause option; the quoted wording stays as dated
+lineage; "no audio yet" remains TRUE of emitters/CONTENT, named open), the VS 4th
+level-up option (our
 level-up overlay offers exactly THREE cards — the three-sheet count is this game's
 own law, not VS parity); carried deferrals: coin-bag tiers (M2-SPEC §8.1),
 roster-expansion +8/+5 (M2-SPEC §8.5). Byte law at this cut: journey 5020 @HD3D_SEED=
@@ -451,7 +455,11 @@ merchant NPC, audio (already open polish), light-source destructibles.
    web+win. `user://` save files cover our persistence (the former "+ the leaderboard
    server" clause named a component this repo never carried — retired MC 11398 §4.1).
 3. **Mobile touch controls** — owner plays desktop/web (their mobile releases exist but the
-   control rows are UNVERIFIED, S8 ~676–678). Revisit on owner word.
+   control rows are UNVERIFIED, S8 ~676–678). Revisit on owner word. — PART-SUPERSEDED
+   2026-11-02 at v4.1.0 (MC 11627, the owner's own menu B word): TOUCH CONTROLS LANDED on
+   the WEB export (virtual joystick + pause tap riding the ONE input seam). What stays
+   EXCLUDED here is the native mobile BUILD (no Android/iOS export target): phones and
+   tablets play through the web build. The VS mobile control rows stay UNVERIFIED.
 4. **DLC-flagged / UNVERIFIED inventory rows** (S2 DLC passives, S4 [DLC] stages, S6 DLC
    roster ~97 names) — these are inventory GAPS (names only, effects unverified); re-verify
    before cloning any SYSTEM from them. No DLC-parity phase.
