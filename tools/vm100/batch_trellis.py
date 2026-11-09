@@ -60,22 +60,23 @@ def attempt(pipe, png, out, seed, budget, quality_on=False, no_strip=False):
                voxel_size=mesh.voxel_size,
                aabb=[[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]])
     for k, frac in enumerate((1.0, 0.8, 0.6)):
+        log(f"  SEAM-MODE {os.path.basename(out)} seed={seed}: "
+            + ("STRIP-ON (explicit opt-in --strip)" if not no_strip else
+               "NO-STRIP (MC 12342 DEFAULT — single-pass, textures intact)"))
         if no_strip:
-            # MC 12338 ESCAPE HATCH: the standing single-pass bake, unstripped
-            # and LOUD (row tagged OK-UNSTRIPPED below) — the seam's CLEAN gate
-            # at the calibrated rung can legitimately refuse a class of mesh;
-            # no standing bake may be silently blocked by it. Default is
-            # still strip-ON (argparse --no-strip).
-            log(f"  NO-STRIP ESCAPE: {os.path.basename(out)} seed={seed} "
-                f"baking UNSTRIPPED (standing single-pass to_glb, MC 12338)")
+            # MC 12342: the unstripped single-pass bake is the DEFAULT;
+            # rows are tagged OK-UNSTRIPPED. The seam (strip branch) is the
+            # explicit --strip opt-in until the post-bake-strip redesign lands.
+            log(f"  NO-STRIP: {os.path.basename(out)} seed={seed} "
+                f"baking UNSTRIPPED (standing single-pass to_glb)")
             glb = o_voxel.postprocess.to_glb(decimation_target=int(budget * frac),
                                              texture_size=2048, remesh=True,
                                              remesh_band=1, remesh_project=0,
                                              verbose=False, **gen)
             glb.export(out)
         else:
-            # MC 12334/12338: pass 1 remesh at the calibrated rung -> CPU
-            # interior strip -> gate CLEAN -> pass 2 budget-decimate + re-bake
+            # MC 12334/12338 (HAZARDED per MC 12339 — opt-in only):
+            # pass 1 remesh -> CPU strip -> gate -> pass 2 re-bake
             # (header of trellis_bake_wrap.py).
             bake_glb_stripped(gen, out, int(budget * frac),
                               to_glb=o_voxel.postprocess.to_glb, log=log)
@@ -92,12 +93,18 @@ def attempt(pipe, png, out, seed, budget, quality_on=False, no_strip=False):
 _ap = argparse.ArgumentParser(description="batch TRELLIS.2 bake (MC 11118)")
 _ap.add_argument("spec")
 _ap.add_argument("outdir")
-_ap.add_argument("--no-strip", action="store_true",
-                 help="MC 12338 escape hatch: bake UNSTRIPPED through the "
-                      "standing single-pass to_glb; LOUD in the log and "
-                      "tagged OK-UNSTRIPPED per row (default: strip-ON)")
+_mode = _ap.add_mutually_exclusive_group()
+_mode.add_argument("--strip", action="store_true",
+                   help="MC 12342: OPT IN to the interior-strip seam. "
+                        "HAZARDED until the post-bake-strip redesign lands "
+                        "(docs/RIG-DEVIATION-3DR-2.md, MC 12339 finding).")
+_mode.add_argument("--no-strip", action="store_true",
+                   help="explicit unstripped bake (standing single-pass "
+                        "to_glb), LOUD per row + tagged OK-UNSTRIPPED "
+                        "(default: no-strip)")
 _args = _ap.parse_args()
-spec, outdir, no_strip = _args.spec, _args.outdir, _args.no_strip
+spec, outdir = _args.spec, _args.outdir
+no_strip = not _args.strip   # MC 12342 DEFAULT INVERSION: strip is explicit opt-in
 rows = []
 for line in open(spec):
     line = line.strip()
@@ -128,9 +135,9 @@ for name, png, budget, seed, q in rows:
                                 no_strip=no_strip)
             if within:
                 ok_n += 1
-                results.append((name, "OK-UNSTRIPPED" if no_strip else "OK",
+                results.append((name, "OK-UNSTRIPPED" if no_strip else "OK-STRIPPED",
                              s, tris, budget))
-                log(f"ROW {name} {'OK-UNSTRIPPED' if no_strip else 'OK'} seed={s} tris={tris}/{budget} "
+                log(f"ROW {name} {'OK-UNSTRIPPED' if no_strip else 'OK-STRIPPED'} seed={s} tris={tris}/{budget} "
                     f"bytes={os.path.getsize(out)} secs={time.time()-t:.0f}")
             else:
                 results.append((name, "OVERBUDGET", s, tris, budget))
