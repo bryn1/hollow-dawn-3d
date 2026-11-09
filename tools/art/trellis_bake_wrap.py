@@ -1,99 +1,57 @@
 #!/usr/bin/env python3
-"""STRIP SEAM for the standing TRELLIS.2 bake path (MC 12334; RE-RUNNED MC
-12338 — see RUNG below).
+"""INTERIOR-STRIP SEAM for the standing TRELLIS.2 bake path — BAKE-ONCE,
+STRIP-AFTER (MC 12342 architecture; supersedes the MC 12334/12338 two-pass
+seam, whose dated hazard record is in docs/RIG-DEVIATION-3DR-2.md §Gate-lab
+and whose fix history is in git at 5b82094/b54bd6f).
 
-WHAT THE SEAM IS, HONESTLY: o_voxel.postprocess.to_glb is ONE monolithic call
-(clean -> narrow-band remesh -> decimate -> UV -> TEXTURE BAKE, all inside a CUDA
-cumesh/nvdiffrast context; there is no importable stage split and patching
-/opt is out of the read-only rule). The gate-lab law is realized as a TWO-PASS
-to_glb call around a CPU strip — the only split the vendor surface allows:
+WHY THIS SHAPE (MC 12339 real-mesh evidence): the two-pass seam (remesh ->
+strip -> remesh=False re-bake) (i) stripped VISIBLE skin at cloth-over-body
+interfaces and the CLEAN gate could not catch it (an opened shell lets probe
+rays escape — the metric is gamed by the stripper's own holes), and (ii) the
+remesh=False re-bake on an open shell structurally breaks the texture bake
+(near-black patchy skin). The inner walls it removes are INVISIBLE — they
+carry no pixels — so the correct order is: bake once on the CLOSED remeshed
+mesh (full textures, the vendor's own Y-up path, the same single-pass shape
+as the --no-strip default), then delete inner faces as PURE GEOMETRY.
 
-  pass 1  to_glb(remesh=True, decimation_target=PASS1_DECIMATION (~1M),
-          texture_size=16) -> the remeshed mesh at the CALIBRATED RUNG. The
-          bake runs but is discarded (16px textures cost milliseconds). The
-          pre-strip GLB is KEPT beside the output as <out>.prestrip.glb —
-          debug evidence, not an artifact.
-  strip   tools/art/interior_strip.strip_roof (roof rule, gate-lab MC 12320)
-  gate    interior_probe on the stripped mesh, AT THE CALIBRATED RUNG, must
-          read CLEAN, else the bake is REFUSED (raise).
-  pass 2  to_glb(remesh=False, decimation_target=budget, texture_size=<real>)
-          on the stripped mesh -> the FINAL textured GLB. The BUDGET
-          DECIMATION runs HERE, after the strip. remesh=False is mandatory:
-          pass-1's dual-grid remesh is what re-creates the double skin; pass 2
-          only decimates + cleans + UVs + bakes the stripped geometry.
+  bake   to_glb(remesh=True, decimation_target=budget, texture_size=<real>)
+         -> <out>.prestrip.glb KEPT beside the output (textured evidence).
+  strip  strip_roof(preserve_visual=True): face-removal only; UVs on kept
+         faces are EXACT (update_faces + update_vertices, unit-tested;
+         asserted to survive the GLB roundtrip). NEVER a re-bake, NEVER
+         remesh after the strip.
+  gate   the post-strip probe at the ship rung is a MEASUREMENT row (logged,
+         never blocking — ship-rung CLEAN is the wrong target, MC 12339);
+         the REAL gate is render parity: tools/art/render_parity.py (4-yaw
+         matched-camera solid check + IoU floor vs the same-seed unstripped
+         arm; the RED control — a punched hole MUST fail the floor — is
+         proven CPU-side in tests/test_art_interior_gate.py; the full bpy
+         leg rides the next real bake card).
+  cal    the probe --selftest contract (PASS x3 at BOTH rungs) still runs
+         once per process BEFORE any strip — a measurement is meaningless
+         uncalibrated; controls failing REFUSES (RuntimeError).
 
-RUNG (the MC 12338 fix): the 12334 pass-1 decimated straight to the ship
-budget BEFORE the strip. MC 12337 measured why that is dead — at an 8k-tri
-budget the decimation has already WELDED the double skin into single sheets
-(nothing to strip), and the residual two-sided thin features keep
-interior_frac ~0.73 for ANY bake of that class (the OFF arm read 0.9425; the
-shipped char-emberwright itself 0.939): the CLEAN gate cannot pass there, so
-every standing bake would be blocked. Wall pairs are resolvable at the ~1M
-remesh rung, which is exactly where gate-lab (MC 12320) calibrated strip ->
-CLEAN — so strip and gate live at PASS1_DECIMATION and the budget binds only
-at the end. The SHIP-RUNG benefit is NOT gated by tri count (the old <=65%
-row is DROPPED, both arms land at the same budget): it is measured as
-interior_frac strip-OFF vs strip-ON AT THE SHIP RUNG, same ref/seed/budget,
-plus matched-camera render parity (MC 12337 re-run law).
-
-Gate law (MC 12334): the probe's --selftest contract (PASS x3 at BOTH rungs
-since MC 12338) runs ONCE per process BEFORE the first bake; controls failing
-REFUSES the bake (RuntimeError). Costs (gate-lab measurements): the strip
-runs ~800-1000 s CPU on the ~1M-tri mesh — the GPU window idles; pass 1's
-glb export at 1M tris is tens of seconds. That price is the law, not a bug.
-
-HAZARD (MC 12339 real-mesh evidence, seam redesign rides the next card):
-on the REAL emberwright mesh this seam produced (i) VISIBLE SKIN LOSS — the
-roof rule strips the lower-support member of pairs of TWO VISIBLE surfaces
-(cloth-over-body interfaces), reads as angular holes upper-body in 4-yaw
-renders (silhouette IoU vs the OFF arm 0.741/0.803), and the gate did not
-catch it because an opened shell lets probe rays ESCAPE -> the CLEAN verdict
-is gamed by the stripper's own holes; and (ii) a BROKEN TEXTURE BAKE — the
-remesh=False pass 2 ray-bakes into the attr volume across the open shell and
-comes back near-black patchy (baseColor std 4.4 vs the OFF arm's 25.2). The
-proposed redesign bakes ONCE on the closed remeshed mesh at full texture and
-applies the strip as pure geometry AFTER the bake (invisible inner walls
-carry no pixels; no pass-2 re-bake). Batch default strip-ON is HAZARDED
-until that lands — flagged to the owner in the MC 12339 RESULT.
-
-Injection points (to_glb, to_torch) exist for the CPU unit test — the real
-caller (tools/vm100/batch_trellis.py) passes the vendor function. torch is
-imported LAZILY inside _to_torch so this module loads on GPU-less seats.
+Batch default is no-strip (MC 12342 commit 1); this seam is the explicit
+--strip opt-in until the render-parity gate has gone GREEN on a real bake.
 """
 import os
 import sys
 
-import numpy as np
+import trimesh
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from interior_probe import load_merged, probe, selftest_ok
+from interior_probe import probe, selftest_ok
 from interior_strip import strip_roof
 
-PASS1_TEXTURE_SIZE = 16          # throwaway: pass 1 exists for geometry only
-# MC 12338 RUNG: strip+gate run at the rung where gate-lab (MC 12320)
-# calibrated strip->CLEAN: walls are RESOLVABLE there (~1M-tri remesh), not at
-# the 8k ship budget (MC 12337: welded sheets, CLEAN unpassable). Matches the
-# P1 evidence mesh (~993k).
-PASS1_DECIMATION = 1_000_000
 _SELFTEST = None                 # per-process latch: run once, refuse forever on fail
 
 
-def _to_torch(x):
-    import torch
-    # MC 12339: the FIRST real pass-2 run caught the int64 trap — o_voxel
-    # requires IntTensor (int32) faces; trimesh hands back int64. Only
-    # s.vertices (float64->float32) and s.faces (int->int32) pass through.
-    dtype = torch.int32 if np.asarray(x).dtype.kind in "iu" else torch.float32
-    return torch.as_tensor(np.asarray(x), dtype=dtype)
-
-
-def bake_glb_stripped(gen, out_path, budget, *, to_glb, to_torch=None,
-                      texture_size=2048, log=print):
-    """Two-pass seam around the standing bake. `gen` is the to_glb geometry
-    kwargs (vertices, faces, attr_volume, coords, attr_layout, voxel_size,
-    aabb). Returns the FINAL (budget-decimated) tri count. Raises RuntimeError
-    on a gate refusal. ORDER IS THE FIX (MC 12338): strip + gate at
-    PASS1_DECIMATION, the budget binds only in pass 2."""
+def bake_then_strip(gen, out_path, budget, *, to_glb, texture_size=2048,
+                    log=print):
+    """Bake once (closed remesh, textures intact), then strip as pure
+    geometry. `gen` is the to_glb geometry kwargs. Returns the final
+    (post-strip) face count. Raises RuntimeError only on a calibration-
+    contract failure (refuse to MEASURE uncalibrated)."""
     global _SELFTEST
     if _SELFTEST is None:
         log("interior-gate: running probe --selftest calibration contract...")
@@ -101,38 +59,22 @@ def bake_glb_stripped(gen, out_path, budget, *, to_glb, to_torch=None,
     if not _SELFTEST:
         raise RuntimeError("INTERIOR-GATE REFUSED: probe selftest controls "
                            "failed — refusing to bake (gate law, MC 12334)")
-    to_torch = to_torch or _to_torch
     pre = out_path + ".prestrip.glb"
-    log(f"seam pass 1: remesh at the CALIBRATED RUNG (decimation_target="
-        f"{PASS1_DECIMATION}, throwaway texture {PASS1_TEXTURE_SIZE})")
-    glb1 = to_glb(decimation_target=PASS1_DECIMATION,
-                  texture_size=PASS1_TEXTURE_SIZE, remesh=True, remesh_band=1,
-                  remesh_project=0, verbose=False, **gen)
-    glb1.export(pre)
-    m = load_merged(pre)
-    s, marked = strip_roof(m)
-    log(f"seam strip: {len(m.faces)} -> {len(s.faces)} faces (marked {marked})")
-    if probe(s, os.path.basename(pre) + " STRIPPED"):
-        raise RuntimeError("INTERIOR-GATE REFUSED: stripped mesh still probes "
-                           "INTERIOR — mesh not exported")
-    log(f"seam pass 2: budget-decimate + re-bake the stripped mesh "
-        f"(decimation_target={budget}, remesh=False, texture {texture_size})")
-    glb2 = to_glb(decimation_target=int(budget),
-                  texture_size=int(texture_size), remesh=False, verbose=False,
-                  **{**gen, "vertices": to_torch(s.vertices),
-                     "faces": to_torch(s.faces)})
-    # MC 12339 UP-AXIS GUARD (caught on the first real pass-2 run): the
-    # vendor's up-axis correction lives INSIDE the remesh leg — remesh=True
-    # exports Y-up (glTF standard, == the shipped asset convention);
-    # remesh=False returns Z-up. Restore Y-up as (x, y, z) -> (x, z, -y)
-    # (Rx(-90): +Z -> +Y), verified by matched-camera render parity against
-    # the single-pass arm (MC 12339 ship-law row d: silhouette parity, both
-    # solids, deltas named).
-    t44 = np.eye(4)
-    t44[:3, :3] = [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, -1.0, 0.0]]
-    glb2.apply_transform(t44)     # Scene or Mesh — both apply vertices+normals
-    glb2.export(out_path)
-    return len(load_merged(out_path).faces)
+    log(f"seam bake: single closed-remesh bake (decimation_target={budget}, "
+        f"texture {texture_size}) — textures intact, prestrip kept")
+    glb = to_glb(decimation_target=int(budget),
+                 texture_size=int(texture_size), remesh=True, remesh_band=1,
+                 remesh_project=0, verbose=False, **gen)
+    glb.export(pre)
+    m = trimesh.load(pre, force="mesh", process=False)
+    s, marked = strip_roof(m, preserve_visual=True)
+    log(f"seam strip (pure geometry): {len(m.faces)} -> {len(s.faces)} faces "
+        f"(removed {marked}); UVs preserved on kept faces (no re-bake)")
+    # MEASUREMENT row (MC 12342): NOT a gate — ship-rung CLEAN is the wrong
+    # target, gamed by the stripper's own holes (MC 12339 finding).
+    probe(s, os.path.basename(out_path) + " STRIPPED (measurement only)")
+    s.export(out_path)
+    return len(s.faces)
 
 
 if __name__ == "__main__":

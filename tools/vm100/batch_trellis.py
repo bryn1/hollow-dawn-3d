@@ -28,7 +28,7 @@ for _art in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "art"),
              os.path.dirname(os.path.abspath(__file__))):
     if _art not in sys.path:
         sys.path.insert(0, _art)
-from trellis_bake_wrap import bake_glb_stripped
+from trellis_bake_wrap import bake_then_strip
 
 # Substitution carried VERBATIM from poc_trellis.py (MC 11096): pipeline.json names the
 # HF-GATED briaai/RMBG-2.0; we run the SAME-architecture MIT ZhengPeng7/BiRefNet and the
@@ -75,11 +75,12 @@ def attempt(pipe, png, out, seed, budget, quality_on=False, no_strip=False):
                                              verbose=False, **gen)
             glb.export(out)
         else:
-            # MC 12334/12338 (HAZARDED per MC 12339 — opt-in only):
-            # pass 1 remesh -> CPU strip -> gate -> pass 2 re-bake
-            # (header of trellis_bake_wrap.py).
-            bake_glb_stripped(gen, out, int(budget * frac),
-                              to_glb=o_voxel.postprocess.to_glb, log=log)
+            # MC 12342: BAKE-ONCE (closed remesh, textures intact), then
+            # strip as pure geometry — no re-bake, never remesh after
+            # (header of trellis_bake_wrap.py). Render-parity gate is the
+            # card's job (tools/art/render_parity.py), not the seam's.
+            bake_then_strip(gen, out, int(budget * frac),
+                            to_glb=o_voxel.postprocess.to_glb, log=log)
         tris = count_tris(out)
         if tris <= budget:
             if quality_on:

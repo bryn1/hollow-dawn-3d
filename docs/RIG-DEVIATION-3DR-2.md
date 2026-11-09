@@ -71,7 +71,69 @@ mapped / target_unmapped): char-tallow-seer 22/22/0, skin-tide 28/22/6, skin-voi
 The observable gate is the shipped named animations + skin data, measured per mesh in
 `.tmp/3dr.txt` (per-window LAW rows, both-failure transcripts, framediff legs).
 
-## §Gate-lab supersession — interior-strip law for art bakes (MC 12334; RE-RUNNED MC 12338, 2026-11-09)
+## §Gate-law — interior-strip law for art bakes (MC 12342 BAKE-ONCE STRIP-AFTER, 2026-11-09)
+
+MC 12339 (emberwright re-master attempt 2) ran the MC 12338 seam on the REAL
+mesh and NO-SHIPPED it with a P1 finding; this is the redesign it authorized
+(third seam integration — the owner has been told: if the RENDER gate fails
+on the next real bake, G2 closes REJECT with the evidence trail; no fourth
+attempt without a new owner ruling).
+
+* SAFETY FIRST (MC 12342 commit 1, sha b54bd6f): batch_trellis default
+  INVERTED to strip-OFF. `--strip` is an explicit OPT-IN (its help names the
+  hazard); `--no-strip` keeps its semantics and is now the default; every
+  row logs SEAM-MODE and tags OK-UNSTRIPPED / OK-STRIPPED.
+* ARCHITECTURE (MC 12342 commit 2): tools/art/trellis_bake_wrap.py now bakes
+  ONCE on the CLOSED remeshed mesh (the standing single-pass to_glb path —
+  textures intact, vendor Y-up), then applies the strip as PURE GEOMETRY:
+  face-removal only via interior_strip.strip_roof(preserve_visual=True) —
+  UVs on kept faces are row-exact (unit test, incl. the shipped-file GLB
+  roundtrip judged at f32 precision: measured post-export uv delta 4.5e-08,
+  rounding only). NEVER a re-bake, NEVER remesh post-strip. The pre-strip
+  textured GLB is KEPT beside the output as `<out>.prestrip.glb` evidence.
+* GATE LAW (MC 12342 rewrite): (i) the post-strip probe at the ship rung is
+  a MEASUREMENT ROW (logged, never blocking — MC 12339 proved post-strip
+  budget-rung CLEAN is the wrong target, gamed by the stripper's own holes);
+  (ii) THE REAL GATE is RENDER PARITY (tools/art/render_parity.py): 4-yaw
+  matched-camera solid check (stored describe-image reads, MC 12339 (d)
+  idiom) + silhouette IoU FLOOR 0.95 vs the same-seed unstripped arm —
+  calibrated on the measured bad values (0.741/0.803). The gate carries its
+  planted-bad RED control IN THE SUITE (tests/test_art_interior_gate.py:
+  a punched visible hole must drop IoU below the floor; CLI reproduction:
+  `render_parity.py good.png punched.png` -> IOU=0.807 FLOOR=0.95 FAIL,
+  exit 1 — while identical masks give IOU=1.000 PASS exit 0). The full bpy
+  4-yaw leg at the real bake rides the next bake card; the CPU rasterizer
+  proves the gate machinery can go RED without GPU.
+* CALIBRATION CONTRACT unchanged: probe --selftest PASS x3 at BOTH rungs
+  runs once per process BEFORE any bake/measurement; controls failing
+  REFUSE (RuntimeError).
+* SHIP-LAW FOR THE BENEFIT unchanged (MC 12338 wording): interior_frac at
+  the ship rung, strip-OFF vs strip-ON, same ref/seed/budget, numbers named.
+
+## SUPERSEDED — DO NOT USE — §Gate-lab (MC 12334; RE-RUNNED MC 12338) wording, dated 2026-11-09, retired same day by MC 12342
+
+> The standing bake path (tools/vm100/batch_trellis.py) now runs EVERY
+> export through the two-pass seam tools/art/trellis_bake_wrap.py, RE-RUNNED
+> per MC 12338: pass 1 remeshes at the CALIBRATED RUNG (decimation_target=
+> 1M, 16px throwaway texture) -> CPU strip -> probe gate AT THAT RUNG (must
+> read CLEAN or the bake is REFUSED) -> pass 2 budget-decimates + re-bakes
+> the stripped mesh (remesh=False). ... default stays strip-ON.
+
+The two-pass order above is what MC 12339 disproved on the real mesh; its
+finding row (wrapper hazard note of commit 5b82094, kept verbatim here per
+versioned-truth): "on the REAL emberwright mesh this seam produced (i)
+VISIBLE SKIN LOSS — the roof rule strips the lower-support member of pairs
+of TWO VISIBLE surfaces (cloth-over-body interfaces), reads as angular holes
+upper-body in 4-yaw renders (silhouette IoU vs the OFF arm 0.741/0.803), and
+the gate did not catch it because an opened shell lets probe rays ESCAPE ->
+the CLEAN verdict is gamed by the stripper's own holes; and (ii) a BROKEN
+TEXTURE BAKE — the remesh=False pass 2 ray-bakes into the attr volume across
+the open shell and comes back near-black patchy (baseColor std 4.4 vs the
+OFF arm's 25.2)." The community-claim row, the ship-benefit row, the
+already-shipped-assets row and the red-case re-proof law SURVIVE this
+supersession unchanged (restated above).
+
+## [SUPERSEDED 2026-11-09 by MC 12342 — full text preserved] §Gate-lab supersession — interior-strip law for art bakes (MC 12334; RE-RUNNED MC 12338, 2026-11-09)
 
 The gate-lab verdicts (MC 12319 probe, MC 12320 stripper — pinned under
 `.audits/20261109-1115-gate-lab/out/`, verdict files TEST-verdict-P1/P2.md) are

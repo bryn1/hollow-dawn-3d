@@ -278,7 +278,9 @@ def rung_fixtures():
     legal with a red-case re-proof at each rung it will face).
 
     CALIBRATED rung (~1M-scale where wall pairs are resolvable — the gate-lab
-    MC 12320 home): the gate runs HERE (seam pass 1 target PASS1_DECIMATION).
+    MC 12320 home): calibration contract runs here; since MC 12342 the seam
+    has NO blocking rung anymore — the post-strip probe is a MEASUREMENT row
+    and the real gate moved to render parity (tools/art/render_parity.py).
     SHIP rung (~8k-tri budget scale, the batch row budget): the seam never
     gates here; controls run here anyway so a future threshold edit cannot
     silently break the ship-rung BENEFIT MEASUREMENT (interior_frac OFF vs ON,

@@ -50,9 +50,14 @@ from interior_probe import (DELTA_FRAC, DOT_MIN, load_merged, probe,
                             rung_fixtures)
 
 
-def strip_roof(m, verbose=True):
+def strip_roof(m, verbose=True, preserve_visual=False):
     """Return (stripped_mesh, marked_count). Importable seam: the bake wrapper
-    (trellis_bake_wrap.py) calls THIS, not the CLI."""
+    (trellis_bake_wrap.py) calls THIS, not the CLI.
+
+    preserve_visual=True (MC 12342 post-bake strip): the kept faces retain
+    their UVs EXACTLY (update_faces + update_vertices — trimesh's own
+    face_visual bookkeeping; unit-tested row-by-row and across a GLB
+    roundtrip). False keeps the historical bare-geometry rebuild."""
     V, F = m.vertices, m.faces
     C = m.triangles_center
     N = m.face_normals
@@ -124,6 +129,13 @@ def strip_roof(m, verbose=True):
               f"({int(loser.sum())/len(F):.3f}) in {time.time()-t0:.0f}s",
               flush=True)
     keep = ~loser
+    if preserve_visual:
+        out = m.copy()
+        out.update_faces(keep)          # kept-face order preserved; UVs follow
+        used = np.zeros(len(V), dtype=bool)
+        used[out.faces] = True
+        out.update_vertices(used)       # crops dead verts, remaps UV rows
+        return out, int(loser.sum())
     subV, subInv = np.unique(F[keep].reshape(-1), return_inverse=True)
     out = trimesh.Trimesh(vertices=V[subV],
                           faces=subInv.reshape(F[keep].shape), process=False)
