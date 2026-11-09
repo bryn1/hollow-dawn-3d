@@ -17,6 +17,18 @@ from trellis2.pipelines import rembg
 import o_voxel
 import trimesh
 
+# MC 12334 INTERIOR-STRIP GATE (gate-lab law, MC 12319/12320): the bake goes
+# through the two-pass seam in tools/art/trellis_bake_wrap.py. Staging note for
+# the batch runner: copy tools/art/{interior_probe,interior_strip,
+# trellis_bake_wrap}.py NEXT TO this file in the staged run dir (same convention
+# as player_attempts.py). Import failure is LOUD by design — there is no
+# unstripped fallback path on this pipeline.
+for _art in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "art"),
+             os.path.dirname(os.path.abspath(__file__))):
+    if _art not in sys.path:
+        sys.path.insert(0, _art)
+from trellis_bake_wrap import bake_glb_stripped
+
 # Substitution carried VERBATIM from poc_trellis.py (MC 11096): pipeline.json names the
 # HF-GATED briaai/RMBG-2.0; we run the SAME-architecture MIT ZhengPeng7/BiRefNet and the
 # subclass IGNORES the passed name (pipeline.json overrides a default kwarg).
@@ -42,15 +54,15 @@ def attempt(pipe, png, out, seed, budget, quality_on=False):
     image = Image.open(png)
     mesh = pipe.run(image, seed=seed, pipeline_type="1024")[0]
     mesh.simplify(16777216)  # nvdiffrast limit (vendor example)
+    gen = dict(vertices=mesh.vertices, faces=mesh.faces, attr_volume=mesh.attrs,
+               coords=mesh.coords, attr_layout=mesh.layout,
+               voxel_size=mesh.voxel_size,
+               aabb=[[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]])
     for k, frac in enumerate((1.0, 0.8, 0.6)):
-        glb = o_voxel.postprocess.to_glb(
-            vertices=mesh.vertices, faces=mesh.faces, attr_volume=mesh.attrs,
-            coords=mesh.coords, attr_layout=mesh.layout, voxel_size=mesh.voxel_size,
-            aabb=[[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
-            decimation_target=int(budget * frac), texture_size=2048,
-            remesh=True, remesh_band=1, remesh_project=0, verbose=False,
-        )
-        glb.export(out)
+        # MC 12334: pass 1 remesh+decimate -> CPU interior strip -> gate CLEAN ->
+        # pass 2 re-bake on the stripped mesh (header of trellis_bake_wrap.py).
+        bake_glb_stripped(gen, out, int(budget * frac),
+                          to_glb=o_voxel.postprocess.to_glb, log=log)
         tris = count_tris(out)
         if tris <= budget:
             if quality_on:
