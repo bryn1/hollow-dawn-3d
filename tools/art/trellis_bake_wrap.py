@@ -42,6 +42,20 @@ REFUSES the bake (RuntimeError). Costs (gate-lab measurements): the strip
 runs ~800-1000 s CPU on the ~1M-tri mesh — the GPU window idles; pass 1's
 glb export at 1M tris is tens of seconds. That price is the law, not a bug.
 
+HAZARD (MC 12339 real-mesh evidence, seam redesign rides the next card):
+on the REAL emberwright mesh this seam produced (i) VISIBLE SKIN LOSS — the
+roof rule strips the lower-support member of pairs of TWO VISIBLE surfaces
+(cloth-over-body interfaces), reads as angular holes upper-body in 4-yaw
+renders (silhouette IoU vs the OFF arm 0.741/0.803), and the gate did not
+catch it because an opened shell lets probe rays ESCAPE -> the CLEAN verdict
+is gamed by the stripper's own holes; and (ii) a BROKEN TEXTURE BAKE — the
+remesh=False pass 2 ray-bakes into the attr volume across the open shell and
+comes back near-black patchy (baseColor std 4.4 vs the OFF arm's 25.2). The
+proposed redesign bakes ONCE on the closed remeshed mesh at full texture and
+applies the strip as pure geometry AFTER the bake (invisible inner walls
+carry no pixels; no pass-2 re-bake). Batch default strip-ON is HAZARDED
+until that lands — flagged to the owner in the MC 12339 RESULT.
+
 Injection points (to_glb, to_torch) exist for the CPU unit test — the real
 caller (tools/vm100/batch_trellis.py) passes the vendor function. torch is
 imported LAZILY inside _to_torch so this module loads on GPU-less seats.
@@ -66,7 +80,10 @@ _SELFTEST = None                 # per-process latch: run once, refuse forever o
 
 def _to_torch(x):
     import torch
-    dtype = torch.int64 if np.asarray(x).dtype.kind in "iu" else torch.float32
+    # MC 12339: the FIRST real pass-2 run caught the int64 trap — o_voxel
+    # requires IntTensor (int32) faces; trimesh hands back int64. Only
+    # s.vertices (float64->float32) and s.faces (int->int32) pass through.
+    dtype = torch.int32 if np.asarray(x).dtype.kind in "iu" else torch.float32
     return torch.as_tensor(np.asarray(x), dtype=dtype)
 
 
@@ -104,6 +121,16 @@ def bake_glb_stripped(gen, out_path, budget, *, to_glb, to_torch=None,
                   texture_size=int(texture_size), remesh=False, verbose=False,
                   **{**gen, "vertices": to_torch(s.vertices),
                      "faces": to_torch(s.faces)})
+    # MC 12339 UP-AXIS GUARD (caught on the first real pass-2 run): the
+    # vendor's up-axis correction lives INSIDE the remesh leg — remesh=True
+    # exports Y-up (glTF standard, == the shipped asset convention);
+    # remesh=False returns Z-up. Restore Y-up as (x, y, z) -> (x, z, -y)
+    # (Rx(-90): +Z -> +Y), verified by matched-camera render parity against
+    # the single-pass arm (MC 12339 ship-law row d: silhouette parity, both
+    # solids, deltas named).
+    t44 = np.eye(4)
+    t44[:3, :3] = [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, -1.0, 0.0]]
+    glb2.apply_transform(t44)     # Scene or Mesh — both apply vertices+normals
     glb2.export(out_path)
     return len(load_merged(out_path).faces)
 

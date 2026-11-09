@@ -82,6 +82,11 @@ def test_strip_cup_parity_and_bad_control():
 class _FakeGlb:
     def __init__(self, mesh):
         self.mesh = mesh
+        self.applied = []               # MC 12339 up-axis guard calls it
+
+    def apply_transform(self, m):
+        self.applied.append(m)
+        self.mesh.apply_transform(m)
 
     def export(self, path):
         self.mesh.export(path)
