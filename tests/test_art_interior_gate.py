@@ -107,12 +107,22 @@ def test_wrapper_seam_plumbing(tmp_path):
                            to_torch=lambda x: x, log=lambda *_: None)
     assert calls[0]["remesh"] is True
     assert calls[0]["texture_size"] == wrap.PASS1_TEXTURE_SIZE
+    # MC 12338 ORDERING ASSERT: pass 1 runs at the CALIBRATED RUNG, never at
+    # the ship budget (strip-before-final-decimate); the budget binds ONLY
+    # in pass 2, after the gate passed.
+    assert calls[0]["decimation_target"] == wrap.PASS1_DECIMATION
+    assert calls[0]["decimation_target"] != 10**9     # budget not in pass 1
     assert calls[1]["remesh"] is False        # NEVER re-remesh after the strip
+    assert calls[1]["decimation_target"] == 10**9     # budget lands HERE, last
     assert calls[1]["texture_size"] == 2048
     final = trimesh.load(out, force="mesh")
     assert len(final.faces) < 2560            # < the unstripped fixture
     assert ip.probe(final, "wrapper-final") is False
     assert os.path.exists(out + ".prestrip.glb")   # evidence kept beside output
+    # NOTE (honesty): the CPU seats carry NO quadric decimator
+    # (fast_simplification/open3d absent), so pass 2's REAL budget-decimate
+    # leg is proven on-GPU by the MC 12337 re-run, not here; this test proves
+    # the ORDERING (budget after strip) and the gate rung.
 
 
 def test_wrapper_gate_refuses(monkeypatch):

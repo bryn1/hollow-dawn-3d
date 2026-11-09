@@ -31,9 +31,11 @@ inward from just outside; a SECOND hit within DELTA_FRAC of the bbox diagonal wi
 |dot(hit_normal, launch_normal)| >= DOT_MIN is a duplicate-wall hit; fraction >=
 HIT_FRAC_MIN over area-weighted samples => INTERIOR. Catches welded inner walls.
 
-Calibration contract (--selftest MUST pass before ANY real mesh is judged):
-  GREEN-solid        solid icosphere              -> CLEAN
-  RED1-nested        sphere + nested 0.95 sphere  -> INTERIOR
+Calibration contract (--selftest MUST pass before ANY real mesh is judged), run
+AT BOTH RUNGS since MC 12338 (gate sits at the CALIBRATED rung; the SHIP rung is
+the benefit-measurement rung):
+  GREEN-solid        solid icosphere              -> CLEAN (same mesh both rungs)
+  RED1-nested        nested sphere pair           -> INTERIOR
   RED2-cup           thick-walled open cup (parametric welded double wall) -> INTERIOR
 """
 import sys
@@ -271,24 +273,59 @@ def probe(m, name):
     return is_int
 
 
+def rung_fixtures():
+    """Control fixtures at BOTH rungs (MC 12338 law: a threshold move is only
+    legal with a red-case re-proof at each rung it will face).
+
+    CALIBRATED rung (~1M-scale where wall pairs are resolvable — the gate-lab
+    MC 12320 home): the gate runs HERE (seam pass 1 target PASS1_DECIMATION).
+    SHIP rung (~8k-tri budget scale, the batch row budget): the seam never
+    gates here; controls run here anyway so a future threshold edit cannot
+    silently break the ship-rung BENEFIT MEASUREMENT (interior_frac OFF vs ON,
+    MC 12337 re-write). The ship-rung nested pair keeps wall separation ABOVE
+    the decimation weld scale (0.035 > d_lo) — welded single sheets are NOT
+    strippable at any rung (that is the 12337 finding, not a control).
+    BAD-control invariance: the solid sphere is the SAME mesh, verdict and
+    strip-delta at both rungs."""
+    solid = trimesh.creation.icosphere(4)
+    return {
+        "calibrated": (
+            ("GREEN-solid", solid, False),
+            ("RED1-nested", trimesh.util.concatenate([
+                trimesh.creation.icosphere(3),
+                trimesh.creation.icosphere(3, radius=0.95)]), True),
+            ("RED2-cup", cup_fixture(), True)),
+        "ship": (
+            ("GREEN-solid", solid, False),
+            ("RED1-nested", trimesh.util.concatenate([
+                trimesh.creation.icosphere(4),
+                trimesh.creation.icosphere(4, radius=0.965)]), True),
+            # t sized INSIDE the lateral slack at this resolution (wall-tri
+            # second-triangle offset 2t/3 < 1.2*med_e; floor radial 2t/3
+            # < lat_max) — measured k=48/t=0.04 fails the pairing margin by
+            # 0.0017, a fixture-fit problem, not a rule problem (MC 12338).
+            ("RED2-cup", cup_fixture(t=0.03, k=48), True)),
+    }
+
+
 def controls():
-    """Calibration contract; exit code 0 == calibrated. Same three arms as the
-    gate-lab selftest (RED2 rebuilt parametric — stack truth, header)."""
+    """Calibration contract at both rungs; exit 0 == calibrated (PASS x3 each).
+    RED2 is the parametric cup (stack truth, header)."""
     ok = True
-    green = trimesh.creation.icosphere(4)
-    red1 = trimesh.util.concatenate([
-        trimesh.creation.icosphere(3),
-        trimesh.creation.icosphere(3, radius=0.95)])
-    red2 = cup_fixture()
-    for name, mesh, expect in (("GREEN-solid", green, False),
-                               ("RED1-nested", red1, True),
-                               ("RED2-cup", red2, True)):
-        got = probe(mesh, name)
-        mark = "PASS" if got == expect else "FAIL"
-        if got != expect:
-            ok = False
-        print(f"CONTROL {name}: expect={'INTERIOR' if expect else 'CLEAN'} "
-              f"got={'INTERIOR' if got else 'CLEAN'} -> {mark}", flush=True)
+    for rung, arms in rung_fixtures().items():
+        print(f"== RUNG {rung} ==", flush=True)
+        n_pass = 0
+        for name, mesh, expect in arms:
+            got = probe(mesh, f"{rung}/{name}")
+            mark = "PASS" if got == expect else "FAIL"
+            if got == expect:
+                n_pass += 1
+            else:
+                ok = False
+            print(f"CONTROL {rung}/{name}: expect="
+                  f"{'INTERIOR' if expect else 'CLEAN'} "
+                  f"got={'INTERIOR' if got else 'CLEAN'} -> {mark}", flush=True)
+        print(f"RUNG {rung}: PASS x{n_pass}", flush=True)
     print(f"PROBE-SELFTEST: {'PASS' if ok else 'FAIL'}", flush=True)
     return 0 if ok else 2
 

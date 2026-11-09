@@ -6,6 +6,7 @@ params — decimation_target is now the per-row tri budget instead of the 1M PoC
 Spec: TSV rows  name<TAB>input.png<TAB>tri_budget<TAB>base_seed.
 Fail policy (brief): 3 distinct-seed failures on one row -> SKIPPED row, batch continues.
 Usage: batch_trellis.py <spec.tsv> <outdir>"""
+import argparse
 import os, sys, time, traceback
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 os.environ.setdefault("OPENCV_IO_ENABLE_OPENEXR", "1")
@@ -45,7 +46,7 @@ def count_tris(path):
     sc = trimesh.load(path, force="scene")
     return sum(len(g.faces) for g in sc.geometry.values())
 
-def attempt(pipe, png, out, seed, budget, quality_on=False):
+def attempt(pipe, png, out, seed, budget, quality_on=False, no_strip=False):
     """One seed: gen + export; up to 3 decimation retries if the export exceeds budget.
     Returns (tris, ok). Raises on gen/export failure (caller counts the seed failure).
     MC 11207: optional 5th spec column "quality" reuses player_attempts.quality
@@ -59,10 +60,25 @@ def attempt(pipe, png, out, seed, budget, quality_on=False):
                voxel_size=mesh.voxel_size,
                aabb=[[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]])
     for k, frac in enumerate((1.0, 0.8, 0.6)):
-        # MC 12334: pass 1 remesh+decimate -> CPU interior strip -> gate CLEAN ->
-        # pass 2 re-bake on the stripped mesh (header of trellis_bake_wrap.py).
-        bake_glb_stripped(gen, out, int(budget * frac),
-                          to_glb=o_voxel.postprocess.to_glb, log=log)
+        if no_strip:
+            # MC 12338 ESCAPE HATCH: the standing single-pass bake, unstripped
+            # and LOUD (row tagged OK-UNSTRIPPED below) — the seam's CLEAN gate
+            # at the calibrated rung can legitimately refuse a class of mesh;
+            # no standing bake may be silently blocked by it. Default is
+            # still strip-ON (argparse --no-strip).
+            log(f"  NO-STRIP ESCAPE: {os.path.basename(out)} seed={seed} "
+                f"baking UNSTRIPPED (standing single-pass to_glb, MC 12338)")
+            glb = o_voxel.postprocess.to_glb(decimation_target=int(budget * frac),
+                                             texture_size=2048, remesh=True,
+                                             remesh_band=1, remesh_project=0,
+                                             verbose=False, **gen)
+            glb.export(out)
+        else:
+            # MC 12334/12338: pass 1 remesh at the calibrated rung -> CPU
+            # interior strip -> gate CLEAN -> pass 2 budget-decimate + re-bake
+            # (header of trellis_bake_wrap.py).
+            bake_glb_stripped(gen, out, int(budget * frac),
+                              to_glb=o_voxel.postprocess.to_glb, log=log)
         tris = count_tris(out)
         if tris <= budget:
             if quality_on:
@@ -73,7 +89,15 @@ def attempt(pipe, png, out, seed, budget, quality_on=False):
         log(f"  decim retry {k+1}: tris={tris} > budget={budget} -> target x{frac*0.8:.2f}")
     return tris, False  # generated but over budget after retries
 
-spec, outdir = sys.argv[1], sys.argv[2]
+_ap = argparse.ArgumentParser(description="batch TRELLIS.2 bake (MC 11118)")
+_ap.add_argument("spec")
+_ap.add_argument("outdir")
+_ap.add_argument("--no-strip", action="store_true",
+                 help="MC 12338 escape hatch: bake UNSTRIPPED through the "
+                      "standing single-pass to_glb; LOUD in the log and "
+                      "tagged OK-UNSTRIPPED per row (default: strip-ON)")
+_args = _ap.parse_args()
+spec, outdir, no_strip = _args.spec, _args.outdir, _args.no_strip
 rows = []
 for line in open(spec):
     line = line.strip()
@@ -100,11 +124,13 @@ for name, png, budget, seed, q in rows:
     skipped_err = None
     for s in (seed, seed + 1, seed + 2):  # 3 distinct-seed attempts
         try:
-            tris, within = attempt(pipe, png, out, s, budget, quality_on=q)
+            tris, within = attempt(pipe, png, out, s, budget, quality_on=q,
+                                no_strip=no_strip)
             if within:
                 ok_n += 1
-                results.append((name, "OK", s, tris, budget))
-                log(f"ROW {name} OK seed={s} tris={tris}/{budget} "
+                results.append((name, "OK-UNSTRIPPED" if no_strip else "OK",
+                             s, tris, budget))
+                log(f"ROW {name} {'OK-UNSTRIPPED' if no_strip else 'OK'} seed={s} tris={tris}/{budget} "
                     f"bytes={os.path.getsize(out)} secs={time.time()-t:.0f}")
             else:
                 results.append((name, "OVERBUDGET", s, tris, budget))

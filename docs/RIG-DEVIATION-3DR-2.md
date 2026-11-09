@@ -71,7 +71,7 @@ mapped / target_unmapped): char-tallow-seer 22/22/0, skin-tide 28/22/6, skin-voi
 The observable gate is the shipped named animations + skin data, measured per mesh in
 `.tmp/3dr.txt` (per-window LAW rows, both-failure transcripts, framediff legs).
 
-## §Gate-lab supersession — interior-strip law for art bakes (MC 12334, 2026-11-09)
+## §Gate-lab supersession — interior-strip law for art bakes (MC 12334; RE-RUNNED MC 12338, 2026-11-09)
 
 The gate-lab verdicts (MC 12319 probe, MC 12320 stripper — pinned under
 `.audits/20261109-1115-gate-lab/out/`, verdict files TEST-verdict-P1/P2.md) are
@@ -81,13 +81,30 @@ PIPELINE LAW for NEW bakes as of this commit:
   measured TRUE on ours (interior-fraction 0.9533/0.9700 at full resolution on
   both config outputs; solid-sphere control 0.0).
 * The standing bake path (tools/vm100/batch_trellis.py) now runs EVERY export
-  through the two-pass seam tools/art/trellis_bake_wrap.py: remesh+decimate ->
-  CPU strip (tools/art/interior_strip.py, roof rule) -> probe gate (must read
-  CLEAN or the bake is REFUSED) -> re-bake on the stripped mesh. The probe's
-  --selftest calibration contract gates the process (controls fail => no bake).
+  through the two-pass seam tools/art/trellis_bake_wrap.py, RE-RUNNED per
+  MC 12338: pass 1 remeshes at the CALIBRATED RUNG (decimation_target=1M,
+  16px throwaway texture) -> CPU strip (tools/art/interior_strip.py, roof
+  rule) -> probe gate AT THAT RUNG (must read CLEAN or the bake is REFUSED)
+  -> pass 2 budget-decimates + re-bakes the stripped mesh (remesh=False).
+  The probe's --selftest calibration contract (PASS x3 at BOTH rungs since
+  MC 12338) gates the process (controls fail => no bake). batch_trellis
+  carries a --no-strip escape hatch (argparse dest no_strip): unstripped
+  single-pass bake, LOUD per log line and tagged OK-UNSTRIPPED per row — a
+  legitimately-refused mesh class never silently blocks a standing bake;
+  default stays strip-ON.
+* SHIP-LAW FOR THE STRIP BENEFIT (MC 12338 re-write): the earlier "<= 65%
+  tri count" row is DROPPED (it was jointly unsatisfiable with the CLEAN gate
+  once the tri budget bound both arms — MC 12337 measurement). The benefit is
+  measured as interior_frac at the SHIP RUNG, strip-OFF vs strip-ON at the
+  same ref/seed/budget, plus matched-camera render parity. Any threshold move
+  in the probe/stripper re-proves the red-case controls AT BOTH RUNGS
+  (nested + welded-cup RED->GREEN, solid-sphere BAD invariant) — a threshold
+  move without a red-case re-proof is a DoD violation.
 * ALREADY-SHIPPED ASSETS ARE NOT AUTO-STRIPPED. The 16 hold-sweep md5s stay
-  untouched (LEDGER hold rows); re-mastering existing GLBs rides MC 12335
-  (emberwright first). This doc row changes NEW bakes only.
+  untouched (LEDGER hold rows); re-mastering existing GLBs rides the MC
+  12337 re-run (emberwright first — its 12337 attempt ran the two arms, the
+  gate held, NO-SHIP; the re-run uses this re-rung seam). This doc row
+  changes NEW bakes only.
 * The GPU-leg proof of the seam (real o_voxel bake, texture parity on a real
   asset) is MC 12335's card, not this one: this commit lands the seam, the
   instruments and the CPU parity tests (tests/test_art_interior_gate.py).

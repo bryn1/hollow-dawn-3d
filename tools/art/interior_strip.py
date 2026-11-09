@@ -27,7 +27,8 @@ wins). KNOWN LIMITATION (declared in gate-lab): legitimate facing walls closer
 than 3% of the bbox diagonal are also stripped — the same class the probe scores
 as interior hits.
 
-Controls contract (--controls, exit 0 == PASS x3):
+Controls contract (--controls, exit 0 == PASS x3 PER RUNG, calibrated
++ ship — MC 12338; fixtures shared with interior_probe.rung_fixtures):
   RED nested shells     -> stripped, probe flips INTERIOR->CLEAN
   RED cup (welded slab) -> stripped, probe flips INTERIOR->CLEAN
   BAD solid sphere      -> ~unchanged (<2% tri/vol delta) and CLEAN
@@ -45,8 +46,8 @@ import numpy as np
 import trimesh
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from interior_probe import (DELTA_FRAC, DOT_MIN, cup_fixture, load_merged,
-                            probe)
+from interior_probe import (DELTA_FRAC, DOT_MIN, load_merged, probe,
+                            rung_fixtures)
 
 
 def strip_roof(m, verbose=True):
@@ -141,34 +142,38 @@ def metrics(m, tag):
 
 
 def controls():
-    """RED->GREEN + BAD controls; exit 0 == all three PASS (mirrors gate-lab
-    p1_strip2 --controls; RED2 rebuilt parametric — stack truth in the header)."""
+    """RED->GREEN + BAD controls at BOTH rungs (MC 12338: the gate faces the
+    calibrated rung, the benefit measurement faces the ship rung — a control
+    that only proves one of them proves half the law). Fixtures shared with
+    the probe's contract (one source of truth, no second fixture set)."""
     ok = True
-    for name, mesh, expect_int in (
-            ("RED-nested", trimesh.util.concatenate([
-                trimesh.creation.icosphere(3),
-                trimesh.creation.icosphere(3, radius=0.95)]), True),
-            ("RED-cup", cup_fixture(), True),
-            ("BAD-solid-sphere", trimesh.creation.icosphere(4), False)):
-        print(f"== CONTROL {name} ==", flush=True)
-        was = probe(mesh, f"{name}-BEFORE")
-        s, marked = strip_roof(mesh, verbose=False)
-        now = probe(s, f"{name}-AFTER")
-        if expect_int:
-            good = was and not now
-            print(f"CONTROL {name}: before={'INTERIOR' if was else 'CLEAN'} "
-                  f"after={'INTERIOR' if now else 'CLEAN'} marked={marked} "
-                  f"-> {'PASS' if good else 'FAIL'}", flush=True)
-        else:
-            dt = abs(len(s.faces) - len(mesh.faces)) / len(mesh.faces)
-            dv = abs(s.volume - mesh.volume) / mesh.volume
-            good = (not now) and dt < 0.02 and dv < 0.02
-            print(f"CONTROL {name}: tris {len(mesh.faces)}->{len(s.faces)} "
-                  f"(d={dt:.4f}) vol d={dv:.4f} marked={marked} "
-                  f"after={'INTERIOR' if now else 'CLEAN'} "
-                  f"-> {'PASS' if good else 'FAIL'}", flush=True)
-        if not good:
-            ok = False
+    for rung, arms in rung_fixtures().items():
+        print(f"== RUNG {rung} ==", flush=True)
+        n_pass = 0
+        for name, mesh, expect_int in arms:
+            print(f"-- CONTROL {rung}/{name} --", flush=True)
+            was = probe(mesh, f"{rung}/{name}-BEFORE")
+            s, marked = strip_roof(mesh, verbose=False)
+            now = probe(s, f"{rung}/{name}-AFTER")
+            if expect_int:
+                good = was and not now
+                print(f"CONTROL {rung}/{name}: "
+                      f"before={'INTERIOR' if was else 'CLEAN'} "
+                      f"after={'INTERIOR' if now else 'CLEAN'} marked={marked} "
+                      f"-> {'PASS' if good else 'FAIL'}", flush=True)
+            else:
+                dt = abs(len(s.faces) - len(mesh.faces)) / len(mesh.faces)
+                dv = abs(s.volume - mesh.volume) / mesh.volume
+                good = (not now) and dt < 0.02 and dv < 0.02
+                print(f"CONTROL {rung}/{name}: tris {len(mesh.faces)}->"
+                      f"{len(s.faces)} (d={dt:.4f}) vol d={dv:.4f} "
+                      f"marked={marked} after={'INTERIOR' if now else 'CLEAN'} "
+                      f"-> {'PASS' if good else 'FAIL'}", flush=True)
+            if good:
+                n_pass += 1
+            else:
+                ok = False
+        print(f"RUNG {rung}: PASS x{n_pass}", flush=True)
     print(f"STRIP-CONTROLS: {'PASS' if ok else 'FAIL'}", flush=True)
     return 0 if ok else 2
 
