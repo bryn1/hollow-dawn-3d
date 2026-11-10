@@ -33,6 +33,13 @@ as the --no-strip default), then delete inner faces as PURE GEOMETRY.
 
 Batch default is no-strip (MC 12342 commit 1); this seam is the explicit
 --strip opt-in until the render-parity gate has gone GREEN on a real bake.
+
+MC 12352 GATE-INT-V4: bake_then_strip_v2 is the SAME order with the RULE the
+card was about — visibility-restricted deletion (tools/art/visibility_strip.py,
+whose six-leg --selftest is this seam's calibration). The roof rule above stays
+reachable behind --strip only because it is still named by --strip and by the
+existing tests; MC 12345 REJECTED it as a ship path, and the batch default is
+still strip-OFF for both.
 """
 import os
 import sys
@@ -42,23 +49,24 @@ import trimesh
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from interior_probe import probe, selftest_ok
 from interior_strip import strip_roof
+from visibility_controls import controls as visible_gate_controls
+from visibility_strip import strip_invisible
 
 _SELFTEST = None                 # per-process latch: run once, refuse forever on fail
+_SELFTEST_V2 = None              #   same law for the V4 visible-gate contract
 
 
-def bake_then_strip(gen, out_path, budget, *, to_glb, texture_size=2048,
-                    log=print):
-    """Bake once (closed remesh, textures intact), then strip as pure
-    geometry. `gen` is the to_glb geometry kwargs. Returns the final
-    (post-strip) face count. Raises RuntimeError only on a calibration-
-    contract failure (refuse to MEASURE uncalibrated)."""
-    global _SELFTEST
-    if _SELFTEST is None:
-        log("interior-gate: running probe --selftest calibration contract...")
-        _SELFTEST = bool(selftest_ok())
-    if not _SELFTEST:
-        raise RuntimeError("INTERIOR-GATE REFUSED: probe selftest controls "
-                           "failed — refusing to bake (gate law, MC 12334)")
+def _bake_then(gen, out_path, budget, to_glb, texture_size, log, *,
+               calibrate, strip, unit):
+    """THE ORDER, in one place (MC 12342, VINDICATED; MC 12352 changed only
+    which RULE is applied): bake ONCE on the closed remeshed mesh at full
+    texture, keep the textured prestrip export beside the output, then delete
+    faces as PURE GEOMETRY. NEVER a re-bake, NEVER remesh after the strip.
+    `calibrate()` must return True or this REFUSES; `strip(mesh)` returns
+    (kept_mesh, metric) with `unit` naming that metric for the log."""
+    if not calibrate():
+        raise RuntimeError("INTERIOR-GATE REFUSED: calibration controls failed "
+                           "— refusing to bake (gate law, MC 12334)")
     pre = out_path + ".prestrip.glb"
     log(f"seam bake: single closed-remesh bake (decimation_target={budget}, "
         f"texture {texture_size}) — textures intact, prestrip kept")
@@ -67,14 +75,54 @@ def bake_then_strip(gen, out_path, budget, *, to_glb, texture_size=2048,
                  remesh_project=0, verbose=False, **gen)
     glb.export(pre)
     m = trimesh.load(pre, force="mesh", process=False)
-    s, marked = strip_roof(m, preserve_visual=True)
+    s, metric = strip(m)
     log(f"seam strip (pure geometry): {len(m.faces)} -> {len(s.faces)} faces "
-        f"(removed {marked}); UVs preserved on kept faces (no re-bake)")
+        f"({unit}={metric:g}); UVs preserved on kept faces (no re-bake)")
     # MEASUREMENT row (MC 12342): NOT a gate — ship-rung CLEAN is the wrong
     # target, gamed by the stripper's own holes (MC 12339 finding).
     probe(s, os.path.basename(out_path) + " STRIPPED (measurement only)")
     s.export(out_path)
     return len(s.faces)
+
+
+def _calibrate_v1(log):
+    global _SELFTEST
+    if _SELFTEST is None:
+        log("interior-gate: running probe --selftest calibration contract...")
+        _SELFTEST = bool(selftest_ok())
+    return _SELFTEST
+
+
+def _calibrate_v2(log):
+    global _SELFTEST_V2
+    if _SELFTEST_V2 is None:
+        log("visible-gate: running visibility_strip --selftest contract "
+            "(six legs, MC 12352)...")
+        _SELFTEST_V2 = (visible_gate_controls() == 0)
+    return _SELFTEST_V2
+
+
+def bake_then_strip(gen, out_path, budget, *, to_glb, texture_size=2048,
+                    log=print):
+    """Roof-rule seam (MC 12342). The RULE here is the one MC 12345 REJECTED
+    (it ate visible skin); it stays only because --strip still reaches it and
+    its tests pin it. New work rides bake_then_strip_v2."""
+    return _bake_then(gen, out_path, budget, to_glb, texture_size, log,
+                      calibrate=lambda: _calibrate_v1(log),
+                      strip=lambda m: strip_roof(m, preserve_visual=True),
+                      unit="marked")
+
+
+def bake_then_strip_v2(gen, out_path, budget, *, to_glb, texture_size=2048,
+                       log=print):
+    """GATE-INT-V4 (MC 12352): the same bake-then-strip order, the VISIBILITY
+    rule — tools/art/visibility_strip.py keeps every face an external camera
+    of the declared set can see (the roof rule's "inner faces are invisible"
+    premise is what MC 12345 measured FALSE). Calibration contract is the V4
+    module's own six-leg --selftest; red controls REFUSE the bake."""
+    return _bake_then(gen, out_path, budget, to_glb, texture_size, log,
+                      calibrate=lambda: _calibrate_v2(log),
+                      strip=strip_invisible, unit="removed_ratio")
 
 
 if __name__ == "__main__":

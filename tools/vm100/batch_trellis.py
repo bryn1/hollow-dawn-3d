@@ -19,16 +19,17 @@ import o_voxel
 import trimesh
 
 # MC 12334 INTERIOR-STRIP GATE (gate-lab law, MC 12319/12320): the bake goes
-# through the two-pass seam in tools/art/trellis_bake_wrap.py. Staging note for
+# through the seam in tools/art/trellis_bake_wrap.py. Staging note for
 # the batch runner: copy tools/art/{interior_probe,interior_strip,
-# trellis_bake_wrap}.py NEXT TO this file in the staged run dir (same convention
-# as player_attempts.py). Import failure is LOUD by design — there is no
-# unstripped fallback path on this pipeline.
+# render_parity,visibility_strip,visibility_controls,trellis_bake_wrap}.py NEXT
+# TO this file in the staged run dir (same convention as player_attempts.py).
+# Import failure is LOUD by design — there is no unstripped fallback path on
+# this pipeline (the DEFAULT is the explicit no-strip single-pass bake).
 for _art in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "art"),
              os.path.dirname(os.path.abspath(__file__))):
     if _art not in sys.path:
         sys.path.insert(0, _art)
-from trellis_bake_wrap import bake_then_strip
+from trellis_bake_wrap import bake_then_strip, bake_then_strip_v2
 
 # Substitution carried VERBATIM from poc_trellis.py (MC 11096): pipeline.json names the
 # HF-GATED briaai/RMBG-2.0; we run the SAME-architecture MIT ZhengPeng7/BiRefNet and the
@@ -46,7 +47,8 @@ def count_tris(path):
     sc = trimesh.load(path, force="scene")
     return sum(len(g.faces) for g in sc.geometry.values())
 
-def attempt(pipe, png, out, seed, budget, quality_on=False, no_strip=False):
+def attempt(pipe, png, out, seed, budget, quality_on=False, no_strip=False,
+            strip_v2=False):
     """One seed: gen + export; up to 3 decimation retries if the export exceeds budget.
     Returns (tris, ok). Raises on gen/export failure (caller counts the seed failure).
     MC 11207: optional 5th spec column "quality" reuses player_attempts.quality
@@ -61,9 +63,18 @@ def attempt(pipe, png, out, seed, budget, quality_on=False, no_strip=False):
                aabb=[[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]])
     for k, frac in enumerate((1.0, 0.8, 0.6)):
         log(f"  SEAM-MODE {os.path.basename(out)} seed={seed}: "
-            + ("STRIP-ON (explicit opt-in --strip)" if not no_strip else
-               "NO-STRIP (MC 12342 DEFAULT — single-pass, textures intact)"))
-        if no_strip:
+            + ("STRIP-V2 (visible-gate, MC 12352 --strip-v2)" if strip_v2 else
+               ("STRIP-ON (explicit opt-in --strip, roof rule REJECTED by "
+                "MC 12345)" if not no_strip else
+                "NO-STRIP (MC 12342 DEFAULT — single-pass, textures intact)")))
+        if strip_v2:
+            # MC 12352 GATE-INT-V4: the bake-then-strip order of MC 12342 with
+            # the VISIBILITY rule (delete only faces provably invisible from
+            # the declared camera set). Still an explicit opt-in: default is
+            # and stays strip-OFF until the render gate goes green on a bake.
+            bake_then_strip_v2(gen, out, int(budget * frac),
+                               to_glb=o_voxel.postprocess.to_glb, log=log)
+        elif no_strip:
             # MC 12342: the unstripped single-pass bake is the DEFAULT;
             # rows are tagged OK-UNSTRIPPED. The seam (strip branch) is the
             # explicit --strip opt-in until the post-bake-strip redesign lands.
@@ -99,13 +110,19 @@ _mode.add_argument("--strip", action="store_true",
                    help="MC 12342: OPT IN to the interior-strip seam. "
                         "HAZARDED until the post-bake-strip redesign lands "
                         "(docs/RIG-DEVIATION-3DR-2.md, MC 12339 finding).")
+_mode.add_argument("--strip-v2", dest="strip_v2", action="store_true",
+                   help="MC 12352 GATE-INT-V4: OPT IN to the visible-gate "
+                        "seam (bake once, then delete only faces provably "
+                        "invisible from the declared camera set; tools/art/"
+                        "visibility_strip.py). Default stays strip-OFF.")
 _mode.add_argument("--no-strip", action="store_true",
                    help="explicit unstripped bake (standing single-pass "
                         "to_glb), LOUD per row + tagged OK-UNSTRIPPED "
                         "(default: no-strip)")
 _args = _ap.parse_args()
 spec, outdir = _args.spec, _args.outdir
-no_strip = not _args.strip   # MC 12342 DEFAULT INVERSION: strip is explicit opt-in
+no_strip = not _args.strip and not _args.strip_v2   # MC 12342 DEFAULT INVERSION:
+strip_v2 = _args.strip_v2    #   ANY strip is an explicit opt-in (MC 12352)
 rows = []
 for line in open(spec):
     line = line.strip()
@@ -133,12 +150,13 @@ for name, png, budget, seed, q in rows:
     for s in (seed, seed + 1, seed + 2):  # 3 distinct-seed attempts
         try:
             tris, within = attempt(pipe, png, out, s, budget, quality_on=q,
-                                no_strip=no_strip)
+                                no_strip=no_strip, strip_v2=strip_v2)
             if within:
                 ok_n += 1
-                results.append((name, "OK-UNSTRIPPED" if no_strip else "OK-STRIPPED",
-                             s, tris, budget))
-                log(f"ROW {name} {'OK-UNSTRIPPED' if no_strip else 'OK-STRIPPED'} seed={s} tris={tris}/{budget} "
+                tag = ("OK-STRIPPED-V2" if strip_v2 else
+                       "OK-UNSTRIPPED" if no_strip else "OK-STRIPPED")
+                results.append((name, tag, s, tris, budget))
+                log(f"ROW {name} {tag} seed={s} tris={tris}/{budget} "
                     f"bytes={os.path.getsize(out)} secs={time.time()-t:.0f}")
             else:
                 results.append((name, "OVERBUDGET", s, tris, budget))

@@ -21,6 +21,23 @@ render as the same solid figure. This tool owns the deterministic half:
             is enforced by the planted-bad RED control (a deliberate visible
             hole MUST drop below it — tests/test_art_interior_gate.py).
 
+FACE-ID FRAMEBUFFER (MC 12352 GATE-INT-V4, same rasterizer, one more output):
+  view_basis   a camera direction on the yaw x elevation sphere (mesh frame =
+               Z-up, the trimesh frame every tools/art instrument already
+               uses; the game rig is camera_rig.gd's ortho 20-deg tilt).
+  face_id_buffer the silhouette machinery above, with two additions: (i) an
+               optional PERSPECTIVE eye (`dist`, in world units, framed so the
+               whole bbox fits — only the ray DIVERGENCE changes), (ii) each
+               triangle is filled with its own face id and faces are drawn
+               far-to-near, so the surviving value of a pixel is the face that
+               eye ACTUALLY sees. Painter's order on centroid depth is the
+               CPU choice (no z-buffer, no new dependency — this stays the
+               repo's rasterizer, not a second one); the mis-order class and
+               the 1-px edge tie-break are named in visibility_strip.py's
+               limits section, where the deleting decision is made.
+  silhouette   the mask this buffer collapses to (pixel owns some face), for
+               matched-camera before/after compares of a GEOMETRY-only edit.
+
 CLI:  render_parity.py A.png B.png [--floor 0.95]
       prints IOU=<x.xxx> and PASS|FAIL; exit 0 pass / 1 fail / 2 usage.
 """
@@ -60,6 +77,79 @@ def rasterize(mesh, size=256, axis=2, bounds=None):
 def iou(a, b):
     union = (a | b).sum()
     return float((a & b).sum()) / float(union) if union else 0.0
+
+
+# ---- FACE-ID FRAMEBUFFER (MC 12352) — this rasterizer, one more output ------
+
+def view_basis(yaw, elev):
+    """Look-FROM unit direction at yaw/elev DEGREES plus its in-plane right/up
+    pair, in the mesh frame (Z-up, the trimesh frame tools/art already uses).
+    elev is the angle ABOVE the mesh's XY plane: 90 = eye on +Z looking
+    straight down (the game rig's 20-deg tilt off straight-down is elev 70,
+    camera_rig.gd); 0 = eye in the mesh's own equatorial plane."""
+    a, e = np.radians(yaw), np.radians(elev)
+    d = np.array([np.cos(e) * np.cos(a), np.cos(e) * np.sin(a), np.sin(e)])
+    r = np.cross(d, np.array([0.0, 0.0, 1.0]))
+    n = float(np.linalg.norm(r))
+    r = np.array([1.0, 0.0, 0.0]) if n < 1e-9 else r / n   # poles: any right
+    return d, r, np.cross(d, r)
+
+
+def frame_focal(bounds, d, r, up, dist, px_span):
+    """Focal length in px that fits the SHARED `bounds` box in the canvas for
+    one view. Fitting the box (not the mesh) is what makes the framing
+    identical for two meshes measured with the same camera — the matched-
+    camera law this file was built for."""
+    lo, hi = bounds
+    corners = np.array([[x, y, z] for x in (lo[0], hi[0])
+                        for y in (lo[1], hi[1]) for z in (lo[2], hi[2])])
+    depth = corners @ d
+    z = np.ones(8) if dist is None else dist + depth
+    if np.any(z <= 0):
+        raise ValueError(f"eye inside the bounds box (dist={dist}, "
+                         f"min z={z.min():.6g}) — an external camera only")
+    m = np.maximum(np.abs((corners @ r) / z), np.abs((corners @ up) / z)).max()
+    return 0.5 * px_span / m
+
+
+def face_id_buffer(mesh, size=512, yaw=0.0, elev=0.0, dist=None, bounds=None):
+    """ONE external view as a face-id framebuffer: value = face id + 1, 0 =
+    background. `dist=None` is ORTHOGRAPHIC (the game's own projection —
+    camera_rig.gd sets PROJECTION_ORTHOGONAL); `dist` (world units, bbox
+    center to eye) is a perspective eye at the SAME bbox fit, so the only
+    difference between the two is ray divergence — a nearer eye sees more of a
+    concavity through an opening, never less of a convex shell.
+    Faces are painted far-to-near so the surviving pixel value is the face
+    that eye actually sees (centroid painter; its limits are declared in
+    visibility_strip.py, where deletion decisions are made)."""
+    lo, hi = bounds if bounds is not None else (mesh.bounds[0], mesh.bounds[1])
+    center = (lo + hi) / 2.0
+    d, r, up = view_basis(yaw, elev)
+    V = mesh.vertices - center
+    depth = V @ d                                  # larger = farther from eye
+    f = frame_focal((lo, hi), d, r, up, dist, size - 1)
+    if dist is None:
+        px, py = (V @ r) * f, (V @ up) * f
+    else:
+        z = dist + depth
+        px, py = f * (V @ r) / z, f * (V @ up) / z
+    P = np.stack([px + (size - 1) / 2.0, py + (size - 1) / 2.0], axis=1)
+    img = Image.fromarray(np.zeros((size, size), dtype=np.int32))   # mode "I"
+    dr = ImageDraw.Draw(img)
+    tri = mesh.faces
+    for k in np.argsort(-depth[tri].mean(axis=1), kind="stable"):   # far first
+        t = P[tri[k]]
+        dr.polygon([(float(t[0, 0]), float(t[0, 1])),
+                    (float(t[1, 0]), float(t[1, 1])),
+                    (float(t[2, 0]), float(t[2, 1]))], fill=int(k) + 1)
+    return np.asarray(img, dtype=np.int32)
+
+
+def silhouette(mesh, size=512, yaw=0.0, elev=0.0, dist=None, bounds=None):
+    """The object mask the face-id buffer collapses to (a pixel is ON if some
+    face survives there). For matched-camera before/after compares of a
+    GEOMETRY-only edit — a hole in the skin is a missing pixel here."""
+    return face_id_buffer(mesh, size, yaw, elev, dist, bounds) > 0
 
 
 def gate_masks(a, b, floor=DEFAULT_FLOOR):
